@@ -4,10 +4,28 @@ const client = new Discord.Client()
 const config = require("./config.json")
 const command = require("./command"); 
 const welcome = require("./welcome");
+const sql = require("./sql");
 const activityTracker = require("./activityTracker")
 
 client.on("ready", () => {
     console.log("College King's Bot is Running");
+
+    sql.init() // keep it here so it connects to the database
+
+    //                CREATE EXAMPLE
+    //  sql.run("CREATE TABLE IF NOT EXISTS test (`val` INT NOT NULL DEFAULT '1')");
+    //
+    //                SELECT EXAMPLE
+    //  sql.each("SELECT * FROM test ORDER BY val DESC", (row) => {
+    //      console.log(row.val)
+    //  });
+    //
+    //                CLOSE CONNECTION
+    //  sql.end() 
+    //
+    //                CREATE CONNECTION
+    //  sql.init()
+    //
     
     welcome(client)
 
