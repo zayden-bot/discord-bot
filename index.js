@@ -39,26 +39,22 @@ client.on("ready", () => {
                 type: 0,
             },
         })
+        message.reply(`Status Changed to: Playing ${content}`)
     })
 
-//// working on - oscar
     command(client, "rd", message => {
-        console.log(typeof message.guild.members.fetch())
-        const users = typeof message.guild.members.fetch()
-
-        // message.guild.members.fetch().then(
-        //     forEach(member => {
-        //         if (Math.floor(Math.random() * 2) == 0) {
-        //             member.roles.add(config.team1Id).catch(console.error);
-        //             var team = "Team1"
-        //             message.channel.send(`${member.username} is now ${team}`)
-        //         } else {
-        //             member.roles.add(config.team2Id).catch(console.error);
-        //             var team = "Team2"
-        //             message.channel.send(`${member.username} is now ${team}`)
-        //         }
-        //     })
-        // )
+        if (message.member.hasPermission("ADMINISTRATOR")) {
+            message.guild.members.cache.filter(m => !m.user.bot).forEach(member => {
+                if (!(member.roles.cache.get(config.team1Id)) && !(member.roles.cache.get(config.team2Id))) {
+                    if (Math.floor(Math.random() * 2) == 0) {
+                        member.roles.add(config.team1Id).catch(console.error);
+                    } else {
+                        member.roles.add(config.team2Id).catch(console.error);
+                    }
+                }
+            })
+            message.reply("Teams have been randomised")
+        }
     })
 });
 
