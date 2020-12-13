@@ -2,11 +2,12 @@ const Discord = require("discord.js")
 const client = new Discord.Client()
 
 const config = require("./config.json")
-const command = require("./command") 
-const welcome = require("./welcome")
+const command = require("./command"); 
+const welcome = require("./welcome");
+// const welcome = require("./welcome")
 
 client.on("ready", () => {
-    console.log("College King's Bot is Running")
+    console.log("College King's Bot is Running");
 
     welcome(client)
 
@@ -21,7 +22,7 @@ client.on("ready", () => {
     })
 
     command(client, ["cc", "clearchannel", "purgeall"], message => {
-        if (message.member.hasPermission("ADMINISTATOR")) {
+        if (message.member.hasPermission("ADMINISTRATOR")) {
             message.channel.messages.fetch().then(results => {
                 message.channel.bulkDelete(results)
             })
@@ -37,7 +38,6 @@ client.on("ready", () => {
             },
         })
     })
-})
-
+});
 
 client.login(config.token)
