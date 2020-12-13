@@ -3,26 +3,41 @@ const client = new Discord.Client()
 
 const config = require("./config.json")
 const command = require("./command") 
+const welcome = require("./welcome")
 
 client.on("ready", () => {
     console.log("College King's Bot is Running")
 
+    welcome(client)
+
     command(client, "ping", (message) => {
         message.channel.send("Pong!")
     })
+
+    command(client, "serverinfo", (message) => {
+        client.guilds.cache.forEach((guild) => {
+            message.channel.send(`**${guild.memberCount}** total members`)
+        })
+    })
+
+    command(client, ["cc", "clearchannel", "purgeall"], message => {
+        if (message.member.hasPermission("ADMINISTATOR")) {
+            message.channel.messages.fetch().then(results => {
+                message.channel.bulkDelete(results)
+            })
+        }
+    })
+
+    command(client, "status", message => {
+        const content = message.content.replace("!status", "")
+        client.user.setPresence({
+            activity: {
+                name: content,
+                type: 0,
+            },
+        })
+    })
 })
-
-// let team1 = message.guild.roles.get(config.team1);
-// let team2 = message.guild.roles.get(config.team2);
-
-client.on('guildMemberAdd', member => {
-    if (Math.floor(Math.random() * 2) == 0) {
-        member.addRole(team1).catch(console.error);
-    } else {
-        member.addRole(team2).catch(console.error);
-    }
-});
-
 
 
 client.login(config.token)
