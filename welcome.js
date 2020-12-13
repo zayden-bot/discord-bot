@@ -1,15 +1,13 @@
 module.exports = (client) => {
     const channelId = "787504014223867904" // Welcome Channel
-    const team1Id = "787495858245599252" // Team 1
-    const team2Id = "787495874687008768"
 
     client.on("guildMemberAdd", (member) => {
 
         if (Math.floor(Math.random() * 2) == 0) {
-            member.roles.add(team1Id).catch(console.error);
+            member.roles.add(config.team1Id).catch(console.error);
             var team = "Team1"
         } else {
-            member.roles.add(team2Id).catch(console.error);
+            member.roles.add(config.team2Id).catch(console.error);
             var team = "Team2"
         }
             
