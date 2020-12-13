@@ -65,7 +65,19 @@ client.on("ready", () => {
             .setDescription(suggestion)
 
         let channel = message.guild.channels.cache.get(config.suggestionChannel)
-        channel.send(embed)
+        channel.send(embed).then(function(message) {
+            message.react("👍")
+            message.react("👎")
+        })
+        
+    })
+
+    command(client, "rules", message => {
+        const embed = new Discord.MessageEmbed()
+            .setTitle(`From: ${message.author.username}`)
+            .setDescription(suggestion)
+        
+            channel.send(embed)
     })
 });
 
