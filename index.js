@@ -42,7 +42,7 @@ client.on("ready", () => {
         message.reply(`Status Changed to: Playing ${content}`)
     })
 
-    command(client, "rd", message => {
+    command(client, "randomise", message => {
         if (message.member.hasPermission("ADMINISTRATOR")) {
             message.guild.members.cache.filter(m => !m.user.bot).forEach(member => {
                 if (!(member.roles.cache.get(config.team1Id)) && !(member.roles.cache.get(config.team2Id))) {
