@@ -56,6 +56,17 @@ client.on("ready", () => {
             message.reply("Teams have been randomised")
         }
     })
+
+    command(client, "suggest", message => {
+        const suggestion = message.content.replace("!suggest", "")
+
+        const embed = new Discord.MessageEmbed()
+            .setTitle(`From: ${message.author.username}`)
+            .setDescription(suggestion)
+
+        let channel = message.guild.channels.cache.get(config.suggestionChannel)
+        channel.send(embed)
+    })
 });
 
 client.login(config.token)
