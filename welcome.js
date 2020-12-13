@@ -23,11 +23,3 @@ module.exports = (client) => {
         channel.send(message)
     })
 }
-
-
-// let team1 = message.guild.roles.get(config.team1);
-// let team2 = message.guild.roles.get(config.team2);
-
-client.on('guildMemberAdd', member => {
-
-});
