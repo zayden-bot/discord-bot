@@ -7,5 +7,5 @@ module.exports = {
             message.channel.bulkDelete(results)
         })
     },
-    permissions: "ADMINISTRATOR",
+    permissions: ["ADMINISTRATOR"],
 }
