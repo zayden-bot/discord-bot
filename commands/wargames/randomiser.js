@@ -14,5 +14,5 @@ module.exports = {
         })
         message.reply("Teams have been randomised")
     },
-    permissions: "ADMINISTRATOR",
+    permissions: ["ADMINISTRATOR"],
 }

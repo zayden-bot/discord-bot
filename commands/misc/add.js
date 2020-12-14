@@ -11,5 +11,5 @@ module.exports = {
         message.reply(`Answer: ${num1 + num2}`)
     },
     permissions: [],
-    requiredRoles: [],
+    requiredRoles: ["Security"],
 }

@@ -52,7 +52,7 @@ module.exports = (client, commandOptions) => {
         permissionError = "You do not have permission to run this command",
         minArgs = 0,
         maxArgs = null,
-        permission = [],
+        permissions = [],
         requiredRoles = [],
         callback
     } = commandOptions
@@ -65,10 +65,10 @@ module.exports = (client, commandOptions) => {
 
     if (permissions.length) {
         if (typeof permissions == "string") {
-            permission = [permission]
+            permissions = [permissions]
         }
 
-        validatePermissions(permission)
+        validatePermissions(permissions)
     }
 
     client.on("message", message => {
