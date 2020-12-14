@@ -21,5 +21,5 @@ module.exports = {
     callback: (message, arguments, text) => {
         message.reply("Work in progress")
     },
-    permissions: "ADMINISTRATOR",
+    permissions: ["ADMINISTRATOR"],
 }
