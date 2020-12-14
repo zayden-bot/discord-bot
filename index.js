@@ -110,6 +110,7 @@ client.on("ready", () => {
             .setFooter("https://www.patreon.com/collegekings")
             
         message.reply(embed)
+
     })
 
     command(client, "update", message => {
