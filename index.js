@@ -5,9 +5,27 @@ const client = new Discord.Client()
 
 const config = require("./config.json")
 const welcome = require("./welcome");
+const sql = require("./sql");
 
 client.on("ready", async () => {
     console.log("College King's Bot is Running");
+
+    sql.init() // keep it here so it connects to the database
+
+    //                CREATE EXAMPLE
+    //  sql.run("CREATE TABLE IF NOT EXISTS test (`val` INT NOT NULL DEFAULT '1')");
+    //
+    //                SELECT EXAMPLE
+    //  sql.each("SELECT * FROM test ORDER BY val DESC", (row) => {
+    //      console.log(row.val)
+    //  });
+    //
+    //                CLOSE CONNECTION
+    //  sql.end() 
+    //
+    //                CREATE CONNECTION
+    //  sql.init()
+    //
     
     const baseFile = "command-base.js"
     const commandBase = require(`./commands/${baseFile}`)
@@ -30,7 +48,6 @@ client.on("ready", async () => {
     // welcome(client)
 
     // activityTracker(client)
-
 });
 
 client.login(config.token)
