@@ -15,6 +15,7 @@ const rules = {
 
 module.exports = {
     commands: "rule",
+    expectedArgs: "<number>",
     minArgs: 1,
     maxArgs: 1,
     callback: (message, arguments, text) => {
