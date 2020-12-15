@@ -46,6 +46,24 @@ client.on("ready", async () => {
 
     readCommands("commands")
 
+    const eventFile = "event-base.js"
+    const eventBase = require(`./events/${eventFile}`)
+
+    const readEvents = dir => {
+        const files = fs.readdirSync(path.join(__dirname, dir))
+        for (const file of files) {
+            const stat = fs.lstatSync(path.join(__dirname, dir, file))
+            if (stat.isDirectory()) {
+                readEvents(path.join(dir, file))
+            } else if (file !== baseFile) {
+                const option = require(path.join(__dirname, dir, file))
+                eventBase(client, option)
+            }
+        }
+    }
+
+    readEvents("events")
+
     // welcome(client)
 
     pingSteve(client)
