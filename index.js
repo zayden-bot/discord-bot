@@ -6,6 +6,7 @@ const client = new Discord.Client()
 const config = require("./config.json")
 const welcome = require("./welcome");
 const sql = require("./sql");
+const pingSteve = require("./pingSteve")
 
 client.on("ready", async () => {
     console.log("College King's Bot is Running");
@@ -46,6 +47,8 @@ client.on("ready", async () => {
     readCommands("commands")
 
     // welcome(client)
+
+    pingSteve(client)
 
     // activityTracker(client)
 });
