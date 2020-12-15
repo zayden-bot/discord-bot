@@ -3,8 +3,6 @@ module.exports = {
     minArgs: 0,
     maxArgs: 0,
     callback: (message, arguments, text) => {
-        client.guilds.cache.forEach((guild) => {
-            message.channel.send(`**${guild.memberCount}** total members`)
-        })
+        message.channel.send(`**${message.guild.memberCount}** total members`)
     },
 }

@@ -1,16 +1,19 @@
 const Discord = require("discord.js");
 const rules = {
-    [1]: "Do not do anything which breaks the Discord ToS or Community Guidelines.",
-    [2]: "Do not harass, bully or cause drama with other members within the discord.",
-    [3]: "Racism, Sexism, Homophobia or any other offensive subject matters are strictly forbidden.",
-    ['3a']: "Talking about Politics, Religion and other sensitive subjects are also forbidden.",
-    [4]: "Do not spam. This includes Images, Repeatedly Asking Questions or spamming emojis.",
-    [5]: "No Advertising. This includes but not limited to Discord Servers or other websites that aren't related to College Kings. Offical websites to other games are allowed in <#787822407733608448>.",
-    [6]: "Do not threaten to DDoS or dox someone, it is also prohibited to discuss these topics or share information regarding either topic (As well as discuss information gained via a dox).",
-    [7]: "Do not post any NSFW pictures outside of an NSFW marked channel. Gore, Loli, Shota and other Extreme NSFW content is prohibited.",
-    [8]: "This is an English-only server.",
-    [9]: "Stay on-topic in the respective channels.",
-    [10]: "Respect our staff team, their decisions are final."
+    [1]: "This server is adult community (18+), by entering the server you agree that you are at least 18 years old. If you are suspected to be under the age of 18 you will be removed from the server.",
+    [2]: "Be respectful. Opinions are fine, attacks are not. This includes but not limited to trolling, belittling, etc",
+    [3]: "Avoid discussing controversial topics, eg religion and politics.",
+    [4]: "This is not a dating service, don't treat it like one",
+    [5]: "No spamming (including bot commands).",
+    [6]: "We are an English only community. Please provide a translation with your message if it's not in English",
+    [7]: "Pay attention to and respect our Staff, their decisions are final",
+    [8]: "Don't link to anything against Discord ToS, such as sexualized jailbait/loli/shota.",
+    [9]: "Don't ask other users for any kind of personal information.",
+    [10]: "Make sure to read the pinned messages in each room.",
+    [11]: "Stay on-topic in the respective channels",
+    [12]: "Respect our staff team, their decisions are final.",
+    [13]: "Under no circumstances may you try to impersonate as one of the staff on this Discord server, whether it be on the development team, an admin or moderator.",
+    [14]: "NSFW content is **ONLY** allowed in <#747428952577933424>. Posting Scat, Urine, Self Harm, Rape, Incest, Beastality, Drug use or Underaged content anywhere will get you immediatly banned. This is your only warning!"
 }
 
 module.exports = {
