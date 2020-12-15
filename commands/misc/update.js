@@ -2,8 +2,6 @@ const Discord = require("discord.js")
 
 module.exports = {
     commands: ["update"],
-    minArgs: 0,
-    maxArgs: 0,
     callback: (message, arguments, text) => {
         const embed = new Discord.MessageEmbed()
             .setTitle("Next College Kings Update")

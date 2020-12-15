@@ -112,5 +112,5 @@ module.exports = (client, commandOptions) => {
                 return
             }
         }
-    })
+    }).setMaxListeners(0)
 }
