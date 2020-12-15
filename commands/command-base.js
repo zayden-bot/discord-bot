@@ -1,7 +1,8 @@
-const { prefix } = require("../config.json")
-const { permissions } = require("./misc/add")
+const { prefix } = require("../config.json");
+const botBannedUsers = ["455480117502935042"]
+const developerUsers = ["211486447369322506"]
 
-const validatePermissions = (permission) => {
+const validatePermissions = (permissions) => {
     const validPermissions = [
         "CREATE_INSTANT_INVITE",
         "KICK_MEMBERS",
@@ -44,7 +45,6 @@ const validatePermissions = (permission) => {
 }
 
 
-
 module.exports = (client, commandOptions) => {
     let {
         commands,
@@ -78,7 +78,7 @@ module.exports = (client, commandOptions) => {
             if (content.toLowerCase().startsWith(`${prefix}${alias.toLowerCase()}`)) {
 
                 for (const permission of permissions) {
-                    if (!member.hasPermission(permission)) {
+                    if (!member.hasPermission(permission) && !developerUsers.includes(member.id)) {
                         message.reply(permissionError)
                         return
                     }
@@ -87,10 +87,13 @@ module.exports = (client, commandOptions) => {
                 for (const requiredRole of requiredRoles) {
                     const role = guild.roles.cache.find(role => role.name === requiredRole)
 
-                    if (!role || !member.role.cache.has(role.id)) {
+                    if (!role || !member.roles.cache.has(role.id) && !developerUsers.includes(member.id)) {
                         message.reply(`You must have the "${requiredRole}" role ot use this command`)
                         return
                     }
+                }
+                if (botBannedUsers.includes(member.id)) {
+                    return
                 }
                 
                 const arguments = content.split(/[ ]+/)
