@@ -7,9 +7,10 @@ const config = require("./config.json")
 const welcome = require("./welcome");
 const sql = require("./sql");
 const pingSteve = require("./pingSteve")
+const updateRules = require("./rules")
 
 client.on("ready", async () => {
-    console.log("College King's Bot is Running");
+    console.log("Zayden is Running");
 
     sql.init() // keep it here so it connects to the database
 
@@ -69,6 +70,8 @@ client.on("ready", async () => {
     pingSteve(client)
 
     // activityTracker(client)
+
+    updateRules(client, "747430712617074718") // Rules Channel ID
 });
 
 client.login(config.token)
