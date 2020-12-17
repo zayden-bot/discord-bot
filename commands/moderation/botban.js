@@ -12,7 +12,7 @@ module.exports = {
 
         const embed = new Discord.MessageEmbed()
             .setDescription(`***${mentions.users.first().username}* was bot banned**`)
-            .setColor("#00ff00")
+            .setColor("#ff0000")
 
         message.reply(embed)
     },

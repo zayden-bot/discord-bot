@@ -9,6 +9,8 @@ const welcome = require("./welcome");
 const sql = require("./sql");
 const pingSteve = require("./pingSteve")
 const updateRules = require("./rules")
+const yesMaster = require("./yesMaster")
+const questionMe = require("./questionMe")
 
 client.on("ready", async () => {
     console.log("Zayden is Running");
@@ -58,6 +60,10 @@ client.on("ready", async () => {
     // activityTracker(client)
 
     updateRules(client, "747430712617074718") // Rules Channel ID
+
+    yesMaster(client);
+
+    questionMe(client)
 });
 
 client.login(config.token)
