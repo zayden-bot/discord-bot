@@ -5,5 +5,5 @@
     "team2Id": "787495874687008768",
     "suggestionChannel": "779064182259449896",
     "logsChannel": "779072597245165667",
-    "dbFile": "./database.db"
+    "dbFile": "./database/database.db"
 }

@@ -71,6 +71,12 @@ module.exports = (client, commandOptions) => {
         validatePermissions(permissions)
     }
 
+    if (requiredRoles.length) {
+        if (typeof requiredRoles == "string") {
+            requiredRoles = [requiredRoles]
+        }
+    }
+
     client.on("message", message => {
         const { member, content, guild } = message
 
