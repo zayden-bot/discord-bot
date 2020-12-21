@@ -1,13 +1,16 @@
-const path = require("path")
-const fs = require("fs")
 const Discord = require("discord.js")
 const client = new Discord.Client()
+const path = require("path")
+const fs = require("fs")
 
+const loadCommands = require("./commands/load-commands")
 const config = require("./config.json")
 const welcome = require("./welcome");
 const sql = require("./sql");
 const pingSteve = require("./pingSteve")
 const updateRules = require("./rules")
+const yesMaster = require("./yesMaster")
+const questionMe = require("./questionMe")
 
 client.on("ready", async () => {
     console.log("Zayden is Running");
@@ -28,25 +31,10 @@ client.on("ready", async () => {
     //                CREATE CONNECTION
     //  sql.init()
     //
-    
+
+    loadCommands(client)
+
     const baseFile = "command-base.js"
-    const commandBase = require(`./commands/${baseFile}`)
-
-    const readCommands = dir => {
-        const files = fs.readdirSync(path.join(__dirname, dir))
-        for (const file of files) {
-            const stat = fs.lstatSync(path.join(__dirname, dir, file))
-            if (stat.isDirectory()) {
-                readCommands(path.join(dir, file))
-            } else if (file !== baseFile) {
-                const option = require(path.join(__dirname, dir, file))
-                commandBase(client, option)
-            }
-        }
-    }
-
-    readCommands("commands")
-
     const eventFile = "event-base.js"
     const eventBase = require(`./events/${eventFile}`)
 
@@ -72,6 +60,10 @@ client.on("ready", async () => {
     // activityTracker(client)
 
     updateRules(client, "747430712617074718") // Rules Channel ID
+
+    yesMaster(client);
+
+    questionMe(client)
 });
 
 client.login(config.token)
