@@ -13,14 +13,15 @@ const rules = {
     [11]: "Stay on-topic in the respective channels",
     [12]: "Respect our staff team, their decisions are final.",
     [13]: "Under no circumstances may you try to impersonate as one of the staff on this Discord server, whether it be on the development team, an admin or moderator.",
-    [14]: "NSFW content is **ONLY** allowed in <#747428952577933424>. Posting Scat, Urine, Self Harm, Rape, Incest, Beastality, Drug use or Underaged content anywhere will get you immediatly banned. This is your only warning!"
+    [14]: "NSFW content is **ONLY** allowed in <#747428952577933424>. Posting Scat, Urine, Self Harm, Rape, Incest, Beastality, Drug use or Underaged content anywhere will get you immediatly banned. This is your only warning!",
+    [69]: "Abby is Oscar's wife. <:pepepointedlaugh:788514455477813320>"
+
 }
 
 module.exports = {
     commands: "rule",
     expectedArgs: "<number>",
     minArgs: 1,
-    maxArgs: 1,
     callback: (message, arguments, text) => {
         const id = arguments[0]
 
