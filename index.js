@@ -55,8 +55,6 @@ client.on("ready", async () => {
 
     // welcome(client)
 
-    pingSteve(client)
-
     // activityTracker(client)
 
     updateRules(client, "747430712617074718") // Rules Channel ID
