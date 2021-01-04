@@ -2,7 +2,6 @@ module.exports = {
     commands: ["punish"],
     permissionError: "You are not a Master! Security Breach calling <@211486447369322506>!",
     callback: (message, arguments, text) => {
-        console.log(text)
         if (text == "<@!747423760780623872>") {
             message.channel.send(`Sorry Master Oscar, I cannot punish Master Steve!`)
         } else {
