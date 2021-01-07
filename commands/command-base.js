@@ -1,4 +1,5 @@
 const { prefix } = require("../config.json");
+const blacklist = require("../blacklist.js");
 const botBannedUsers = ["455480117502935042"]
 const developerUsers = ["211486447369322506"]
 
@@ -61,7 +62,7 @@ module.exports = (client, commandOptions) => {
         commands = [commands];
     }
 
-    console.log(`Registering command "${commands[0]}"`)
+    console.log(`Registering command "${commands[0]}"`);
 
     if (permissions.length) {
         if (typeof permissions == "string") {
@@ -98,7 +99,8 @@ module.exports = (client, commandOptions) => {
                         return
                     }
                 }
-                if (botBannedUsers.includes(member.id)) {
+                //if (botBannedUsers.includes(member.id)) {
+                if (blacklist.isBlacklisted(member.user.id)) {
                     return
                 }
                 
