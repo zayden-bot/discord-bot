@@ -26,7 +26,7 @@ module.exports = {
         for (roleId of memberRoles) {
             channel.updateOverwrite(roles.cache.get(roleId), {SEND_MESSAGES: true}, "Channel Unlocked")
         }
-
+        message.channel.send("Channel Unlocked! Thank you for your patience")
     },
     requiredRoles: ["Security"],
 }
