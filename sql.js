@@ -70,5 +70,13 @@ module.exports = {
         } else {
             console.log("There is no database connection active.");
         }
+    },
+    
+    getConnection: function() {
+        if (db) {
+            return db;
+        } else {
+            console.log("There is no database connection active.");
+        }
     }
 }
