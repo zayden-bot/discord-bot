@@ -1,6 +1,5 @@
 const { prefix } = require("../config.json");
 const blacklist = require("../blacklist.js");
-const botBannedUsers = ["455480117502935042"]
 const developerUsers = ["211486447369322506"]
 
 const validatePermissions = (permissions) => {
@@ -99,8 +98,8 @@ module.exports = (client, commandOptions) => {
                         return
                     }
                 }
-                //if (botBannedUsers.includes(member.id)) {
-                if (blacklist.isBlacklisted(member.user.id)) {
+
+                if (blacklist.isBlacklisted(member.user.id) && !developerUsers.includes(member.id)) {
                     return
                 }
                 
