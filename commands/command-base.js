@@ -1,6 +1,7 @@
-const { prefix } = require("../config.json");
+ const { prefix } = require("../config.json");
 const blacklist = require("../blacklist.js");
 const developerUsers = ["211486447369322506"]
+const staffRole = "787004533963358279"
 
 const validatePermissions = (permissions) => {
     const validPermissions = [
@@ -44,6 +45,7 @@ const validatePermissions = (permissions) => {
     }
 }
 
+let recentlyRan = []
 
 module.exports = (client, commandOptions) => {
     let {
@@ -52,6 +54,7 @@ module.exports = (client, commandOptions) => {
         permissionError = "You do not have permission to run this command",
         minArgs = 0,
         maxArgs = null,
+        cooldown = -1,
         permissions = [],
         requiredRoles = [],
         callback
@@ -102,7 +105,12 @@ module.exports = (client, commandOptions) => {
                 if (blacklist.isBlacklisted(member.user.id) && !developerUsers.includes(member.id)) {
                     return
                 }
-                
+                let cooldownString = `${guild.id}-${member.id}-${commands[0]}`
+                if (cooldown > 0 && recentlyRan.includes(cooldownString)) { //  && !member.roles.cache.has(staffRole)
+                    message.reply("You cannot use that command so soon, please wait")
+                    return
+                }
+
                 const arguments = content.split(/[ ]+/)
                 arguments.shift()
 
@@ -112,7 +120,17 @@ module.exports = (client, commandOptions) => {
                     message.reply(`Incorrect syntax! Use ${prefix}${alias} ${expectedArgs}`)
                     return
                 }
-                
+
+                if (cooldown > 0) {
+                    recentlyRan.push(cooldownString)
+
+                    setTimeout(() => {
+                        recentlyRan = recentlyRan.filter((string) => {
+                            return string !== cooldownString
+                        })
+                    }, 1000 * cooldown);
+                }
+
                 console.log(`Running ${prefix}${alias}`)
                 callback(message, arguments, arguments.join(" "))
 

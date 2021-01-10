@@ -25,6 +25,7 @@ module.exports = {
     commands: "rule",
     expectedArgs: "<number>",
     minArgs: 1,
+    cooldown: 6 * 60 * 60,
     callback: (message, arguments, text) => {
         const id = arguments[0]
 
