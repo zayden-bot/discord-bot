@@ -18,7 +18,7 @@ const rules = {
     [15]: "NSFW content is **ONLY** allowed in <#747428952577933424>. Posting Scat, Urine, Self Harm, Rape, Incest, Beastality, Drug use or Underaged content anywhere will get you immediatly banned. This is your only warning!",
     [69]: "Abby is OscarSix's wife. <:pepepointedlaugh:788514455477813320>",
     [420]: "**OscarSix's Cult:**\n1. <@516991142156435472>\n2. <@793546328865112134>\n3. <@709305430874259469>\n4. <@563985503834210304>\n5. <@124663881460219906>\n6. <@304599215022276608>\n7. <@757213114843398145>\n8. <@341545447199866880>\n9. <@407157583409971202>\n10. <@520924966510657537>",
-    [94832]: "You found the secret rule, this means Slockie is now officially College Kings owner."
+    [80085]: "You found the secret rule, this means Slockie is now officially College Kings owner."
 }
 
 module.exports = {
