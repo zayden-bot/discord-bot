@@ -106,7 +106,7 @@ module.exports = (client, commandOptions) => {
                     return
                 }
                 let cooldownString = `${guild.id}-${member.id}-${commands[0]}`
-                if (cooldown > 0 && recentlyRan.includes(cooldownString)) { //  && !member.roles.cache.has(staffRole)
+                if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(staffRole)) {
                     message.reply("You cannot use that command so soon, please wait")
                     return
                 }

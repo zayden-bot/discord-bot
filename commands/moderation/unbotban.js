@@ -14,4 +14,5 @@ module.exports = {
             message.reply("The user is not blacklisted!");
         }
     },
+    requiredRoles: ["Security"],
 }
