@@ -18,6 +18,11 @@ const slockiesCult = [
     "<@588577832905736192>" // LOYAL
 ]
 
+const ayasCult = [
+    "<@342098139395653633>", // ASHARYA15
+    "<@615128589918011393>" // JANY  
+]
+
 let rv = ""
 for (let i = 0; i < oscarsCult.length; i++) {
     rv = `${rv}\n${i+1}. ${oscarsCult[i]}`
@@ -26,6 +31,11 @@ for (let i = 0; i < oscarsCult.length; i++) {
 let slockierv = ""
 for (let i = 0; i < slockiesCult.length; i++) {
     slockierv = `${slockierv}\n${i+1}. ${slockiesCult[i]}`
+}
+
+let ayarv = ""
+for (let i = 0; i < ayasCult.length; i++) {
+    ayarv = `${ayarv}\n${i+1}. ${ayasCult[i]}`
 }
 
 let rules = {
@@ -47,6 +57,7 @@ let rules = {
     [27]: "Aya's the College Kings head cheerleader",
     [42]: `**Slockie's Vocal Cult:**${slockierv}`,
     [69]: "Abby is OscarSix's wife. <:pepepointedlaugh:788514455477813320>",
+    [93]: `**Aya's CK cheerleading sorority:**${ayarv}`,
     [420]: `**OscarSix's Cult:**${rv}`,
     [80085]: "Congratulations! You have found the secret rule. Winner: <@516991142156435472>"
 }
@@ -58,6 +69,11 @@ module.exports = {
     cooldown: 10,
     callback: (message, arguments, text) => {
         const id = arguments[0]
+
+        if (!rules[id]) {
+            message.reply(`There is no rule with the id ${id}`);
+            return
+        }
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Rule ${id}`)
