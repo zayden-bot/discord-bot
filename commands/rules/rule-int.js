@@ -1,27 +1,61 @@
 const Discord = require("discord.js");
-const rules = {
+const oscarsCult = [
+    "<@516991142156435472>", // Abby
+    "<@709305430874259469>", // Leon
+    "<@563985503834210304>", // Jeevant
+    "<@124663881460219906>", // Slockie
+    "<@304599215022276608>", // Fork
+    "<@275401248331661313>", // Thyg
+    "<@757213114843398145>", // Panty Lover
+    "<@341545447199866880>", // Mark
+    "<@407157583409971202>", // Satan
+]
+
+const slockiesCult = [
+    "<@211486447369322506>", // Oscar
+    "<@516991142156435472>", // Abby
+    "<@307239591755251722>", // JSlice
+    "<@588577832905736192>" // LOYAL
+]
+
+let rv = ""
+for (let i = 0; i < oscarsCult.length; i++) {
+    rv = `${rv}\n${i+1}. ${oscarsCult[i]}`
+}
+
+let slockierv = ""
+for (let i = 0; i < slockiesCult.length; i++) {
+    slockierv = `${slockierv}\n${i+1}. ${slockiesCult[i]}`
+}
+
+let rules = {
+    [0]: "Use common sense! If the staff are telling you to stop doing something, stop.",
     [1]: "This server is adult community (18+), by entering the server you agree that you are at least 18 years old. If you are suspected to be under the age of 18 you will be removed from the server.",
     [2]: "Be respectful. Opinions are fine, attacks are not. This includes but not limited to trolling, belittling, etc",
-    [3]: "Avoid discussing controversial topics, eg religion and politics.",
-    [4]: "This is not a dating service, don't treat it like one",
-    [5]: "No spamming (including bot commands).",
-    [6]: "We are an English only community. Please provide a translation with your message if it's not in English",
-    [7]: "Pay attention to and respect our Staff, their decisions are final",
-    [8]: "Don't link to anything against Discord ToS, such as sexualized jailbait/loli/shota.",
-    [9]: "Don't ask other users for any kind of personal information.",
-    [10]: "Make sure to read the pinned messages in each room.",
-    [11]: "Stay on-topic in the respective channels",
-    [12]: "Respect our staff team, their decisions are final.",
+    [3]: "No discussing sensitive or controversial topics, eg religion and politics.",
+    [4]: "No adveritising, links to promotional websites or affiliate links.",
+    [5]: "This is not a dating service, don't treat it like one",
+    [6]: "No spamming (including bot commands).",
+    [7]: "We are an English only community. Please provide a translation with your message if it's not in English",
+    [8]: "Pay attention to and respect our Staff, their decisions are final",
+    [9]: "Don't link to anything against Discord ToS, such as sexualized jailbait/loli/shota.",
+    [10]: "Don't ask other users for any kind of personal information.",
+    [11]: "Make sure to read the pinned messages in each room.",
+    [12]: "Stay on-topic in the respective channels",
     [13]: "Under no circumstances may you try to impersonate as one of the staff on this Discord server, whether it be on the development team, an admin or moderator.",
     [14]: "NSFW content is **ONLY** allowed in <#747428952577933424>. Posting Scat, Urine, Self Harm, Rape, Incest, Beastality, Drug use or Underaged content anywhere will get you immediatly banned. This is your only warning!",
-    [69]: "Abby is Oscar's wife. <:pepepointedlaugh:788514455477813320>"
-
+    [27]: "Aya's the College Kings head cheerleader",
+    [42]: `**Slockie's Vocal Cult:**${slockierv}`,
+    [69]: "Abby is OscarSix's wife. <:pepepointedlaugh:788514455477813320>",
+    [420]: `**OscarSix's Cult:**${rv}`,
+    [80085]: "Congratulations! You have found the secret rule. Winner: <@516991142156435472>"
 }
 
 module.exports = {
     commands: "rule",
     expectedArgs: "<number>",
     minArgs: 1,
+    cooldown: 10,
     callback: (message, arguments, text) => {
         const id = arguments[0]
 
