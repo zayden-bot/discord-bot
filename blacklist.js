@@ -50,5 +50,16 @@ module.exports = {
         } else {
             console.error("Expected int at argument 1 of removeBlacklist");
         }
+    },
+    isProtectedUser: function(id) {
+        if (id) {
+            if (!config.protectedUsers[Number(id)]) {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            console.error("Expected int at argument 1 of isProtectedUser");
+        }
     }
 }
