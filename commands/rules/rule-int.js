@@ -59,7 +59,8 @@ let rules = {
     [69]: "Abby is OscarSix's wife. <:pepepointedlaugh:788514455477813320>",
     [93]: `**Aya's CK cheerleading sorority:**${ayarv}`,
     [420]: `**OscarSix's Cult:**${rv}`,
-    [80085]: "Congratulations! You have found the secret rule. Winner: <@516991142156435472>"
+    [80085]: "Congratulations! You have found the secret rule. Winner: <@516991142156435472>",
+    ["hehe"]: "Matt sucks dick!"
 }
 
 module.exports = {
