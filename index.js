@@ -5,13 +5,12 @@ const fs = require("fs")
 
 const loadCommands = require("./commands/load-commands");
 const config = require("./config.json");
-const welcome = require("./welcome");
 const sql = require("./sql");
-const pingSteve = require("./pingSteve");
 const updateRules = require("./updateRules");
 const yesMaster = require("./yesMaster");
 const questionMe = require("./questionMe");
 const blacklist = require("./blacklist");
+const dmMatt = require("./dmMatt");
 
 client.on("ready", async () => {
     console.log("Zayden is Running");
@@ -57,6 +56,8 @@ client.on("ready", async () => {
     // welcome(client)
 
     // activityTracker(client)
+
+    dmMatt(client)
 
     updateRules(client, "747430712617074718") // Rules Channel ID
 
