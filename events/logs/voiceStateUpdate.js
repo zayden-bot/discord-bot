@@ -18,7 +18,7 @@ module.exports = {
                 newState.guild.channels.cache.get(config.logsChannel).send(embed);
         } else {
             const embed = new MessageEmbed()
-                .setTitle('Member connected to a voice chat!')
+                .setTitle('Member disconnected to a voice chat!')
                 .addField("Member", `<@${oldState.member.id}>`, true)
                 .addField("Channel", `${oldState.channel.name}`, true)
                 .setColor('#ff0000')
