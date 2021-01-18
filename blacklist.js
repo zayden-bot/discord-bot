@@ -53,7 +53,7 @@ module.exports = {
     },
     isProtectedUser: function(id) {
         if (id) {
-            if (!config.protectedUsers[Number(id)]) {
+            if (config.protectedUsers.includes(String(id))) {
                 return true
             } else {
                 return false
