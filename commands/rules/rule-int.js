@@ -77,21 +77,22 @@ module.exports = {
             message.reply(`There is no rule with the id ${id}`);
             return
         }
-
+        
+        var embed;
         if (id == 93) {
-            const embed = new Discord.MessageEmbed()
+            embed = new Discord.MessageEmbed()
                 .setTitle(`Rule ${id}`)
                 .setDescription(`**${id}.** ${rules[id]}\n\n**Please read the rest of the rules in <#747430712617074718>!**`)
                 .setColor("ff0000")
                 .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
                 .setImage("https://images-ext-1.discordapp.net/external/qSqe_sMdFj-dM1iuXadMclKHfV8CU5XGr2SFuIdKr_s/https/i.pinimg.com/originals/9d/af/64/9daf641ca935b02d992614ccee620e3f.gif")
         } else {
-            const embed = new Discord.MessageEmbed()
+            embed = new Discord.MessageEmbed()
                 .setTitle(`Rule ${id}`)
                 .setDescription(`**${id}.** ${rules[id]}\n\n**Please read the rest of the rules in <#747430712617074718>!**`)
                 .setColor("ff0000")
                 .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
         }
-            message.reply(embed)
+        message.reply(embed);
     },
 }
