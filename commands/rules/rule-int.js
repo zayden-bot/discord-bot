@@ -25,6 +25,20 @@ const ayasCult = [
     "<@457249514542071819>" // Wall rider
 ]
 
+const chloecock = [
+    "<@516991142156435472>", // Abby
+    "<@400649996556435458>", // Alo
+    "<@444839364107698187>", // DaniD27
+    "<@615128589918011393>", // Jany
+    "<@709305430874259469>", // Leon
+    "<@211486447369322506>", // Oscar
+    "<@801133648170582078>", // Rudy
+    "<@801044177138745394>", // SamZwill
+    "<@124663881460219906>", // Slockie
+    "<@747423760780623872>", // Steve
+    "<@212376690574360588>" // Xander
+]
+
 let rv = ""
 for (let i = 0; i < oscarsCult.length; i++) {
     rv = `${rv}\n${i+1}. ${oscarsCult[i]}`
@@ -38,6 +52,11 @@ for (let i = 0; i < slockiesCult.length; i++) {
 let ayarv = ""
 for (let i = 0; i < ayasCult.length; i++) {
     ayarv = `${ayarv}\n${i+1}. ${ayasCult[i]}`
+}
+
+let cockrv = ""
+for (let i = 0; i < chloecock.length; i++) {
+    cockrv = `${cockrv}\n${i+1}. ${chloecock[i]}`
 }
 
 let rules = {
@@ -62,6 +81,7 @@ let rules = {
     [93]: `**Aya's CK cheerleading sorority:**${ayarv}`,
     [420]: `**OscarSix's Cult:**${rv}`,
     [80085]: "Congratulations! You have found the secret rule. Winner: <@516991142156435472>",
+    ["chloe"]: `**Chloe's Cult:**${cockrv}`,
     ["hehe"]: "Matt thinks he's cool"
 }
 
@@ -77,21 +97,22 @@ module.exports = {
             message.reply(`There is no rule with the id ${id}`);
             return
         }
-
+        
+        var embed;
         if (id == 93) {
-            const embed = new Discord.MessageEmbed()
+            embed = new Discord.MessageEmbed()
                 .setTitle(`Rule ${id}`)
                 .setDescription(`**${id}.** ${rules[id]}\n\n**Please read the rest of the rules in <#747430712617074718>!**`)
                 .setColor("ff0000")
                 .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
                 .setImage("https://images-ext-1.discordapp.net/external/qSqe_sMdFj-dM1iuXadMclKHfV8CU5XGr2SFuIdKr_s/https/i.pinimg.com/originals/9d/af/64/9daf641ca935b02d992614ccee620e3f.gif")
         } else {
-            const embed = new Discord.MessageEmbed()
+            embed = new Discord.MessageEmbed()
                 .setTitle(`Rule ${id}`)
                 .setDescription(`**${id}.** ${rules[id]}\n\n**Please read the rest of the rules in <#747430712617074718>!**`)
                 .setColor("ff0000")
                 .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
         }
-            message.reply(embed)
+        message.reply(embed);
     },
 }
