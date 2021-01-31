@@ -100,7 +100,6 @@ module.exports = {
             return
         }
         
-        var embed;
         if (id == 93) {
             embed = new Discord.MessageEmbed()
                 .setTitle(`Rule ${id}`)
