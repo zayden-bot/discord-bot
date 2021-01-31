@@ -99,7 +99,8 @@ module.exports = {
             message.reply(`There is no rule with the id ${id}`);
             return
         }
-
+        
+        var embed;
         if (id == 93) {
             embed = new Discord.MessageEmbed()
                 .setTitle(`Rule ${id}`)
@@ -114,6 +115,6 @@ module.exports = {
                 .setColor("ff0000")
                 .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
         }
-            message.reply(embed)
+        message.reply(embed);
     },
 }
