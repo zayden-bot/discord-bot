@@ -18,7 +18,7 @@ module.exports = {
     expectedArgs: "<user>",
     minArgs: 1,
     callback: (message, arguments, text) => {
-        const imgId = Math.floor(Math.random() * (kissingImages.length -1))
+        const imgId = Math.floor(Math.random() * kissingImages.length)
         const member = message.mentions.members.first()
         const embed = new Discord.MessageEmbed()
             .setTitle(`${message.author.username} kisses ${member.user.username}`)
