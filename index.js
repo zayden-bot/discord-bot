@@ -70,6 +70,7 @@ client.on("ready", async () => {
 
     reactionRoles.init()
     reactionRoles.addNormalReactionRole(client)
+    reactionRoles.removeNormalReactionRole(client)
 });
 
 client.login(config.token)

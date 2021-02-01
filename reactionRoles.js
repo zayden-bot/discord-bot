@@ -5,69 +5,85 @@ let channelId = "787713329472471050";
 let messageId = "805707849246179339";
 
 let reactionMessages = [];
-let checkReactionMessage = [787713329472471000, 805707849246179300]
+let checkReactionMessages = []
 
 module.exports = {
     init: function () {
         sql.each("SELECT * FROM `reactionRoleMessages`", (row) => {
-            reactionMessages.push([Number(row.channelId), Number(row.messageId), String(row.emoji), Number(row.roleId)]);
-            // checkReactionMessage.push([Number(row.channelId), Number(row.messageId), String(row.emoji)]);
+            reactionMessages.push([row.channelId, row.messageId, row.emoji, row.roleId]);
+            checkReactionMessages.push([row.channelId, row.messageId, row.emoji]);
         })
         console.log(`Loaded ${reactionMessages.length} reaction messages!`);
     },
 
     getChannel: function(channel) { // Get Channel ID
         channelId = channel.match(/\d+/);
-        // console.log(`ChannelID: ${channelId}`);
     },
 
     getMessage: function(message) { // Get Message ID
         messageId = message.match(/\d+/);
     },
 
-    addNormalReaction: function(message, emoji, role) {
+    addNormalReaction: function(message, emoji, role) { // Add the reaction to message + database
         const roleId = role.match(/\d+/);
         message.client.channels.fetch(channelId).then(channel => {
             channel.messages.fetch(messageId).then(message => {
-                if (checkReactionMessage.includes([Number(channelId), Number(message.id), String(emoji)])) {
+                if (checkReactionMessages.includes([channelId, message.id, emoji])) {
                     message.reply("Reaction already exists.")
                 } else {
-                    // console.log(message)
                     message.react(emoji)
-                    sql.run(`INSERT INTO 'reactionRoleMessages' ('channelId', 'messageId', 'emoji', 'roleId') VALUES ('${Number(channel.id)}', '${Number(message.id)}', '${String(emoji)}', '${Number(roleId)}');`)
-                    reactionMessages.push([Number(channel.id), Number(message.id), String(emoji), Number(roleId)]);
-                    checkReactionMessage.push([Number(channel.id), Number(message.id), String(emoji)]);
+                    sql.run(`INSERT INTO 'reactionRoleMessages' ('channelId', 'messageId', 'emoji', 'roleId') VALUES ('${channel.id}', '${message.id}', '${emoji}', '${roleId}');`)
+                    reactionMessages.push([channel.id, message.id, emoji, roleId]);
+                    checkReactionMessages.push([channel.id, message.id, emoji]);
                 }
             })
         })
     },
 
-    addNormalReactionRole: function(client) {
+    addNormalReactionRole: function(client) { // Watch for reaction and grant role
         client.on("messageReactionAdd", (reaction, user) => {
-            const test = [Number(reaction.message.channel.id), Number(reaction.message.id)]
-            // console.log(reactionMessages)
-            // console.log(checkReactionMessage)
-            // console.log(test)
+            let check = false
+            let index;
 
-            for (let i = 0; i < checkReactionMessage.length; i++) {
-                if (test == checkReactionMessage[i]) {
-                    console.log("TRUE")
-                } else {
-                    console.log("FALSE")
+            for (let i = 0; i < checkReactionMessages.length; i++) {
+                if (checkReactionMessages[i][0] == reaction.message.channel.id && checkReactionMessages[i][1] == reaction.message.id && checkReactionMessages[i][2] == reaction._emoji.name) {
+                    check = true
+                    index = i
                 }
             }
 
-            if (checkReactionMessage.includes([Number(reaction.message.channel.id), Number(reaction.message.id), String(reaction._emoji)]) && user.id !== "787490197943091211") {
-                console.log("Reaction Found.")
-                const emoji = reaction._emoji.name
+            if (check && user.id !== "787490197943091211") {
                 const { guild } = reaction.message
-                const reactionMessagesIndex = checkReactionMessage.indexOf([Number(reaction.message.channel.id), Number(reaction.message.id), String(reaction._emoji)])
-                const roleId = reactionMessages[reactionMessagesIndex][3]
+                const roleId = reactionMessages[index][3]
 
                 const role = guild.roles.cache.get(roleId)
                 const member = guild.members.cache.find(member => member.id === user.id)
                 
                 member.roles.add(role)
+            }
+        })
+    },
+
+    removeNormalReactionRole: function(client) { // Remove reaction Role
+        client.on("messageReactionRemove", (reaction, user) => {
+            let check = false
+            let index;
+
+            for (let i = 0; i < checkReactionMessages.length; i++) {
+                if (checkReactionMessages[i][0] == reaction.message.channel.id && checkReactionMessages[i][1] == reaction.message.id && checkReactionMessages[i][2] == reaction._emoji.name) {
+                    check = true
+                    index = i
+                }
+            }
+
+            if (check && user.id !== "787490197943091211") {
+                const { guild } = reaction.message
+                const roleId = reactionMessages[index][3]
+
+                const role = guild.roles.cache.get(roleId)
+                const member = guild.members.cache.find(member => member.id === user.id)
+                
+                member.roles.remove(role)
             }
         })
     }
