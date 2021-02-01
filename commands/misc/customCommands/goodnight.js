@@ -11,7 +11,7 @@ module.exports = {
     maxArgs: 1,
     callback: (message, arguments, text) => {
         let member = message.author.username
-        if (arguments) { member = message.mentions.members.first().user.username }
+        if (text) { member = message.mentions.members.first().user.username }
         const imgId = Math.floor(Math.random() * GNImages.length)
         const embed = new Discord.MessageEmbed()
             .setTitle(`Good Night, ${member}`)

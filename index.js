@@ -11,6 +11,7 @@ const yesMaster = require("./yesMaster");
 const questionMe = require("./questionMe");
 const blacklist = require("./blacklist");
 const dmMatt = require("./dmMatt");
+const reactionRoles = require("./reactionRoles")
 
 client.on("ready", async () => {
     console.log("Zayden is Running");
@@ -66,6 +67,9 @@ client.on("ready", async () => {
     questionMe(client);
 
     blacklist.init();
+
+    reactionRoles.init()
+    reactionRoles.addNormalReactionRole(client)
 });
 
 client.login(config.token)
