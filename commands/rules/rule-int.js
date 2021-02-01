@@ -36,7 +36,8 @@ const chloecock = [
     "<@801044177138745394>", // SamZwill
     "<@124663881460219906>", // Slockie
     "<@747423760780623872>", // Steve
-    "<@212376690574360588>" // Xander
+    "<@212376690574360588>", // Xander
+    "<@275401248331661313>" // Thyg
 ]
 
 let rv = ""
@@ -81,8 +82,8 @@ let rules = {
     [93]: `**Aya's CK cheerleading sorority:**${ayarv}`,
     [420]: `**OscarSix's Cult:**${rv}`,
     [80085]: "Congratulations! You have found the secret rule. Winner: <@516991142156435472>",
-    ["chloe"]: `**Chloe's Cult:**${cockrv}`,
-    ["hehe"]: "Matt thinks he's cool"
+    ["Hehe"]: "Matt thinks he's cool",
+    ["Chloe"]: `**Chloe's Cult:**${cockrv}`
 }
 
 module.exports = {
@@ -92,13 +93,13 @@ module.exports = {
     cooldown: 10,
     callback: (message, arguments, text) => {
         const id = arguments[0]
+        let embed;
 
         if (!rules[id]) {
             message.reply(`There is no rule with the id ${id}`);
             return
         }
         
-        var embed;
         if (id == 93) {
             embed = new Discord.MessageEmbed()
                 .setTitle(`Rule ${id}`)

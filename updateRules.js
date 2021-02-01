@@ -10,7 +10,7 @@ module.exports = async (client, channelId) => {
             **1.** This server is adult community (18+), by entering the server you agree that you are at least 18 years old. If you are suspected to be under the age of 18 you will be removed from the server.\n
             **2.** Be respectful. Opinions are fine, attacks are not. This includes but not limited to trolling, belittling, etc\n
             **3.** No discussing sensitive or controversial topics, eg religion and politics.\n
-            **4.** No adveritising, links to promotional websites or affiliate links.\n
+            **4.** No advertising, links to promotional websites or affiliate links.\n
             **5.** This is not a dating service, don't treat it like one\n
             **6.** No spamming (including bot commands).\n
             **7.** We are an English only community. Please provide a translation with your message if it's not in English\n
