@@ -7,15 +7,25 @@ const loadCommands = require("./commands/load-commands");
 const config = require("./config.json");
 const sql = require("./sql");
 const updateRules = require("./updateRules");
+const updateClubs = require("./updateClubs");
 const yesMaster = require("./yesMaster");
 const questionMe = require("./questionMe");
 const blacklist = require("./blacklist");
 const dmMatt = require("./dmMatt");
+const reactionRoles = require("./reactionRoles");
 
 client.on("ready", async () => {
     console.log("Zayden is Running");
 
-    sql.init() // keep it here so it connects to the database
+    client.user.setPresence({
+        game: {
+            name: "College Kings",
+            type: "PLAYING",
+            url: "https://www.patreon.com/collegekings"
+        }
+    });
+
+    sql.init(); // keep it here so it connects to the database
 
     //                CREATE EXAMPLE
     //  sql.run("CREATE TABLE IF NOT EXISTS test (`val` INT NOT NULL DEFAULT '1')");
@@ -60,12 +70,17 @@ client.on("ready", async () => {
     dmMatt(client)
 
     updateRules(client, "747430712617074718") // Rules Channel ID
+    updateClubs(client, "805765564504473641") // Clubs Channel ID
 
     yesMaster(client);
 
     questionMe(client);
 
     blacklist.init();
+
+    reactionRoles.init()
+    reactionRoles.addNormalReactionRole(client)
+    reactionRoles.removeNormalReactionRole(client)
 });
 
 client.login(config.token)
