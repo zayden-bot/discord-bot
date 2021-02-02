@@ -1,8 +1,8 @@
 const Discord = require("discord.js")
 const sql = require("./sql");
 
-let channelId = "787713329472471050";
-let messageId = "805707849246179339";
+let channelId;
+let messageId;
 
 let reactionMessages = [];
 let checkReactionMessages = []
@@ -17,20 +17,22 @@ module.exports = {
     },
 
     getChannel: function(channel) { // Get Channel ID
-        channelId = channel.match(/\d+/);
+        channelId = channel.match(/\d+/)[0];
     },
 
     getMessage: function(message) { // Get Message ID
-        messageId = message.match(/\d+/);
+        messageId = message.match(/\d+/)[0];
     },
 
     addNormalReaction: function(message, emoji, role) { // Add the reaction to message + database
         const roleId = role.match(/\d+/);
         message.client.channels.fetch(channelId).then(channel => {
+            // console.log(messageId)
             channel.messages.fetch(messageId).then(message => {
                 if (checkReactionMessages.includes([channelId, message.id, emoji])) {
                     message.reply("Reaction already exists.")
                 } else {
+                    // console.log(message)
                     message.react(emoji)
                     sql.run(`INSERT INTO 'reactionRoleMessages' ('channelId', 'messageId', 'emoji', 'roleId') VALUES ('${channel.id}', '${message.id}', '${emoji}', '${roleId}');`)
                     reactionMessages.push([channel.id, message.id, emoji, roleId]);
@@ -73,6 +75,7 @@ module.exports = {
                 if (checkReactionMessages[i][0] == reaction.message.channel.id && checkReactionMessages[i][1] == reaction.message.id && checkReactionMessages[i][2] == reaction._emoji.name) {
                     check = true
                     index = i
+                    break
                 }
             }
 

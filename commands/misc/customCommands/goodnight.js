@@ -3,6 +3,7 @@ const Discord = require("discord.js")
 const GNImages = [
     "https://cdn.discordapp.com/attachments/796455862968909904/805291737878364180/Lauren_sleeping.png",
     "https://cdn.discordapp.com/attachments/796455862968909904/805300252986703883/addtext_com_MjM1NTI5NDE1NTA.png",
+    "https://cdn.discordapp.com/attachments/796455862968909904/805991914222518322/addtext_com_MjE0MzQzNTAxOQ.png",
 ]
 
 module.exports = {

@@ -4,46 +4,22 @@ module.exports = {
     commands: ["custom", "cm"],
     callback: (message, arguments, text) => {
         const embed = new Discord.MessageEmbed()
-            .setTitle(`Who's Your Favourite Girl`)
+            .setTitle(`Join a CK Custom Club!`)
             .setDescription(`
-            :one: Riley
+            :one: <@&805766527889440778>
 
-            :two: Lauren
+            :two: <@&805766587704803339>
 
-            :three: Amber
+            :three: <@&805766682202079273>
 
-            :four: Kim
+            :four: <@&805766763215847454>
 
-            :five: Autumn
-
-            <:penelope:774987041838334002> Penelope
-
-            <:nora:774987041649721345> Nora
-
-            <:julia:774987041888927784> Julia
-
-            <:emily:774987041795604510> Emily
-
-            <:chloe2:774987041922220042> Chloe
-
-            <:aubrey:774987041796653066> Aubrey
+            :five: <@&805766896233742346>
             `)
             .setColor("0000ff")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
 
-        message.channel.send(embed).then(function(message) {
-            message.react("1️⃣")
-            message.react("2️⃣")
-            message.react("3️⃣")
-            message.react("4️⃣")
-            message.react("5️⃣")
-            message.react("<:penelope:774987041838334002>")
-            message.react("<:nora:774987041649721345>")
-            message.react("<:julia:774987041888927784>")
-            message.react("<:emily:774987041795604510>")
-            message.react("<:chloe2:774987041922220042>")
-            message.react("<:aubrey:774987041796653066>")
-        })
+        message.channel.send(embed)
     },
     requiredRoles: "Security",
 }

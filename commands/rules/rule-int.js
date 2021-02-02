@@ -1,22 +1,4 @@
 const Discord = require("discord.js");
-const oscarsCult = [
-    "<@709305430874259469>", // Leon
-    "<@563985503834210304>", // Jeevant
-    "<@124663881460219906>", // Slockie
-    "<@304599215022276608>", // Fork
-    "<@275401248331661313>", // Thyg
-    "<@757213114843398145>", // Panty Lover
-    "<@341545447199866880>", // Mark
-    "<@516991142156435472>", // Abby
-    "<@407157583409971202>", // Satan
-]
-
-const slockiesCult = [
-    "<@211486447369322506>", // Oscar
-    "<@516991142156435472>", // Abby
-    "<@307239591755251722>", // JSlice
-    "<@588577832905736192>" // LOYAL
-]
 
 const ayasCult = [
     "<@131797300006748160>", // AYA
@@ -25,39 +7,9 @@ const ayasCult = [
     "<@457249514542071819>" // Wall rider
 ]
 
-const chloecock = [
-    "<@516991142156435472>", // Abby
-    "<@400649996556435458>", // Alo
-    "<@444839364107698187>", // DaniD27
-    "<@615128589918011393>", // Jany
-    "<@709305430874259469>", // Leon
-    "<@211486447369322506>", // Oscar
-    "<@801133648170582078>", // Rudy
-    "<@801044177138745394>", // SamZwill
-    "<@124663881460219906>", // Slockie
-    "<@747423760780623872>", // Steve
-    "<@212376690574360588>", // Xander
-    "<@275401248331661313>" // Thyg
-]
-
-let rv = ""
-for (let i = 0; i < oscarsCult.length; i++) {
-    rv = `${rv}\n${i+1}. ${oscarsCult[i]}`
-}
-
-let slockierv = ""
-for (let i = 0; i < slockiesCult.length; i++) {
-    slockierv = `${slockierv}\n${i+1}. ${slockiesCult[i]}`
-}
-
 let ayarv = ""
 for (let i = 0; i < ayasCult.length; i++) {
     ayarv = `${ayarv}\n${i+1}. ${ayasCult[i]}`
-}
-
-let cockrv = ""
-for (let i = 0; i < chloecock.length; i++) {
-    cockrv = `${cockrv}\n${i+1}. ${chloecock[i]}`
 }
 
 let rules = {
@@ -76,14 +28,12 @@ let rules = {
     [12]: "Stay on-topic in the respective channels",
     [13]: "Under no circumstances may you try to impersonate as one of the staff on this Discord server, whether it be on the development team, an admin or moderator.",
     [14]: "NSFW content is **ONLY** allowed in <#747428952577933424>. Posting Scat, Urine, Self Harm, Rape, Incest, Beastality, Drug use or Underaged content anywhere will get you immediatly banned. This is your only warning!",
+
     [27]: "Aya's the College Kings head cheerleader",
-    [42]: `**Slockie's Vocal Cult:**${slockierv}`,
     [69]: "Whatever you do, DO NOT PING ME <:peperage:788512386205745162>",
     [93]: `**Aya's CK cheerleading sorority:**${ayarv}`,
-    [420]: `**OscarSix's Cult:**${rv}`,
     [80085]: "Congratulations! You have found the secret rule. Winner: <@516991142156435472>",
-    ["Hehe"]: "Matt thinks he's cool",
-    ["Chloe"]: `**Chloe's Cult:**${cockrv}`
+    ["matt"]: "Is Matt cool? Is he? <:pepecrinj:788514633262301274>",
 }
 
 module.exports = {
@@ -92,7 +42,7 @@ module.exports = {
     minArgs: 1,
     cooldown: 10,
     callback: (message, arguments, text) => {
-        const id = arguments[0]
+        const id = arguments[0].toLowerCase();
         let embed;
 
         if (!rules[id]) {
