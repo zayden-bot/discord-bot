@@ -17,6 +17,7 @@ module.exports = {
                 .setTitle(`Member Role Update`)
                 .setThumbnail('https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566')
                 .setFooter(newMember.guild.name, newMember.guild.iconURL({ dynamic: true }))
+                .addField("Update For", `<@${newMember.id}>`, false)
                 .setTimestamp();
 
             for (const role of newMember.roles.cache.map(x => x.id)) {
@@ -44,6 +45,7 @@ module.exports = {
                 .setTitle(`Member Role Update`)
                 .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
                 .setFooter(newMember.guild.name, newMember.guild.iconURL({ dynamic: true }))
+                .addField("Update For", `<@${newMember.id}>`, false)
                 .setTimestamp();
 
             for (const role of oldMember.roles.cache.map(x => x.id)) {
