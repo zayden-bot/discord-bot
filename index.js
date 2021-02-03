@@ -12,6 +12,10 @@ const questionMe = require("./questionMe");
 const blacklist = require("./blacklist");
 const dmMatt = require("./dmMatt");
 
+
+// Temp event fix
+const guildMemberUpdateLog = require("./events/logs/guildMemberUpdate.js");
+
 client.on("ready", async () => {
     console.log("Zayden is Running");
 
@@ -52,6 +56,10 @@ client.on("ready", async () => {
     }
 
     readEvents("events")
+
+    client.on("guildMemberUpdate", async (oldMember, newMember) => {
+        guildMemberUpdateLog.log(client, oldMember, newMember);
+    });
 
     // welcome(client)
 
