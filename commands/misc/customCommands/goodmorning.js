@@ -4,6 +4,8 @@ const GMImages = [
     "https://cdn.discordapp.com/attachments/796455862968909904/805281646253047818/Riley_sleeping.png",
     "https://cdn.discordapp.com/attachments/796455862968909904/805307740121464832/addtext_com_MDAyNTIwNDI0NzI.png",
     "https://cdn.discordapp.com/attachments/796455862968909904/805313219798630419/Julia_streching_1.png",
+    "https://cdn.discordapp.com/attachments/796455862968909904/806365147123548190/Emily_Good_Morning_1_1.png",
+    "https://cdn.discordapp.com/attachments/796455862968909904/806388589793378305/Aubrey_Riley_good_morning_1.png"
 ]
 
 module.exports = {
