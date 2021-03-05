@@ -89,6 +89,18 @@ client.on("ready", async () => {
     reactionRoles.init()
     reactionRoles.addNormalReactionRole(client)
     reactionRoles.removeNormalReactionRole(client)
+
+    // client.on("message", message => {
+    //     const media = (message.content.toLowerCase().startsWith("https://") || message.attachments.size > 0)
+    //     const channel = (message.channel.id == "747428952577933424" || message.channel.id == "788893358482784266")
+        
+    //     if (!media && channel && !message.author.bot) {
+    //         message.delete({ reason:"Non-nsfw message in NSFW channel" }).then(
+    //             message.channel.send("Please only post NSFW media in this channel.").then(msg => { msg.delete({ timeout:10000 }) })
+    //         ).catch(() => message.channel.send("Cannot delete message. Missing MANAGE_MESSAGES permission."));
+    //     }
+    // })
+
 });
 
 client.login(config.token)
