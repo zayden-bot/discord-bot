@@ -1,3 +1,4 @@
+// Template Command
 module.exports = {
     commands: ["add", "addition"],
     expectedArgs: "<num1> <num2>",

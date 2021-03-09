@@ -4,14 +4,13 @@ const path = require("path")
 const fs = require("fs")
 
 const loadCommands = require("./commands/load-commands");
-const config = require("./config.json");
+const config = require("./botConfig.json");
 const sql = require("./sql");
-const updateRules = require("./updateRules");
-const updateClubs = require("./updateClubs");
+const updateRules = require("./selfUpdating/updateRules");
+const updateClubs = require("./selfUpdating/updateClubs");
 const yesMaster = require("./yesMaster");
 const questionMe = require("./questionMe");
 const blacklist = require("./blacklist");
-const dmMatt = require("./dmMatt");
 const reactionRoles = require("./reactionRoles");
 
 
@@ -25,7 +24,6 @@ client.on("ready", async () => {
         game: {
             name: "College Kings",
             type: "PLAYING",
-            url: "https://www.patreon.com/collegekings"
         }
     });
 
@@ -71,15 +69,10 @@ client.on("ready", async () => {
         guildMemberUpdateLog.log(client, oldMember, newMember);
     });
 
-    // welcome(client)
-
-    // activityTracker(client)
-
-    dmMatt(client)
-
     updateRules(client, "747430712617074718") // Rules Channel ID
-    updateClubs(client, "805765564504473641") // Clubs Channel ID
-
+    updateClubs.customClubs(client, "805765564504473641") // Clubs Channel ID
+    updateClubs.pledgeRoles(client, "805765564504473641")
+    
     yesMaster(client);
 
     questionMe(client);
@@ -89,17 +82,6 @@ client.on("ready", async () => {
     reactionRoles.init()
     reactionRoles.addNormalReactionRole(client)
     reactionRoles.removeNormalReactionRole(client)
-
-    // client.on("message", message => {
-    //     const media = (message.content.toLowerCase().startsWith("https://") || message.attachments.size > 0)
-    //     const channel = (message.channel.id == "747428952577933424" || message.channel.id == "788893358482784266")
-        
-    //     if (!media && channel && !message.author.bot) {
-    //         message.delete({ reason:"Non-nsfw message in NSFW channel" }).then(
-    //             message.channel.send("Please only post NSFW media in this channel.").then(msg => { msg.delete({ timeout:10000 }) })
-    //         ).catch(() => message.channel.send("Cannot delete message. Missing MANAGE_MESSAGES permission."));
-    //     }
-    // })
 
 });
 

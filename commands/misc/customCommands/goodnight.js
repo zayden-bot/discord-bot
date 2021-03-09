@@ -25,7 +25,7 @@ module.exports = {
         const imgId = Math.floor(Math.random() * GNImages[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`Good Morning, ${member}`)
+            .setTitle(`Good Night, ${member}`)
             .setImage(GNImages[arrayId][imgId])
 
         message.channel.send(embed)

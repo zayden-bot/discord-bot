@@ -1,6 +1,6 @@
 const fs = require('fs');
-const fileName = "config.json";
-const file = require("../../config.json");
+const fileName = "botConfig.json";
+const file = require("../../botConfig.json");
 
 module.exports = {
     commands: "status",
@@ -16,7 +16,6 @@ module.exports = {
             activity: {
                 name: text,
                 type: 0,
-                url: "https://www.patreon.com/collegekings"
             },
         })
             
