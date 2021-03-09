@@ -1,4 +1,4 @@
-const config = require("./config.json");
+const config = require("./botConfig.json");
 const discord = require("discord.js");
 const sql = require("./sql");
 var blacklistedUsers = [];
@@ -53,7 +53,7 @@ module.exports = {
     },
     isProtectedUser: function(id) {
         if (id) {
-            if (config.protectedUsers.includes(String(id))) {
+            if (config.developers.includes(String(id))) {
                 return true
             } else {
                 return false

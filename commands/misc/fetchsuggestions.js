@@ -1,5 +1,5 @@
 const Discord = require("discord.js")
-const config = require("../../config.json")
+const config = require("../../serverConfigs/CKConfig.json")
 
 module.exports = {
     commands: ["fetchSuggestions", "fetchsuggestions"],

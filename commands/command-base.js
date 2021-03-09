@@ -1,4 +1,4 @@
- const { prefix } = require("../config.json");
+const { prefix } = require("../botConfig.json");
 const blacklist = require("../blacklist.js");
 const developerUsers = ["211486447369322506"]
 const staffRole = "787004533963358279"
@@ -81,10 +81,17 @@ module.exports = (client, commandOptions) => {
     }
 
     client.on("message", message => {
-        const { member, content, guild } = message
+        const { member, content, guild, channel } = message
 
         for (const alias of commands) {
             if (content.toLowerCase().startsWith(`${prefix}${alias.toLowerCase()}`)) {
+                
+                // if (channel.id != "776139754408247326" && !member.roles.cache.has(staffRole)) {
+                //     message.delete({ reason:"No bot commands outside of #bot-commands" }).then(
+                //         message.reply("Please only use bot commands in <#776139754408247326>.").then(msg => { msg.delete({ timeout:10000 }) })
+                //     ).catch((error) => console.log(error))
+                //     return
+                // }
 
                 for (const permission of permissions) {
                     if (!member.hasPermission(permission) && !developerUsers.includes(member.id)) {
