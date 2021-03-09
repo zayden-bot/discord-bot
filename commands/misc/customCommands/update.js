@@ -1,6 +1,8 @@
 const Discord = require("discord.js");
-const PatreonUpdate = new Date("18 Mar, 2021 19:00:00")
-// const SteamUpdate = new Date("5 Mar, 2021 19:00:00")
+const config = require("../../../serverConfigs/CKConfig.json")
+
+const PatreonUpdate = new Date(config.patreonUpdate)
+// const SteamUpdate = new Date(config.steamUpdate)
 
 const PatreonUpdateMS = PatreonUpdate.getTime()
 let SteamUpdateMS;

@@ -1,5 +1,68 @@
 {
     "suggestionChannel": "779064182259449896",
     "logsChannel": "779072597245165667",
-    "patreonChannel": "806504327307853826"
+    "patreonChannel": "806504327307853826",
+    "kissingImgs": [
+        "https://cdn.weeb.sh/images/B1NwJg9Jz.gif",
+        "https://cdn.weeb.sh/images/SyY0j6Ov-.gif",
+        "https://cdn.weeb.sh/images/rJ_U2p_Pb.gif",
+        "https://cdn.weeb.sh/images/SydfnauPb.gif",
+        "https://cdn.weeb.sh/images/r1VWnTuPW.gif",
+        "https://cdn.weeb.sh/images/ryceu6V0W.gif",
+        "https://cdn.weeb.sh/images/HJmunTOw-.gif",
+        "https://cdn.weeb.sh/images/rkFSiEedf.gif",
+        "https://cdn.weeb.sh/images/HkZyXs3A-.gif",
+        "https://media.giphy.com/media/l2Je2M4Nfrit0L7sQ/giphy.gif"
+    ],
+    "goodMorningImgs": {
+        "Global": [
+            "https://cdn.discordapp.com/attachments/796455862968909904/805281646253047818/Riley_sleeping.png",
+            "https://cdn.discordapp.com/attachments/796455862968909904/805307740121464832/addtext_com_MDAyNTIwNDI0NzI.png",
+            "https://cdn.discordapp.com/attachments/796455862968909904/805313219798630419/Julia_streching_1.png",
+            "https://cdn.discordapp.com/attachments/796455862968909904/806365147123548190/Emily_Good_Morning_1_1.png",
+            "https://cdn.discordapp.com/attachments/796455862968909904/806388589793378305/Aubrey_Riley_good_morning_1.png"
+        ],
+        "615128589918011393": [
+            "https://i.imgur.com/2iEytRE.png"
+        ]
+    },
+    "goodNightImgs": {
+        "Global": [
+            "https://cdn.discordapp.com/attachments/796455862968909904/805291737878364180/Lauren_sleeping.png",
+            "https://cdn.discordapp.com/attachments/796455862968909904/805300252986703883/addtext_com_MjM1NTI5NDE1NTA.png",
+            "https://cdn.discordapp.com/attachments/796455862968909904/805991914222518322/addtext_com_MjE0MzQzNTAxOQ.png"
+        ],
+        "615128589918011393": [
+            "https://i.imgur.com/ZvATozx.png"
+        ]
+    },
+    "patreonUpdate": "18 Mar, 2021 19:00:00",
+    "steamUpdate": "5 Mar, 2021 19:00:00",
+    "ayasClub": [
+        "<@131797300006748160>",
+        "<@342098139395653633>",
+        "<@615128589918011393>",
+        "<@457249514542071819>"
+    ],
+    "serverRules": {
+        "0": "Use common sense! If the staff are telling you to stop doing something, stop.",
+        "1": "This server is adult community (18+), by entering the server you agree that you are at least 18 years old. If you are suspected to be under the age of 18 you will be removed from the server.",
+        "2": "Be respectful. Opinions are fine, attacks are not. This includes but not limited to trolling, belittling, etc",
+        "3": "No discussing sensitive or controversial topics, eg religion and politics.",
+        "4": "No adveritising, links to promotional websites or affiliate links.",
+        "5": "This is not a dating service, don't treat it like one",
+        "6": "No spamming (including bot commands).",
+        "7": "We are an English only community. Please provide a translation with your message if it's not in English",
+        "8": "Pay attention to and respect our Staff, their decisions are final",
+        "9": "Don't link to anything against Discord ToS, such as sexualized jailbait/loli/shota.",
+        "10": "Don't ask other users for any kind of personal information.",
+        "11": "Make sure to read the pinned messages in each room.",
+        "12": "Stay on-topic in the respective channels",
+        "13": "Under no circumstances may you try to impersonate as one of the staff on this Discord server, whether it be on the development team, an admin or moderator.",
+        "14": "NSFW content is **ONLY** allowed in <#747428952577933424>. Posting Scat, Urine, Self Harm, Rape, Incest, Beastality, Drug use or Underaged content anywhere will get you immediatly banned. This is your only warning!",
+        "27": "Aya's the College Kings head cheerleader",
+        "69": "Whatever you do, DO NOT PING ME <:peperage:788512386205745162>",
+        "93": "**Aya's CK cheerleading sorority:**\n1. <@131797300006748160>\n2. <@342098139395653633>\n3. <@615128589918011393>\n4. <@457249514542071819>",
+        "80085": "Congratulations! You have found the secret rule. Winner: <@516991142156435472>"
+    }
 }

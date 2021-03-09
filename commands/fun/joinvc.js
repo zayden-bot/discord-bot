@@ -1,4 +1,3 @@
-const Discord = require("discord.js")
 const Blacklist = require("../../blacklist.js");
 
 module.exports = {
