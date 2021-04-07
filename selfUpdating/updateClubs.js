@@ -8,7 +8,7 @@ module.exports = {
             .setTitle(`Join a CK Custom Club!`)
             .setDescription(`
             :one: <@&805766527889440778>
-            Wtf is that?
+            Come join our community events. You will be pinged when events are taking place!
 
             :two: <@&805766587704803339>
             We're the gals that cheer on Steve! Join us to make Steve happy and GO STEVE! (only girls allowed btw)
@@ -24,8 +24,10 @@ module.exports = {
 
             :six: <@&809240184201412619>
 
-
             :seven: <@&809240269622214676>
+
+            :eight: <@&825746784688668713>
+            Those that don't want to be under the rule of a passive aggressive old man that want the right of freedom of speech.
             `)
             .setColor("0000ff")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
