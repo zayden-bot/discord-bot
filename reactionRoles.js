@@ -85,9 +85,9 @@ module.exports = {
 
                 const role = guild.roles.cache.get(roleId)
                 const member = guild.members.cache.find(member => member.id === user.id)
-                if (!roleId == "805766682202079273") {    
-                    member.roles.remove(role)
-                }
+
+                member.roles.remove(role)
+
             }
         })
     }
