@@ -1,13 +1,6 @@
 const Discord = require("discord.js");
 const config = require("../../serverConfigs/CKConfig.json")
 
-const fs = require('fs');
-const fileName = "CKConfig.json";
-
-fs.writeFile("serverConfigs/CKConfig.json", JSON.stringify(config, null, 4), function writeJSON(err) {
-    if (err) return console.log(err);
-  });
-
 module.exports = {
     commands: "rule",
     expectedArgs: "<number>",
