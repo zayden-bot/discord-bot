@@ -1,5 +1,6 @@
 const fs = require('fs');
 const config = require("../../serverConfigs/CKConfig.json")
+const fileName = "CKConfig.json"
 
 module.exports = {
     commands: ["UpdateReleaseDate", "UpdateUpdate"],
