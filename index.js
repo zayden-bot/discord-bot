@@ -14,7 +14,7 @@ const blacklist = require("./blacklist");
 const reactionRoles = require("./reactionRoles");
 
 
-// Temp event fix
+// Temp event fix - test
 const guildMemberUpdateLog = require("./events/logs/guildMemberUpdate.js");
 
 client.on("ready", async () => {
