@@ -1,5 +1,5 @@
 const Discord = require("discord.js")
-const config = require("../../../serverConfigs/CKConfig.json")
+const botConfig = require("../../../botConfig.json")
 
 module.exports = {
     commands: ["goodmorning", "gm"],
@@ -10,13 +10,13 @@ module.exports = {
         if (text) { member = message.mentions.members.first().user.username }
 
         let arrayId = "Global"
-        if (message.author.id in config.goodMorningImgs) { arrayId = message.author.id }
+        if (message.author.id in botConfig.goodMorningImgs) { arrayId = message.author.id }
 
-        const imgId = Math.floor(Math.random() * config.goodMorningImgs[arrayId].length)
+        const imgId = Math.floor(Math.random() * botConfig.goodMorningImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Good Morning, ${member}`)
-            .setImage(config.goodMorningImgs[arrayId][imgId])
+            .setImage(botConfig.goodMorningImgs[arrayId][imgId])
 
         message.channel.send(embed)
     },

@@ -1,5 +1,5 @@
 const Discord = require("discord.js")
-const config = require("../../serverConfigs/CKConfig.json")
+const botConfig = require("../../botConfig.json")
 
 module.exports = {
     commands: ["kiss"],
@@ -10,13 +10,13 @@ module.exports = {
         if (text) { member = message.mentions.members.first().user.username }
 
         let arrayId = "Global"
-        if (message.author.id in config.kissingImgs) { arrayId = message.author.id }
+        if (message.author.id in botConfig.kissingImgs) { arrayId = message.author.id }
 
-        const imgId = Math.floor(Math.random() * config.kissingImgs[arrayId].length)
+        const imgId = Math.floor(Math.random() * botConfig.kissingImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`${message.author.username} kisses ${member.user.username}`)
-            .setImage(config.kissingImgs[arrayId][imgId])
+            .setTitle(`${message.author.username} kisses ${member}`)
+            .setImage(botConfig.kissingImgs[arrayId][imgId])
             .setColor("FFC0CB")
 
         message.channel.send(embed)
