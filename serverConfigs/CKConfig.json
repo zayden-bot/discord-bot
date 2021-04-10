@@ -2,68 +2,8 @@
     "suggestionChannel": "779064182259449896",
     "logsChannel": "779072597245165667",
     "patreonChannel": "806504327307853826",
-    "kissingImgs": {
-        "Global": [
-            "https://cdn.weeb.sh/images/B1NwJg9Jz.gif",
-            "https://cdn.weeb.sh/images/SyY0j6Ov-.gif",
-            "https://cdn.weeb.sh/images/rJ_U2p_Pb.gif",
-            "https://cdn.weeb.sh/images/SydfnauPb.gif",
-            "https://cdn.weeb.sh/images/r1VWnTuPW.gif",
-            "https://cdn.weeb.sh/images/ryceu6V0W.gif",
-            "https://cdn.weeb.sh/images/HJmunTOw-.gif",
-            "https://cdn.weeb.sh/images/rkFSiEedf.gif",
-            "https://cdn.weeb.sh/images/HkZyXs3A-.gif"
-        ],
-        "615128589918011393": [
-            "https://cdn.discordapp.com/attachments/724275357594943539/830540006937722900/jany_kiss.jpg"
-        ]
-},
-    "huggingImgs": {
-        "Global": [
-            "https://cdn.weeb.sh/images/r1bAksn0W.gif",
-            "https://cdn.weeb.sh/images/BkBs2uk_b.gif",
-            "https://cdn.weeb.sh/images/HJTWcTNCZ.gif",
-            "https://cdn.weeb.sh/images/BJoC__XvZ.gif",
-            "https://cdn.weeb.sh/images/H1ui__XDW.gif",
-            "https://cdn.weeb.sh/images/BkuUhO1OW.gif",
-            "https://cdn.weeb.sh/images/BJ0UovdUM.gif",
-            "https://cdn.weeb.sh/images/HkQs_dXPZ.gif",
-            "https://cdn.weeb.sh/images/SJfEks3Rb.gif",
-            "https://cdn.weeb.sh/images/BkHA_O7v-.gif",
-            "https://cdn.weeb.sh/images/BkFnJsnA-.gif",
-            "https://cdn.weeb.sh/images/Hk3ox0tYW.gif",
-            "https://cdn.weeb.sh/images/ryCG-OatM.gif",
-            "https://cdn.weeb.sh/images/r1kC_dQPW.gif",
-            "https://cdn.weeb.sh/images/Sy65_OQvZ.gif",
-            "https://cdn.weeb.sh/images/Bk5T2_1Ob.gif"
-        ],
-        "615128589918011393": [
-            "https://cdn.discordapp.com/attachments/724275357594943539/830541007308849152/1510928869.png"
-        ]
-},
-    "goodMorningImgs": {
-        "Global": [
-            "https://cdn.discordapp.com/attachments/796455862968909904/805281646253047818/Riley_sleeping.png",
-            "https://cdn.discordapp.com/attachments/796455862968909904/805307740121464832/addtext_com_MDAyNTIwNDI0NzI.png",
-            "https://cdn.discordapp.com/attachments/796455862968909904/805313219798630419/Julia_streching_1.png",
-            "https://cdn.discordapp.com/attachments/796455862968909904/806365147123548190/Emily_Good_Morning_1_1.png",
-            "https://cdn.discordapp.com/attachments/796455862968909904/806388589793378305/Aubrey_Riley_good_morning_1.png"
-        ],
-        "615128589918011393": [
-            "https://i.imgur.com/2iEytRE.png"
-        ]
-    },
-    "goodNightImgs": {
-        "Global": [
-            "https://cdn.discordapp.com/attachments/796455862968909904/805291737878364180/Lauren_sleeping.png",
-            "https://cdn.discordapp.com/attachments/796455862968909904/805300252986703883/addtext_com_MjM1NTI5NDE1NTA.png",
-            "https://cdn.discordapp.com/attachments/796455862968909904/805991914222518322/addtext_com_MjE0MzQzNTAxOQ.png"
-        ],
-        "615128589918011393": [
-            "https://i.imgur.com/ZvATozx.png"
-        ]
-    },
-    "patreonUpdate": "23 Apr, 2021 19:00:00",
+
+    "patreonUpdate": "",
     "steamUpdate": "5 Mar, 2021 19:00:00",
     "serverRules": {
         "0": "Use common sense! If the staff are telling you to stop doing something, stop.",
