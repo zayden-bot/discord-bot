@@ -84,7 +84,7 @@ module.exports = (client, commandOptions) => {
         const { member, content, guild, channel } = message
 
         for (const alias of commands) {
-            if (content.toLowerCase().startsWith(`${prefix}${alias.toLowerCase()}`)) {
+            if (content.split(" ")[0].toLowerCase() == `${prefix}${alias.toLowerCase()}`) {
                 
                 // if (channel.id != "776139754408247326" && !member.roles.cache.has(staffRole)) {
                 //     message.delete({ reason:"No bot commands outside of #bot-commands" }).then(
@@ -112,6 +112,7 @@ module.exports = (client, commandOptions) => {
                 if (blacklist.isBlacklisted(member.user.id) && !developerUsers.includes(member.id)) {
                     return
                 }
+
                 let cooldownString = `${guild.id}-${member.id}-${commands[0]}`
                 if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(staffRole)) {
                     message.reply("You cannot use that command so soon, please wait")
