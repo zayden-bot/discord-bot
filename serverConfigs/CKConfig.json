@@ -2,18 +2,45 @@
     "suggestionChannel": "779064182259449896",
     "logsChannel": "779072597245165667",
     "patreonChannel": "806504327307853826",
-    "kissingImgs": [
-        "https://cdn.weeb.sh/images/B1NwJg9Jz.gif",
-        "https://cdn.weeb.sh/images/SyY0j6Ov-.gif",
-        "https://cdn.weeb.sh/images/rJ_U2p_Pb.gif",
-        "https://cdn.weeb.sh/images/SydfnauPb.gif",
-        "https://cdn.weeb.sh/images/r1VWnTuPW.gif",
-        "https://cdn.weeb.sh/images/ryceu6V0W.gif",
-        "https://cdn.weeb.sh/images/HJmunTOw-.gif",
-        "https://cdn.weeb.sh/images/rkFSiEedf.gif",
-        "https://cdn.weeb.sh/images/HkZyXs3A-.gif",
-        "https://media.giphy.com/media/l2Je2M4Nfrit0L7sQ/giphy.gif"
-    ],
+    "kissingImgs": {
+        "Global": [
+            "https://cdn.weeb.sh/images/B1NwJg9Jz.gif",
+            "https://cdn.weeb.sh/images/SyY0j6Ov-.gif",
+            "https://cdn.weeb.sh/images/rJ_U2p_Pb.gif",
+            "https://cdn.weeb.sh/images/SydfnauPb.gif",
+            "https://cdn.weeb.sh/images/r1VWnTuPW.gif",
+            "https://cdn.weeb.sh/images/ryceu6V0W.gif",
+            "https://cdn.weeb.sh/images/HJmunTOw-.gif",
+            "https://cdn.weeb.sh/images/rkFSiEedf.gif",
+            "https://cdn.weeb.sh/images/HkZyXs3A-.gif"
+        ],
+        "615128589918011393": [
+            "https://cdn.discordapp.com/attachments/724275357594943539/830540006937722900/jany_kiss.jpg"
+        ]
+},
+    "huggingImgs": {
+        "Global": [
+            "https://cdn.weeb.sh/images/r1bAksn0W.gif",
+            "https://cdn.weeb.sh/images/BkBs2uk_b.gif",
+            "https://cdn.weeb.sh/images/HJTWcTNCZ.gif",
+            "https://cdn.weeb.sh/images/BJoC__XvZ.gif",
+            "https://cdn.weeb.sh/images/H1ui__XDW.gif",
+            "https://cdn.weeb.sh/images/BkuUhO1OW.gif",
+            "https://cdn.weeb.sh/images/BJ0UovdUM.gif",
+            "https://cdn.weeb.sh/images/HkQs_dXPZ.gif",
+            "https://cdn.weeb.sh/images/SJfEks3Rb.gif",
+            "https://cdn.weeb.sh/images/BkHA_O7v-.gif",
+            "https://cdn.weeb.sh/images/BkFnJsnA-.gif",
+            "https://cdn.weeb.sh/images/Hk3ox0tYW.gif",
+            "https://cdn.weeb.sh/images/ryCG-OatM.gif",
+            "https://cdn.weeb.sh/images/r1kC_dQPW.gif",
+            "https://cdn.weeb.sh/images/Sy65_OQvZ.gif",
+            "https://cdn.weeb.sh/images/Bk5T2_1Ob.gif"
+        ],
+        "615128589918011393": [
+            "https://cdn.discordapp.com/attachments/724275357594943539/830541007308849152/1510928869.png"
+        ]
+},
     "goodMorningImgs": {
         "Global": [
             "https://cdn.discordapp.com/attachments/796455862968909904/805281646253047818/Riley_sleeping.png",
