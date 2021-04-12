@@ -22,11 +22,11 @@ client.on("ready", async () => {
     console.log("Zayden is Running");
 
     client.user.setPresence({
-        game: {
+        activity: {
             name: "College Kings",
-            type: "PLAYING",
-        }
-    });
+            type: 0,
+        },
+    })
 
     sql.init(); // keep it here so it connects to the database
 
