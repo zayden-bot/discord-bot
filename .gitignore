@@ -1,4 +1,4 @@
 database/
 node_modules/
-
+Configs/botConfig.json
 botConfig.json

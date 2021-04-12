@@ -1,4 +1,4 @@
-const config = require("./botConfig.json");
+const config = require("./Configs/botConfig.json");
 const discord = require("discord.js");
 const sql = require("./sql");
 var blacklistedUsers = [];

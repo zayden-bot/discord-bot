@@ -1,6 +1,6 @@
 const fs = require('fs');
 const fileName = "botConfig.json";
-const file = require("../../botConfig.json");
+const file = require("../../Configs/botConfig.json");
 
 module.exports = {
     commands: "status",

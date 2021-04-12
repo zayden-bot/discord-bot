@@ -1,5 +1,5 @@
 const sqlite3 = require("sqlite3").verbose(); // npm install sqlite3
-const config = require("./botConfig.json")
+const config = require("./Configs/botConfig.json")
 let db = false;
 
 module.exports = {

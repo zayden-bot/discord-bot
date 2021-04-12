@@ -1,5 +1,5 @@
 const Discord = require("discord.js")
-const botConfig = require("../../botConfig.json")
+const botConfig = require("../../Configs/imgConfig.json")
 
 module.exports = {
     commands: ["fuck"],
