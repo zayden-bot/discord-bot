@@ -15,6 +15,7 @@ module.exports = {
         if (text) { member = message.mentions.members.first().user.username }
 
         let arrayId = "Global"
+        if (message.mentions.members.first().user.id in botConfig.fuckingImgs) { arrayId = message.author.id }
         if (message.author.id in botConfig.fuckingImgs) { arrayId = message.author.id }
 
         const imgId = Math.floor(Math.random() * botConfig.fuckingImgs[arrayId].length)
