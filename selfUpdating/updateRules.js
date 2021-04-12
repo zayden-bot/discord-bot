@@ -6,7 +6,6 @@ for (rule in serverConfig.serverRules) {
     if (rule == "69" || rule == "80085") { continue }
     serverRules += `**${rule}.** ${serverConfig.serverRules[rule]}\n\n`
 }
-// console.log(serverRules)
 
 module.exports = async (client, channelId) => {
     const channel = await client.channels.fetch(channelId)

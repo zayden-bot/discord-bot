@@ -7,6 +7,7 @@ const loadCommands = require("./commands/load-commands");
 const config = require("./botConfig.json");
 const sql = require("./sql");
 const updateRules = require("./selfUpdating/updateRules");
+const updateInfomation = require("./selfUpdating/updateInfomation");
 const updateClubs = require("./selfUpdating/updateClubs");
 const yesMaster = require("./yesMaster");
 const questionMe = require("./questionMe");
@@ -70,6 +71,7 @@ client.on("ready", async () => {
     });
 
     updateRules(client, "747430712617074718") // Rules Channel ID
+    updateInfomation(client, "830927865784565800") // information Channel ID
     updateClubs.customClubs(client, "805765564504473641") // Clubs Channel ID
     updateClubs.pledgeRoles(client, "805765564504473641")
     
