@@ -1,0 +1,31 @@
+{
+    "suggestionChannel": "779064182259449896",
+    "logsChannel": "779072597245165667",
+    "patreonChannel": "806504327307853826",
+
+    "patreonUpdate": "",
+    "steamUpdate": "",
+    
+    "serverRules": {
+        "0": "Use common sense! If the staff are telling you to stop doing something, stop.",
+        "1": "This server is adult community (18+), by entering the server you agree that you are at least 18 years old. If you are suspected to be under the age of 18 you will be removed from the server.",
+        "2": "Be respectful. Opinions are fine, attacks are not. This includes but not limited to trolling, belittling, etc",
+        "3": "No discussing sensitive or controversial topics, eg religion and politics.",
+        "4": "No adveritising, links to promotional websites or affiliate links.",
+        "5": "This is not a dating service, don't treat it like one",
+        "6": "No spamming (including bot commands).",
+        "7": "We are an English only community. Please provide a translation with your message if it's not in English",
+        "8": "Pay attention to and respect our Staff, their decisions are final",
+        "9": "Don't link to anything against Discord ToS, such as sexualized jailbait/loli/shota.",
+        "10": "Don't ask other users for any kind of personal information.",
+        "11": "Make sure to read the pinned messages in each room.",
+        "12": "Stay on-topic in the respective channels",
+        "13": "Under no circumstances may you try to impersonate as one of the staff on this Discord server, whether it be on the development team, an admin or moderator.",
+        "14": "NSFW content is **ONLY** allowed in <#747428952577933424>. Posting Scat, Urine, Self Harm, Rape, Incest, Beastality, Drug use or Underaged content anywhere will get you immediatly banned. This is your only warning!",
+        "15": "Talking about new content outside of <#770621445637799946> and <#747428461391380532> is strictly forbidden during release phase.",
+    },
+    "hiddenRules": {
+        "69": "Whatever you do, DO NOT PING ME <:peperage:788512386205745162>",
+        "80085": "Congratulations! You have found the secret rule. Winner: <@516991142156435472>"
+    }
+}
