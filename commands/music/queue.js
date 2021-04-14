@@ -21,7 +21,7 @@ module.exports = {
             message.reply("The queue is empty. Use `!play` to queue some music up.")
             return
         }
-        getQueue().then( queue => message.channel.send(`**Music Queue**\n\n${queue}`) );
+        getQueue().then( queue => message.channel.send(`**Music Queue**\nTrack Position: ${serverConfig.trackPosition+1}\n\n${queue}`) );
 
         
     },
