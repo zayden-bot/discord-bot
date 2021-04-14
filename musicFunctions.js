@@ -36,8 +36,6 @@ module.exports = {
                 serverConfig.trackPosition += 1;
             }
 
-            console.log(serverConfig.trackPosition)
-            console.log(serverConfig.musicQueue.length)
             if (serverConfig.trackPosition <= serverConfig.musicQueue.length) {
                 console.log(serverConfig.musicQueue)
 
