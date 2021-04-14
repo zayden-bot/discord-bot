@@ -27,12 +27,10 @@ module.exports = {
     addNormalReaction: function(message, emoji, role) { // Add the reaction to message + database
         const roleId = role.match(/\d+/);
         message.client.channels.fetch(channelId).then(channel => {
-            // console.log(messageId)
             channel.messages.fetch(messageId).then(message => {
                 if (checkReactionMessages.includes([channelId, message.id, emoji])) {
                     message.reply("Reaction already exists.")
                 } else {
-                    // console.log(message)
                     message.react(emoji)
                     sql.run(`INSERT INTO 'reactionRoleMessages' ('channelId', 'messageId', 'emoji', 'roleId') VALUES ('${channel.id}', '${message.id}', '${emoji}', '${roleId}');`)
                     reactionMessages.push([channel.id, message.id, emoji, roleId]);
