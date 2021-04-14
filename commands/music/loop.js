@@ -15,17 +15,21 @@ module.exports = {
     callback: (message, arguments, text) => {
         if (arguments[0] == "track" || arguments[0] == "song") {
             serverConfig.loopTrack = !serverConfig.loopTrack || true;
-            serverConfig.loopQueue = !serverConfig.loopQueue || false;
+            serverConfig.loopQueue = false;
             writeToJson()
-            message.reply("Now looping **track**")
+
+            if (serverConfig.loopTrack) { message.reply("Now looping **track**") }
+            else { message.reply("Disabled looping") }
             return
         }
 
         if (arguments[0] == "queue") {
             serverConfig.loopQueue = !serverConfig.loopQueue || true;
-            serverConfig.loopTrack = !serverConfig.loopTrack || false;
+            serverConfig.loopTrack = false;
             writeToJson()
-            message.reply("Now looping **queue**")
+            
+            if (serverConfig.loopQueue) { message.reply("Now looping **queue**") }
+            else { message.reply("Disabled looping") }
             return
         }
     },
