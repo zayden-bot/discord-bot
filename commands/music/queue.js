@@ -4,7 +4,7 @@ const serverConfig = require("../../serverConfigs/745662812335898806.json")
 
 async function getQueue() {
     let queue = ""
-    for (let i = 0; i < serverConfig.musicQueue.length; i++) {
+    for (let i = serverConfig.trackPosition; i < serverConfig.musicQueue.length; i++) {
         const info = await ytdl.getInfo(serverConfig.musicQueue[i]);
         const songTitle = info.videoDetails.title
             queue += `${i+1}. ${songTitle}\n`
