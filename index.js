@@ -13,7 +13,7 @@ const yesMaster = require("./yesMaster");
 const questionMe = require("./questionMe");
 const blacklist = require("./blacklist");
 const reactionRoles = require("./reactionRoles");
-
+const music = require("./musicFunctions")
 
 // Temp event fix
 const guildMemberUpdateLog = require("./events/logs/guildMemberUpdate.js");
@@ -85,6 +85,16 @@ client.on("ready", async () => {
     reactionRoles.addNormalReactionRole(client)
     reactionRoles.removeNormalReactionRole(client)
 
+});
+
+client.on("disconnect", () => {
+    console.log("Bot shutting down.")
+    music.disconnect();
+})
+
+client.on("error", function(error){
+    music.disconnect();
+    console.error(`Error: ${error}`);
 });
 
 client.login(config.token)
