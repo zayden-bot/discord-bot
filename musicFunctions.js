@@ -40,12 +40,7 @@ module.exports = {
                 console.log(serverConfig.musicQueue)
 
                 module.exports.play(message, connection)
-            } else {
-                serverConfig.musicQueue = []
-                writeToJson()
-                console.log("Disconnecting")
-                connection.disconnect();
-            }
+            } else { module.exports.disconnect() }
         })
     },
 
@@ -57,6 +52,18 @@ module.exports = {
         serverConfig.musicQueue = []
         writeToJson()
 
+    },
+
+    disconnect: function() {
+        serverConfig.musicQueue = []
+        writeToJson()
+
+        serverConfig.loopTrack = false;
+        serverConfig.loopQueue = false;
+
+        console.log("Disconnecting")
+        dispatcher.destroy();
+        connection.disconnect();
     }
 
 }
