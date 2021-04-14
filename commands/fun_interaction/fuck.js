@@ -5,6 +5,7 @@ module.exports = {
     commands: ["fuck"],
     expectedArgs: "<user>",
     maxArgs: 1,
+    cooldown: 43200,
     callback: (message, arguments, text) => {
         if (!message.channel.nsfw) {
             message.reply("This command can only be used in <#747428952577933424>")
