@@ -23,6 +23,13 @@ module.exports = {
             serverConfig.trackPosition = 0
         }
         dispatcher = connection.play(ytdl(serverConfig.musicQueue[serverConfig.trackPosition], { filter: 'audioonly' }))
+        
+        module.exports.getSongTitle(serverConfig.musicQueue[serverConfig.trackPosition])
+        .then(songTitle => {
+            console.log(`Now Playing: ${songTitle}`)
+            message.channel.send(`Now Playing: ${songTitle}`)
+        })
+
 
         dispatcher.on("finish", () => {
             if (!serverConfig.loopTrack) {
@@ -33,7 +40,6 @@ module.exports = {
             console.log(serverConfig.musicQueue.length)
             if (serverConfig.trackPosition <= serverConfig.musicQueue.length) {
                 console.log(serverConfig.musicQueue)
-                writeToJson()
 
                 module.exports.play(message, connection)
             } else {
