@@ -1,9 +1,8 @@
 const Discord = require("discord.js");
-const serverConfig = require("../serverConfigs/CKConfig.json")
+const serverConfig = require("../Configs/ckConfig.json")
 
 let serverRules = ""
 for (rule in serverConfig.serverRules) {
-    if (rule == "69" || rule == "80085") { continue }
     serverRules += `**${rule}.** ${serverConfig.serverRules[rule]}\n\n`
 }
 

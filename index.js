@@ -4,7 +4,7 @@ const path = require("path")
 const fs = require("fs")
 
 const loadCommands = require("./commands/load-commands");
-const config = require("./botConfig.json");
+const config = require("./Configs/botConfig.json");
 const sql = require("./sql");
 const updateRules = require("./selfUpdating/updateRules");
 const updateInfomation = require("./selfUpdating/updateInfomation");

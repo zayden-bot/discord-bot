@@ -1,5 +1,5 @@
 const fs = require('fs');
-const config = require("../../serverConfigs/CKConfig.json")
+const config = require("../../Configs/ckConfig.json")
 const fileName = "CKConfig.json"
 
 module.exports = {

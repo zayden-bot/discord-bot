@@ -1,4 +1,4 @@
-const { prefix } = require("../botConfig.json");
+const { prefix } = require("../Configs/botConfig.json");
 const blacklist = require("../blacklist.js");
 const developerUsers = ["211486447369322506"]
 const staffRole = "787004533963358279"
