@@ -33,5 +33,5 @@ module.exports = {
         }
     },
     permissions: [],
-    requiredRoles: ["Security"],
+    requiredRoles: [],
 }
