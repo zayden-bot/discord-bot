@@ -8,6 +8,5 @@ module.exports = {
     callback: (message, arguments, text) => {
         reactionRoles.getMessage(text)
     },
-    permissions: [],
-    requiredRoles: ["Security"],
+    permissions: ["ADMINISTRATOR"],
 }

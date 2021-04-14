@@ -4,22 +4,20 @@ const blacklist = require("../../blacklist");
 module.exports = {
     commands: ["ban"],
     expectedArgs: "<user>",
-    maxArgs: 1,
+    minArgs: 1,
     callback: (message, arguments, text) => {
         const member = message.mentions.members.first()
 
-        if (blacklist.isProtectedUser(member.user.id)) {
-            message.reply("Nice try you can't ban that user :pepepointedlaugh:");
-        } else {
+        if (member) {
             const embed = new Discord.MessageEmbed()
             .setTitle(`User Banned`)
             .setDescription(`<@${member.id}> has been banned by CK Staff`)
             .setColor("ff0000")
 
-            member.ban().then(
-                message.channel.send(embed)
-            )
+            member.ban()
+            .then( () => { message.channel.send(embed) })
+            .catch( err => { message.reply(`Failed to ban ${member.user.username}`) })
         }
     },
-    permissions: "ADMINISTRATOR",
+    permissions: "BAN_MEMBERS",
 }

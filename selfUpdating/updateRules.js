@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const serverConfig = require("../Configs/ckConfig.json")
+const serverConfig = require("../serverConfigs/745662812335898806.json")
 
 let serverRules = ""
 for (rule in serverConfig.serverRules) {

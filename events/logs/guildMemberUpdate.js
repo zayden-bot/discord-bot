@@ -1,5 +1,5 @@
 const { MessageEmbed } = require("discord.js");
-const { patreonChannel, logsChannel } = require("../../Configs/ckConfig.json");
+const { patreonChannel, logsChannel } = require("../../serverConfigs/745662812335898806.json");
 
 const patreonRoles = {
     ['745663316776714370'] : 1, // Freshman

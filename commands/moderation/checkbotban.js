@@ -7,6 +7,12 @@ module.exports = {
     minArgs: 1,
     callback: (message, arguments, text) => {
         const member = message.mentions.members.first()
+
+        if (!member) {
+            message.reply("Please mention a valid user.")
+            return
+        }
+
         if (blacklist.isBlacklisted(member.user.id)) {
             message.reply("The user is blacklisted!");
         } else {

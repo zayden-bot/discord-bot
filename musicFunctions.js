@@ -1,12 +1,12 @@
 const fs = require("fs")
 const ytdl = require("ytdl-core")
 
-const serverConfig = require("./serverConfigs/CKConfig.json")
+const serverConfig = require("./serverConfigs/745662812335898806.json")
 
 let dispatcher;
 
 function writeToJson() {
-    fs.writeFile("./serverConfigs/CKConfig.json", JSON.stringify(serverConfig, null, 4), function writeJSON(err) {
+    fs.writeFile("./serverConfigs/745662812335898806.json", JSON.stringify(serverConfig, null, 4), function writeJSON(err) {
         if (err) { return console.log(err); }
     });
 }

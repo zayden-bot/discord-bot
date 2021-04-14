@@ -1,6 +1,6 @@
 const ytdl = require("ytdl-core")
 
-const serverConfig = require("../../serverConfigs/CKConfig.json")
+const serverConfig = require("../../serverConfigs/745662812335898806.json")
 
 async function getQueue() {
     let queue = ""

@@ -1,5 +1,5 @@
 const Discord = require("discord.js")
-const botConfig = require("../../Configs/imgConfig.json")
+const imgConfig = require("../../configs/imgConfig.json")
 
 module.exports = {
     commands: ["fuck"],
@@ -12,18 +12,20 @@ module.exports = {
             return
         }
 
-        let member = message.author.username
-        if (text) { member = message.mentions.members.first().user.username }
+        let member;
+        try { member = message.mentions.members.first().user.username }
+        catch (error) { member = message.author.username }
 
         let arrayId = "Global"
-        if (message.mentions.members.first().user.id in botConfig.fuckingImgs) { arrayId = message.author.id }
-        if (message.author.id in botConfig.fuckingImgs) { arrayId = message.author.id }
+        if (message.author.id in imgConfig.fuckingImgs) { arrayId = message.author.id }
+        try { if (message.mentions.members.first().user.id in imgConfig.fuckingImgs) { arrayId = message.mentions.members.first().user.id } }
+        catch (error) {}
 
-        const imgId = Math.floor(Math.random() * botConfig.fuckingImgs[arrayId].length)
+        const imgId = Math.floor(Math.random() * imgConfig.fuckingImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`${message.author.username} fucks ${member}`)
-            .setImage(botConfig.fuckingImgs[arrayId][imgId])
+            .setImage(imgConfig.fuckingImgs[arrayId][imgId])
             .setColor("FFC0CB")
 
         message.channel.send(embed)

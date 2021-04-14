@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const config = require("../../Configs/ckConfig.json")
+const config = require("../../serverConfigs/745662812335898806.json")
 
 const PatreonUpdate = new Date(config.patreonUpdate)
 // const SteamUpdate = new Date(config.steamUpdate)

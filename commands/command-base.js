@@ -1,4 +1,4 @@
-const { prefix } = require("../Configs/botConfig.json");
+const { prefix } = require("../configs/botConfig.json");
 const blacklist = require("../blacklist.js");
 const developerUsers = ["211486447369322506"]
 const staffRole = "787004533963358279"
@@ -104,7 +104,7 @@ module.exports = (client, commandOptions) => {
                     const role = guild.roles.cache.find(role => role.name === requiredRole)
 
                     if (!role || !member.roles.cache.has(role.id) && !developerUsers.includes(member.id)) {
-                        message.reply(`You must have the "${requiredRole}" role to use this command`)
+                        message.reply(permissionError)
                         return
                     }
                 }

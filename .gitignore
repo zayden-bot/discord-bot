@@ -1,4 +1,3 @@
 database/
 node_modules/
-Configs/botConfig.json
-botConfig.json
+configs/botConfig.json

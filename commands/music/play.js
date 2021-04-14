@@ -2,7 +2,7 @@ const fs = require("fs")
 
 const music = require("../../musicFunctions")
 
-const serverConfig = require("../../serverConfigs/CKConfig.json")
+const serverConfig = require("../../serverConfigs/745662812335898806.json")
 
 module.exports = {
     commands: ["play", "p"],
@@ -24,7 +24,7 @@ module.exports = {
         serverConfig.musicQueue.push(arguments[0])
         music.getSongTitle(arguments[0]).then(songTitle => message.channel.send(`Added ${songTitle} to the Queue.`))
 
-        fs.writeFile("./serverConfigs/CKConfig.json", JSON.stringify(serverConfig, null, 4), function writeJSON(err) {
+        fs.writeFile("./serverConfigs/745662812335898806.json", JSON.stringify(serverConfig, null, 4), function writeJSON(err) {
             if (err) { return console.log(err); }
         });
 

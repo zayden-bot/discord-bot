@@ -8,6 +8,5 @@ module.exports = {
     callback: (message, arguments, text) => {
         reactionRoles.addNormalReaction(message, arguments[0], arguments[1])
     },
-    permissions: [],
-    requiredRoles: ["Security"],
+    permissions: ["ADMINISTRATOR"],
 }

@@ -1,5 +1,5 @@
 const music = require("../../musicFunctions")
-const serverConfig = require("../../serverConfigs/CKConfig.json")
+const serverConfig = require("../../serverConfigs/745662812335898806.json")
 
 module.exports = {
     commands: ["skip", "next", "n"],
