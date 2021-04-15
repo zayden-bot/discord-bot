@@ -4,7 +4,7 @@ const path = require("path")
 const fs = require("fs")
 
 const loadCommands = require("./commands/load-commands");
-const config = require("./configs/botConfig.json");
+const botConfig = require("./configs/botConfig.json");
 const sql = require("./sql");
 const updateRules = require("./selfUpdating/updateRules");
 const updateInfomation = require("./selfUpdating/updateInfomation");
@@ -19,7 +19,7 @@ const music = require("./musicFunctions")
 const guildMemberUpdateLog = require("./events/logs/guildMemberUpdate.js");
 
 client.on("ready", async () => {
-    console.log("Zayden is Running");
+    console.log(`Zayden is Running, version: ${botConfig.version}`);
 
     client.user.setPresence({
         activity: {
@@ -89,12 +89,16 @@ client.on("ready", async () => {
 
 client.on("disconnect", () => {
     console.log("Bot shutting down.")
-    music.disconnect();
+    for (guild in client.guilds.cache) {
+        music.disconnect(guild.voice.connection);
+    }
 })
 
 client.on("error", function(error){
-    music.disconnect();
+    for (guild in client.guilds.cache) {
+        music.disconnect(guild.voice.connection);
+    }
     console.error(`Error: ${error}`);
 });
 
-client.login(config.token)
+client.login(botConfig.token)
