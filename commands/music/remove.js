@@ -4,13 +4,15 @@ module.exports = {
     commands: ["remove", "r", "rm", "delete", "del"],
     permissionError: "Command is currently in development. Limited to staff use only.",
     callback: (message, arguments, text) => {
-        track = arguments[0]
+        let trackPosition = arguments[0]
         if (arguments[0] == "last") {
-            track = serverConfig.musicQueue.length
+            trackPosition = serverConfig.musicQueue.length
         }
 
-        music.remove(track)
-        music.getSongTitle(serverConfig.musicQueue[track + 1]).then(songTitle => { message.channel.send(`Removed ${songTitle} from queue.`) })
+        music.getSongTitle(serverConfig.musicQueue[trackPosition - 1]).then(songTitle => {
+            music.remove(trackPosition)
+            message.channel.send(`Removed ${songTitle} from queue.`)
+        })
     },
     permissions: [],
     requiredRoles: [],
