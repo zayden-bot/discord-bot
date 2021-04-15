@@ -5,7 +5,11 @@ module.exports = {
     commands: ["nowplaying", "np", "song"],
     maxArgs: 0,
     callback: (message, arguments, text) => {
-        music.getSongTitle(serverConfig.musicQueue[0]).then( (songTitle) => { message.reply(`Now playing: ${songTitle}`) })
+        if (serverConfig.musicQueue[0]) {
+            music.getSongTitle(serverConfig.musicQueue[0]).then( (songTitle) => { message.reply(`Now playing: ${songTitle}`) })
+        } else {
+            message.reply("Nothing playing. Use `!play` to queue some music up.")
+        }
         
     },
 }
