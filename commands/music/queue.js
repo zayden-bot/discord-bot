@@ -7,10 +7,14 @@ async function getQueue() {
     }
 
     let queue = ""
-    for (let i = serverConfig.trackPosition + 1; i < serverConfig.musicQueue.length; i++) {
-        console.log(serverConfig.musicQueue[i])
-        const songTitle = await music.getSongTitle(serverConfig.musicQueue[i]);
-            queue += `${i+1}. ${songTitle}\n`
+    for (let i = serverConfig.trackPosition + 1; i < 26; i++) {
+        if (serverConfig.musicQueue[i]) {
+            console.log(serverConfig.musicQueue[i])
+            const songTitle = await music.getSongTitle(serverConfig.musicQueue[i]);
+                queue += `${i+1}. ${songTitle}\n`
+        } else {
+            break
+        }
     }
     return queue
 }
