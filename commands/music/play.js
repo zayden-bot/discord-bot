@@ -9,7 +9,7 @@ const youtube = new YouTubeAPI(botConfig.youtubeAPIKey)
 
 async function getLinks(link) {
     const results = await youtube.getPlaylist(link, { part: "snippet" });
-    const videos = await results.getVideos(25, { part: "snippet" });
+    const videos = await results.getVideos(100, { part: "snippet" });
     return videos.map(video => video.url)
 }
 
@@ -43,7 +43,6 @@ module.exports = {
             serverConfig.musicQueue.push(arguments[0])
             music.getSongTitle(arguments[0]).then(songTitle => message.channel.send(`Added ${songTitle} to the Queue.`))
         } else {
-            let url;
             getSearch(text).then(url => {
                 serverConfig.musicQueue.push(url)
                 music.getSongTitle(url).then(songTitle => message.channel.send(`Added ${songTitle} to the Queue.`))

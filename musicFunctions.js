@@ -69,9 +69,9 @@ module.exports = {
         if (dispatcher) { dispatcher.resume() }
     },
 
-    remove: function(track) {
+    remove: function(trackPosition) {
         serverConfig.musicQueue = serverConfig.musicQueue.filter((value, index, arr) => {
-            return index != track - 1
+            return index != trackPosition - 1
         })
         common.writeToServerConfig("745662812335898806")
     },
