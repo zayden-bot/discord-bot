@@ -27,9 +27,7 @@
         "80085": "Congratulations! You have found the secret rule. Winner: <@516991142156435472>"
     },
     "trackPosition": 0,
-    "musicQueue": [
-        "https://www.youtube.com/watch?v=KzMWZXPCGUo"
-    ],
+    "musicQueue": [],
     "loopQueue": false,
-    "loopTrack": true
+    "loopTrack": false
 }
