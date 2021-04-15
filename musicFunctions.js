@@ -1,27 +1,21 @@
-const fs = require("fs")
 const ytdl = require("ytdl-core")
-
+const common = require("./common")
 const serverConfig = require("./serverConfigs/745662812335898806.json")
 
 let dispatcher;
 
-function writeToJson() {
-    fs.writeFile("./serverConfigs/745662812335898806.json", JSON.stringify(serverConfig, null, 4), function writeJSON(err) {
-        if (err) { return console.log(err); }
-    });
-}
-
 module.exports = {
-    getSongTitle: async function (link) {
+    getDispatcher: function() {
+        return dispatcher
+    },
+
+    getSongTitle: async function(link) {
         const info = await ytdl.getInfo(link);
         return info.videoDetails.title
     },
     
-    play: function (message, connection) {
+    play: function(message, connection) {
 
-        if (serverConfig.trackPosition >= serverConfig.musicQueue.length && serverConfig.loopQueue) {
-            serverConfig.trackPosition = 0
-        }
         dispatcher = connection.play(ytdl(serverConfig.musicQueue[serverConfig.trackPosition], { filter: 'audioonly' }))
         
         module.exports.getSongTitle(serverConfig.musicQueue[serverConfig.trackPosition])
@@ -30,40 +24,79 @@ module.exports = {
             message.channel.send(`Now Playing: ${songTitle}`)
         })
 
-
-        dispatcher.on("finish", () => {
-            if (!serverConfig.loopTrack) {
-                serverConfig.trackPosition += 1;
+        dispatcher.on("finish", () => { // Track Pos: 0; Length = 1
+            if (serverConfig.loopQueue) {
+                serverConfig.musicQueue.push(serverConfig.musicQueue.shift()) // Move first item to end of array
             }
 
-            if (serverConfig.trackPosition <= serverConfig.musicQueue.length) {
-                console.log(serverConfig.musicQueue)
+            if (!serverConfig.loopTrack) {
+                serverConfig.trackPosition += 1
+            }
 
-                module.exports.play(message, connection)
-            } else { module.exports.disconnect() }
+            if (serverConfig.musicQueue) { module.exports.play(message, connection) }
+            else { module.exports.disconnect(connection) }
         })
     },
 
-    skip: function () {
+    skip: function() {
         if (dispatcher) { dispatcher.end() }
     },
 
-    clear: function () {
+    back: function() {
+        serverConfig.trackPosition -= 2;
+        common.writeToServerConfig("745662812335898806")
+        if (dispatcher) { dispatcher.end() }
+    },
+
+    clear: function() {
         serverConfig.musicQueue = []
-        writeToJson()
+        common.writeToServerConfig("745662812335898806")
 
     },
 
-    disconnect: function() {
+    jump: function(trackPosition) {
+        trackPosition -= 2;
+        serverConfig.trackPosition = trackPosition
+        common.writeToServerConfig("745662812335898806")
+        if (dispatcher) { dispatcher.end() }
+    },
+
+    pause: function() {
+        if (dispatcher) { dispatcher.pause(true); }
+    },
+
+    resume: function() {
+        if (dispatcher) { dispatcher.resume() }
+    },
+
+    remove: function(track) {
+        serverConfig.musicQueue = serverConfig.musicQueue.filter((value, index, arr) => {
+            return index != track - 1
+        })
+        common.writeToServerConfig("745662812335898806")
+    },
+
+    removeRange: function(start, end) {
+        serverConfig.musicQueue = serverConfig.musicQueue.filter((value, index, arr) => {
+            return start - 1 > index && index < end
+        })
+        console.log(serverConfig.musicQueue)
+        common.writeToServerConfig("745662812335898806")
+    },
+
+    disconnect: function(connection) {
         serverConfig.musicQueue = []
-        writeToJson()
+        serverConfig.trackPosition = 0
+        common.writeToServerConfig("745662812335898806")
 
         serverConfig.loopTrack = false;
         serverConfig.loopQueue = false;
 
-        console.log("Disconnecting")
-        dispatcher.destroy();
+        if (dispatcher) { dispatcher.destroy(); }
+
         connection.disconnect();
+
+
     }
 
 }
