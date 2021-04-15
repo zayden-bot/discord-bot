@@ -43,10 +43,11 @@ module.exports = {
             serverConfig.musicQueue.push(arguments[0])
             music.getSongTitle(arguments[0]).then(songTitle => message.channel.send(`Added ${songTitle} to the Queue.`))
         } else {
-            const url = getSearch(text)
-            serverConfig.musicQueue.push(url)
-            music.getSongTitle(url).then(songTitle => message.channel.send(`Added ${songTitle} to the Queue.`))
-            
+            let url;
+            getSearch(text).then(url => {
+                serverConfig.musicQueue.push(url)
+                music.getSongTitle(url).then(songTitle => message.channel.send(`Added ${songTitle} to the Queue.`))
+            })
         }
 
         common.writeToServerConfig("745662812335898806")
