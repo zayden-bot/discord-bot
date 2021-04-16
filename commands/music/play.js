@@ -1,7 +1,4 @@
 const music = require("../../musicFunctions")
-const common = require("../../common")
-const serverConfig = require("../../serverConfigs/745662812335898806.json")
-const botConfig = require("../../configs/botConfig.json")
 
 let Queue = music.Queue
 
