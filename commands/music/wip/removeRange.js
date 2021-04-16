@@ -1,4 +1,4 @@
-const music = require("../../musicFunctions")
+const music = require("../../../musicFunctions")
 
 module.exports = {
     commands: ["removeRange", "rr"],
