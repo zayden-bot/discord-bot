@@ -1,36 +1,42 @@
 const common = require("../../common")
 const serverConfig = require("../../serverConfigs/745662812335898806.json")
 
+const music = require("../../musicFunctions")
+
 module.exports = {
     commands: ["loop"],
     expectedArgs: "<track/song/queue/off>",
     minArgs: 1,
     maxArgs: 1,
     callback: (message, arguments, text) => {
-        if (arguments[0] == "track" || arguments[0] == "song") {
-            serverConfig.loopTrack = !serverConfig.loopTrack;
-            serverConfig.loopQueue = false;
-            common.writeToServerConfig("745662812335898806")
+        try { var queue = music.servers[message.guild.id].queue }
+        catch (error) {
+            message.reply("Queue up some music first.")
+            return;
+        }
 
-            if (serverConfig.loopTrack) { message.reply("Now looping **track**") }
+        if (arguments[0] == "track" || arguments[0] == "song") {
+            queue.loopTrack = !queue.loopTrack
+            queue.loopQueue = false
+
+            if (queue.loopTrack) { message.reply("Now looping **track**") }
             else { message.reply("Disabled looping") }
             return
         }
 
-        if (arguments[0] == "queue") {
-            serverConfig.loopQueue = !serverConfig.loopQueue;
-            serverConfig.loopTrack = false;
-            common.writeToServerConfig("745662812335898806")
+        if (arguments[0] == "queue"|| arguments[0] == "q") {
+            queue.loopTrack = false
+            queue.loopQueue = !queue.loopQueue
             
-            if (serverConfig.loopQueue) { message.reply("Now looping **queue**") }
+            if (queue.loopQueue) { message.reply("Now looping **queue**") }
             else { message.reply("Disabled looping") }
             return
         }
 
         if (arguments[0] == "off") {
-            serverConfig.loopQueue = false;
-            serverConfig.loopTrack = false;
-            common.writeToServerConfig("745662812335898806")
+            queue.loopTrack = false
+            queue.loopQueue = false
+
             message.reply("Disabled looping")
             return
         }

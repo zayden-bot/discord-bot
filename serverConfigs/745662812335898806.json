@@ -2,7 +2,7 @@
     "suggestionChannel": "779064182259449896",
     "logsChannel": "779072597245165667",
     "patreonChannel": "806504327307853826",
-    "patreonUpdate": "23 Apr 2021 19:00",
+    "patreonUpdate": "23 Apr 2021, 19:00",
     "steamUpdate": "",
     "serverRules": {
         "0": "Use common sense! If the staff are telling you to stop doing something, stop.",
@@ -26,8 +26,8 @@
         "69": "Whatever you do, DO NOT PING ME <:peperage:788512386205745162>",
         "80085": "Congratulations! You have found the secret rule. Winner: <@516991142156435472>"
     },
-    "trackPosition": 0,
-    "musicQueue": [],
-    "loopQueue": false,
-    "loopTrack": false
+    "trackPosition": 22,
+    "musicQueue": {},
+    "loopTrack": false,
+    "loopQueue": false
 }

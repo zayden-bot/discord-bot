@@ -3,6 +3,7 @@ const music = require("../../musicFunctions")
 module.exports = {
     commands: ["removeRange", "rr"],
     permissionError: "Command is currently in development. Limited to staff use only.",
+    disabled: true,
     callback: (message, arguments, text) => {
         start = parseInt(arguments[0])
         end = parseInt(arguments[1])

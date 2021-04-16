@@ -5,7 +5,6 @@ module.exports = {
     minArgs: 0,
     maxArgs: 0,
     callback: (message, arguments, text) => {
-        
 
         let roles = []
         message.guild.roles.cache.forEach(role => roles.push(role.name))

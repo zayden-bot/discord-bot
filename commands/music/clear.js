@@ -4,7 +4,7 @@ module.exports = {
     commands: ["clear"],
     maxArgs: 0,
     callback: (message, arguments, text) => {
-        music.clear()
+        music.clear(message)
         message.channel.send("Queue cleared.")
     },
 }

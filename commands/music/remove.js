@@ -1,18 +1,26 @@
 const music = require("../../musicFunctions")
-const serverConfig = require("../../serverConfigs/745662812335898806.json")
+
 module.exports = {
     commands: ["remove", "r", "rm", "delete", "del"],
     permissionError: "Command is currently in development. Limited to staff use only.",
+    expectedArgs: "<track position>",
+    minArgs: 1,
     callback: (message, arguments, text) => {
+        const queue = music.servers[message.guild.id].queue
+        
         let trackPosition = arguments[0]
-        if (arguments[0] == "last") {
-            trackPosition = serverConfig.musicQueue.length
+        if (trackPosition > queue.currentQueue.length) {
+            message.reply("Track position out of queue length")
+            return
         }
 
-        music.getSongTitle(serverConfig.musicQueue[trackPosition - 1]).then(songTitle => {
-            music.remove(trackPosition)
-            message.channel.send(`Removed ${songTitle} from queue.`)
-        })
+        if (arguments[0] == "last") {
+            trackPosition = queue.currentQueue.length
+        }
+    
+        const song = queue.currentQueue[trackPosition - 1].title
+        music.remove(message, trackPosition)
+        message.channel.send(`Removed ${song} from queue.`)
     },
     permissions: [],
     requiredRoles: [],

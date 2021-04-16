@@ -1,22 +1,20 @@
 const music = require("../../musicFunctions")
-const serverConfig = require("../../serverConfigs/745662812335898806.json")
 
-async function getQueue() {
-    if (serverConfig.trackPosition + 1 >= serverConfig.musicQueue.length) {
-        return "End of queue. Use `!play` to queue some music up."
-    }
+function getQueue(queue) {
+    // if (serverConfig.trackPosition + 1 >= serverConfig.musicQueue.length) {
+    //     return "End of queue. Use `!play` to queue some music up."
+    // }
 
-    let queue = ""
-    for (let i = serverConfig.trackPosition + 1; i < 26; i++) {
-        if (serverConfig.musicQueue[i]) {
-            console.log(serverConfig.musicQueue[i])
-            const songTitle = await music.getSongTitle(serverConfig.musicQueue[i]);
-                queue += `${i+1}. ${songTitle}\n`
+    let queueText = ""
+    for (let i = 0; i < 26; i++) {
+        if (i < queue.currentQueue.length) {
+            const song = queue.currentQueue[i]
+            queueText += `${i+1}. ${song.title}\n`
         } else {
             break
         }
     }
-    return queue
+    return queueText
 }
 
 module.exports = {
@@ -25,21 +23,15 @@ module.exports = {
     maxArgs: 1,
     callback: (message, arguments, text) => {
 
-        if (serverConfig.musicQueue.length == 0) {
+        const queue = music.servers[message.guild.id].queue
+
+        if (!queue.nowPlaying) {
             message.channel.send("End of queue. Use `!play` to queue some music up.")
             return;
         }
 
-        let nowPlaying = "None"
-        music.getSongTitle(serverConfig.musicQueue[serverConfig.trackPosition]).then(songTitle => {
-            nowPlaying = songTitle
+        const queueText = getQueue(queue)
+        message.channel.send(`**Music Queue**\nNow Playing: ${queue.nowPlaying.title}\n\n${queueText}`) 
 
-            getQueue().then(queue => {
-                message.channel.send(`**Music Queue**\nTrack Position: ${serverConfig.trackPosition+1}\nNow Playing: ${nowPlaying}\n\n${queue}`) 
-            });
-            
-        })
     },
-    permissions: [],
-    requiredRoles: [],
 }

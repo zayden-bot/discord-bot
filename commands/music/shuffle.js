@@ -1,9 +1,6 @@
-const common = require("../../common")
 const music = require("../../musicFunctions")
-const serverConfig = require("../../serverConfigs/745662812335898806.json")
 
 function shuffle(array) {
-    array = array.slice(1, array.length)
     var currentIndex = array.length, temporaryValue, randomIndex;
   
     // While there remain elements to shuffle...
@@ -18,7 +15,6 @@ function shuffle(array) {
       array[currentIndex] = array[randomIndex];
       array[randomIndex] = temporaryValue;
     }
-    console.log(array)
     return array;
 }
 
@@ -26,8 +22,9 @@ module.exports = {
     commands: ["shuffle", "shuf", "randomize", "randomise"],
     permissionError: "Command is currently in development. Limited to staff use only.",
     callback: (message, arguments, text) => {
-        serverConfig.musicQueue = shuffle(serverConfig.musicQueue);
-        common.writeToServerConfig("745662812335898806")
+        let queue = music.servers[message.guild.id].queue
+        queue.currentQueue = shuffle(queue.currentQueue);
+
         message.reply("Shuffled Queue")
     },
     permissions: [],

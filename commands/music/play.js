@@ -1,59 +1,53 @@
-const YouTubeAPI = require("simple-youtube-api")
-
 const music = require("../../musicFunctions")
 const common = require("../../common")
 const serverConfig = require("../../serverConfigs/745662812335898806.json")
 const botConfig = require("../../configs/botConfig.json")
 
-const youtube = new YouTubeAPI(botConfig.youtubeAPIKey)
-
-async function getLinks(link) {
-    const results = await youtube.getPlaylist(link, { part: "snippet" });
-    const videos = await results.getVideos(100, { part: "snippet" });
-    return videos.map(video => video.url)
-}
-
-async function getSearch(searchTerm) {
-    const result = await youtube.searchVideos(searchTerm, 1, { part: "snippet" });
-    return result[0].url
-}
+let Queue = music.Queue
 
 module.exports = {
     commands: ["play", "p"],
     expectedArgs: "<music>",
     minArgs: 1,
-    callback: (message, arguments, text) => {
+    callback: async (message, arguments, text) => {
         if (!message.member.voice.channel) {
             message.reply("You have to be connected to a voice channel before you can use this command!")
             return
         }
 
+        // Create guild config
+        try { music.servers[message.guild.id].queue }
+        catch (error) { music.servers[message.guild.id] = {} }
+
+        if (!music.servers[message.guild.id].queue) {
+            music.servers[message.guild.id].queue = new Queue(message.guild.id)
+        }
+
+        let queue = music.servers[message.guild.id].queue
+
         const videoPattern = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.?be)\/.+$/gi;
         const playlistPattern = /^.*(list=)([^#\&\?]*).*/gi;
 
+        const url = arguments[0]
+
         // Adding to queue
-        if (playlistPattern.test(arguments[0])) { // if youtube playlist
-            getLinks(arguments[0]).then(links => {
-                for (link of links) {
-                    serverConfig.musicQueue.push(link)
-                }
-                music.getSongTitle(arguments[0]).then(songTitle => message.channel.send(`Added ${links.length} songs to the Queue.`))
-            })
-        } else if (videoPattern.test(arguments[0])) { // if single link
-            serverConfig.musicQueue.push(arguments[0])
-            music.getSongTitle(arguments[0]).then(songTitle => message.channel.send(`Added ${songTitle} to the Queue.`))
+        if (playlistPattern.test(url)) { // if youtube playlist
+            const urls = await queue.getPlaylist(url);
+            message.channel.send(`Added ${urls.length} songs to the Queue.`);
+        } else if (videoPattern.test(url)) { // if single link
+            const songTitle = await queue.getSong(url)
+            message.channel.send(`Added ${songTitle} to the Queue.`)
         } else {
-            getSearch(text).then(url => {
-                serverConfig.musicQueue.push(url)
-                music.getSongTitle(url).then(songTitle => message.channel.send(`Added ${songTitle} to the Queue.`))
-            })
+            const songTitle = await queue.getSearch(text)
+            message.channel.send(`Added ${songTitle} to the Queue.`)
         }
 
-        common.writeToServerConfig("745662812335898806")
-
-        if (!message.guild.voice || !message.guild.voice.channelID) {
+        // console.log(music.dispatcher)
+        if (!message.guild.voice || !message.guild.voice.channelID && typeof(music.dispatcher) == "undefined") {
+            // console.log("Playing Music")
             message.member.voice.channel.join().then(connection => { music.play(message, connection) })
         }
+
     },
     permissions: [],
     requiredRoles: [],

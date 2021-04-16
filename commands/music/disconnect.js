@@ -10,7 +10,7 @@ module.exports = {
             return
         }
         const connection = message.guild.voice.connection
-        music.disconnect(connection)
+        music.disconnect(message, connection)
         message.channel.send("Disconnecting...")
     },
 }
