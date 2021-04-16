@@ -23,7 +23,7 @@ class Queue {
 
     async getPlaylist(url) {
         const results = await youtube.getPlaylist(url, { part: "snippet" });
-        const videos = await results.getVideos(25, { part: "snippet" });
+        const videos = await results.getVideos(50, { part: "snippet" });
         const videoUrls = videos.map(video => video.url)
         for (let videoUrl of videoUrls) {
             const songInfo = await ytdl.getInfo(videoUrl)
