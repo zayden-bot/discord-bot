@@ -1,3 +1,5 @@
+const Discord = require("discord.js")
+
 const { prefix } = require("../configs/botConfig.json");
 const blacklist = require("../blacklist.js");
 const developerUsers = ["211486447369322506"]
@@ -127,10 +129,11 @@ module.exports = (client, commandOptions) => {
                 const arguments = content.split(/[ ]+/)
                 arguments.shift()
 
-                if (arguments.length < minArgs || (
-                    maxArgs !== null && arguments.length > maxArgs
-                )) {
-                    message.reply(`Incorrect syntax! Use \`${prefix}${alias} ${expectedArgs}\``)
+                if (arguments.length < minArgs || ( maxArgs !== null && arguments.length > maxArgs )) {
+                    const embed = new Discord.MessageEmbed()
+                    .setColor("#ff0000")
+                    .setDescription(`Invalid command usage, try using it like:\n\`${prefix}${alias} ${expectedArgs}\``)
+                    message.channel.send(embed)
                     return
                 }
 
