@@ -26,28 +26,30 @@ class Queue {
         let videos = await results.getVideos(50, { part: "snippet" });
         videos = videos.filter((video) => video.title != "Private video" && video.title != "Deleted video")
         
-        for (let video of videos) { this.addSong(video.url, video.title) }
+        for (let video of videos) {
+            this.addSong(video.url, video.title)
+        }
         return videos
     }
 
     async getSong(url) {
-        const songInfo = await ytdl.getInfo(url)
-        this.addSong(url, songInfo)
-        return songInfo.videoDetails.title
+        const song = await youtube.getVideo(url)
+        this.addSong(url, song.title)
+        return song.title
     }
 
     async getSearch(search) {
-        const result = await youtube.searchVideos(search, 1, { part: "snippet" });
-        try { var url = result[0].url }
+        const results = await youtube.searchVideos(search, 1, { part: "snippet" });
+        const song = results[0]
+        try { song.url }
         catch { return null }
 
-        const songInfo = await ytdl.getInfo(url)
-        this.addSong(url, songInfo)
-        return songInfo.videoDetails.title
+        this.addSong(song.url, song.title)
+        return song.title
     }
 
-    addSong(url, info) {
-        let song = new Song(url, info)
+    addSong(url, title) {
+        let song = new Song(url, title)
         this.currentQueue.push(song)
     }
 
@@ -58,16 +60,9 @@ class Queue {
 }
 
 class Song {
-    constructor (url, info=null, title=null) {
+    constructor (url, title) {
         this.url = url;
-        this.info = info;
         this.title = title;
-        if (this.title) { this.getTitle() }
-    }
-
-    getTitle() {
-        console.log(this.info.videoDetails.title)
-        return this.info.videoDetails.title
     }
 }
 
