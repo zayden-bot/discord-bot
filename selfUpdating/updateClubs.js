@@ -11,7 +11,7 @@ module.exports = {
             Come join our community events. You will be pinged when events are taking place!
 
             :two: <@&805766587704803339>
-            We're the gals that cheer on Steve! Join us to make Steve happy and GO STEVE! (only girls allowed btw)
+            We're the gals that cheer on the Team! Join us to make the Team happy and GO STEVE!
 
             :three: <@&805766682202079273>
             We move the masses to start a revolution! Join now and come to the dark good side!
