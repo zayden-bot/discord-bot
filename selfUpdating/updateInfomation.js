@@ -16,14 +16,13 @@ const field2 = `<#830927865784565800>
 
 const field3 = `<#745662813036609548> ~ Highly moderated and regulated chat.
 <#787774961850646559> ~ Everything that doesn't fit in another channel and memes go here
+<#832695012709892107> ~ 0100111001100101011100100110010001110011 
 <#747428461391380532> ~ (spoilers) for theories about College Kings
 <#817235460467720194> ~ (spoilers) Make your own tierlist from the pinned links and post it here
 <#789831288558452746> ~ (nsfw) Post your or other art. If it isn't your art, make sure to credit the artist
 <#770621445637799946> ~ (spoilers) Here you can discuss College Kings without having to spoiler mark you messages
-<#747429243633270844> ~ Secret chat for awesome people
 <#747428952577933424> ~ (nsfw) For real nsfw images. 2D or 3D art goes in #art
-<#772516507041005618> ~ You can talk about other games here
-<#825313752730697778> ~ [REDACTED]
+<#772516507041005618> ~ (nsfw) You can talk about and send screenshots of other games here
 <#776139754408247326> ~ Use bot commands here, unless they add to a conversation in another channel`
 
 const field4 = `<#779064182259449896> ~ Vote for your favourite suggestions here
@@ -34,7 +33,6 @@ const field5 = `<#789990024220377159> ~ a chat for talking about things that hap
 <#796400464358670344> ~ a chat for music commands when listening to music in the Groovy VC
 General ~ Talk about anything in here (without breaking the rules)
 Groovy ~ Listen to some music together with <@234395307759108106>
-Events ~ Sometimes events happen here
 
 __**Roles:**__`
 
