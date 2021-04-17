@@ -23,13 +23,11 @@ class Queue {
 
     async getPlaylist(url) {
         const results = await youtube.getPlaylist(url, { part: "snippet" });
-        const videos = await results.getVideos(50, { part: "snippet" });
-        const videoUrls = videos.map(video => video.url)
-        for (let videoUrl of videoUrls) {
-            const songInfo = await ytdl.getInfo(videoUrl)
-            this.addSong(videoUrl, songInfo)
-        }
-        return videoUrls
+        let videos = await results.getVideos(50, { part: "snippet" });
+        videos = videos.filter((video) => video.title != "Private video" && video.title != "Deleted video")
+        
+        for (let video of videos) { this.addSong(video.url, video.title) }
+        return videos
     }
 
     async getSong(url) {
@@ -60,10 +58,11 @@ class Queue {
 }
 
 class Song {
-    constructor (url, info) {
+    constructor (url, info=null, title=null) {
         this.url = url;
         this.info = info;
-        this.title = this.getTitle()
+        this.title = title;
+        if (this.title) { this.getTitle() }
     }
 
     getTitle() {
