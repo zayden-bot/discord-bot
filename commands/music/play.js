@@ -36,12 +36,17 @@ module.exports = {
             message.channel.send(`Added ${songTitle} to the Queue.`)
         } else {
             const songTitle = await queue.getSearch(text)
-            message.channel.send(`Added ${songTitle} to the Queue.`)
+
+            // Check if song is found
+            if (songTitle) {
+                message.channel.send(`Added ${songTitle} to the Queue.`)
+            } else {
+                message.channel.send("No song found")
+                return
+            }
         }
 
-        // console.log(music.dispatcher)
         if (!message.guild.voice || !message.guild.voice.channelID && typeof(music.dispatcher) == "undefined") {
-            // console.log("Playing Music")
             message.member.voice.channel.join().then(connection => { music.play(message, connection) })
         }
 
