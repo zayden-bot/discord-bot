@@ -91,8 +91,8 @@ module.exports = {
                 queue.previousQueue = []
             }
 
-            if (queue.currentQueue[0]) { module.exports.play(message, connection) }
-            else { module.exports.disconnect(message, connection) }
+            if (queue.currentQueue[0] || queue.loopTrack) { module.exports.play(message, connection) }
+            else { setTimeout(() => module.exports.disconnect(message, connection), 5*60*1000)  }
         })
     },
 
