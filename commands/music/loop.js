@@ -1,6 +1,3 @@
-const common = require("../../common")
-const serverConfig = require("../../serverConfigs/745662812335898806.json")
-
 const music = require("../../musicFunctions")
 
 module.exports = {

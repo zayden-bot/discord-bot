@@ -1,5 +1,4 @@
 const music = require("../../musicFunctions")
-const serverConfig = require("../../serverConfigs/745662812335898806.json")
 
 module.exports = {
     commands: ["disconnect", "dc", "leave", "reset", "fuckoff"],
