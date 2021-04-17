@@ -26,7 +26,7 @@ module.exports = {
         }
 
         const embed = new Discord.MessageEmbed()
-        .addField(`Question ID: ${question.questionId}`, question.text)
+        .addField(`Question id: ${question.questionId}`, question.text)
         .addField(`Answered by ${question.answer.user}`, question.answer.text)
 
         const channel = await message.guild.channels.cache.get(serverConfig.questionChannel)

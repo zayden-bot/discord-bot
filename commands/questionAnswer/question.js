@@ -36,7 +36,7 @@ module.exports = {
         questions.push(question)
 
         const embed = new Discord.MessageEmbed()
-        .addField(`Question ID: ${question.questionId}`, question.text)
+        .addField(`Question id: ${question.questionId}`, question.text)
 
         let channel = message.guild.channels.cache.get(serverConfig.questionChannel)
         channel.send(embed).then(message => { question.setMessageId(message.id) })
