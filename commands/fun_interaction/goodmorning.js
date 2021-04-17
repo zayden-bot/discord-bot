@@ -12,10 +12,12 @@ module.exports = {
 
         let arrayId = "Global";
         if (message.author.id in imgConfig.goodMorningImgs) { arrayId = message.author.id }
-        try {
-            if (message.mentions.members.first().user.id in imgConfig.goodMorningImgs) { arrayId = message.mentions.members.first().user.id }
+        else {
+            try {
+                if (message.mentions.members.first().user.id in imgConfig.goodMorningImgs) { arrayId = message.mentions.members.first().user.id }
+            }
+            catch (error) { console.log(error); arrayId = "Global" }
         }
-        catch (error) { arrayId = "Global" }
 
         const imgId = Math.floor(Math.random() * imgConfig.goodMorningImgs[arrayId].length)
 
