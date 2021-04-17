@@ -40,7 +40,8 @@ class Queue {
 
     async getSearch(search) {
         const result = await youtube.searchVideos(search, 1, { part: "snippet" });
-        const url = result[0].url
+        try { var url = result[0].url }
+        catch { return null }
 
         const songInfo = await ytdl.getInfo(url)
         this.addSong(url, songInfo)
