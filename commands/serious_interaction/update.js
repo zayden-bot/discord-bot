@@ -57,7 +57,7 @@ module.exports = {
         }
 
         const embed = new Discord.MessageEmbed()
-            .setTitle("Next College Kings Update (0.9)")
+            .setTitle("Next College Kings Update (9.0.0)")
             .setColor("ff0000")
             .setDescription("If you are interested in the next update, read below:")
             .addField("__Patreon Release__ ($10)", patreonOutput, true)
