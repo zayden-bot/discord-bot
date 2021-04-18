@@ -13,7 +13,8 @@ let servers = {}
 class Queue {
     constructor(guild) {
         this.guild = guild
-        this.nowPlaying;
+        this.nowPlaying = null;
+        this.previousMessage = null;
         this.currentQueue = []
         this.previousQueue = []
         this.trackPosition = 0
@@ -72,7 +73,6 @@ module.exports = {
     Song: Song,
     
     play: function(message, connection) {
-        let previousMessage = null
         let queue = servers[message.guild.id].queue
 
         if (!queue.loopTrack) {
@@ -83,9 +83,14 @@ module.exports = {
 
         console.log(`Now Playing: ${queue.nowPlaying.title}`)
 
-        message.channel.fetchMessage(previousMessage).then(async msg => {
-            await message.channel.send(`Now Playing: ${queue.nowPlaying.title}`).then(msg => previousMessage = msg.id)
-            if (msg) { msg.delete() }
+        // message.channel.messages.fetch(previousMessage).then(async msg => {
+        //     await message.channel.send(`Now Playing: ${queue.nowPlaying.title}`).then(msg => previousMessage = msg.id)
+        //     if (msg) { msg.delete() }
+        // })
+
+        message.channel.send(`Now Playing: ${queue.nowPlaying.title}`).then(msg => {
+            if (queue.previousMessage) { queue.previousMessage.delete() }
+            queue.previousMessage = msg
         })
 
         dispatcher.on("finish", () => {
