@@ -87,12 +87,19 @@ module.exports = (client, commandOptions) => {
 
     client.on("message", message => {
         const { member, content, guild, channel } = message
+        const serverConfig = require(`../serverConfigs/${guild.id}.json`)
+        const testServer = "745662812335898806"
 
         for (const alias of commands) {
             if (content.split(" ")[0].toLowerCase() == `${prefix}${alias.toLowerCase()}`) {
-                
+
+                // Check if the command is globally disabled
                 if (disabled) { return }
 
+                // Check if the command is enabled in that server
+                if (!(commands[0].toLowerCase() in serverConfig.enabledCommands) && guild.id != testServer) { return }
+
+                // Check if the user has the correct permissions to run the command
                 for (const permission of permissions) {
                     if (!member.hasPermission(permission) && !developerUsers.includes(member.id)) {
                         message.reply(permissionError)
@@ -100,6 +107,7 @@ module.exports = (client, commandOptions) => {
                     }
                 }
 
+                // Check if the user has the required roles to run the command
                 for (const requiredRole of requiredRoles) {
                     const role = guild.roles.cache.find(role => role.name === requiredRole)
 
@@ -109,19 +117,23 @@ module.exports = (client, commandOptions) => {
                     }
                 }
 
+                // Check if the user is blacklisted
                 if (blacklist.isBlacklisted(member.user.id) && !developerUsers.includes(member.id)) {
                     return
                 }
 
+                // Check if the command is on cooldown
                 let cooldownString = `${guild.id}-${member.id}-${commands[0]}`
                 if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(staffRole)) {
                     message.reply("You cannot use that command so soon, please wait")
                     return
                 }
 
+                // Create the arguments variable
                 const arguments = content.split(/[ ]+/)
                 arguments.shift()
 
+                // Check if the user inputed the correct number of arguments
                 if (arguments.length < minArgs || ( maxArgs !== null && arguments.length > maxArgs )) {
                     const embed = new Discord.MessageEmbed()
                     .setColor("#ff0000")
@@ -130,6 +142,7 @@ module.exports = (client, commandOptions) => {
                     return
                 }
 
+                // Add command to recentlyRan if command has cooldown
                 if (cooldown > 0) {
                     recentlyRan.push(cooldownString)
 
