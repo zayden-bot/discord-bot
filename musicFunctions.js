@@ -72,6 +72,7 @@ module.exports = {
     Song: Song,
     
     play: function(message, connection) {
+        let previousMessage = null
         let queue = servers[message.guild.id].queue
 
         if (!queue.loopTrack) {
@@ -81,10 +82,14 @@ module.exports = {
         dispatcher = connection.play(ytdl(queue.nowPlaying.url, { filter: 'audioonly' }))
 
         console.log(`Now Playing: ${queue.nowPlaying.title}`)
-        message.channel.send(`Now Playing: ${queue.nowPlaying.title}`)
+
+        message.channel.fetchMessage(previousMessage).then(async msg => {
+            await message.channel.send(`Now Playing: ${queue.nowPlaying.title}`).then(msg => previousMessage = msg.id)
+            if (msg) { msg.delete() }
+        })
 
         dispatcher.on("finish", () => {
-
+            
 
             if (queue.loopQueue && typeof(queue.currentQueue[0]) == "undefined") {
                 queue.currentQueue = [...queue.previousQueue]
