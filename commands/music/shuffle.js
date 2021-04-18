@@ -22,8 +22,13 @@ module.exports = {
     commands: ["shuffle", "shuf", "randomize", "randomise"],
     permissionError: "Command is currently in development. Limited to staff use only.",
     callback: (message, arguments, text) => {
-        let queue = music.servers[message.guild.id].queue
-        queue.currentQueue = shuffle(queue.currentQueue);
+        try {
+            let queue = music.servers[message.guild.id].queue
+            queue.currentQueue = shuffle(queue.currentQueue);
+        } catch {
+            message.reply("Cannot shuffle empty queue")
+            return
+        }
 
         message.reply("Shuffled Queue")
     },
