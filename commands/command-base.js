@@ -87,7 +87,8 @@ module.exports = (client, commandOptions) => {
 
     client.on("message", message => {
         const { member, content, guild, channel } = message
-        const serverConfig = require(`../serverConfigs/${guild.id}.json`)
+        try { var serverConfig = require(`../serverConfigs/${guild.id}.json`) }
+        catch { var serverConfig = require(`../serverConfigs/privateMessage.json`) }
         const testServer = "745662812335898806"
 
         for (const alias of commands) {
