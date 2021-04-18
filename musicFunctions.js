@@ -81,13 +81,6 @@ module.exports = {
 
         dispatcher = connection.play(ytdl(queue.nowPlaying.url, { filter: 'audioonly' }))
 
-        console.log(`Now Playing: ${queue.nowPlaying.title}`)
-
-        // message.channel.messages.fetch(previousMessage).then(async msg => {
-        //     await message.channel.send(`Now Playing: ${queue.nowPlaying.title}`).then(msg => previousMessage = msg.id)
-        //     if (msg) { msg.delete() }
-        // })
-
         message.channel.send(`Now Playing: ${queue.nowPlaying.title}`).then(msg => {
             if (queue.previousMessage) { queue.previousMessage.delete() }
             queue.previousMessage = msg
