@@ -34,8 +34,6 @@ module.exports = {
             msg.edit(embed)
             message.delete()
         })
-        
-        // embed.setTitle("You're question has been answered.")
 
         try { question.user.send(embed) }
         catch {}
