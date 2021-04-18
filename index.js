@@ -87,6 +87,58 @@ client.on("ready", async () => {
 
 });
 
+client.on("guildCreate", guild => {
+    const defaultConfig = {
+        "enabledCommands": [
+            "goodmorning",
+            "goodnight",
+            "hug",
+            "newyear",
+            "ban",
+            "botban",
+            "checkbotban",
+            "clearchannel",
+            "serverLockdown",
+            "unbotban",
+            "back",
+            "clear",
+            "disconnect",
+            "jump",
+            "loop",
+            "move",
+            "nowplaying",
+            "pause",
+            "play",
+            "queue",
+            "remove",
+            "resume",
+            "shuffle",
+            "skip",
+            "help",
+            "membercount",
+            "ping",
+            "serverinfo",
+            "add"
+        ],
+        "suggestionChannel": "",
+        "logsChannel": "",
+        "patreonChannel": "",
+        "questionChannel": "",
+        "patreonUpdate": "",
+        "steamUpdate": "",
+        "serverRules": {},
+        "hiddenRules": {}
+    }
+
+    fs.writeFile(`./serverConfigs/${guild.id}.json`, JSON.stringify(defaultConfig, null, 4), function writeJSON(err) {
+        if (err) { return console.log(err); }
+    });
+})
+
+client.on("guildDelete", guild => {
+    fs.unlink(`./serverConfigs/${guild.id}.json`)
+})
+
 client.on("disconnect", () => {
     console.log("Bot shutting down.")
     for (guild in client.guilds.cache) {
@@ -94,11 +146,8 @@ client.on("disconnect", () => {
     }
 })
 
-client.on("error", function(error){
-    for (guild in client.guilds.cache) {
-        music.disconnect(guild.voice.connection);
-    }
-    console.error(`Error: ${error}`);
-});
+client.on("error", error => {
+    console.log(`Error Encountered`);
+})
 
 client.login(botConfig.token)
