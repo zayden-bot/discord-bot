@@ -29,13 +29,13 @@ module.exports = {
 
         // Adding to queue
         if (playlistPattern.test(url)) { // if youtube playlist
-            const urls = await queue.getPlaylist(url);
+            const urls = await queue.getPlaylist(url, message.author);
             message.channel.send(`Added ${urls.length} songs to the Queue.`);
         } else if (videoPattern.test(url)) { // if single link
-            const songTitle = await queue.getSong(url)
+            const songTitle = await queue.getSong(url, message.author)
             message.channel.send(`Added ${songTitle} to the Queue.`)
         } else {
-            const songTitle = await queue.getSearch(text)
+            const songTitle = await queue.getSearch(text, message.author)
 
             // Check if song is found
             if (songTitle) {
