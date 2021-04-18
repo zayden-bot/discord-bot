@@ -23,7 +23,7 @@ module.exports = {
             try {
                 if (message.mentions.members.first().user.id in imgConfig.fuckingImgs) { arrayId = message.mentions.members.first().user.id }
             }
-            catch (error) { console.log(error); arrayId = "Global" }
+            catch (error) { arrayId = "Global" }
         }
 
         const imgId = Math.floor(Math.random() * imgConfig.fuckingImgs[arrayId].length)

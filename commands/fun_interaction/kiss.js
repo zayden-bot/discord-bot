@@ -16,7 +16,7 @@ module.exports = {
             try {
                 if (message.mentions.members.first().user.id in imgConfig.kissingImgs) { arrayId = message.mentions.members.first().user.id }
             }
-            catch (error) { console.log(error); arrayId = "Global" }
+            catch (error) { arrayId = "Global" }
         }
 
 
