@@ -1,9 +1,8 @@
+const Discord = require("discord.js")
 const YouTubeAPI = require("simple-youtube-api")
 
 const ytdl = require("ytdl-core")
-const common = require("./common")
 const botConfig = require("./configs/botConfig.json")
-const serverConfig = require("./serverConfigs/745662812335898806.json")
 
 const youtube = new YouTubeAPI(botConfig.youtubeAPIKey)
 
@@ -14,7 +13,7 @@ class Queue {
     constructor(guild) {
         this.guild = guild
         this.nowPlaying = null;
-        this.previousMessage = null;
+        this.nowPlayingMessage = null;
         this.currentQueue = []
         this.previousQueue = []
         this.trackPosition = 0
@@ -22,35 +21,35 @@ class Queue {
         this.loopTrack = false
     }
 
-    async getPlaylist(url) {
+    async getPlaylist(url, user) {
         const results = await youtube.getPlaylist(url, { part: "snippet" });
         let videos = await results.getVideos(50, { part: "snippet" });
         videos = videos.filter((video) => video.title != "Private video" && video.title != "Deleted video")
         
         for (let video of videos) {
-            this.addSong(video.url, video.title)
+            this.addSong(video.url, video.title, user)
         }
         return videos
     }
 
-    async getSong(url) {
+    async getSong(url, user) {
         const song = await youtube.getVideo(url)
-        this.addSong(url, song.title)
+        this.addSong(url, song.title, user)
         return song.title
     }
 
-    async getSearch(search) {
+    async getSearch(search, user) {
         const results = await youtube.searchVideos(search, 1, { part: "snippet" });
         const song = results[0]
         try { song.url }
         catch { return null }
 
-        this.addSong(song.url, song.title)
+        this.addSong(song.url, song.title, user)
         return song.title
     }
 
-    addSong(url, title) {
-        let song = new Song(url, title)
+    addSong(url, title, user) {
+        let song = new Song(url, title, user)
         this.currentQueue.push(song)
     }
 
@@ -61,17 +60,17 @@ class Queue {
 }
 
 class Song {
-    constructor (url, title) {
+    constructor (url, title, user) {
         this.url = url;
         this.title = title;
+        this.user = user
     }
 }
 
 module.exports = {
+    
     Queue: Queue,
 
-    Song: Song,
-    
     play: function(message, connection) {
         let queue = servers[message.guild.id].queue
 
@@ -81,13 +80,14 @@ module.exports = {
 
         dispatcher = connection.play(ytdl(queue.nowPlaying.url, { filter: 'audioonly' }))
 
-        message.channel.send(`Now Playing: ${queue.nowPlaying.title}`).then(msg => {
-            if (queue.previousMessage) { queue.previousMessage.delete() }
-            queue.previousMessage = msg
-        })
+        const embed = new Discord.MessageEmbed()
+        .setTitle("Now playing")
+        .setDescription(`[${queue.nowPlaying.title}](${queue.nowPlaying.url}) [<@${queue.nowPlaying.user.id}>]`)
+
+        try { queue.nowPlayingMessage.edit(embed) }
+        catch (error) { message.channel.send(embed).then(msg => queue.nowPlayingMessage = msg ) }
 
         dispatcher.on("finish", () => {
-            
 
             if (queue.loopQueue && typeof(queue.currentQueue[0]) == "undefined") {
                 queue.currentQueue = [...queue.previousQueue]
@@ -140,14 +140,6 @@ module.exports = {
         let queue = servers[message.guild.id].queue
 
         queue.currentQueue.splice(trackPosition - 1, 1)
-    },
-
-    removeRange: function(start, end) {
-        serverConfig.musicQueue = serverConfig.musicQueue.filter((value, index, arr) => {
-            return start - 1 > index && index < end
-        })
-        console.log(serverConfig.musicQueue)
-        common.writeToServerConfig("745662812335898806")
     },
 
     disconnect: function(message, connection) {
