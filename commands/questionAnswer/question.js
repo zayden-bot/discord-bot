@@ -26,7 +26,7 @@ class Answer {
 let questions = []
 
 module.exports = {
-    commands: ["question", "questions"],
+    commands: ["question", "ask"],
     expectedArgs: "<question>",
     minArgs: 1,
     callback: (message, arguments, text) => {
