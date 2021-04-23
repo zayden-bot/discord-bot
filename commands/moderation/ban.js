@@ -14,7 +14,7 @@ module.exports = {
             .setDescription(`<@${member.id}> has been banned by CK Staff`)
             .setColor("ff0000")
 
-            member.ban()
+            member.ban( {days: 7, reason: text} )
             .then( () => { message.channel.send(embed) })
             .catch( err => { message.reply(`Failed to ban ${member.user.username}`) })
         }
