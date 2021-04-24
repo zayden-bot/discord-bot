@@ -1,17 +1,11 @@
-const { servers } = require("../../index")
-const music = require("../../musicFunctions")
-
 module.exports = {
     commands: ["loop"],
     expectedArgs: "<track/song/queue/off>",
     minArgs: 1,
     maxArgs: 1,
     callback: (message, arguments, text) => {
-        try { var queue = servers[message.guild.id].queue }
-        catch (error) {
-            message.reply("Queue up some music first.")
-            return;
-        }
+        const { servers } = require("../../index")
+        let queue = servers[message.guild.id].queue
 
         if (arguments[0] == "track" || arguments[0] == "song") {
             queue.loopTrack = !queue.loopTrack
