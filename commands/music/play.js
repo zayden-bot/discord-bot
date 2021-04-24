@@ -37,8 +37,12 @@ module.exports = {
             }
         }
 
-        if (!message.guild.voice || !message.guild.voice.connection) {
-            message.member.voice.channel.join().then(connection => { music.play(message, connection) })
+        if (!guild.voice || message.member.voice.channelID != guild.voice.channelID) {
+            await message.member.voice.channel.join()
+        }
+
+        if (!queue.nowPlaying) {
+            music.play(message, message.guild.voice.connection)
         }
 
     },
