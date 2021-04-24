@@ -85,9 +85,10 @@ module.exports = {
         .setDescription(`[${queue.nowPlaying.title}](${queue.nowPlaying.url}) [<@${queue.nowPlaying.user.id}>]`)
 
         try { queue.nowPlayingMessage.edit(embed) }
-        catch (error) { message.channel.send(embed).then(msg => queue.nowPlayingMessage = msg ) }
+        catch { message.channel.send(embed).then(msg => queue.nowPlayingMessage = msg ) }
 
         dispatcher.on("finish", () => {
+            queue.nowPlaying = null
 
             if (queue.loopQueue && typeof(queue.currentQueue[0]) == "undefined") {
                 queue.currentQueue = [...queue.previousQueue]

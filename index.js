@@ -72,7 +72,7 @@ client.on("guildCreate", guild => {
     });
 })
 
-client.on("guildDelete", guild => {
+client.on("guildDelete", async guild => {
     fs.unlink(`./serverConfigs/${guild.id}.json`)
 })
 
