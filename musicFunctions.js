@@ -88,6 +88,7 @@ module.exports = {
         catch { message.channel.send(embed).then(msg => queue.nowPlayingMessage = msg ) }
 
         dispatcher.on("finish", () => {
+            queue.previousQueue.push(queue.nowPlaying)
             queue.nowPlaying = null
 
             if (queue.loopQueue && typeof(queue.currentQueue[0]) == "undefined") {
@@ -116,12 +117,14 @@ module.exports = {
     },
 
     clear: function(message) {
-        let queue = index.servers[message.guild.id].queue
+        const { servers } = require("./index")
+        let queue = servers[message.guild.id].queue
         queue.clearQueue()
     },
 
-    jump: function(message, trackPosition) { // Loop track breaks
-        let queue = index.servers[message.guild.id].queue
+    jump: function(message, trackPosition) {
+        const { servers } = require("./index")
+        let queue = servers[message.guild.id].queue
 
         queue.previousQueue = queue.previousQueue.concat(queue.currentQueue.splice(0, trackPosition - 1))
 
@@ -137,7 +140,8 @@ module.exports = {
     },
 
     remove: function(message, trackPosition) {
-        let queue = index.servers[message.guild.id].queue
+        const { servers } = require("./index")
+        let queue = servers[message.guild.id].queue
 
         queue.currentQueue.splice(trackPosition - 1, 1)
     },
