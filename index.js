@@ -32,6 +32,9 @@ client.on("ready", async () => {
     
     loadCommands(client)
 
+    const moderation = require("./moderationFunctions")
+    moderation.init()
+
     const updateClubs = require("./selfUpdating/updateClubs")
     // updateClubs.customClubs(client, "805765564504473641")
     // updateClubs.pledgeRoles(client, "805765564504473641")
