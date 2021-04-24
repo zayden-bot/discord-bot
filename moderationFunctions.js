@@ -1,22 +1,24 @@
 const sql = require("./sql")
-const index = require("./index")
+
 
 module.exports = {
     
     init: () => {
+        const { servers } = require("./index")
         sql.each("SELECT * FROM `moderation`", (row) => {
-            index.getServers()[row.guildId].moderation[row.caseNumber] = {
+            servers[row.guildId].moderation[row.caseNumber] = {
                 "userId": row.userId,
                 "type": row.type,
                 "moderator": row.moderator,
                 "reason": row.reason
             };
         })
-        console.log(`Loaded ${Object.keys(index.getServers()).length} servers!`);
+        console.log(`Loaded ${Object.keys(servers).length} servers!`);
     },
 
     addLog: (guild, user, type, moderator, reason) => {
-        let server = index.servers[guild.id]
+        const { servers } = require("./index")
+        let server = servers[guild.id]
 
         var caseNumber = Object.keys(server.moderation).length
 
@@ -32,7 +34,8 @@ module.exports = {
     },
 
     getWarnings: (guild, user) => {
-        let server = index.servers[guild.id]
+        const { servers } = require("./index")
+        let server = servers[guild.id]
         let warnings = {}
 
         for (log in server.moderation) {
@@ -48,7 +51,8 @@ module.exports = {
     },
 
     getLogs: (guild, user) => {
-        let server = index.servers[guild.id]
+        const { servers } = require("./index")
+        let server = servers[guild.id]
         let logs = {}
 
         for (log in server.moderation) {
