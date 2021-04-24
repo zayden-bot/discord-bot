@@ -1,3 +1,4 @@
+const { servers } = require("../../index")
 const music = require("../../musicFunctions")
 
 module.exports = {
@@ -7,7 +8,7 @@ module.exports = {
     minArgs: 2,
     maxArgs: 2,
     callback: (message, arguments, text) => {
-        let queue = music.servers[message.guild.id].queue
+        let queue = servers[message.guild.id].queue
         const song = queue.currentQueue[arguments[0] - 1].title
 
         queue.currentQueue.splice(arguments[1] - 1, 0, ...queue.currentQueue.splice(arguments[0] - 1, 1)) 

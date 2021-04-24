@@ -1,4 +1,4 @@
-const music = require("../../musicFunctions")
+const { servers } = require("../../index")
 
 function getQueue(queue) {
     // if (serverConfig.trackPosition + 1 >= serverConfig.musicQueue.length) {
@@ -23,7 +23,7 @@ module.exports = {
     maxArgs: 1,
     callback: (message, arguments, text) => {
 
-        const queue = music.servers[message.guild.id].queue
+        const queue = servers[message.guild.id].queue
 
         if (!queue.nowPlaying) {
             message.channel.send("End of queue. Use `!play` to queue some music up.")

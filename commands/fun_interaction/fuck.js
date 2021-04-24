@@ -6,24 +6,22 @@ module.exports = {
     expectedArgs: "<user>",
     maxArgs: 1,
     cooldown: 43200,
-    disabled: true,
     callback: (message, arguments, text) => {
         if (!message.channel.nsfw) {
-            message.reply("This command can only be used in <#747428952577933424>")
+            message.reply("This command can only be used in nsfw channels")
             return
         }
 
         let member;
         try { member = message.mentions.members.first().user.username }
-        catch (error) { member = message.author.username }
+        catch { member = message.author.username }
 
         let arrayId = "Global"
         if (message.author.id in imgConfig.fuckingImgs) { arrayId = message.author.id }
         else {
             try {
                 if (message.mentions.members.first().user.id in imgConfig.fuckingImgs) { arrayId = message.mentions.members.first().user.id }
-            }
-            catch (error) { arrayId = "Global" }
+            } catch {}
         }
 
         const imgId = Math.floor(Math.random() * imgConfig.fuckingImgs[arrayId].length)

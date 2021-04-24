@@ -1,4 +1,4 @@
-const music = require("../../musicFunctions")
+const { servers } = require("../../index")
 
 module.exports = {
     commands: ["remove", "r", "rm", "delete", "del"],
@@ -6,7 +6,7 @@ module.exports = {
     expectedArgs: "<track position>",
     minArgs: 1,
     callback: (message, arguments, text) => {
-        const queue = music.servers[message.guild.id].queue
+        const queue = servers[message.guild.id].queue
         
         let trackPosition = arguments[0]
         if (trackPosition > queue.currentQueue.length) {

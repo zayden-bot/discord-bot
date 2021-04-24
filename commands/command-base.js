@@ -1,9 +1,7 @@
 const Discord = require("discord.js")
 
-const { prefix } = require("../configs/botConfig.json");
+const botConfig = require("../configs/botConfig.json");
 const blacklist = require("../blacklist.js");
-const developerUsers = ["211486447369322506"]
-const staffRole = "787004533963358279"
 
 const validatePermissions = (permissions) => {
     const validPermissions = [
@@ -59,15 +57,12 @@ module.exports = (client, commandOptions) => {
         cooldown = -1,
         permissions = [],
         requiredRoles = [],
-        disabled = false,
         callback
     } = commandOptions
 
     if (typeof commands === "string") {
         commands = [commands];
     }
-
-    if (disabled) { return }
 
     console.log(`Registering command "${commands[0]}"`);
 
@@ -89,20 +84,17 @@ module.exports = (client, commandOptions) => {
         const { member, content, guild, channel } = message
         try { var serverConfig = require(`../serverConfigs/${guild.id}.json`) }
         catch { var serverConfig = require(`../serverConfigs/privateMessage.json`) }
-        const testServer = "745662812335898806"
 
+        
         for (const alias of commands) {
-            if (content.split(" ")[0].toLowerCase() == `${prefix}${alias.toLowerCase()}`) {
-
-                // Check if the command is globally disabled
-                if (disabled) { return }
+            if (content.split(" ")[0].toLowerCase() == `${botConfig.prefix}${alias.toLowerCase()}`) {
 
                 // Check if the command is enabled in that server
-                if (!(commands[0].toLowerCase() in serverConfig.enabledCommands) && guild.id != testServer) { return }
+                if (serverConfig.disabledCommands.includes(commands[0])) { return }
 
                 // Check if the user has the correct permissions to run the command
                 for (const permission of permissions) {
-                    if (!member.hasPermission(permission) && !developerUsers.includes(member.id)) {
+                    if (!member.hasPermission(permission) && !botConfig.developers.includes(member.id)) {
                         message.reply(permissionError)
                         return
                     }
@@ -112,20 +104,20 @@ module.exports = (client, commandOptions) => {
                 for (const requiredRole of requiredRoles) {
                     const role = guild.roles.cache.find(role => role.name === requiredRole)
 
-                    if (!role || !member.roles.cache.has(role.id) && !developerUsers.includes(member.id)) {
+                    if (!role || !member.roles.cache.has(role.id) && !botConfig.developers.includes(member.id)) {
                         message.reply(permissionError)
                         return
                     }
                 }
 
                 // Check if the user is blacklisted
-                if (blacklist.isBlacklisted(member.user.id) && !developerUsers.includes(member.id)) {
+                if (blacklist.isBlacklisted(member.user.id) && !botConfig.developers.includes(member.id)) {
                     return
                 }
 
                 // Check if the command is on cooldown
                 let cooldownString = `${guild.id}-${member.id}-${commands[0]}`
-                if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(staffRole)) {
+                if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(serverConfig.staffRoles)) {
                     message.reply("You cannot use that command so soon, please wait")
                     return
                 }
@@ -138,8 +130,9 @@ module.exports = (client, commandOptions) => {
                 if (arguments.length < minArgs || ( maxArgs !== null && arguments.length > maxArgs )) {
                     const embed = new Discord.MessageEmbed()
                     .setColor("#ff0000")
-                    .setDescription(`Invalid command usage, try using it like:\n\`${prefix}${alias} ${expectedArgs}\``)
-                    message.channel.send(embed)
+                    .setDescription(`Invalid command usage, try using it like:\n\`${botConfig.prefix}${alias} ${expectedArgs}\``)
+                    
+                    channel.send(embed)
                     return
                 }
 
@@ -154,7 +147,7 @@ module.exports = (client, commandOptions) => {
                     }, 1000 * cooldown);
                 }
 
-                console.log(`Running ${prefix}${alias}`)
+                console.log(`Running ${botConfig.prefix}${alias}`)
                 callback(message, arguments, arguments.join(" "))
 
                 return

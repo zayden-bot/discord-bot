@@ -14,9 +14,8 @@ module.exports = {
         if (message.author.id in imgConfig.kissingImgs) { arrayId = message.author.id }
         else {
             try {
-                if (message.mentions.members.first().user.id in imgConfig.kissingImgs) { arrayId = message.mentions.members.first().user.id }
-            }
-            catch (error) { arrayId = "Global" }
+                if (message.mentions.members.first().user.id in imgConfig.fuckingImgs) { arrayId = message.mentions.members.first().user.id }
+            } catch {}
         }
 
 

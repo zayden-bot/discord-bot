@@ -1,3 +1,4 @@
+const { servers } = require("../../index")
 const music = require("../../musicFunctions")
 
 module.exports = {
@@ -12,7 +13,7 @@ module.exports = {
             return
         }
 
-        const queue = music.servers[message.guild.id].queue
+        const queue = servers[message.guild.id].queue
         if (trackPosition > queue.currentQueue.length) {
             message.reply("Track not in queue.")
             return

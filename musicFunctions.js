@@ -7,7 +7,6 @@ const botConfig = require("./configs/botConfig.json")
 const youtube = new YouTubeAPI(botConfig.youtubeAPIKey)
 
 let dispatcher;
-let servers = {}
 
 class Queue {
     constructor(guild) {
@@ -72,6 +71,7 @@ module.exports = {
     Queue: Queue,
 
     play: function(message, connection) {
+        const { servers } = require("./index")
         let queue = servers[message.guild.id].queue
 
         if (!queue.loopTrack) {
@@ -95,7 +95,6 @@ module.exports = {
             }
 
             if (queue.currentQueue[0] || queue.loopTrack) { module.exports.play(message, connection) }
-            else { setTimeout(() => module.exports.disconnect(message, connection), 5*60*1000)  }
         })
     },
 
@@ -104,7 +103,7 @@ module.exports = {
     },
 
     back: function(message) {
-        let queue = servers[message.guild.id].queue
+        let queue = index.servers[message.guild.id].queue
 
         if (queue.previousQueue[0]) {
             queue.currentQueue.unshift( queue.previousQueue.pop() )
@@ -116,12 +115,12 @@ module.exports = {
     },
 
     clear: function(message) {
-        let queue = servers[message.guild.id].queue
+        let queue = index.servers[message.guild.id].queue
         queue.clearQueue()
     },
 
     jump: function(message, trackPosition) { // Loop track breaks
-        let queue = servers[message.guild.id].queue
+        let queue = index.servers[message.guild.id].queue
 
         queue.previousQueue = queue.previousQueue.concat(queue.currentQueue.splice(0, trackPosition - 1))
 
@@ -137,7 +136,7 @@ module.exports = {
     },
 
     remove: function(message, trackPosition) {
-        let queue = servers[message.guild.id].queue
+        let queue = index.servers[message.guild.id].queue
 
         queue.currentQueue.splice(trackPosition - 1, 1)
     },
@@ -152,7 +151,4 @@ module.exports = {
     },
 
     dispatcher: dispatcher,
-
-    servers: servers,
-
 }

@@ -1,4 +1,4 @@
-const music = require("../../musicFunctions")
+const { servers } = require("../../index")
 
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
@@ -23,7 +23,7 @@ module.exports = {
     permissionError: "Command is currently in development. Limited to staff use only.",
     callback: (message, arguments, text) => {
         try {
-            let queue = music.servers[message.guild.id].queue
+            let queue = servers[message.guild.id].queue
             queue.currentQueue = shuffle(queue.currentQueue);
         } catch {
             message.reply("Cannot shuffle empty queue")

@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 const moderation = require("../../moderationFunctions")
 
 module.exports = {
-    commands: ["ban"],
+    commands: ["warn"],
     expectedArgs: "<user> <reason>",
     minArgs: 1,
     callback: (message, arguments, text) => {
@@ -16,21 +16,17 @@ module.exports = {
         else { var reason = "No Reason Given"}
 
         const serverMsg = new Discord.MessageEmbed()
-        .setTitle(`User Banned`)
-        .setDescription(`<@${member.id}> has been banned by CK Staff`)
+        .setTitle(`User Warned`)
+        .setDescription(`**<@${member.id}> has been warned by <@${message.author.id}>\nReason: ${reason}**`)
         .setColor("ff0000")
 
         const privateMsg = new Discord.MessageEmbed()
-        .setDescription(`You were banned in ${message.guild.name} for: ${reason}`)
+        .setDescription(`You were warned in ${message.guild.name} for: ${reason}`)
 
-        moderation.addLog(message.guild, member, "ban", message.author, reason)
+        moderation.addLog(message.guild, member, "warning", message.author, reason)
 
-        member.ban( {days: 7, reason: reason} )
-        .then( () => {
-            message.channel.send(serverMsg)
-            member.user.send(privateMsg)
-        })
-        .catch( err => { message.reply(`Failed to ban ${member.user.username}`) })
+        message.channel.send(serverMsg)
+        member.user.send(privateMsg)
     },
-    permissions: "BAN_MEMBERS",
+    requiredRoles: ["Security"],
 }

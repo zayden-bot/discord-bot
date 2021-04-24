@@ -1,3 +1,4 @@
+const { servers } = require("../../index")
 const music = require("../../musicFunctions")
 
 module.exports = {
@@ -6,7 +7,7 @@ module.exports = {
     minArgs: 1,
     maxArgs: 1,
     callback: (message, arguments, text) => {
-        try { var queue = music.servers[message.guild.id].queue }
+        try { var queue = servers[message.guild.id].queue }
         catch (error) {
             message.reply("Queue up some music first.")
             return;

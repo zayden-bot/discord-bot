@@ -1,22 +1,14 @@
 const Discord = require("discord.js")
-const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
-const path = require("path")
 const fs = require("fs")
+
+const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
 
 const loadCommands = require("./commands/load-commands");
 const botConfig = require("./configs/botConfig.json");
 const sql = require("./sql");
-const updateRules = require("./selfUpdating/updateRules");
-const updateInfomation = require("./selfUpdating/updateInfomation");
-const updateClubs = require("./selfUpdating/updateClubs");
-const yesMaster = require("./yesMaster");
-const questionMe = require("./questionMe");
-const blacklist = require("./blacklist");
-const reactionRoles = require("./reactionRoles");
 const music = require("./musicFunctions")
 
-// Temp event fix
-const guildMemberUpdateLog = require("./events/logs/guildMemberUpdate.js");
+let servers = {};
 
 client.on("ready", async () => {
     console.log(`Zayden is Running, version: ${botConfig.version}`);
@@ -28,98 +20,42 @@ client.on("ready", async () => {
         },
     })
 
-    sql.init(); // keep it here so it connects to the database
+    const guilds = client.guilds.cache.map(guild => guild.id)
+    for (guild of guilds) {
+        servers[guild] = {}
+        servers[guild].moderation = {}
+        servers[guild].queue = new music.Queue(guild)
+    }
+    module.exports = { servers: servers }
 
-    //                CREATE EXAMPLE
-    //  sql.run("CREATE TABLE IF NOT EXISTS test (`val` INT NOT NULL DEFAULT '1')");
-    //
-    //                SELECT EXAMPLE
-    //  sql.each("SELECT * FROM test ORDER BY val DESC", (row) => {
-    //      console.log(row.val)
-    //  });
-    //
-    //                CLOSE CONNECTION
-    //  sql.end() 
-    //
-    //                CREATE CONNECTION
-    //  sql.init()
-    //
-
+    sql.init(); // Connect to database
+    
     loadCommands(client)
 
-    const baseFile = "command-base.js"
-    const eventFile = "event-base.js"
-    const eventBase = require(`./events/${eventFile}`)
+    const updateClubs = require("./selfUpdating/updateClubs")
+    // updateClubs.customClubs(client, "805765564504473641")
+    // updateClubs.pledgeRoles(client, "805765564504473641")
 
-    const readEvents = dir => {
-        const files = fs.readdirSync(path.join(__dirname, dir))
-        for (const file of files) {
-            const stat = fs.lstatSync(path.join(__dirname, dir, file))
-            if (stat.isDirectory()) {
-                readEvents(path.join(dir, file))
-            } else if (file !== baseFile) {
-                const option = require(path.join(__dirname, dir, file))
-                eventBase(client, option)
-            }
-        }
-    }
+    const updateInfomation = require("./selfUpdating/updateInfomation")
+    // updateInfomation(client, "830927865784565800")
 
-    readEvents("events")
-
-    client.on("guildMemberUpdate", async (oldMember, newMember) => {
-        guildMemberUpdateLog.log(client, oldMember, newMember);
-    });
-
-    updateRules(client, "747430712617074718") // Rules Channel ID
-    updateInfomation(client, "830927865784565800") // information Channel ID
-    updateClubs.customClubs(client, "805765564504473641") // Clubs Channel ID
-    updateClubs.pledgeRoles(client, "805765564504473641")
-    
-    yesMaster(client);
-
-    questionMe(client);
-
-    blacklist.init();
-
-    reactionRoles.init()
-    reactionRoles.addNormalReactionRole(client)
-    reactionRoles.removeNormalReactionRole(client)
+    const updateRules = require("./selfUpdating/updateRules")
+    // updateRules(client, "747430712617074718")
 
 });
 
+client.on("message", message => {
+    const yesMaster = require("./specialCommands/yesMaster")
+    yesMaster(message)
+
+    const questionMe = require("./specialCommands/questionMe")
+    questionMe(message)
+})
+
 client.on("guildCreate", guild => {
     const defaultConfig = {
-        "enabledCommands": [
-            "goodmorning",
-            "goodnight",
-            "hug",
-            "newyear",
-            "ban",
-            "botban",
-            "checkbotban",
-            "clearchannel",
-            "serverLockdown",
-            "unbotban",
-            "back",
-            "clear",
-            "disconnect",
-            "jump",
-            "loop",
-            "move",
-            "nowplaying",
-            "pause",
-            "play",
-            "queue",
-            "remove",
-            "resume",
-            "shuffle",
-            "skip",
-            "help",
-            "membercount",
-            "ping",
-            "serverinfo",
-            "add"
-        ],
+        "disabledCommands": [],
+        "staffRoles": [],
         "suggestionChannel": "",
         "logsChannel": "",
         "patreonChannel": "",
@@ -127,7 +63,8 @@ client.on("guildCreate", guild => {
         "patreonUpdate": "",
         "steamUpdate": "",
         "serverRules": {},
-        "hiddenRules": {}
+        "hiddenRules": {},
+        "masters": []
     }
 
     fs.writeFile(`./serverConfigs/${guild.id}.json`, JSON.stringify(defaultConfig, null, 4), function writeJSON(err) {
@@ -141,9 +78,6 @@ client.on("guildDelete", guild => {
 
 client.on("disconnect", () => {
     console.log("Bot shutting down.")
-    for (guild in client.guilds.cache) {
-        music.disconnect(guild.voice.connection);
-    }
 })
 
 client.on("error", error => {

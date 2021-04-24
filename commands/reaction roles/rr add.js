@@ -1,4 +1,4 @@
-const reactionRoles = require("../../reactionRoles")
+const reactionRoles = require("../../reactionRoleFuncions")
 
 module.exports = {
     commands: ["rr add", "rradd"],

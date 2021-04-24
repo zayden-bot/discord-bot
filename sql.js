@@ -16,7 +16,7 @@ module.exports = {
         }
     },
 
-    run: function(data) { // run a query
+    run: function(data) { // Run a query
         if (data) {
             if (db) {
                 db.serialize(function() {
