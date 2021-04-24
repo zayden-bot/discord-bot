@@ -21,6 +21,7 @@ module.exports = (client) => {
                 }
             }
         }
+        console.log(`Registered ${files.length} command`);
     }
 
     readCommands("./")

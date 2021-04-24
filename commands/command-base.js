@@ -64,8 +64,6 @@ module.exports = (client, commandOptions) => {
         commands = [commands];
     }
 
-    console.log(`Registering command "${commands[0]}"`);
-
     if (permissions.length) {
         if (typeof permissions == "string") {
             permissions = [permissions]
