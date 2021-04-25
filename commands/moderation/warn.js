@@ -1,6 +1,21 @@
 const Discord = require("discord.js");
 const moderation = require("../../moderationFunctions")
 
+function addWarning(message, member, reason) {
+    const serverMsg = new Discord.MessageEmbed()
+    .setTitle(`User Warned`)
+    .setDescription(`**<@${member.id}> has been warned by <@${message.author.id}>\nReason: ${reason}**`)
+    .setColor("ff0000")
+
+    const privateMsg = new Discord.MessageEmbed()
+    .setDescription(`You were warned in ${message.guild.name} for: ${reason}`)
+
+    moderation.addLog(message.guild, member, "warning", message.author, reason)
+
+    message.channel.send(serverMsg)
+    member.user.send(privateMsg)
+}
+
 module.exports = {
     commands: ["warn"],
     expectedArgs: "<user> <reason>",
@@ -15,12 +30,9 @@ module.exports = {
         if (arguments[1]) { var reason = arguments.slice(1).join(" ") }
         else { var reason = "No Reason Given"}
 
-        
-        const privateMsg = new Discord.MessageEmbed()
-
         var warnings = moderation.getWarnings(message.guild, member)
 
-        if (warnings) {
+        if (Object.keys(warnings).length) {
             const muteMsg = new Discord.MessageEmbed()
             .setTitle(`${member.user.username} has been warned before:`)
             for (warning in warnings) {
@@ -38,21 +50,9 @@ module.exports = {
                         mute.callback(message, [ `<@${member.id}>`, "1h", reason ], `<@${member.id}> 1h ${reason}`)
                         return
                     } else { throw "Warning Sent" }
-                }).catch(messages => {
-                    const serverMsg = new Discord.MessageEmbed()
-                    .setTitle(`User Warned`)
-                    .setDescription(`**<@${member.id}> has been warned by <@${message.author.id}>\nReason: ${reason}**`)
-                    .setColor("ff0000")
-                
-                    privateMsg.setDescription(`You were warned in ${message.guild.name} for: ${reason}`)
-                
-                    moderation.addLog(message.guild, member, "warning", message.author, reason)
-                
-                    message.channel.send(serverMsg)
-                    member.user.send(privateMsg)
-                })
+                }).catch(messages => { addWarning(message, member, reason) })
             })
-        }
+        } else { addWarning(message, member, reason) }
     },
     requiredRoles: ["Security"],
 }
