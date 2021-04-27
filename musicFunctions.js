@@ -53,6 +53,7 @@ class Queue {
     }
 
     clearQueue() {
+        this.nowPlaying = null
         this.previousQueue = []
         this.currentQueue = []
     }
@@ -116,9 +117,10 @@ module.exports = {
         module.exports.play(message, message.guild.voice.connection)
     },
 
-    clear: function(message) {
+    clear: function(guild) {
         const { servers } = require("./index")
-        let queue = servers[message.guild.id].queue
+        const queue = servers[guild.id].queue
+        
         queue.clearQueue()
     },
 
@@ -146,12 +148,12 @@ module.exports = {
         queue.currentQueue.splice(trackPosition - 1, 1)
     },
 
-    disconnect: function(message, connection) {
-        module.exports.clear(message)
+    disconnect: function(guild) {
+        const { servers } = require("./index")
+        const queue = servers[guild.id].queue
+        queue.clearQueue()
 
-        if (dispatcher) { dispatcher.destroy(); }
-
-        connection.disconnect();
+        guild.voice.connection.disconnect()
 
     },
 

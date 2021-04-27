@@ -6,7 +6,7 @@ module.exports = {
     minArgs: 1,
     maxArgs: 1,
     callback: (message, arguments, text) => {
-        reactionRoles.getMessage(text)
+        reactionRoles.setMessageId(text)
     },
     permissions: ["ADMINISTRATOR"],
 }

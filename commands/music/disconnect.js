@@ -8,8 +8,8 @@ module.exports = {
             message.reply("Not in voice channel. Use `!play` to queue some music up.")
             return
         }
-        const connection = message.guild.voice.connection
-        music.disconnect(message, connection)
+
+        music.disconnect(message.guild)
         message.channel.send("Disconnecting...")
     },
 }

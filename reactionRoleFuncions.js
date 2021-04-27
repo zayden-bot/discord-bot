@@ -1,4 +1,3 @@
-const Discord = require("discord.js")
 const sql = require("./sql");
 
 let channelId;
@@ -9,83 +8,95 @@ let checkReactionMessages = []
 
 module.exports = {
     init: function () {
-        sql.each("SELECT * FROM `reactionRoleMessages`", (row) => {
-            reactionMessages.push([row.channelId, row.messageId, row.emoji, row.roleId]);
-            checkReactionMessages.push([row.channelId, row.messageId, row.emoji]);
+        const { servers } = require("./index")
+        sql.each("SELECT * FROM `reactionRoles`", (row) => {
+            servers[row.guildId].reactionRoles[row.id] = {
+                "channelId": row.channelId,
+                "messageId": row.messageId,
+                "emoji": row.emoji,
+                "roleId": row.roleId
+            }
         })
-        console.log(`Loaded ${reactionMessages.length} reaction messages!`);
     },
 
-    getChannel: function(channel) { // Get Channel ID
+    setChannelId: function(channel) { // Get Channel ID
         channelId = channel.match(/\d+/)[0];
     },
 
-    getMessage: function(message) { // Get Message ID
+    getChannelId: () => {
+        return channelId
+    },
+
+    setMessageId: function(message) { // Get Message ID
         messageId = message.match(/\d+/)[0];
     },
 
-    addNormalReaction: function(message, emoji, role) { // Add the reaction to message + database
+    getMessageId: () => {
+        return messageId
+    },
+
+    // Add the reaction to message + database
+    addNormalReaction: function(client, guildId, emoji, role) {
         const roleId = role.match(/\d+/);
-        message.client.channels.fetch(channelId).then(channel => {
-            channel.messages.fetch(messageId).then(message => {
-                if (checkReactionMessages.includes([channelId, message.id, emoji])) {
-                    message.reply("Reaction already exists.")
-                } else {
-                    message.react(emoji)
-                    sql.run(`INSERT INTO 'reactionRoleMessages' ('channelId', 'messageId', 'emoji', 'roleId') VALUES ('${channel.id}', '${message.id}', '${emoji}', '${roleId}');`)
-                    reactionMessages.push([channel.id, message.id, emoji, roleId]);
-                    checkReactionMessages.push([channel.id, message.id, emoji]);
+        client.channels.fetch(channelId).then(channel => {
+            channel.messages.fetch(messageId).then(msg => {
+                const { servers } = require("./index");
+                const { reactionRoles } = servers[guildId];
+
+                const id = Object.keys(reactionRoles).length
+                sql.run(`INSERT INTO 'reactionRoles' ('id', 'guildId', 'channelId', 'messageId', 'emoji', 'roleId') VALUES ('${id}', '${guildId}', '${channelId}', '${messageId}', '${emoji}', '${roleId}');`)
+                msg.react(emoji)
+                
+                reactionRoles[id] = {
+                    "channelId": channelId,
+                    "messageId": messageId,
+                    "emoji": emoji,
+                    "roleId": roleId
                 }
             })
         })
     },
 
-    addNormalReactionRole: function(client) { // Watch for reaction and grant role
+    addNormalReactionRole: client => { // Watch for reaction and grant role
         client.on("messageReactionAdd", (reaction, user) => {
-            let check = false
-            let index;
+            const { servers } = require("./index");
+            const { guild } = reaction.message
+            const { reactionRoles } = servers[guild.id];
 
-            for (let i = 0; i < checkReactionMessages.length; i++) {
-                if (checkReactionMessages[i][0] == reaction.message.channel.id && checkReactionMessages[i][1] == reaction.message.id && checkReactionMessages[i][2] == reaction._emoji.name) {
-                    check = true
-                    index = i
+            for (reactionRoleId in reactionRoles) {
+                if (reaction.message.id == reactionRoles[reactionRoleId].messageId && reaction.message.channel.id == reactionRoles[reactionRoleId].channelId && reaction._emoji.name == reactionRoles[reactionRoleId].emoji && user.id !== "787490197943091211") {
+                    let roleId = reactionRoles[reactionRoleId].roleId
+
+                    if (typeof(roleId) == "string") { roleId = [roleId] }
+                    const role = guild.roles.cache.get(roleId[0])
+
+                    const member = guild.members.cache.find(member => member.id == user.id)
+                    
+                    member.roles.add(role)
+                    break
                 }
-            }
-
-            if (check && user.id !== "787490197943091211") {
-                const { guild } = reaction.message
-                const roleId = reactionMessages[index][3]
-
-                const role = guild.roles.cache.get(roleId)
-                const member = guild.members.cache.find(member => member.id === user.id)
-                
-                member.roles.add(role)
             }
         })
     },
 
     removeNormalReactionRole: function(client) { // Remove reaction Role
         client.on("messageReactionRemove", (reaction, user) => {
-            let check = false
-            let index;
+            const { servers } = require("./index");
+            const { guild } = reaction.message
+            const { reactionRoles } = servers[guild.id];
 
-            for (let i = 0; i < checkReactionMessages.length; i++) {
-                if (checkReactionMessages[i][0] == reaction.message.channel.id && checkReactionMessages[i][1] == reaction.message.id && checkReactionMessages[i][2] == reaction._emoji.name) {
-                    check = true
-                    index = i
+            for (reactionRoleId in reactionRoles) {
+                if (reaction.message.id == reactionRoles[reactionRoleId].messageId && reaction.message.channel.id == reactionRoles[reactionRoleId].channelId && reaction._emoji.name == reactionRoles[reactionRoleId].emoji && user.id !== "787490197943091211") {
+                    let roleId = reactionRoles[reactionRoleId].roleId
+                    
+                    if (typeof(roleId) == "string") { roleId = [roleId] }
+                    const role = guild.roles.cache.get(roleId[0])
+
+                    const member = guild.members.cache.find(member => member.id == user.id)
+                    
+                    member.roles.remove(role)
                     break
                 }
-            }
-
-            if (check && user.id !== "787490197943091211") {
-                const { guild } = reaction.message
-                const roleId = reactionMessages[index][3]
-
-                const role = guild.roles.cache.get(roleId)
-                const member = guild.members.cache.find(member => member.id === user.id)
-
-                member.roles.remove(role)
-
             }
         })
     }

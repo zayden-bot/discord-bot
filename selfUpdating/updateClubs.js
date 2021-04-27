@@ -28,8 +28,10 @@ module.exports = {
 
             :eight: <@&825746784688668713>
             Those that don't want to be under the rule of a passive aggressive old man that want the right of freedom of speech.
+
+            :nine: <@&836659038666227722>
+            Ever wanted to finger the ginger? Now its your time to shine and show off your obsession with Riley
             `)
-            .setColor("0000ff")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
 
         channel.messages.fetch("805767878212452372").then((message) => { message.edit(updatedClubs) })

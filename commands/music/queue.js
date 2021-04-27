@@ -6,7 +6,7 @@ function getQueue(queue) {
     // }
 
     let queueText = ""
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 21; i++) {
         if (i < queue.currentQueue.length) {
             const song = queue.currentQueue[i]
             queueText += `${i+1}. ${song.title}\n`
