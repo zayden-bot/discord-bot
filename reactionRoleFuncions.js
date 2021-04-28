@@ -37,7 +37,7 @@ module.exports = {
 
     // Add the reaction to message + database
     addNormalReaction: function(client, guildId, emoji, role) {
-        const roleId = role.match(/\d+/);
+        const roleId = role.match(/\d+/)[0];
         client.channels.fetch(channelId).then(channel => {
             channel.messages.fetch(messageId).then(msg => {
                 const { servers } = require("./index");

@@ -5,7 +5,9 @@ module.exports = {
     expectedArgs: "<user>",
     minArgs: 1,
     callback: (message, arguments, text) => {
-        const member = message.mentions.members.first()
+        const memberId = arguments[0].match(/\d+/)[0];
+        const member = message.guild.members.cache.get(memberId)
+        
         if (!member) {
             message.reply("Please mention a valid member")
             return
@@ -14,15 +16,13 @@ module.exports = {
         const index = require("../../index")
         let server = index.servers[message.guild.id]
 
-        console.log(server.moderation)
-
         for (log in server.moderation) {
             if (server.moderation[log].userId == member.id && server.moderation[log].type == "warning") {
                 sql.run(`DELETE FROM 'moderation' WHERE caseNumber = '${Number(log)}';`);
                 delete server.moderation[log]
             }
         }
-        console.log(server.moderation)
+        message.channel.send(`Cleared ${member.user.username} warnings.`)
     },
     requiredRoles: ["Security"],
 }

@@ -16,30 +16,32 @@ module.exports = {
         console.log(`Loaded ${Object.keys(servers).length} servers!`);
     },
 
-    addLog: (guild, user, type, moderator, reason) => {
+    addLog: (guild, member, type, moderator, reason) => {
         const { servers } = require("./index")
         let server = servers[guild.id]
 
-        var caseNumber = Object.keys(server.moderation).length
+        const caseNumber = Object.keys(server.moderation).length
+
+        reason = reason.replace("'", "\'")
 
         server.moderation[caseNumber] = {
-            "userId": user.id,
+            "userId": member.user.id,
             "type": type,
             "moderator": moderator.id,
             "reason": reason
         }
 
-        sql.run(`INSERT INTO 'moderation' ('caseNumber', 'guildId', 'userId', 'type', 'moderator', 'reason') VALUES ('${caseNumber}', '${guild.id}', '${user.id}', '${type}', '${moderator.id}', '${reason}');`)
+        sql.run(`INSERT INTO 'moderation' ('caseNumber', 'guildId', 'userId', 'type', 'moderator', 'reason') VALUES ('${caseNumber}', '${guild.id}', '${member.user.id}', '${type}', '${moderator.id}', '${reason}');`)
 
     },
 
-    getWarnings: (guild, user) => {
+    getWarnings: (guild, member) => {
         const { servers } = require("./index")
         let server = servers[guild.id]
         let warnings = {}
 
         for (log in server.moderation) {
-            if (server.moderation[log].userId == user.id && server.moderation[log].type == "warning") {
+            if (server.moderation[log].userId == member.user.id && server.moderation[log].type == "warning") {
                 warnings[log] = server.moderation[log]
             }
         }
@@ -50,13 +52,13 @@ module.exports = {
         return
     },
 
-    getLogs: (guild, user) => {
+    getLogs: (guild, member) => {
         const { servers } = require("./index")
         let server = servers[guild.id]
         let logs = {}
 
         for (log in server.moderation) {
-            if (server.moderation[log].userId == user.id) {
+            if (server.moderation[log].userId == member.user.id) {
                 logs[log] = server.moderation[log]
             }
         }

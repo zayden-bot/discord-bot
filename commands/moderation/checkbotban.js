@@ -6,7 +6,8 @@ module.exports = {
     expectedArgs: "<user>",
     minArgs: 1,
     callback: (message, arguments, text) => {
-        const member = message.mentions.members.first()
+        const memberId = arguments[0].match(/\d+/)[0];
+        const member = message.guild.members.cache.get(memberId)
 
         if (!member) {
             message.reply("Please mention a valid user.")
