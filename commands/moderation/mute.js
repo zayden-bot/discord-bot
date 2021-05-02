@@ -17,6 +17,7 @@ module.exports = {
         let reason = "No Reason Given"
         let duration = arguments[1]
         const durations = {
+            s: 1,
             m: 60,
             h: 60 * 60,
             d: 60 * 60 * 24,

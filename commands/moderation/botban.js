@@ -13,13 +13,13 @@ module.exports = {
             return
         }
 
-        if (blacklist.isProtectedUser(member.user.id)) {
+        if (blacklist.isProtectedUser(member.id)) {
             message.reply("Nice try you can't botban that user <:pepepointedlaugh:788514455477813320>");
         } else {
-            if (blacklist.isBlacklisted(member.user.id)) {
+            if (blacklist.isBlacklisted(member.id)) {
                 message.reply("User is already blacklisted!");
             } else {
-                blacklist.blacklist(member.user.id);
+                blacklist.blacklist(member.id);
                 message.reply("You have succesfully blacklisted the user!");
             }
         }

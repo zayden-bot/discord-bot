@@ -25,13 +25,13 @@ module.exports = {
         reason = reason.replace("'", "\'")
 
         server.moderation[caseNumber] = {
-            "userId": member.user.id,
+            "userId": member.id,
             "type": type,
             "moderator": moderator.id,
             "reason": reason
         }
 
-        sql.run(`INSERT INTO 'moderation' ('caseNumber', 'guildId', 'userId', 'type', 'moderator', 'reason') VALUES ('${caseNumber}', '${guild.id}', '${member.user.id}', '${type}', '${moderator.id}', '${reason}');`)
+        sql.run(`INSERT INTO 'moderation' ('caseNumber', 'guildId', 'userId', 'type', 'moderator', 'reason') VALUES ('${caseNumber}', '${guild.id}', '${member.id}', '${type}', '${moderator.id}', '${reason}');`)
 
     },
 
@@ -41,7 +41,7 @@ module.exports = {
         let warnings = {}
 
         for (log in server.moderation) {
-            if (server.moderation[log].userId == member.user.id && server.moderation[log].type == "warning") {
+            if (server.moderation[log].userId == member.id && server.moderation[log].type == "warning") {
                 warnings[log] = server.moderation[log]
             }
         }
@@ -58,7 +58,7 @@ module.exports = {
         let logs = {}
 
         for (log in server.moderation) {
-            if (server.moderation[log].userId == member.user.id) {
+            if (server.moderation[log].userId == member.id) {
                 logs[log] = server.moderation[log]
             }
         }

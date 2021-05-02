@@ -14,7 +14,7 @@ module.exports = {
             return
         }
 
-        if (blacklist.isBlacklisted(member.user.id)) {
+        if (blacklist.isBlacklisted(member.id)) {
             message.reply("The user is blacklisted!");
         } else {
             message.reply("The user is not blacklisted!");

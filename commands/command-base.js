@@ -92,7 +92,7 @@ module.exports = (client, commandOptions) => {
 
                 // Check if the user has the correct permissions to run the command
                 for (const permission of permissions) {
-                    if (!member.hasPermission(permission) && !botConfig.developers.includes(member.id)) {
+                    if (guild && !member.hasPermission(permission) && !botConfig.developers.includes(member.id)) {
                         message.reply(permissionError)
                         return
                     }
@@ -109,12 +109,13 @@ module.exports = (client, commandOptions) => {
                 }
 
                 // Check if the user is blacklisted
-                if (blacklist.isBlacklisted(member.user.id) && !botConfig.developers.includes(member.id)) {
+                if (guild && blacklist.isBlacklisted(member.id) && !botConfig.developers.includes(member.id)) {
                     return
                 }
 
                 // Check if the command is on cooldown
-                let cooldownString = `${guild.id}-${member.id}-${commands[0]}`
+                try { var cooldownString = `${guild.id}-${member.id}-${commands[0]}` }
+                catch { var cooldownString = `privateMessage-${message.author.id}-${commands[0]}` }
                 if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(serverConfig.staffRoles)) {
                     message.reply("You cannot use that command so soon, please wait")
                     return

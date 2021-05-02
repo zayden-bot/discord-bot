@@ -13,8 +13,8 @@ module.exports = {
             return
         }
 
-        if (blacklist.isBlacklisted(member.user.id)) {
-            blacklist.removeBlacklist(member.user.id);
+        if (blacklist.isBlacklisted(member.id)) {
+            blacklist.removeBlacklist(member.id);
             message.reply("You have succesfully removed the blacklist from the user!");
         } else {
             message.reply("The user is not blacklisted!");
