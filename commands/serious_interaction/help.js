@@ -16,7 +16,7 @@ module.exports = {
 
             // Check for permissions
             if (permissions) {
-                if (typeof(message.guild) == "undefined") { continue }
+                if (message.guild == null) { continue }
 
                 if (typeof permissions === "string") {
                     permissions = [permissions]
@@ -32,6 +32,7 @@ module.exports = {
 
             // Check for requiredRoles
             if (roles) {
+                if (message.guild == null) { continue }
                 if (typeof roles === "string") {
                     roles = [roles]
                 }

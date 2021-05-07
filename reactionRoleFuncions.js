@@ -59,6 +59,8 @@ module.exports = {
 
     addNormalReactionRole: client => { // Watch for reaction and grant role
         client.on("messageReactionAdd", (reaction, user) => {
+            if (reaction.message.guild == null) { return }
+
             const { servers } = require("./index");
             const { guild } = reaction.message
             const { reactionRoles } = servers[guild.id];
@@ -81,6 +83,8 @@ module.exports = {
 
     removeNormalReactionRole: function(client) { // Remove reaction Role
         client.on("messageReactionRemove", (reaction, user) => {
+            if (reaction.message.guild == null) { return }
+            
             const { servers } = require("./index");
             const { guild } = reaction.message
             const { reactionRoles } = servers[guild.id];

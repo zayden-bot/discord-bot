@@ -5,7 +5,6 @@ const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 
 const loadCommands = require("./commands/load-commands");
 const botConfig = require("./configs/botConfig.json");
-const music = require("./musicFunctions")
 
 let servers = {};
 
@@ -24,7 +23,6 @@ client.on("ready", async () => {
         servers[guild] = {}
         servers[guild].moderation = {}
         servers[guild].reactionRoles = {}
-        servers[guild].queue = new music.Queue(guild)
     }
     module.exports = { servers: servers }
     

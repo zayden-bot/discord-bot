@@ -32,9 +32,11 @@ module.exports = {
         if (arguments[1]) { var reason = arguments.slice(1).join(" ") }
         else { var reason = "No Reason Given"}
 
+        addWarning(message, member, reason)
+
         var warnings = moderation.getWarnings(message.guild, member)
 
-        if (Object.keys(warnings).length) {
+        if (Object.keys(warnings).length > 1) {
             const muteMsg = new Discord.MessageEmbed()
             .setTitle(`${member.user.username} has been warned before:`)
             for (warning in warnings) {
@@ -54,7 +56,7 @@ module.exports = {
                     } else { throw "Warning Sent" }
                 }).catch(messages => { addWarning(message, member, reason) })
             })
-        } else { addWarning(message, member, reason) }
+        }
     },
     requiredRoles: ["Security"],
 }
