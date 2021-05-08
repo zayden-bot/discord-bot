@@ -1,14 +1,4 @@
 const Discord = require("discord.js");
-const config = require("../../serverConfigs/745662812335898806.json")
-
-const PatreonUpdate = new Date(config.patreonUpdate)
-// const SteamUpdate = new Date(config.steamUpdate)
-
-const PatreonUpdateMS = PatreonUpdate.getTime()
-let SteamUpdateMS;
-if (typeof(SteamUpdate) !== "undefined") {
-    SteamUpdateMS = SteamUpdate.getTime()
-}
 
 function msToTime(ms) {
     const days = Math.floor(ms / (1000 * 60 * 60 * 24));
@@ -21,49 +11,66 @@ function msToTime(ms) {
 module.exports = {
     commands: ["update"],
     callback: (message, arguments, text) => {
-        const currentTime = new Date().getTime()
-        let newSteamUpdate;
-        if (typeof(SteamUpdate) !== "undefined") {
-            newSteamUpdate = SteamUpdateMS - currentTime
-        }
-        const newPatreonUpdate = PatreonUpdateMS - currentTime
+        const config = require(`../../serverConfigs/${message.guild.id}`)
+        const currentTimeMS = new Date().getTime()
 
-        let patreonOutput, steamOutput;
-        
-        if (typeof(PatreonUpdate) == "undefined") {
+        // Patreon update
+        let patreonOutput = "";
+        let patreonDateMS = 0;
+        let patreonUpdateMS = 0;
+        const patreonDate = new Date(config.patreonUpdate)
+
+        if (config.patreonUpdate == "") {
             patreonOutput = "No public date set."
-        } else if (newPatreonUpdate < 0) {
+        } else {
+            patreonDateMS = patreonDate.getTime()
+            patreonUpdateMS = patreonDateMS - currentTimeMS
+        }
+
+        if (patreonUpdateMS < 0) {
             patreonOutput = "RELEASED"
-        } else {
-            const day = PatreonUpdate.toLocaleString("en-GB", { day:"numeric" })
-            const month = PatreonUpdate.toLocaleString("en-GB", { month:"long" })
+        } else if (patreonUpdateMS > 0) {
+            const day = patreonDate.toLocaleString("en-GB", { day:"numeric" })
+            const month = patreonDate.toLocaleString("en-GB", { month:"long" })
     
-            const [ days, hours, minutes, seconds ] = msToTime(newPatreonUpdate)
+            const [ days, hours, minutes, seconds ] = msToTime(patreonUpdateMS)
 
-            patreonOutput = `${day}th ${month}\n${days}d ${hours}h ${minutes}m ${seconds}s`
+            patreonOutput = `${day} ${month}\n${days}d ${hours}h ${minutes}m ${seconds}s`
         }
 
-        if (typeof(SteamUpdate) == "undefined") {
-            steamOutput = "Late May or Early June"
-        } else if (newSteamUpdate < 0) {
+        // Steam update
+        let steamOutput = "";
+        let steamDateMS = 0;
+        let steamUpdateMS = 0;
+        const steamDate = new Date(config.steamUpdate)
+
+        if (config.steamUpdate == "") {
+            steamOutput = "No public date set."
+        } else {
+            steamDateMS = steamDate.getTime()
+            steamUpdateMS = steamDateMS - currentTimeMS
+        }
+
+        if (steamUpdateMS < 0) {
             steamOutput = "RELEASED"
-        } else {
-            const day = SteamUpdate.toLocaleString("en-GB", { day:"numeric" })
-            const month = SteamUpdate.toLocaleString("en-GB", { month:"long" })
-
-            const [ days, hours, minutes, seconds ] = msToTime(newSteamUpdate)
+        } else if (steamUpdateMS > 0) {
+            const day = steamDate.toLocaleString("en-GB", { day:"numeric" })
+            const month = steamDate.toLocaleString("en-GB", { month:"long" })
     
-            steamOutput = `${day}th ${month}\n${days}d ${hours}h ${minutes}m ${seconds}s`
+            const [ days, hours, minutes, seconds ] = msToTime(steamUpdateMS)
+
+            steamOutput = `${day} ${month}\n${days}d ${hours}h ${minutes}m ${seconds}s`
         }
 
+        // Send update message
         const embed = new Discord.MessageEmbed()
-            .setTitle("Next College Kings Update (9.0.0)")
+            .setTitle("Next College Kings Update (10.0/Act 2)")
             .setColor("ff0000")
             .setDescription("If you are interested in the next update, read below:")
             .addField("__Patreon Release__ ($10)", patreonOutput, true)
             .addField("__Steam Release__ ($5 - $15)", steamOutput, true)
             .setImage("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg?width=1440&height=360")
-            .setURL("https://www.youtube.com/watch?v=rIelf_KPybE")
+            .setURL("https://store.steampowered.com/app/1624520/College_Kings__Act_II/")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
             .setFooter("https://www.patreon.com/collegekings")
 
