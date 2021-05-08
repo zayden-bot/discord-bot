@@ -13,7 +13,12 @@ function addWarning(message, member, reason) {
     moderation.addLog(message.guild, member, "warning", message.author, reason)
 
     message.channel.send(serverMsg)
-    member.user.send(privateMsg)
+    try { member.user.send(privateMsg) }
+    catch (error) {
+        if (!(error instanceof(Discord.DiscordAPIError))) {
+            throw error
+        }
+    }
 }
 
 module.exports = {
@@ -58,5 +63,5 @@ module.exports = {
             })
         }
     },
-    requiredRoles: ["Security"],
+    permissions: ["MANAGE_MESSAGES"],
 }

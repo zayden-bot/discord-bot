@@ -68,7 +68,12 @@ module.exports = {
         member.roles.add(mutedRole)
 
         message.channel.send(serverMsg)
-        member.user.send(privateMsg)
+        try { member.user.send(privateMsg) }
+        catch (error) {
+            if (!(error instanceof(Discord.DiscordAPIError))) {
+                throw error
+            }
+        }
 
         if (duration > 0) {
             setTimeout( () => {
@@ -77,5 +82,5 @@ module.exports = {
         }
 
     },
-    requiredRoles: "Security"
+    permissions: ["MANAGE_MESSAGES"],
 }

@@ -39,5 +39,5 @@ module.exports = {
         catch {}
         
     },
-    requireRoles: ["Security"]
+    permissions: ["MANAGE_MESSAGES"],
 }

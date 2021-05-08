@@ -24,5 +24,5 @@ module.exports = {
         }
         message.channel.send(`Cleared ${member.user.username} warnings.`)
     },
-    requiredRoles: ["Security"],
+    permissions: ["MANAGE_MESSAGES"],
 }

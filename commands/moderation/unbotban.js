@@ -20,5 +20,5 @@ module.exports = {
             message.reply("The user is not blacklisted!");
         }
     },
-    requiredRoles: ["Security"],
+    permissions: ["MANAGE_MESSAGES"],
 }

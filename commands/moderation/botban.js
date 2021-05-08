@@ -24,5 +24,5 @@ module.exports = {
             }
         }
     },
-    requiredRoles: ["Security"],
+    permissions: ["MANAGE_MESSAGES"],
 }

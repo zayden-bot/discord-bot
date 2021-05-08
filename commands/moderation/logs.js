@@ -31,5 +31,5 @@ module.exports = {
 
         message.channel.send(embed)
     },
-    requiredRoles: ["Security"],
+    permissions: ["MANAGE_MESSAGES"],
 }

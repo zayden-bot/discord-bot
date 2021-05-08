@@ -4,7 +4,6 @@ const config = require("../../serverConfigs/745662812335898806.json")
 module.exports = {
     commands: ["fetchSuggestions", "fetchsuggestions"],
     permissionError: "",
-    requiredRoles: ["Security"],
     callback: async (message) => {
         var startTime, endTime;
         startTime = new Date();
@@ -57,4 +56,5 @@ module.exports = {
                 statusMessage.edit(`Information sent in DMs, elapsed time: ${Math.round(timeDiff /= 1000)} second(s)!`);
             });
     },
+    permissions: ["MANAGE_MESSAGES"],
 }

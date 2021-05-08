@@ -30,7 +30,12 @@ module.exports = {
         member.ban( {days: 7, reason: reason} )
         .then( () => {
             message.channel.send(serverMsg)
-            member.user.send(privateMsg)
+            try { member.user.send(privateMsg) }
+            catch (error) {
+                if (!(error instanceof(Discord.DiscordAPIError))) {
+                    throw error
+                }
+            }
         })
         .catch( err => { message.reply(`Failed to ban ${member.user.username}`) })
     },

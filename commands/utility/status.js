@@ -14,5 +14,5 @@ module.exports = {
         message.reply(`Status Changed to: Playing ${text}`)
     },
     permissions: [],
-    requiredRoles: ["Security"],
+    permissions: ["ADMINISTRATOR"],
 }
