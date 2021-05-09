@@ -31,11 +31,7 @@ module.exports = {
         .then( () => {
             message.channel.send(serverMsg)
             try { member.user.send(privateMsg) }
-            catch (error) {
-                if (!(error instanceof(Discord.DiscordAPIError))) {
-                    throw error
-                }
-            }
+            catch {}
         })
         .catch( err => { message.reply(`Failed to ban ${member.user.username}`) })
     },

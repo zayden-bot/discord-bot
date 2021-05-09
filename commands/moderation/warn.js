@@ -14,11 +14,7 @@ function addWarning(message, member, reason) {
 
     message.channel.send(serverMsg)
     try { member.user.send(privateMsg) }
-    catch (error) {
-        if (!(error instanceof(Discord.DiscordAPIError))) {
-            throw error
-        }
-    }
+    catch {}
 }
 
 module.exports = {

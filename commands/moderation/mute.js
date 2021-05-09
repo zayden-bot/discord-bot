@@ -68,12 +68,11 @@ module.exports = {
         member.roles.add(mutedRole)
 
         message.channel.send(serverMsg)
-        try { member.user.send(privateMsg) }
-        catch (error) {
-            if (!(error instanceof(Discord.DiscordAPIError))) {
-                throw error
-            }
-        }
+        .then( () => {
+            message.channel.send(serverMsg)
+            try { member.user.send(privateMsg) }
+            catch {}
+        })
 
         if (duration > 0) {
             setTimeout( () => {
