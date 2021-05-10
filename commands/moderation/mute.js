@@ -68,11 +68,8 @@ module.exports = {
         member.roles.add(mutedRole)
 
         message.channel.send(serverMsg)
-        .then( () => {
-            message.channel.send(serverMsg)
-            try { member.user.send(privateMsg) }
-            catch {}
-        })
+        try { member.user.send(privateMsg) }
+        catch {}
 
         if (duration > 0) {
             setTimeout( () => {
