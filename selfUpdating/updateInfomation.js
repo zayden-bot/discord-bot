@@ -19,9 +19,8 @@ const field3 = `<#745662813036609548> ~ Highly moderated and regulated chat.
 <#832695012709892107> ~ 0100111001100101011100100110010001110011 
 <#747428461391380532> ~ (spoilers) for theories about College Kings
 <#817235460467720194> ~ (spoilers) Make your own tierlist from the pinned links and post it here
-<#789831288558452746> ~ (nsfw) Post your or other art. If it isn't your art, make sure to credit the artist
+<#789831288558452746> ~ (nsfw) Post your or other art. If it isn't your art, make sure to credit an official publication from the artist
 <#770621445637799946> ~ (spoilers) Here you can discuss College Kings without having to spoiler mark you messages
-<#747428952577933424> ~ (nsfw) For real nsfw images. 2D or 3D art goes in #art
 <#772516507041005618> ~ (nsfw) You can talk about and send screenshots of other games here
 <#776139754408247326> ~ Use bot commands here, unless they add to a conversation in another channel`
 
@@ -37,7 +36,7 @@ Groovy ~ Listen to some music together with <@234395307759108106>
 __**Roles:**__`
 
 const field6 = `The server staff and developers are having special roles so you can find them easily.
-<@&746717374761402438>, <@&807370330388693082>, <@&807366743546396782>, <@&764860044977504318>, <@&803393475440541727>, <@&787003873839022081>, <@&804524527191195668>, <@&805243547363704835>`
+<@&746717374761402438>, <@&807370330388693082>, <@&807366743546396782>, <@&764860044977504318>, <@&803393475440541727>, <@&787003873839022081>, <@&804524527191195668>`
 
 const field7 = `If you join the patreon (which you absolutely should), you can gain an awesome colourful role. 
 <@&745663432560345218>, <@&745663409932206112>, <@&745663394543304704>, <@&745663375496708127>, <@&745663351756947656>, <@&745663316776714370>, <@&768568151343497257>`
@@ -46,7 +45,7 @@ const field8 = `Fan roles are pink and optained through activity in the server. 
 <@&787443819024220210>, <@&787445571539304510>, <@&787445900992577556>, <@&787446715057831976>, <@&787447090728796191>, <@&787447252783202326>`
 
 const field9 = `Join a College Kings Club below!
-<@&805766527889440778>, <@&805766587704803339>, <@&805766682202079273>, <@&805766763215847454>, <@&805766896233742346>, <@&809240184201412619>, <@&809240269622214676>, <@&825746784688668713>, <@&818365011554336809>, <@&818365035259887626>`
+<@&805766527889440778>, <@&805766587704803339>, <@&805766682202079273>, <@&805766763215847454>, <@&805766896233742346>, <@&809240184201412619>, <@&809240269622214676>, <@&825746784688668713>, <@&818365011554336809>, <@&818365035259887626>, <@&836659038666227722>`
 
 module.exports = async (client, channelId) => {
     const channel = await client.channels.fetch(channelId)
