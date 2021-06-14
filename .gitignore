@@ -1,4 +1,6 @@
 database/
 node_modules/
 configs/botConfig.json
+
 client_secrets.json
+package-lock.json
