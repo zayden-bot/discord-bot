@@ -64,13 +64,13 @@ module.exports = {
 
         // Send update message
         const embed = new Discord.MessageEmbed()
-            .setTitle("Next College Kings Update (10.0/Act 2)")
+            .setTitle("Next Update (v11.0/Act 3 Part 1)")
             .setColor("ff0000")
             .setDescription("If you are interested in the next update, read below:")
             .addField("__Patreon Release__ ($10)", patreonOutput, true)
-            .addField("__Steam Release__ ($9.99)", steamOutput, true)
+            .addField("__Steam Release__", steamOutput, true)
             .setImage("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg?width=1440&height=360")
-            .setURL("https://store.steampowered.com/app/1624520/College_Kings__Act_II/")
+            .setURL("https://www.patreon.com/collegekings")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
             .setFooter("https://www.patreon.com/collegekings")
 
