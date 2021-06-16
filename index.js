@@ -91,15 +91,13 @@ client.on("guildMemberUpdate", (oldMember, newMember) =>{
         ['745663409932206112'] : 50, // President
         ['745663432560345218'] : 100 // King
     }
-    if (newMember.roles.cache.size < oldMember.roles.cache.size) { return; } // Role removed
-
     // Get new added role
     const newRole = newMember.roles.cache
         .filter(role => !oldMember.roles.cache.has(role.id))
         .first()
 
     // Is new role a patreon role
-    if (newRole.id in patreonRoles) {
+    if (typeof(newRole) != "undefined" && newRole.id in patreonRoles) {
         const emebed = new Discord.MessageEmbed()
         .setTitle("New Patron")
         .setColor(`${newRole.hexColor}`)
