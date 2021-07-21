@@ -3,11 +3,13 @@ const fs = require("fs")
 
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
 
+const init = require("./init")
 const loadCommands = require("./commands/load-commands");
 const botConfig = require("./configs/botConfig.json");
 
 let servers = {};
 
+// Init
 client.on("ready", async () => {
     console.log(`Zayden is Running, version: ${botConfig.version}`);
 
@@ -26,6 +28,8 @@ client.on("ready", async () => {
     }
     module.exports = { servers: servers }
     
+    init.updateImages();
+
     // Connect to database
     const sql = require("./sql");
     sql.init(); 

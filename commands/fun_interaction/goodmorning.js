@@ -12,11 +12,6 @@ module.exports = {
 
         let arrayId = "Global";
         if (message.author.id in imgConfig.goodMorningImgs) { arrayId = message.author.id }
-        else {
-            try {
-                if (message.mentions.members.first().user.id in imgConfig.fuckingImgs) { arrayId = message.mentions.members.first().user.id }
-            } catch {}
-        }
 
         const imgId = Math.floor(Math.random() * imgConfig.goodMorningImgs[arrayId].length)
 
