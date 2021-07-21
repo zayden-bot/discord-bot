@@ -2,7 +2,11 @@ const Discord = require("discord.js")
 
 const field1 = `"This server is about the game "College Kings". You can always  Supporting the game on patreon helps us a lot, so if you have the resources, consider joining the patreon.
 You can always get the newest version on patreon.
+Get Act 1 for free here:
 https://store.steampowered.com/app/1463120/College_Kings__Act_I/
+Get the lastest steam version here:
+https://store.steampowered.com/dlc/1463120/College_Kings__Act_I/
+Get the latest patreon version here:
 https://patreon.com/collegekings
 
 __**Channels:**__`
@@ -12,7 +16,10 @@ const field2 = `<#830927865784565800>
 <#747426032453156924> ~ Announcements about the game and the server
 <#797859157562359888> ~ Information about events
 <#803728389500174378> ~ New patreon posts are announced here
-<#806504327307853826> ~ If someone joins the patreon server it is announced here to celebrate the awesomeness of that person!`
+<#775795293894475816> ~ Find information about the patreon here
+<#806504327307853826> ~ If someone joins the patreon server it is announced here to celebrate the awesomeness of that person!
+<#867385605553389618> ~ This is a live feed of College Kings development
+<#805765564504473641> ~ You can get Roles, like the "Event Role" or "Crazy for Chloe" role here`
 
 const field3 = `<#745662813036609548> ~ Highly moderated and regulated chat.
 <#787774961850646559> ~ Everything that doesn't fit in another channel and memes go here
@@ -21,7 +28,7 @@ const field3 = `<#745662813036609548> ~ Highly moderated and regulated chat.
 <#817235460467720194> ~ (spoilers) Make your own tierlist from the pinned links and post it here
 <#789831288558452746> ~ (nsfw) Post your or other art. If it isn't your art, make sure to credit an official publication from the artist
 <#770621445637799946> ~ (spoilers) Here you can discuss College Kings without having to spoiler mark you messages
-<#772516507041005618> ~ (nsfw) You can talk about and send screenshots of other games here
+<#772516507041005618> ~ (nsfw) You can talk about and discuss other games here
 <#776139754408247326> ~ Use bot commands here, unless they add to a conversation in another channel`
 
 const field4 = `<#779064182259449896> ~ Vote for your favourite suggestions here
@@ -44,8 +51,8 @@ const field7 = `If you join the patreon (which you absolutely should), you can g
 const field8 = `Fan roles are pink and optained through activity in the server. You will get your first one at level 5, which allows you to post images in all the channels.
 <@&787443819024220210>, <@&787445571539304510>, <@&787445900992577556>, <@&787446715057831976>, <@&787447090728796191>, <@&787447252783202326>`
 
-const field9 = `Join a College Kings Club below!
-<@&805766527889440778>, <@&805766587704803339>, <@&805766682202079273>, <@&805766763215847454>, <@&805766896233742346>, <@&809240184201412619>, <@&809240269622214676>, <@&825746784688668713>, <@&818365011554336809>, <@&818365035259887626>, <@&836659038666227722>`
+const field9 = `Join a College Kings Club in <#805765564504473641>!
+<@&805766527889440778>, <@&805766587704803339>, <@&805766682202079273>, <@&805766763215847454>, <@&805766896233742346>, <@&809240184201412619>, <@&809240269622214676>, <@&836659038666227722>, <@&825746784688668713>, <@&818365035259887626>, <@&862417421167886357>`
 
 module.exports = async (client, channelId) => {
     const channel = await client.channels.fetch(channelId)
