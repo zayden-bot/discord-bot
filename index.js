@@ -72,6 +72,7 @@ client.on("guildCreate", guild => {
         "logsChannel": "",
         "patreonChannel": "",
         "questionChannel": "",
+        "game_version": "",
         "patreonUpdate": "",
         "steamUpdate": "",
         "serverRules": {},

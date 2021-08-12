@@ -64,7 +64,7 @@ module.exports = {
 
         // Send update message
         const embed = new Discord.MessageEmbed()
-            .setTitle("Next Update (v11.0/Act 3 Part 1)")
+            .setTitle(`Next Update (${config.game_version})`)
             .setColor("ff0000")
             .setDescription("If you are interested in the next update, read below:")
             .addField("__Patreon Release__ ($10)", patreonOutput, true)
