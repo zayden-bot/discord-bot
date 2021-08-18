@@ -11,6 +11,10 @@ module.exports = {
             message.reply("No member mentioned.");
             return;
         }
+        if (member.id == message.member.id) {
+            message.reply("You idiot...");
+            return;
+        }
         const author = message.member;
         
         common.user_config_setup(message);
@@ -35,7 +39,7 @@ module.exports = {
 
         const embed = new Discord.MessageEmbed()
         .setTitle(`⭐ NEW GOLDEN STAR ⭐`)
-        .setDescription(`<@${member.id}> received a golden star from <@${author.id}> for a total of ${member_config["number_of_stars"]}`);
+        .setDescription(`<@${member.id}> received a golden star from <@${author.id}> for a total of ${member_config["number_of_stars"]} stars`);
 
         message.channel.send(embed);
     },
