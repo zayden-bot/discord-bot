@@ -9,7 +9,8 @@ module.exports = {
         let member = message.mentions.members.first();
         if (!member) { member = message.member; }
 
-        commom.user_config_setup();
+        commom.user_config_setup(message);
+        const member_config = require(`../../user_configs/${member.id}.json`);
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`${member.user.username} Stats`)
