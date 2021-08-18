@@ -14,7 +14,6 @@ module.exports = {
         }
 
         common.user_config_setup(message);
-
         member_config = require(`../../user_configs/${member.id}`)
 
         try { member_config["unopen_card_packs"] += 1; }
