@@ -31,17 +31,25 @@ module.exports = {
 
     },
     
-    update_user_configs: function (message) {
+    update_configs: function (message, member_config=null, author_config=null, server_config=null) {
         const member = message.mentions.members.first();      
         const author = message.member;
-        let member_config = `./user_configs/${member.id}`
-        let author_config = `./user_configs/${author.id}`
+        const server = message.guild;
 
-        fs.writeFile(`${member_config}.json`, JSON.stringify(member_config, null, 4), function writeJSON(err) {
-            if (err) { return console.log(err); }
-        });
-        fs.writeFile(`${author_config}.json`, JSON.stringify(author_config, null, 4), function writeJSON(err) {
-            if (err) { return console.log(err); }
-        });
+        if (member_config != null) {
+            fs.writeFileSync(`./user_configs/${member.id}.json`, JSON.stringify(member_config, null, 4), function writeJSON(err) {
+                if (err) { return console.log(err); }
+            });
+        }
+        if (author_config != null) {
+            fs.writeFileSync(`./user_configs/${author.id}.json`, JSON.stringify(author_config, null, 4), function writeJSON(err) {
+                if (err) { return console.log(err); }
+            });
+        }
+        if (server_config != null) {
+            fs.writeFileSync(`./serverConfigs/${server.id}.json`, JSON.stringify(server_config, null, 4), function writeJSON(err) {
+                if (err) { return console.log(err); }
+            });
+        }
     }
 }
