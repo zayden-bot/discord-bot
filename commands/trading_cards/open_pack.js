@@ -12,11 +12,7 @@ module.exports = {
     minArgs: 0,
     maxArgs: 0,
     callback: (message, arguments, text) => {
-        let member = message.mentions.members.first();
-        if (!member) {
-            message.channel.send("Error: Please mention a member.");
-            return;
-        }
+        const member = message.member;
 
         common.user_config_setup(message);
         member_config = require(`../../user_configs/${member.id}`)
@@ -27,7 +23,7 @@ module.exports = {
         }
 
         open_card_pack(member_config)
-        common.update_user_configs(message);
+        common.update_configs(message, member_config);
 
         message.channel.send(`<@${member.id}> has opened a card pack. This is a test message while assets are being created.`)
     },
