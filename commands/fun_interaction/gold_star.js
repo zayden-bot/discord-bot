@@ -3,9 +3,8 @@ const fs = require("fs")
 
 module.exports = {
     commands: ["give_star", "gs"],
-    expectedArgs: "<user>",
+    expectedArgs: "<user> [text]",
     minArgs: 1,
-    maxArgs: 1,
     callback: (message, arguments, text) => {
         const default_config = {
             "number_of_stars": 0,
@@ -14,6 +13,11 @@ module.exports = {
         }
 
         const member = message.mentions.members.first();
+        if (!member) {
+            message.reply("No member mentioned.")
+            return;
+        }
+        
         const author = message.member;
         const server_config = require(`../../serverConfigs/${message.guild.id}`)
         let member_config;
