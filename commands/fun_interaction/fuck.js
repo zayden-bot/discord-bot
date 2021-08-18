@@ -32,5 +32,5 @@ module.exports = {
             .setColor("FFC0CB")
 
         message.channel.send(embed)
-    },
+    }
 }
