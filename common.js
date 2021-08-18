@@ -10,7 +10,8 @@ module.exports = {
             "openned_card_packs": 0,
         }
 
-        const member = message.mentions.members.first();      
+        let member = message.mentions.members.first();
+        if (!member) { member = message.member }
         const author = message.member;
         let member_config = `./user_configs/${member.id}.json`
         let author_config = `./user_configs/${author.id}.json`
