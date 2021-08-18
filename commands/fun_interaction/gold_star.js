@@ -15,8 +15,9 @@ module.exports = {
         
         common.user_config_setup(message);
 
-        member_config = require(`../../user_configs/${member.id}`)
-        author_config = require(`../../user_configs/${author.id}`)
+        member_config = require(`../../user_configs/${member.id}.json`)
+        author_config = require(`../../user_configs/${author.id}.json`)
+        server_config = require(`../../serverConfigs/${message.guild.id}.json`)
 
         if (author_config["number_of_stars"] <= 0 && !author.roles.cache.has(server_config.staffRoles)) {
             message.reply("Unable. You have no gold stars to give.");

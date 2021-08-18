@@ -11,7 +11,7 @@ function msToTime(ms) {
 module.exports = {
     commands: ["update"],
     callback: (message, arguments, text) => {
-        const config = require(`../../serverConfigs/${message.guild.id}`)
+        const config = require(`../../serverConfigs/${message.guild.id}.json`)
         const currentTimeMS = new Date().getTime()
 
         // Patreon update
