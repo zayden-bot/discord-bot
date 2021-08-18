@@ -19,7 +19,7 @@ module.exports = {
         try { member_config["unopen_card_packs"] += 1; }
         catch {member_config["unopen_card_packs"] = 1; }
 
-        common.update_user_configs(message);
+        common.update_configs(message, member_config);
 
         message.channel.send(`<@${member.id}> has received a card pack`)
     },
