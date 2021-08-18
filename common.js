@@ -17,14 +17,12 @@ module.exports = {
         let author_config = `./user_configs/${author.id}.json`
 
         if (!fs.existsSync(member_config)) {
-            console.log("Writing member config")
             fs.writeFileSync(member_config, JSON.stringify(default_config, null, 4), function writeJSON(err) {
                 if (err) { return console.log(err); }
             });
         }
 
         if (!fs.existsSync(author_config)) {
-            console.log("Writing author config")
             fs.writeFileSync(author_config, JSON.stringify(default_config, null, 4), function writeJSON(err) {
                 if (err) { return console.log(err); }
             });
@@ -33,7 +31,8 @@ module.exports = {
     },
     
     update_configs: function (message, member_config=null, author_config=null, server_config=null) {
-        const member = message.mentions.members.first();      
+        let member = message.mentions.members.first();
+        if (!member) { member = message.member }
         const author = message.member;
         const server = message.guild;
 
