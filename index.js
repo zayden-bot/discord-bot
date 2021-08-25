@@ -44,6 +44,9 @@ client.on("ready", async () => {
     reactionRoles.addNormalReactionRole(client);
     reactionRoles.removeNormalReactionRole(client);
 
+    const update_guidelines = require("./selfUpdating/update_guidelines");
+    update_guidelines(client, "879894434538459157")
+
     const updateClubs = require("./selfUpdating/updateClubs")
     updateClubs.customClubs(client, "805765564504473641")
     updateClubs.pledgeRoles(client, "805765564504473641")
@@ -76,6 +79,7 @@ client.on("guildCreate", guild => {
         "patreonUpdate": "",
         "steamUpdate": "",
         "serverRules": {},
+        "server_guidelines": {},
         "hiddenRules": {},
         "masters": []
     }
