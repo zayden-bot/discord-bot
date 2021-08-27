@@ -23,10 +23,15 @@ module.exports = {
             You like Lauren? We Lustin 4 Lauren. Join us to level up in your relationship with Lauren!
 
             :six: <@&809240184201412619>
+            Do you like the version of Chloe without a dick? Cause over here we're crazy for her!
 
             :seven: <@&809240269622214676>
+            Are you prepared to back up your hacking Queen? Penelope's Posse is right for you!
 
-            :eight: <@&836659038666227722>
+            :eight: <@&880607567074721822>
+            Want to help keep the peace against the evil bulldog named OscarSix? Join the Peacekeepers and help Peace fight the so called revolution
+
+            :nine: <@&836659038666227722>
             Ever wanted to finger the ginger? Now its your time to shine and show off your obsession with Riley
             `)
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
