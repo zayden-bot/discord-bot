@@ -1,3 +1,5 @@
+const responses = require("../../configs/8ballResponses.json")
+
 module.exports = {
     commands: ["8ball"],
     expectedArgs: "<question>",
@@ -7,13 +9,16 @@ module.exports = {
         const randomNumber = Math.floor(Math.random() * 3)
 
         if (randomNumber == 0 || (member.id == "211486447369322506" && message.content.endsWith('?'))) {
-            message.reply("Yes")
+            const randomIndex = Math.floor(Math.random() * responses.Yes.length)
+            message.reply(responses.Yes[randomIndex])
         }
         else if (randomNumber == 1 || member.id == "211486447369322506") {
-            message.reply("No")
+            const randomIndex = Math.floor(Math.random() * responses.No.length)
+            message.reply(responses.No[randomIndex])
         }
         else {
-            message.reply("Maybe")
+            const randomIndex = Math.floor(Math.random() * responses.Maybe.length)
+            message.reply(responses.Maybe[randomIndex])
         }
     },
 }
