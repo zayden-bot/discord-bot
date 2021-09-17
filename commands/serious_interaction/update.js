@@ -11,6 +11,14 @@ function msToTime(ms) {
 module.exports = {
     commands: ["update"],
     callback: (message, arguments, text) => {
+        if (message.channel.id != "776139754408247326") {
+            message.reply("You're an idiot. Use <#776139754408247326> for commands.").then(msg => {
+                msg.delete({ timeout: 5000 });
+            });
+            message.delete();
+            return;
+        }
+
         const config = require(`../../serverConfigs/${message.guild.id}.json`)
         const currentTimeMS = new Date().getTime()
 
