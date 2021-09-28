@@ -1,6 +1,10 @@
 database/
 node_modules/
-configs/botConfig.json
+serverConfigs/
+user_configs/
 
+configs/botConfig.json
 client_secrets.json
 package-lock.json
+
+*.stackdump

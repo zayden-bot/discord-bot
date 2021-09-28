@@ -17,7 +17,7 @@ module.exports = {
             message.channel.send(`Sorry Master Oscar, I cannot punish Master ${member.user.username}!`);
             return;
         }
-        message.channel.send(`<@${member.id}> bow down to Master ${message.author.username}! Or you will recieve an hour in the pain chamber`)
+        message.channel.send(`<@${member.id}> bow down to Master ${message.author.username}! Or you will recieve an hour in the pain chamber.`)
 
     },
     permissions: ["ADMINISTRATOR"],
