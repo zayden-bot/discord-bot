@@ -1,6 +1,5 @@
 database/
 node_modules/
-serverConfigs/
 user_configs/
 
 configs/botConfig.json
