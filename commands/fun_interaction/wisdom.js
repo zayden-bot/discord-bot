@@ -1,16 +1,26 @@
 const Discord = require("discord.js")
-const imgConfig = require("../../configs/imgConfig.json")
 
 module.exports = {
     commands: ["wisdomoftheday", "wisdom", "w"],
     callback: (message, arguments, text) => {
+        const images = require("../../configs/imgConfig.json").huggingImgs.Global
 
-        const imgId = Math.floor((new Date() - new Date(now.getFullYear(), 0, 0)) / 86400000);
+        // Returns 0 - 365
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const oneDay = 1000 * 60 * 60 * 24;
+        const imageIndex = Math.floor((start - start) / oneDay)
 
-        const embed = new Discord.MessageEmbed()
-            .setImage(imgConfig.goodMorningImgs[imgId])
+        // Check if index is within bounds of the images
+        if (imageIndex < images.length) { 
+            const embed = new Discord.MessageEmbed()
+                .setTitle("Today's Wisdom")
+                .setImage(images[imageIndex])
 
-        message.channel.send(embed)
+            message.channel.send({embeds: [embed]})
+        } else { 
+            message.reply("There is no wisdom for today. #BlameJany")
+        }
+
     },
 }
-// TODO: Add try/catch for the image
