@@ -88,7 +88,6 @@ client.on("guildCreate", guild => {
         "serverRules": {},
         "server_guidelines": {},
         "hiddenRules": {},
-        "masters": []
     }
 
     fs.writeFile(`./serverConfigs/${guild.id}.json`, JSON.stringify(defaultConfig, null, 4), function writeJSON(err) {

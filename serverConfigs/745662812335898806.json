@@ -73,11 +73,6 @@
     ],
     "hiddenRules": {
         "69": "Whatever you do, DO NOT PING ME <:peperage:788512386205745162>",
-        "80085": "Congratulations! You have found the secret rule. Winner: <@516991142156435472>",
-        "nickname": "\n**1.** No blank or \"invisible\" names\n**2.** No slurs or other offensive sentiments\n**3.** No noisy unicode characters - for example, z̯̯͡a̧͎̺l̡͓̫g̹̲o̡̼̘ or byte order marks\n**4.** No nicknames designed to annoy other users",
-        "diana": "These users are not allowed to post more than 10 screenshots per day in <#772516507041005618>: <@686178433717239842>"
-    },
-    "masters": [
-        "211486447369322506"
-    ]
+        "nickname": "\n**1.** No blank or \"invisible\" names\n**2.** No slurs or other offensive sentiments\n**3.** No noisy unicode characters - for example, z̯̯͡a̧͎̺l̡͓̫g̹̲o̡̼̘ or byte order marks\n**4.** No nicknames designed to annoy other users"
+    }
 }
