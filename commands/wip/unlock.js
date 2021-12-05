@@ -11,5 +11,5 @@ module.exports = {
         // }
         message.channel.send("Channel Unlocked! Thank you for your patience")
     },
-    requiredRoles: ["Security"],
+    requiredRoles: ["Admin"],
 }

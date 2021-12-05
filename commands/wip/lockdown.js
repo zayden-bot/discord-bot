@@ -13,6 +13,6 @@ module.exports = {
         // channel.updateOverwrite(roles.cache.get("787004533963358279"), {SEND_MESSAGES: true}, "Channel Lockdown")
         message.channel.send("Channel Lockdown! Please listen to the staff for further infomation.")
     },
-    requiredRoles: ["Security"],
+    requiredRoles: ["Admin"],
 }
 
