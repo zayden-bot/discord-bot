@@ -35,7 +35,7 @@ const field2c = `
 <#779064182259449896> ~ Find community suggestions here
 <#829463308629180447> ~ You want to ask a question and are not sure if someone else already asked? Take a look in here
 <#747428614500384788> ~ Do you need help or did you find any bugs? Make sure to ask about it here.
-<#888586464814854194> ~ Tha launcher gives some weird error or just doesn't work at all? Our Support Team will help you here`
+<#888586464814854194> ~ The launcher gives some weird error or just doesn't work at all? Our Support Team will help you here`
 
 const field3 = `**Staff Roles:**
 <@&746717374761402438>, <@&807370330388693082>, <@&839484117895610378>, <@&764860044977504318>, <@&803393475440541727>, <@&787003873839022081>, <@&804524527191195668>, <@&913374071239102504>
