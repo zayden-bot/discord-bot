@@ -51,7 +51,7 @@ To be added :)`
 module.exports = async (client, channelId) => {
     const channel = await client.channels.fetch(channelId)
 
-    const updateInfomation = new Discord.MessageEmbed()
+    const embed = new Discord.MessageEmbed()
     .setAuthor(channel.guild.name, channel.guild.iconURL())
     .addField("College Kings Game", field1)
     .addField("Channels", field2)
@@ -59,5 +59,5 @@ module.exports = async (client, channelId) => {
     .setFooter(`Server Created: ${channel.guild.createdAt.getFullYear()}-${channel.guild.createdAt.getMonth()}-${channel.guild.createdAt.getDate()}`)
     .setThumbnail(channel.guild.iconURL())
     
-    channel.messages.fetch("830931135780880415").then((message) => { message.edit(updateInfomation) })
+    channel.messages.fetch("830931135780880415").then((message) => { message.edit({embeds: [embed]}) })
 }

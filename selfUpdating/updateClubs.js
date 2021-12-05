@@ -4,7 +4,7 @@ module.exports = {
     customClubs: async (client, channelId) => {
         const channel = await client.channels.fetch(channelId)
 
-        const updatedClubs = new Discord.MessageEmbed()
+        const embed = new Discord.MessageEmbed()
             .setTitle(`Join a CK Custom Club!`)
             .setDescription(`
             :one: <@&805766527889440778>
@@ -36,13 +36,13 @@ module.exports = {
             `)
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
 
-        channel.messages.fetch("805767878212452372").then((message) => { message.edit(updatedClubs) })
+        channel.messages.fetch("805767878212452372").then((message) => { message.edit({embeds: [embed]}) })
         // Club's Message ID ^
     },
     pledgeRoles: async (client, channelId) => {
         const channel = await client.channels.fetch(channelId)
 
-        const updatedRoles = new Discord.MessageEmbed()
+        const embed = new Discord.MessageEmbed()
             .setTitle("Who do you pledge for?")
             .setDescription(`
             :one: <@&818365011554336809>
@@ -54,6 +54,6 @@ module.exports = {
             .setColor("0000ff")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
 
-        channel.messages.fetch("818369390067449859").then((message) => { message.edit(updatedRoles) })
+        channel.messages.fetch("818369390067449859").then((message) => { message.edit({embeds: [embed]}) })
     }
 }
