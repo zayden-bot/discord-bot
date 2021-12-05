@@ -19,6 +19,6 @@ module.exports = {
             .setTitle(`Good Morning, ${member}`)
             .setImage(imgConfig.goodMorningImgs[arrayId][imgId])
 
-        message.channel.send(embed)
+        message.channel.send({embeds: [embed]})
     },
 }

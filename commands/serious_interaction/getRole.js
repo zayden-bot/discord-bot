@@ -14,6 +14,6 @@ module.exports = {
             .setFooter("https://www.patreon.com/collegekings")
             .setColor("#ff0000")
 
-        message.channel.send(embed)
+        message.channel.send({embeds: [embed]})
     },
 }

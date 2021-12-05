@@ -32,14 +32,14 @@ module.exports = {
                             .addField("Amount", `$${patreonRoles[role]}`, true)
                             .setTimestamp();
 
-                        client.channels.cache.get(patreonChannel).send(embed2);
+                        client.channels.cache.get(patreonChannel).send({embeds: [embed2]});
                     }
                     embed1.setColor(`${newMember.guild.roles.cache.get(`${role}`).hexColor}`);
                     embed1.addField(`Information:`, `**❯ Role: ** ✅ ${oldMember.guild.roles.cache.get(role).name}`);
                 }
             }
 
-            client.channels.cache.get(logsChannel).send(embed1);
+            client.channels.cache.get(logsChannel).send({embeds: [embed1]});
         } else if (oldMember.roles.cache.size > newMember.roles.cache.size) {
             const embed = new MessageEmbed()
                 .setTitle(`Member Role Update`)
@@ -54,7 +54,7 @@ module.exports = {
                     embed.addField(`Information:`, `**❯ Role: ** ⛔ ${newMember.guild.roles.cache.get(role).name}`);
                 }
             }
-            client.channels.cache.get(logsChannel).send(embed);
+            client.channels.cache.get(logsChannel).send({embeds: [embed]});
         }
     }
 }

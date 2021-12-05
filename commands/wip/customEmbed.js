@@ -19,7 +19,7 @@ module.exports = {
             .setColor("0000ff")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
 
-        message.channel.send(embed)
+        message.channel.send({embeds: [embed]})
     },
     requiredRoles: "Security",
 }

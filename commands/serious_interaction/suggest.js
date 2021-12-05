@@ -12,7 +12,7 @@ module.exports = {
             .setDescription(text)
 
         let channel = message.guild.channels.cache.get(config.suggestionChannel)
-        channel.send(embed).then(function(message) {
+        channel.send({embeds: [embed]}).then(function(message) {
             message.react("👍")
             message.react("👎")
         })

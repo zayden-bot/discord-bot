@@ -29,7 +29,7 @@ module.exports = {
         .setDescription(warningMsg)
         .setColor("ff0000")
 
-        message.channel.send(embed)
+        message.channel.send({embeds: [embed]})
     },
     permissions: ["MANAGE_MESSAGES"],
 }

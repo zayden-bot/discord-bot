@@ -24,6 +24,6 @@ module.exports = {
         .setFooter(`ID: ${message.guild.id} | Server Created: ${message.guild.createdAt.getFullYear()}-${message.guild.createdAt.getMonth()}-${message.guild.createdAt.getDate()}`)
         .setThumbnail(message.guild.iconURL())
 
-        message.channel.send(embed)
+        message.channel.send({embeds: [embed]})
     },
 }

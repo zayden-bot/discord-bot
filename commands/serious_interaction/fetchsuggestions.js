@@ -49,7 +49,7 @@ module.exports = {
                         embed.setTimestamp();
                     }
 
-                    await message.author.send(embed);
+                    await message.author.send({embeds: [embed]});
                 }
                 endTime = new Date();
                 var timeDiff = endTime - startTime;

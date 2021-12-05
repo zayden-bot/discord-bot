@@ -39,7 +39,7 @@ module.exports = {
         .addField(`Question id: ${question.questionId}`, question.text)
 
         let channel = message.guild.channels.cache.get(serverConfig.questionChannel)
-        channel.send(embed).then(message => { question.setMessageId(message.id) })
+        channel.send({embeds: [embed]}).then(message => { question.setMessageId(message.id) })
     },
     questions: questions
 }

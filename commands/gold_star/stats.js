@@ -20,6 +20,6 @@ module.exports = {
                 { name: "Received Stars", value: member_config["received_stars"], inline: true },
             )
 
-        message.channel.send(embed)
+        message.channel.send({embeds: [embed]})
     },
 }

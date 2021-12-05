@@ -31,11 +31,11 @@ module.exports = {
 
         const channel = await message.guild.channels.cache.get(serverConfig.questionChannel)
         channel.messages.fetch(question.messageId).then(msg => { 
-            msg.edit(embed)
+            msg.edit({embeds: [embed]})
             message.delete()
         })
 
-        try { question.user.send(embed) }
+        try { question.user.send({embeds: [embed]}) }
         catch {}
         
     },

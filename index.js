@@ -113,7 +113,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) =>{
 
     // Is new role a patreon role
     if (typeof(newRole) != "undefined" && newRole.id in patreonRoles) {
-        const emebed = new Discord.MessageEmbed()
+        const embed = new Discord.MessageEmbed()
         .setTitle("New Patron")
         .setColor(`${newRole.hexColor}`)
         .setFooter(newMember.guild.name, newMember.guild.iconURL({ dynamic: true }))
@@ -122,7 +122,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) =>{
         .addField("Amount", `$${patreonRoles[newRole.id]}`, true)
         .setTimestamp();
 
-        client.channels.cache.get(patreonChannel).send(emebed);
+        client.channels.cache.get(patreonChannel).send({embeds: [embed]});
     }
 })
 

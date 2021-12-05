@@ -131,7 +131,7 @@ module.exports = (client, commandOptions) => {
                     .setColor("#ff0000")
                     .setDescription(`Invalid command usage, try using it like:\n\`${botConfig.prefix}${alias} ${expectedArgs}\``)
                     
-                    channel.send(embed)
+                    channel.send({embeds: [embed]})
                     return
                 }
 

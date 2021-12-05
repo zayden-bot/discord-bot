@@ -25,6 +25,6 @@ module.exports = {
             .setImage(imgConfig.huggingImgs[arrayId][imgId])
             .setColor("FFC0CB")
 
-        message.channel.send(embed)
+        message.channel.send({embeds: [embed]})
     },
 }

@@ -85,8 +85,8 @@ module.exports = {
         .setTitle("Now playing")
         .setDescription(`[${queue.nowPlaying.title}](${queue.nowPlaying.url}) [<@${queue.nowPlaying.user.id}>]`)
 
-        try { queue.nowPlayingMessage.edit(embed) }
-        catch { message.channel.send(embed).then(msg => queue.nowPlayingMessage = msg ) }
+        try { queue.nowPlayingMessage.edit({embeds: [embed]}) }
+        catch { message.channel.send({embeds: [embed]}).then(msg => queue.nowPlayingMessage = msg ) }
 
         dispatcher.on("finish", () => {
             queue.previousQueue.push(queue.nowPlaying)

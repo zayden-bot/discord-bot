@@ -15,7 +15,7 @@ module.exports = {
         //         .setColor("#00ff00")
         //         .setTimestamp();
 
-        //         newState.guild.channels.cache.get(config.logsChannel).send(embed);
+        //         newState.guild.channels.cache.get(config.logsChannel).send({embeds: [embed]});
         // } else {
         //     const embed = new MessageEmbed()
         //         .setTitle('Member disconnected to a voice chat!')
@@ -25,7 +25,7 @@ module.exports = {
         //         .setTimestamp();
                 
 
-        //     oldState.guild.channels.cache.get(config.logsChannel).send(embed);
+        //     oldState.guild.channels.cache.get(config.logsChannel).send({embeds: [embed]});
         // }
     },
 }
