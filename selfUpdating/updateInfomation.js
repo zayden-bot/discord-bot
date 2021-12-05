@@ -9,7 +9,7 @@ https://store.steampowered.com/dlc/1463120/
 Get the latest patreon version here:
 https://patreon.com/collegekings`
 
-const field2 = `
+const field2a = `
 <#830927865784565800> ~ Welcome!
 <#747430712617074718> ~ Make sure you are fully familiar with the rules. Ignorance is not a defence.
 <#747426032453156924> ~ General announcement about the game or the discord server
@@ -18,9 +18,9 @@ const field2 = `
 <#885713583948836874> ~ Get to know the team behind College Kings and the discord server
 <#806504327307853826> ~ New patrons will be announced here, thanks for the support!
 <#867385605553389618> ~ A live development log to see what's happening
-<#805765564504473641> ~ You can get your custom roles here, from favourite characters club to event announcements.
+<#805765564504473641> ~ You can get your custom roles here, from favourite characters club to event announcements.`
 
-<#745662813036609548> ~ Highly moderated and regulated chat.
+const field2b = `<#745662813036609548> ~ Highly moderated and regulated chat.
 <#787774961850646559> ~ [NSFW] Feel free to discuss anything provided it doesn't break the rules.
 <#789831288558452746> ~ [NSFW] Post your favourite pictures or videos here. NSFW media has to be 2d/3d, no NSFW real life imagery. Ping or message <@615128589918011393> if you're unsure.
 <#880870369198751764> ~ Discussions about Sports usually happen here
@@ -29,8 +29,9 @@ const field2 = `
 <#770621445637799946> ~ [SPOILERS] Here you can discuss College Kings without having to spoiler mark you messages
 <#817235460467720194> ~ [SPOILERS] Like to rank the ck characters? Let the world know about your ranking here
 <#772516507041005618> ~ [NSFW] Discussion around games that aren't College Kings
-<#776139754408247326> ~ Use bot commands here!
+<#776139754408247326> ~ Please only use bot commands in this channel!`
 
+const field2c = `
 <#779064182259449896> ~ Find community suggestions here
 <#829463308629180447> ~ You want to ask a question and are not sure if someone else already asked? Take a look in here
 <#747428614500384788> ~ Do you need help or did you find any bugs? Make sure to ask about it here.
@@ -54,7 +55,9 @@ module.exports = async (client, channelId) => {
     const embed = new Discord.MessageEmbed()
     .setAuthor(channel.guild.name, channel.guild.iconURL())
     .addField("College Kings Game", field1)
-    .addField("Channels", field2)
+    .addField("Information channels", field2a)
+    .addField("Discussion channels", field2b)
+    .addField("Support channels", field2c)
     .addField("Roles", field3)
     .setFooter(`Server Created: ${channel.guild.createdAt.getFullYear()}-${channel.guild.createdAt.getMonth()}-${channel.guild.createdAt.getDate()}`)
     .setThumbnail(channel.guild.iconURL())
