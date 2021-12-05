@@ -54,9 +54,9 @@ client.on("ready", async () => {
     const update_guidelines = require("./selfUpdating/updateGuidelines");
     update_guidelines(client, "879894434538459157")
 
-    const updateClubs = require("./selfUpdating/updateClubs")
-    updateClubs.customClubs(client, "805765564504473641")
-    updateClubs.pledgeRoles(client, "805765564504473641")
+    const customRoles = require("./selfUpdating/custom_roles")
+    customRoles.customClubs(client, "805765564504473641")
+    customRoles.pledgeRoles(client, "805765564504473641")
 
     const updateInfomation = require("./selfUpdating/updateInfomation")
     updateInfomation(client, "830927865784565800")
