@@ -78,7 +78,7 @@ module.exports = (client, commandOptions) => {
         }
     }
 
-    client.on("message", message => {
+    client.on("messageCreate", message => {
         const { member, content, guild, channel } = message
         try { var serverConfig = require(`../serverConfigs/${guild.id}.json`) }
         catch { var serverConfig = require(`../serverConfigs/privateMessage.json`) }
