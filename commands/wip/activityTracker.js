@@ -1,5 +1,5 @@
 // module.exports = (client) => {
-//     client.on("message", message => {
+//     client.on("messageCreate", message => {
 //         const { guild, member } = message
 //         // if (user is not in databse) { add user to database }
 //     })

@@ -1,7 +1,14 @@
 const Discord = require("discord.js")
 const fs = require("fs")
 
-const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
+const client = new Discord.Client({
+    intents: [
+        Discord.Intents.FLAGS.GUILDS,
+        Discord.Intents.FLAGS.GUILD_MESSAGES,
+        Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS
+    ],
+    partials: ['MESSAGE', 'CHANNEL', 'REACTION']
+})
 
 const init = require("./init")
 const loadCommands = require("./commands/load-commands");
@@ -44,7 +51,7 @@ client.on("ready", async () => {
     reactionRoles.addNormalReactionRole(client);
     reactionRoles.removeNormalReactionRole(client);
 
-    const update_guidelines = require("./selfUpdating/update_guidelines");
+    const update_guidelines = require("./selfUpdating/updateGuidelines");
     update_guidelines(client, "879894434538459157")
 
     const updateClubs = require("./selfUpdating/updateClubs")
@@ -59,7 +66,7 @@ client.on("ready", async () => {
 
 });
 
-client.on("message", message => {
+client.on("messageCreate", message => {
     const yesMaster = require("./specialCommands/yesMaster")
     yesMaster(message)
 

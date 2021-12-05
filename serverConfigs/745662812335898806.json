@@ -1,10 +1,17 @@
 {
-    "disabledCommands": ["fuck"],
+    "disabledCommands": [
+        "fuck"
+    ],
     "staffRoles": "787004533963358279",
     "suggestionChannel": "779064182259449896",
     "logsChannel": "779072597245165667",
     "patreonChannel": "806504327307853826",
     "questionChannel": "829463308629180447",
+    "supportChannels": [
+        "747428614500384788",
+        "888586464814854194"
+    ],
+    "idNumber": 14,
     "steam_version": "Act 3",
     "patreon_version": "v14",
     "patreonUpdate": "12 November 2021, 19:00",
@@ -33,12 +40,36 @@
         "21": "We moderate for violations of Discord's ToS and Guidelines:\n[Terms of Service](https://discord.com/terms)\n[Community Guidelines](https://discord.com/guidelines)"
     },
     "server_guidelines": [
-        ["College Kings is an adult-only community.", "If you are caught or shown to be under-age you will be immediately removed. Please do not send a message for example \"I'm 12\" as a joke. We will need to take these seriously in order to stay within Discord Terms of Service. You will be immediately removed from the server.", "Ban (until you are 18)"],
-        ["Discrimination, Drama, and Bullying", "It's unacceptable to attack a person based on their race, ethnicity, sex, gender, sexuality, region, or disabilities are strictly disallowed. Please be respectful to our members including staff. We're all welcome here.", "Warning, Kick, Ban."],
-        ["NSFW Content In Open Chat", "NSFW content in open chat such as <#745662813036609548> is not allowed.", "Verbal Warning, Warning/Mute, Kick, Ban."],
-        ["Blackmail, Doxxing, and Personal Information", "Do not send someone's personal information to another member without permission from the person who owns that information. This includes addresses, full names, family members, and personal images.", "Ban and report to Discord."],
-        ["Advertisements", "Advertising in DMs of another server or website without permission will result in a ban. You can use <#772516507041005618> to advertise your game. Other advertisement please contact <@211486447369322506>", "Ban"],
-        ["Streaming Guidelines", "Please do not stream any type of movies or any premium television (i.e. Netflix and Amazon Prime) on this server. Free online content, video games, and other types of shareable media are permitted if they do not violate any of the terms or guidelines.", "Warning, Kick, Ban."]
+        [
+            "College Kings is an adult-only community.",
+            "If you are caught or shown to be under-age you will be immediately removed. Please do not send a message for example \"I'm 12\" as a joke. We will need to take these seriously in order to stay within Discord Terms of Service. You will be immediately removed from the server.",
+            "Ban (until you are 18)"
+        ],
+        [
+            "Discrimination, Drama, and Bullying",
+            "It's unacceptable to attack a person based on their race, ethnicity, sex, gender, sexuality, region, or disabilities are strictly disallowed. Please be respectful to our members including staff. We're all welcome here.",
+            "Warning, Kick, Ban."
+        ],
+        [
+            "NSFW Content In Open Chat",
+            "NSFW content in open chat such as <#745662813036609548> is not allowed.",
+            "Verbal Warning, Warning/Mute, Kick, Ban."
+        ],
+        [
+            "Blackmail, Doxxing, and Personal Information",
+            "Do not send someone's personal information to another member without permission from the person who owns that information. This includes addresses, full names, family members, and personal images.",
+            "Ban and report to Discord."
+        ],
+        [
+            "Advertisements",
+            "Advertising in DMs of another server or website without permission will result in a ban. You can use <#772516507041005618> to advertise your game. Other advertisement please contact <@211486447369322506>",
+            "Ban"
+        ],
+        [
+            "Streaming Guidelines",
+            "Please do not stream any type of movies or any premium television (i.e. Netflix and Amazon Prime) on this server. Free online content, video games, and other types of shareable media are permitted if they do not violate any of the terms or guidelines.",
+            "Warning, Kick, Ban."
+        ]
     ],
     "hiddenRules": {
         "69": "Whatever you do, DO NOT PING ME <:peperage:788512386205745162>",
