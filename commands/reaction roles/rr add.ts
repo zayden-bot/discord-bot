@@ -1,4 +1,4 @@
-const Discord = require("discord.js")
+import Discord, { TextChannel } from "discord.js"
 // import { ReactionRole } from "../../reactionRole";
 // import { Server, servers } from "../../server"
 
@@ -8,14 +8,14 @@ module.exports = {
     expectedArgs: "<channel> <message> <role> <emoji>",
     minArgs: 4,
     maxArgs: 4,
-    callback: (message, args, text) => {
+    callback: (message: Discord.Message, args: string[], text: string) => {
         const guild = message.guild;
         if (!guild) return;
 
         // Handle Channel
         const common = require("../../common")
         const channelId = common.getChannelId(args[0]);
-        let rrChannel = message.guild.channels.cache.get(channelId)
+        let rrChannel = message.guild.channels.cache.get(channelId) as TextChannel | undefined;
         if (!rrChannel) return;
 
         if (!rrChannel) {
@@ -56,13 +56,11 @@ module.exports = {
 
             // Add to JSON
             const fs = require("fs")
-            fs.writeFileSync(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4), function writeJSON(err) {
+            fs.writeFileSync(`./Server Configs/${guild.id}.json`, JSON.stringify(server, null, 4), function writeJSON(err: any) {
                 if (err) { return console.log(err); }
             });
         })
         .catch(console.error)
-
-
 
         message.reply("Successfully added reaction")
     },
