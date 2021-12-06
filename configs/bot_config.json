@@ -1,0 +1,6 @@
+{
+    "version": "3.2.0",
+    "prefix": "!",
+    "dbFile": "./database/database.db",
+    "developers": [ "211486447369322506" ]
+}

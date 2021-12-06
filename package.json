@@ -19,6 +19,7 @@
   "homepage": "https://github.com/College-Kings/Zayden#readme",
   "dependencies": {
     "discord.js": "^13.3.1",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "sqlite3": "^5.0.2"
   }
 }
