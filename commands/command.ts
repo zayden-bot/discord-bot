@@ -1,13 +1,13 @@
 import Discord from "discord.js"
 
 export interface Command {
-    commands: string[]
+    commands: string | string[]
     permissionError: string
     expectedArgs: string
     minArgs: number
     maxArgs: number
     cooldown: number
-    permissions: Discord.PermissionResolvable[]
-    requiredRoles: string[]
+    permissions: Array<Discord.PermissionResolvable>
+    requiredRoles: string | string[]
     callback: Function
 }
