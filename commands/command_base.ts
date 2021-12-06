@@ -1,5 +1,6 @@
 import Discord from "discord.js"
 import { Command } from "./command"
+import { servers } from "../server"
 
 let recentlyRan: string[] = []
 
@@ -28,15 +29,14 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
 
         if (member == null || guild == null) { return }
 
-        try { var serverConfig = require(`../server_configs/${guild.id}.json`).config }
-        catch { var serverConfig = require(`../server_configs/privateMessage.json`) }
+        const server = servers[guild.id]
 
         const botConfig = require("../configs/bot_config.json");
         for (const alias of commands) {
             if (content.split(" ")[0].toLowerCase() == `${botConfig.prefix}${alias.toLowerCase()}`) {
 
                 // Check if the command is enabled in that server
-                if (serverConfig.disabledCommands.includes(commands[0])) { return }
+                if (server.disabledCommands.includes(commands[0])) { return }
 
                 // Check if the user has the correct permissions to run the command
                 for (const permission of permissions) {
@@ -65,7 +65,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 // Check if the command is on cooldown
                 try { var cooldownString = `${guild.id}-${member.id}-${commands[0]}` }
                 catch { var cooldownString = `privateMessage-${message.author.id}-${commands[0]}` }
-                if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(serverConfig.staffRoles)) {
+                if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(server.moderationRole)) {
                     message.reply("You cannot use that command so soon, please wait")
                     return
                 }
