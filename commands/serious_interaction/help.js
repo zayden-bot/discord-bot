@@ -7,6 +7,9 @@ module.exports = {
     callback: (message, arguments, text) => {
         let reply = "Zayden's Commands:\n"
 
+        message.reply("Disabled due to bug")
+        return;
+
         const commands = loadCommands(message.client)
 
         for (let command of commands) {

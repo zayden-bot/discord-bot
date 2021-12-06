@@ -32,6 +32,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
         const server = servers[guild.id]
 
         const botConfig = require("../configs/bot_config.json");
+
         for (const alias of commands) {
             if (content.split(" ")[0].toLowerCase() == `${botConfig.prefix}${alias.toLowerCase()}`) {
 
