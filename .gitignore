@@ -127,5 +127,5 @@ dist
 .pnp.*
 
 # Config files
-server_config/
+server_configs/
 user_config/
