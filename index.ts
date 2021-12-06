@@ -30,8 +30,10 @@ client.on("ready", () => {
     // Load server configs
     const serverConfigFiles = fs.readdirSync(path.join(__dirname, "server_configs"))
     for (const filename of serverConfigFiles) {
-        const filePath = path.join(__dirname, "server_configs", filename)
-        servers[path.parse(filename).name] = require(filePath)
+        const file = require(path.join(__dirname, "server_configs", filename))
+        const guildId = path.parse(filename).name
+        const server = new Server(guildId, file)
+        servers[guildId] = server
     }
 
     client.guilds.cache.each(guild => {
