@@ -1,7 +1,4 @@
-import Discord, { TextChannel } from "discord.js"
-// import { ReactionRole } from "../../reactionRole";
-// import { Server, servers } from "../../server"
-
+import Discord from "discord.js"
 
 module.exports = {
     commands: ["rr add", "rradd"],
@@ -15,7 +12,7 @@ module.exports = {
         // Handle Channel
         const common = require("../../common")
         const channelId = common.getChannelId(args[0]);
-        let rrChannel = message.guild.channels.cache.get(channelId) as TextChannel | undefined;
+        let rrChannel = message.guild.channels.cache.get(channelId) as Discord.TextChannel | undefined;
         if (!rrChannel) return;
 
         if (!rrChannel) {
@@ -56,7 +53,7 @@ module.exports = {
 
             // Add to JSON
             const fs = require("fs")
-            fs.writeFileSync(`./Server Configs/${guild.id}.json`, JSON.stringify(server, null, 4), function writeJSON(err: any) {
+            fs.writeFileSync(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4), function writeJSON(err: any) {
                 if (err) { return console.log(err); }
             });
         })
