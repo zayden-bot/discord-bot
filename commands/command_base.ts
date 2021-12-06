@@ -28,7 +28,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
 
         if (member == null || guild == null) { return }
 
-        try { var serverConfig = require(`../server_configs/${guild.id}.json`) }
+        try { var serverConfig = require(`../server_configs/${guild.id}.json`).config }
         catch { var serverConfig = require(`../server_configs/privateMessage.json`) }
 
         const botConfig = require("../configs/bot_config.json");
