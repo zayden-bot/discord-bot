@@ -110,36 +110,36 @@ client.on("guildDelete", async guild => {
 // })
 
 
-// client.on("messageReactionAdd", (reaction, user) => {
-//     if (!reaction.message.guild) return;
+client.on("messageReactionAdd", (reaction, user) => {
+    if (!reaction.message.guild) return;
 
-//     const guild = reaction.message.guild
-//     const server = servers[guild.id];
+    const guild = reaction.message.guild
+    const server = servers[guild.id];
 
-//     for (const reactionRole of server.reactionRoles) {
-//         if (reaction.message == reactionRole.message && reaction.emoji.name == reactionRole.emoji && user.id !== "907635513341644861") {
-//             const member = guild.members.cache.find(member => member.id == user.id)
-//             if (member) {  member.roles.add(reactionRole.role) }
-//             break
-//         }
-//     }
-// })
+    for (const reactionRole of server.reactionRoles) {
+        if (reaction.message == reactionRole.message && reaction.emoji.name == reactionRole.emoji && user.id !== "907635513341644861") {
+            const member = guild.members.cache.find(member => member.id == user.id)
+            if (member) {  member.roles.add(reactionRole.role) }
+            break
+        }
+    }
+})
 
 
-// client.on("messageReactionRemove", (reaction, user) => {
-//     if (!reaction.message.guild) return;
+client.on("messageReactionRemove", (reaction, user) => {
+    if (!reaction.message.guild) return;
 
-//     const guild = reaction.message.guild
-//     const server = servers[guild.id];
+    const guild = reaction.message.guild
+    const server = servers[guild.id];
 
-//     for (const reactionRole of server.reactionRoles) {
-//         if (reaction.message == reactionRole.message && reaction.emoji.name == reactionRole.emoji && user.id !== "907635513341644861") {
-//             const member = guild.members.cache.find(member => member.id == user.id)
-//             if (member) {  member.roles.remove(reactionRole.role) }
-//             break
-//         }
-//     }
-// })
+    for (const reactionRole of server.reactionRoles) {
+        if (reaction.message == reactionRole.message && reaction.emoji.name == reactionRole.emoji && user.id !== "907635513341644861") {
+            const member = guild.members.cache.find(member => member.id == user.id)
+            if (member) {  member.roles.remove(reactionRole.role) }
+            break
+        }
+    }
+})
 
 // Events
 // client.on("guildMemberUpdate", (oldMember, newMember) =>{
