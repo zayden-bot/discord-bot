@@ -30,9 +30,20 @@ client.on("ready", () => {
     // Load server configs
     const serverConfigFiles = fs.readdirSync(path.join(__dirname, "server_configs"))
     for (const filename of serverConfigFiles) {
-        const file = require(path.join(__dirname, "server_configs", filename))
+        const serverConfig = require(path.join(__dirname, "server_configs", filename))
         const guildId = path.parse(filename).name
-        const server = new Server(guildId, file)
+
+        const server = new Server(guildId)
+        server.disabledCommands = serverConfig.disabledCommands
+        server.reactionRoles = serverConfig.reactionRoles
+        server.moderationRole = serverConfig.moderationRole
+        server.channels = serverConfig.channels
+        server.idNumber = serverConfig.idNumber
+        server.gameVersions = serverConfig.gameVersions
+        server.serverRules = serverConfig.serverRules
+        server.serverGuidelines = serverConfig.serverGuidelines
+        server.hidden = serverConfig.hidden
+
         servers[guildId] = server
     }
 
