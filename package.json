@@ -1,7 +1,24 @@
 {
+  "name": "zayden",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/College-Kings/Zayden.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/College-Kings/Zayden/issues"
+  },
+  "homepage": "https://github.com/College-Kings/Zayden#readme",
   "dependencies": {
     "discord.js": "^13.3.1",
-    "dotenv": "^10.0.0",
-    "sqlite3": "^5.0.2"
+    "dotenv": "^10.0.0"
   }
 }
