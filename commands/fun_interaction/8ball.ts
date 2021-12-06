@@ -28,5 +28,5 @@ module.exports = {
             default:
                 message.reply("<@211486447369322506> Error: Unknown random number")
         }
-    },
+    }
 }
