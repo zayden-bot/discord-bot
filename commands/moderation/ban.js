@@ -35,5 +35,5 @@ module.exports = {
         })
         .catch( err => { message.reply(`Failed to ban ${member.user.username}`) })
     },
-    permissions: "BAN_MEMBERS",
+    permissions: ["BAN_MEMBERS"],
 }
