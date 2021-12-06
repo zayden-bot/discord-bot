@@ -16,10 +16,11 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
         callback
     } = commandOptions
 
-    if (requiredRoles.length) {
-        if (typeof requiredRoles == "string") {
+    if (typeof(commands) == "string") {
+        commands = [commands]
+    }
+    if (typeof(requiredRoles) == "string") {
             requiredRoles = [requiredRoles]
-        }
     }
 
     client.on("messageCreate", message => {
