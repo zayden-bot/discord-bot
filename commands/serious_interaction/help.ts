@@ -1,16 +1,17 @@
-const loadCommands = require("../load_commands")
-const { prefix } = require("../../configs/bot_config.json")
+import Discord from "discord.js"
 
 module.exports = {
     commands: ["help", "h", "?"],
     description: "Zayden Help Command",
-    callback: (message, arguments, text) => {
+    callback: (message: Discord.Message, args: string[], text: string) => {
+        if (!message.member) { return; }
+
+        const { prefix } = require("../../configs/bot_config.json")
+
         let reply = "Zayden's Commands:\n"
 
-        message.reply("Disabled due to bug")
-        return;
-
-        const commands = loadCommands(message.client)
+        const loadCommands = require("../load_commands")
+        const commands = loadCommands()
 
         for (let command of commands) {
             let permissions = command.permissions

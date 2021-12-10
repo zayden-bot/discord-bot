@@ -3,7 +3,7 @@ import path from "path"
 import fs from "fs"
 import { Command } from "./command"
 
-module.exports = (client: Discord.Client) => {
+module.exports = (client?: Discord.Client) => {
     const ignoreFiles = [ "command_base.ts", "load_commands.ts", "command.ts" ]
     const commandBase = require(`./command_base`)
 
@@ -23,7 +23,7 @@ module.exports = (client: Discord.Client) => {
 
             const options = require(path.join(__dirname, dir, file))
             commands.push(options)
-            commandBase(client, options)
+            if (client) { commandBase(client, options) }
         }
     }
 
