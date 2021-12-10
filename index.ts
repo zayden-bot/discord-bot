@@ -12,6 +12,7 @@ dotenv.config()
 const client = new Discord.Client({
     intents: [
         Discord.Intents.FLAGS.GUILDS,
+        Discord.Intents.FLAGS.GUILD_MEMBERS,
         Discord.Intents.FLAGS.GUILD_MESSAGES,
         Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS
     ],
@@ -153,38 +154,38 @@ client.on("messageReactionRemove", (reaction, user) => {
 })
 
 // Events
-// client.on("guildMemberUpdate", (oldMember, newMember) =>{
-//     const { patreonChannel } = require("./server_configs/745662812335898806.json");
+client.on("guildMemberUpdate", (oldMember, newMember) => {
+    const server_config = require("./server_configs/745662812335898806.json");
 
-//     const patreonRoles: Record<string, number> = {
-//         '745663316776714370': 1, // Freshman
-//         '745663351756947656': 5, // Sophomore
-//         '745663375496708127': 10, // Junior
-//         '745663394543304704': 20, // Senior
-//         '745663409932206112': 50, // President
-//         '745663432560345218': 100 // King
-//     }
+    const patreonRoles: Record<string, number> = {
+        '745663316776714370': 1, // Freshman
+        '745663351756947656': 5, // Sophomore
+        '745663375496708127': 10, // Junior
+        '745663394543304704': 20, // Senior
+        '745663409932206112': 50, // President
+        '745663432560345218': 100 // King
+    }
 
-//     // Get new added role
-//     const newRole = newMember.roles.cache
-//         .filter(role => !oldMember.roles.cache.has(role.id))
-//         .first()
+    // Get new added role
+    const newRole = newMember.roles.cache
+        .filter(role => !oldMember.roles.cache.has(role.id))
+        .first()
 
-//     // Is new role a patreon role
-//     if (typeof(newRole) != "undefined" && newRole.id in patreonRoles) {
-//         const embed = new Discord.MessageEmbed()
-//         .setTitle("New Patron")
-//         .setColor(`${newRole.hexColor}`)
-//         .setFooter(newMember.guild.name, newMember.guild.iconURL({ dynamic: true }) as string)
-//         .setThumbnail("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8f5967b9-fc84-45f6-a9c3-3938bfba7232/dbujg26-4865d57d-8dcc-435c-ac6e-0d0590f9de37.png/v1/fill/w_1683,h_475,q_70,strp/patreon_logo_by_laprasking_dbujg26-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD01NzYiLCJwYXRoIjoiXC9mXC84ZjU5NjdiOS1mYzg0LTQ1ZjYtYTljMy0zOTM4YmZiYTcyMzJcL2RidWpnMjYtNDg2NWQ1N2QtOGRjYy00MzVjLWFjNmUtMGQwNTkwZjlkZTM3LnBuZyIsIndpZHRoIjoiPD0yMDQxIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.95jfkKc4e-WyhcxKoiDGebItWvxmMPadhqYsh7gIsnQ")
-//         .addField("User", `<@${newMember.id}>`, true)
-//         .addField("Amount", `$${patreonRoles[newRole.id]}`, true)
-//         .setTimestamp();
+    // Is new role a patreon role
+    if (typeof(newRole) != "undefined" && newRole.id in patreonRoles) {
+        const embed = new Discord.MessageEmbed()
+        .setTitle("New Patron")
+        .setColor(`${newRole.hexColor}`)
+        .setFooter(newMember.guild.name, newMember.guild.iconURL({ dynamic: true }) as string)
+        .setThumbnail("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8f5967b9-fc84-45f6-a9c3-3938bfba7232/dbujg26-4865d57d-8dcc-435c-ac6e-0d0590f9de37.png/v1/fill/w_1683,h_475,q_70,strp/patreon_logo_by_laprasking_dbujg26-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD01NzYiLCJwYXRoIjoiXC9mXC84ZjU5NjdiOS1mYzg0LTQ1ZjYtYTljMy0zOTM4YmZiYTcyMzJcL2RidWpnMjYtNDg2NWQ1N2QtOGRjYy00MzVjLWFjNmUtMGQwNTkwZjlkZTM3LnBuZyIsIndpZHRoIjoiPD0yMDQxIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.95jfkKc4e-WyhcxKoiDGebItWvxmMPadhqYsh7gIsnQ")
+        .addField("User", `<@${newMember.id}>`, true)
+        .addField("Amount", `$${patreonRoles[newRole.id]}`, true)
+        .setTimestamp();
 
-//         const channel = client.channels.cache.get(patreonChannel) as Discord.TextChannel
-//         channel.send({embeds: [embed]});
-//     }
-// })
+        const channel = client.channels.cache.get(server_config.channels.patreonChannel) as Discord.TextChannel
+        channel.send({embeds: [embed]});
+    }
+})
 
 client.on("disconnect", () => {
     console.log("Bot shutting down.")
