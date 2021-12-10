@@ -1,22 +1,22 @@
-const Discord = require("discord.js")
+import Discord from "discord.js"
 
 module.exports = {
     commands: ["answer"],
     expectedArgs: "<id> <answer>",
     minArgs: 2,
-    callback: async (message, arguments, text) => {
-        const serverConfig = require(`../../server_configs/${message.guild.id}.json`)
-        const { questions } = require("./question")
+    callback: (message: Discord.Message, args: string[], text: string) => {
+        if (!message.guild) { return; }
 
-        const id = Number(arguments.shift())
+        const id = Number(args.shift())
 
-        if (typeof(id) == "undefined") {
+        if (typeof(id) !== "number") { 
             message.reply("Missing question ID")
             return
         }
 
-        text = arguments.join(" ")
+        text = args.join(" ")
 
+        const { questions } = require("./question")
         let question = questions[id]
         try {
             question.setAnswer(text, message.author.username)
@@ -29,8 +29,10 @@ module.exports = {
         .addField(`Question id: ${question.questionId}`, question.text)
         .addField(`Answered by ${question.answer.user}`, question.answer.text)
 
-        const channel = await message.guild.channels.cache.get(serverConfig.questionChannel)
-        channel.messages.fetch(question.messageId).then(msg => { 
+        const serverConfig = require(`../../server_configs/${message.guild.id}.json`)
+        const channel = message.guild.channels.cache.get(serverConfig.channels.questionChannel) as Discord.TextChannel
+        channel.messages.fetch(question.messageId)
+        .then(msg => { 
             msg.edit({embeds: [embed]})
             message.delete()
         })
