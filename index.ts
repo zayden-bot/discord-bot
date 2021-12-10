@@ -112,13 +112,13 @@ client.on("guildDelete", async guild => {
 })
 
 
-// client.on("messageCreate", message => {
-//     const yesMaster = require("./specialCommands/yesMaster")
-//     yesMaster(message)
+client.on("messageCreate", message => {
+    const yesMaster = require("./special_commands/yesMaster")
+    yesMaster(message)
 
-//     const questionMe = require("./specialCommands/questionMe")
-//     questionMe(message)
-// })
+    const questionMe = require("./special_commands/questionMe")
+    questionMe(message)
+})
 
 
 client.on("messageReactionAdd", (reaction, user) => {
