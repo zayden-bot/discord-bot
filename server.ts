@@ -11,6 +11,7 @@ export class Server {
     serverGuidelines: Array<Array<string>>
     idNumber: number;
     hidden: Record<string, Record<string, string>>
+    moderation: Record<string, Record<string, string>>
 
 
     constructor(id: string) {
@@ -24,6 +25,7 @@ export class Server {
         this.serverRules = {}
         this.serverGuidelines = [];
         this.hidden = {}
+        this.moderation = {}
 
         servers[this.id] = this
     }
