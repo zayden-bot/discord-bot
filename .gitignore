@@ -129,3 +129,6 @@ dist
 # Config files
 server_configs/
 user_configs/
+
+# Database
+*.db
