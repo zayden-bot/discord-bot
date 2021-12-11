@@ -1,12 +1,11 @@
 import Discord from "discord.js"
 import dotenv from "dotenv"
-import { Server, servers } from "./server";
 import fs from "fs"
 import path from "path"
+
+import { Server, servers } from "./server";
+
 dotenv.config()
-
-// const init = require("./init")
-
 
 
 const client = new Discord.Client({
@@ -18,6 +17,10 @@ const client = new Discord.Client({
     ],
     partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 })
+
+
+// Initialize database
+require("./sql").init()
 
 
 // Init
@@ -73,8 +76,8 @@ client.on("ready", () => {
     
     // init.updateImages();
 
-    // const moderation = require("./moderationFunctions")
-    // moderation.init()
+    const moderation = require("./moderationFunctions")
+    moderation.init()
 
     // const reactionRoles = require("./reactionRoleFuncions")
     // reactionRoles.init();
