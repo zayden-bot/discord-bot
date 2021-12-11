@@ -81,7 +81,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                     .setColor("#ff0000")
                     .setDescription(`Invalid command usage, try using it like:\n\`${botConfig.prefix}${alias} ${expectedArgs}\``)
                     
-                    channel.send({embeds: [embed]})
+                    channel.send({embeds: [embed]});
                     return
                 }
 

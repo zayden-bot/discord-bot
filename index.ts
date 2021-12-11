@@ -182,8 +182,11 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
         .addField("Amount", `$${patreonRoles[newRole.id]}`, true)
         .setTimestamp();
 
-        const channel = client.channels.cache.get(server_config.channels.patreonChannel) as Discord.TextChannel
-        channel.send({embeds: [embed]});
+        const channel = client.channels.cache.get(server_config.channels.patreonChannel)
+        if (channel && channel.isText()) {
+            channel.send({embeds: [embed]});
+        }
+
     }
 })
 

@@ -30,12 +30,15 @@ module.exports = {
         .addField(`Answered by ${question.answer.user}`, question.answer.text)
 
         const serverConfig = require(`../../server_configs/${message.guild.id}.json`)
-        const channel = message.guild.channels.cache.get(serverConfig.channels.questionChannel) as Discord.TextChannel
-        channel.messages.fetch(question.messageId)
-        .then(msg => { 
-            msg.edit({embeds: [embed]})
-            message.delete()
-        })
+        const channel = message.guild.channels.cache.get(serverConfig.channels.questionChannel)
+        
+        if (channel && channel.isText()) {
+            channel.messages.fetch(question.messageId)
+            .then(msg => { 
+                msg.edit({embeds: [embed]})
+                message.delete()
+            })
+        }
 
         try { question.user.send({embeds: [embed]}) }
         catch {}

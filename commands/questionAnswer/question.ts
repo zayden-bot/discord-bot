@@ -51,8 +51,10 @@ module.exports = {
         const embed = new Discord.MessageEmbed()
         .addField(`Question id: ${question.questionId}`, question.text)
 
-        const channel = message.guild.channels.cache.get(serverConfig.channels.questionChannel) as Discord.TextChannel
-        channel.send({embeds: [embed]}).then((message: Discord.Message) => { question.setMessageId(message.id) })
+        const channel = message.guild.channels.cache.get(serverConfig.channels.questionChannel)
+        if (channel && channel.isText()) {
+            channel.send({embeds: [embed]}).then((message: Discord.Message) => { question.setMessageId(message.id) })
+        }
     },
     questions: questions
 }

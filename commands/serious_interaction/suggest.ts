@@ -14,11 +14,13 @@ module.exports = {
         .setTitle(`From: ${message.author.username}`)
         .setDescription(text);
 
-        let channel = message.guild.channels.cache.get(config.channels.suggestionChannel) as Discord.TextChannel;
-        channel.send({embeds: [embed]})
-        .then((message: Discord.Message) => {
-            message.react("👍");
-            message.react("👎");
-        })
+        let channel = message.guild.channels.cache.get(config.channels.suggestionChannel);
+        if (channel && channel.isText()) {
+            channel.send({embeds: [embed]})
+            .then((message: Discord.Message) => {
+                message.react("👍");
+                message.react("👎");
+            })
+        }
     },
 }

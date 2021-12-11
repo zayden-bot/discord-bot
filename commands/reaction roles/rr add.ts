@@ -12,10 +12,9 @@ module.exports = {
         // Handle Channel
         const common = require("../../common")
         const channelId = common.getChannelId(args[0]);
-        let rrChannel = message.guild.channels.cache.get(channelId) as Discord.TextChannel | undefined;
-        if (!rrChannel) return;
+        let rrChannel = message.guild.channels.cache.get(channelId);
 
-        if (!rrChannel) {
+        if (!rrChannel || !rrChannel.isText()) {
             message.reply("Invald channel.");
             return;
         }
