@@ -1,15 +1,15 @@
-const Discord = require("discord.js")
-const imgConfig = require("../../configs/image_config.json")
+import Discord from "discord.js";
 
 module.exports = {
     commands: ["goodmorning", "gm"],
     expectedArgs: "<user>",
     maxArgs: 1,
-    callback: (message, arguments, text) => {
-        let member;
-        try { member = message.mentions.members.first().user.username }
-        catch (error) { member = message.author.username }
+    callback: (message: Discord.Message, args: string[], text: string) => {
+        let member: Discord.GuildMember | undefined;
+        if (message.mentions.members) { member = message.mentions.members.first(); }
+        if (!member) { member = message.member as Discord.GuildMember }
 
+        const imgConfig = require("../../configs/image_config.json")
         let arrayId = "Global";
         if (message.author.id in imgConfig.goodMorningImgs) { arrayId = message.author.id }
 
