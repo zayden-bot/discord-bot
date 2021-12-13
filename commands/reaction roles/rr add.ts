@@ -40,3 +40,5 @@ module.exports = {
     },
     permissions: ["MANAGE_ROLES"]
 }
+
+// TODO: Check if role is allowed
