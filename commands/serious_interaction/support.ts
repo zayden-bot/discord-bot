@@ -1,10 +1,11 @@
-// const Discord = require("discord.js")
-const fs = require("fs")
+import Discord from "discord.js"
 
 module.exports = {
     commands: ["support", "helpme"],
     expectedArgs: "<text>",
-    callback: async (message, arguments, text) => {
+    callback: async (message: Discord.Message, args: string[], text: string) => {
+        if (!message.guild || message.channel.type !== "GUILD_TEXT") { return; }
+
         const config = require(`../../server_configs/${message.guild.id}.json`)
         const idNumber = config.idNumber.toLocaleString('en', {minimumIntegerDigits: 4, useGrouping: false})
 
@@ -13,7 +14,7 @@ module.exports = {
 
             // Join support channels together
             let supportChannelsString = ""
-            config.supportChannels.forEach(function (channel, index) {
+            config.supportChannels.forEach((channel: string, index: number) => {
                 if (index === config.supportChannels.length - 1) {
                     supportChannelsString += `<#${channel}>`
                 } else {
@@ -39,7 +40,9 @@ module.exports = {
         
         // Update json file.
         config.idNumber += 1
-        fs.writeFile(`./server_configs/${message.guild.id}.json`, JSON.stringify(config, null, 4), function writeJSON(err) {
+
+        const fs = require("fs")
+        fs.writeFile(`./server_configs/${message.guild.id}.json`, JSON.stringify(config, null, 4), (err: any) => {
             if (err) { return console.log(err); }
         });
     },
