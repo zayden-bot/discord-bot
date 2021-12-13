@@ -10,7 +10,7 @@ module.exports = {
         const idNumber = config.idNumber.toLocaleString('en', {minimumIntegerDigits: 4, useGrouping: false})
 
         // Send error if in wrong channel
-        if (!config.supportChannels.includes(message.channel.id)) {
+        if (!config.channels.supportChannels.includes(message.channel.id)) {
 
             // Join support channels together
             let supportChannelsString = ""
