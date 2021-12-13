@@ -1,7 +1,8 @@
-const Discord = require("discord.js");
+import Discord from "discord.js"
 
-module.exports = async (client, channelId) => {
+export default async function (client: Discord.Client, channelId: string) {
     const channel = await client.channels.fetch(channelId)
+    if (!channel || !channel.isText()) { return console.error("Invalid channel id") }
 
     const embed = new Discord.MessageEmbed()
         .setTitle("React below to join a role")

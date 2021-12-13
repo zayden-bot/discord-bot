@@ -1,4 +1,4 @@
-const Discord = require("discord.js")
+import Discord from "discord.js"
 
 const field1 = `This server is about the game "College Kings". The game is still in active development. Supporting the game on patreon helps us a lot, so if you have the resources, consider joining the patreon.
 You can always get the newest version on patreon.
@@ -49,18 +49,19 @@ const field3 = `**Staff Roles:**
 **Custom Roles:** <#805765564504473641>
 To be added :)`
 
-module.exports = async (client, channelId) => {
-    const channel = await client.channels.fetch(channelId)
+export default async function (client: Discord.Client, channelId: string) {
+    const channel = await client.channels.fetch(channelId) as Discord.TextChannel
+    if (!channel || channel.type !== "GUILD_TEXT") { return console.error("Invalid channel id") }
 
     const embed = new Discord.MessageEmbed()
-    .setAuthor(channel.guild.name, channel.guild.iconURL())
+    .setAuthor(channel.guild.name, channel.guild.iconURL() as string)
     .addField("College Kings Game", field1)
     .addField("Information channels", field2a)
     .addField("Discussion channels", field2b)
     .addField("Support channels", field2c)
     .addField("Roles", field3)
     .setFooter(`Server Created: ${channel.guild.createdAt.getFullYear()}-${channel.guild.createdAt.getMonth()}-${channel.guild.createdAt.getDate()}`)
-    .setThumbnail(channel.guild.iconURL())
+    .setThumbnail(channel.guild.iconURL() as string)
     
     channel.messages.fetch("830931135780880415").then((message) => { message.edit({embeds: [embed]}) })
 }
