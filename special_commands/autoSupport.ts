@@ -5,7 +5,7 @@ module.exports = async function(message: Discord.Message) {
     if (!guild || message.channel.type !== "GUILD_TEXT" || message.author.id == "787490197943091211" || !message.member) { return; }
 
     const config = require(`../server_configs/${guild.id}.json`)
-    if (!config.channels.supportChannels.includes(message.channel.id) || message.member.roles.cache.has(config.moderationRole)) { return; }
+    if (!config.channels.supportChannels || !config.channels.supportChannels.includes(message.channel.id) || message.member.roles.cache.has(config.moderationRole)) { return; }
     const idNumber = config.idNumber.toLocaleString('en', {minimumIntegerDigits: 4, useGrouping: false})
 
     // Create channel thread and send mentions
