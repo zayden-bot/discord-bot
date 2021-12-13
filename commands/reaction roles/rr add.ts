@@ -5,58 +5,36 @@ module.exports = {
     expectedArgs: "<channel> <message> <role> <emoji>",
     minArgs: 4,
     maxArgs: 4,
-    callback: (message: Discord.Message, args: string[], text: string) => {
-        const guild = message.guild;
-        if (!guild) return;
+    callback: async (message: Discord.Message, args: string[], text: string) => {
+        const guild: Discord.Guild | null = message.guild;
+        if (!guild) { return; }
 
         // Handle Channel
         const common = require("../../common")
-        const channelId = common.getChannelId(args[0]);
-        let rrChannel = message.guild.channels.cache.get(channelId);
+        const channelId: string = common.parseId(args[0]);
+        const channel: Discord.Channel | null = await guild.channels.fetch(channelId);
 
-        if (!rrChannel || !rrChannel.isText()) {
-            message.reply("Invald channel.");
-            return;
-        }
-
-        // Handle Role
-        const roleId = common.getRoleId(args[2]);
-        const rrRole = guild.roles.cache.get(roleId);
-        if (!rrRole) {
-            message.reply("Invald Role.");
-            return;
-        }
-
-        // Handle Emoji
-        const rrEmoji = args[3]
+        if (!channel || !channel.isText()) { return message.reply("Invald channel."); }
 
         // Handle Message
-        rrChannel.messages.fetch(args[1])
-        .then(rrMessage => {
-            if (!rrMessage) { 
-                message.reply("Invald message.");
-                return;
-            }
+        const messageId: string= common.parseId(args[1]);
+        const msg: Discord.Message = await channel.messages.fetch(messageId)
 
-            // Append reaction to server object
-            const { ReactionRole } = require("../../reactionRole");
-            const { Server, servers } = require("../../server");
-            let server = servers[guild.id];
-            if (!server) { server = new Server(guild.id) }
+        if (!msg) { return message.reply("Invalid message."); }
 
-            const reactionRole = new ReactionRole(rrChannel, rrMessage, rrRole, rrEmoji)
-            server.reactionRoles.push(reactionRole);
+        // Handle Role
+        const roleId: string = common.parseId(args[2]);
+        const role: Discord.Role | null = await guild.roles.fetch(roleId);
 
-            rrMessage.react(rrEmoji)
+        if (!role) { return message.reply("Invald Role."); }
 
+        // Handle Emoji
+        const emoji: string = args[3]
 
-            // Add to JSON
-            const fs = require("fs")
-            fs.writeFileSync(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4), function writeJSON(err: any) {
-                if (err) { return console.log(err); }
-            });
-        })
-        .catch(console.error)
+        // Create ReactionRole
+        const status: boolean = require("./functions").addNormalReaction(guild, channel, msg, role, emoji)
+
+        if (!status) { return message.reply("Failed to added reaction") }
 
         message.reply("Successfully added reaction")
     },
