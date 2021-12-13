@@ -90,13 +90,13 @@ client.on("ready", () => {
     // const update_guidelines = require("./selfUpdating/updateGuidelines");
     // update_guidelines(client, "879894434538459157")
 
-    const customRoles = require("./selfUpdating/custom_roles")
+    const customRoles = require("./self_updating/customRoles")
     customRoles(client, "805765564504473641")
 
-    const updateInfomation = require("./selfUpdating/updateInfomation")
+    const updateInfomation = require("./self_updating/updateInfomation")
     updateInfomation(client, "830927865784565800")
 
-    const updateRules = require("./selfUpdating/updateRules")
+    const updateRules = require("./self_updating/updateRules")
     updateRules(client, "747430712617074718")
 });
 
@@ -123,6 +123,9 @@ client.on("messageCreate", message => {
 
     const questionMe = require("./special_commands/questionMe")
     questionMe(message)
+
+    const autoSupport = require("./special_commands/autoSupport")
+    autoSupport(message)
 })
 
 
