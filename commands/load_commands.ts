@@ -22,8 +22,11 @@ module.exports = (client?: Discord.Client) => {
             }
 
             const options = require(path.join(__dirname, dir, file))
-            commands.push(options)
-            if (client) { commandBase(client, options) }
+            if (options.commands && options.callback) {
+                commands.push(options);
+                if (client) { commandBase(client, options) }
+            }
+
         }
     }
 
