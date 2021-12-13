@@ -38,5 +38,5 @@ module.exports = {
 
         message.reply("Successfully added reaction")
     },
-    permissions: ["ADMINISTRATOR"],
+    permissions: ["MANAGE_MESSAGES"]
 }
