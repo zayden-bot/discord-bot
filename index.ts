@@ -82,11 +82,6 @@ client.on("ready", () => {
     const moderation = require("./moderationFunctions")
     moderation.init()
 
-    // const reactionRoles = require("./reactionRoleFuncions")
-    // reactionRoles.init();
-    // reactionRoles.addNormalReactionRole(client);
-    // reactionRoles.removeNormalReactionRole(client);
-
     // Self Updating
     // const update_guidelines = require("./selfUpdating/updateGuidelines");
     // update_guidelines(client, "879894434538459157")
@@ -99,7 +94,6 @@ client.on("ready", () => {
 
     // const updateRules = require("./selfUpdating/updateRules")
     // updateRules(client, "747430712617074718")
-
 });
 
 
