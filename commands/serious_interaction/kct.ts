@@ -1,9 +1,9 @@
-const Discord = require("discord.js")
+import Discord from "discord.js"
 
 module.exports = {
     commands: ["kct", "plc"],
     permissionError: "",
-    callback: (message, arguments, text) => {
+    callback: (message: Discord.Message, args: string[], text: string) => {
         
         const embed = new Discord.MessageEmbed()
         .addFields(
