@@ -1,6 +1,6 @@
 import Discord from "discord.js"
 
-export default async function (client: Discord.Client, channelId: string) {
+module.exports = async function (client: Discord.Client, channelId: string) {
     const channel = await client.channels.fetch(channelId)
     if (!channel || !channel.isText()) { return console.error("Invalid channel id") }
 

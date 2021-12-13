@@ -1,6 +1,6 @@
 import Discord from "discord.js"
 
-export default function (message: Discord.Message) {
+module.exports = function (message: Discord.Message) {
     if (!message.client.user) { return; }
 
     if (message.content.toLowerCase() == `shut up <@!${message.client.user.id}>` && message.author.id == "211486447369322506") {

@@ -49,7 +49,7 @@ const field3 = `**Staff Roles:**
 **Custom Roles:** <#805765564504473641>
 To be added :)`
 
-export default async function (client: Discord.Client, channelId: string) {
+module.exports = async function (client: Discord.Client, channelId: string) {
     const channel = await client.channels.fetch(channelId) as Discord.TextChannel
     if (!channel || channel.type !== "GUILD_TEXT") { return console.error("Invalid channel id") }
 
