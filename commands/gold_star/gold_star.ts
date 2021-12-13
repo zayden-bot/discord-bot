@@ -1,22 +1,19 @@
-const Discord = require("discord.js")
-const common = require("../../common")
+import Discord from "discord.js";
 
 module.exports = {
     commands: ["give_star", "gs"],
     expectedArgs: "<user> [text]",
     minArgs: 1,
-    callback: (message, arguments, text) => {
-        const member = message.mentions.members.first();
-        if (!member) {
-            message.reply("No member mentioned.");
-            return;
-        }
-        if (member.id == message.member.id) {
-            message.reply("You idiot...");
-            return;
-        }
+    callback: (message: Discord.Message, args: string[], text: string) => {
         const author = message.member;
+        const member = message.mentions.members?.first();
+
+        if (!message.guild || !author) { return; }
+
+        if (!member) { return message.reply("No member mentioned."); }
+        if (member.id == author.id) { return message.reply("You idiot..."); }
         
+        const common = require("../../common")
         common.user_config_setup(message);
 
         const member_config = require(`../../user_configs/${member.id}.json`);
