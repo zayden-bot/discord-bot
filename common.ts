@@ -55,17 +55,8 @@ module.exports = {
         }
     },
 
-    getChannelId: function (id: string) {
-        if (id.startsWith("<#") && id.endsWith('>')) {
-            id = id.slice(2, -1);
-        }
-        return id
+    parseId: function (id: string): string | undefined {
+        const match = id.match(/\d+/)
+        if (match) { return match[0]; }
     },
-
-    getRoleId: function (id: string) {
-        if (id.startsWith("<@&") && id.endsWith('>')) {
-            id = id.slice(3, -1);
-        }
-        return id
-    }
 }
