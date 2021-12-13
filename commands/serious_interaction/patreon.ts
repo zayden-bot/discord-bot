@@ -1,11 +1,11 @@
-const Discord = require("discord.js")
+import Discord from "discord.js"
 
 module.exports = {
     commands: ["patreon"],
     permissionError: "",
     minArgs: 0,
     maxArgs: 0,
-    callback: (message, arguments, text) => {
+    callback: (message: Discord.Message, args: string[], text: string) => {
         const embed = new Discord.MessageEmbed()
             .setTitle("Pledge to College Kings")
             .setURL(`https://www.patreon.com/collegekings`)
