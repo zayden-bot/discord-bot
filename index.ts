@@ -76,6 +76,9 @@ client.on("ready", () => {
     
     // init.updateImages();
 
+    const blacklist = require("./blacklist")
+    blacklist.init()
+
     const moderation = require("./moderationFunctions")
     moderation.init()
 
