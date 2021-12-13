@@ -38,5 +38,5 @@ module.exports = {
 
         message.reply("Successfully added reaction")
     },
-    permissions: Discord.Permissions.FLAGS.MANAGE_ROLES
+    permissions: ["MANAGE_ROLES"]
 }
