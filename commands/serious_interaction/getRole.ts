@@ -1,8 +1,8 @@
-const Discord = require("discord.js")
+import Discord from "discord.js"
 
 module.exports = {
     commands: ["getRole", "patreonRole"],
-    callback: (message, arguments, text) => {
+    callback: (message: Discord.Message, args: string[], text: string) => {
         const embed = new Discord.MessageEmbed()
             .setTitle("How do I get my Discord role when I become a patron?")
             .setURL(`https://support.patreon.com/hc/en-us/articles/212052266-Get-my-Discord-role`)
