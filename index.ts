@@ -28,6 +28,10 @@ client.on("ready", () => {
     const botConfig = require("./configs/bot_config.json");
     console.log(`Zayden is Running, version: ${botConfig.version}`);
 
+    if (client.user) { 
+        client.user.setPresence({ activities: [{ name: "College Kings" }], status: "online"})
+    }
+
     const loadCommands = require("./commands/load_commands");
     loadCommands(client)
 
