@@ -137,8 +137,9 @@ client.on("messageReactionAdd", (reaction, user) => {
     for (const reactionRole of server.reactionRoles) {
         if (reaction.message == reactionRole.message && reaction.emoji.name == reactionRole.emoji && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
-            if (member) {  member.roles.add(reactionRole.role) }
-            break
+            if (!member) { break; }
+            member.roles.add(reactionRole.role)
+            .catch((error) => console.log(error))
         }
     }
 })
