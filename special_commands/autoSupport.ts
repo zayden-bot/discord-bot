@@ -18,7 +18,11 @@ module.exports = async function(message: Discord.Message) {
     })
 
     thread.send("<@&913374071239102504>")
-    thread.send(`${message.author} wrote:\n> ${message.content}`)
+    thread.send({
+        content: `${message.author} wrote:\n${message.content}`,
+        embeds: message.embeds,
+        files: [...message.attachments.values()]
+    })
 
     // Update json file.
     config.idNumber += 1
