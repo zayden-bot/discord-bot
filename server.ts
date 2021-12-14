@@ -4,7 +4,7 @@ export class Server {
     id: string;
     reactionRoles: ReactionRole[]
     disabledCommands: string[];
-    moderationRole: string;
+    roles: Record<string, string>;
     channels: Record<string, string>;
     gameVersions: Record<string, string>
     serverRules: Record<string, string>
@@ -18,7 +18,7 @@ export class Server {
         this.id = id;
         this.reactionRoles = []
         this.disabledCommands = []
-        this.moderationRole = ""
+        this.roles = {}
         this.channels = {};
         this.idNumber = 0;
         this.gameVersions = {}

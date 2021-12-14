@@ -66,7 +66,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 // Check if the command is on cooldown
                 try { var cooldownString = `${guild.id}-${member.id}-${commands[0]}` }
                 catch { var cooldownString = `privateMessage-${message.author.id}-${commands[0]}` }
-                if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(server.moderationRole)) {
+                if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(server.roles.moderationRole)) {
                     message.reply("You cannot use that command so soon, please wait")
                     return
                 }

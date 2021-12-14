@@ -15,7 +15,7 @@ module.exports = {
         if (!message.guild || !message.member) { return; }
 
         const server = servers[message.guild.id]
-        if (message.channel.id != "776139754408247326" && !message.member.roles.cache.has(server.moderationRole)) {
+        if (message.channel.id != "776139754408247326" && !message.member.roles.cache.has(server.roles.moderationRole)) {
             message.reply("You're an idiot. Use <#776139754408247326> for commands.").then(msg => {
                 setTimeout(() => msg.delete(), 5000);
             });
