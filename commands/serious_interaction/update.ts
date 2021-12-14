@@ -16,10 +16,11 @@ module.exports = {
 
         const server = servers[message.guild.id]
         if (message.channel.id != "776139754408247326" && !message.member.roles.cache.has(server.roles.moderationRole)) {
-            message.reply("You're an idiot. Use <#776139754408247326> for commands.").then(msg => {
+            message.reply("You're an idiot. Use <#776139754408247326> for commands.")
+            .then(msg => {
+                message.delete().catch((err: any) => {console.log(err)});
                 setTimeout(() => msg.delete(), 5000);
             });
-            message.delete();
             return;
         }
 
