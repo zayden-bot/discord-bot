@@ -67,13 +67,15 @@ client.on("ready", () => {
 
         // Cache reaction messages
         for (let reactionRole of servers[guild.id].reactionRoles) {
-            reactionRole.channel = client.channels.cache.get(reactionRole.channel.id) as Discord.TextChannel;
+            const channel = client.channels.cache.get(reactionRole.channelId) as Discord.TextChannel
+            if (!channel) { break; }
+            reactionRole.channelId = channel.id;
 
-            reactionRole.channel.messages.fetch(reactionRole.message.id)
-                .then((msg: Discord.Message) => { reactionRole.message = msg })
+            channel.messages.fetch(reactionRole.messageId)
+                .then((msg: Discord.Message) => { reactionRole.messageId = msg.id })
 
-            guild.roles.fetch(reactionRole.role.id)
-                .then(role => { if (role) reactionRole.role = role; })
+            guild.roles.fetch(reactionRole.roleId)
+                .then(role => { if (role) { reactionRole.roleId = role.id; } })
         }
     })
 
@@ -129,34 +131,45 @@ client.on("messageCreate", message => {
 })
 
 
-client.on("messageReactionAdd", (reaction, user) => {
+client.on("messageReactionAdd", async (reaction, user) => {
     if (!reaction.message.guild) return;
 
     const guild = reaction.message.guild
     const server = servers[guild.id];
 
-    for (const reactionRole of server.reactionRoles) {
-        if (reaction.message.id == reactionRole.message.id && reaction.emoji.name == reactionRole.emoji && user.id !== "907635513341644861") {
+    for (const reactionRole of server.reactionRoles) {        
+        if (reaction.message.id == reactionRole.messageId && reaction.emoji.id== reactionRole.emojiId && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) { break; }
-            member.roles.add(reactionRole.role)
+
+            const role = await guild.roles.fetch(reactionRole.roleId)
+            if (!role) { break; }
+
+            member.roles.add(role)
             .catch((error) => console.log(error))
+            break;
         }
     }
 })
 
 
-client.on("messageReactionRemove", (reaction, user) => {
+client.on("messageReactionRemove", async (reaction, user) => {
     if (!reaction.message.guild) return;
 
     const guild = reaction.message.guild
     const server = servers[guild.id];
 
-    for (const reactionRole of server.reactionRoles) {
-        if (reaction.message == reactionRole.message && reaction.emoji.name == reactionRole.emoji && user.id !== "907635513341644861") {
+    for (const reactionRole of server.reactionRoles) {        
+        if (reaction.message.id == reactionRole.messageId && reaction.emoji.id== reactionRole.emojiId && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
-            if (member) {  member.roles.remove(reactionRole.role) }
-            break
+            if (!member) { break; }
+
+            const role = await guild.roles.fetch(reactionRole.roleId)
+            if (!role) { break; }
+
+            member.roles.remove(role)
+            .catch((error) => console.log(error))
+            break;
         }
     }
 })

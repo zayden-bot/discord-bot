@@ -1,4 +1,4 @@
-import { ReactionRole } from "./reactionRole"
+import { ReactionRole } from "./commands/reaction roles/reactionRole"
 
 export class Server {
     id: string;

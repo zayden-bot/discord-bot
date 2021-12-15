@@ -1,17 +1,17 @@
 import Discord from "discord.js"
-import { ReactionRole } from "../../reactionRole";
+import { ReactionRole } from "./reactionRole";
 
-function getReactionRoleIndex(reactionRoles: ReactionRole[], channel: Discord.Channel, message: Discord.Message, emoji: string) {
+function getReactionRoleIndex(reactionRoles: ReactionRole[], channel: Discord.Channel, message: Discord.Message, emoji: Discord.GuildEmoji) {
     for (let i = 0; i < reactionRoles.length; i++) {
         const reactionRole = reactionRoles[i]
-        if (reactionRole.channel === channel && reactionRole.message === message, reactionRole.emoji === emoji) { return i; }
+        if (reactionRole.channelId === channel.id && reactionRole.messageId === message.id, reactionRole.emojiId === emoji.id) { return i; }
     }
 
     return undefined;
 }
 
-export function addNormalReaction(guild: Discord.Guild, channel: Discord.TextChannel, message: Discord.Message, role: Discord.Role, emoji: string): boolean {
-    const { ReactionRole } = require("../../reactionRole");
+export function addNormalReaction(guild: Discord.Guild, channel: Discord.TextChannel, message: Discord.Message, role: Discord.Role, emoji: Discord.GuildEmoji): boolean {
+    const { ReactionRole } = require("./reactionRole");
     const { Server, servers } = require("../../server");
 
     // Get server object
@@ -19,7 +19,7 @@ export function addNormalReaction(guild: Discord.Guild, channel: Discord.TextCha
     if (!server) { server = new Server(guild.id) }
 
     // Create reaction role and push to server
-    const reactionRole = new ReactionRole(channel, message, role, emoji)
+    const reactionRole = new ReactionRole(channel.id, message.id, role.id, emoji.id)
     server.reactionRoles.push(reactionRole);
     
     // Add to JSON
@@ -36,7 +36,7 @@ export function addNormalReaction(guild: Discord.Guild, channel: Discord.TextCha
     return true;
 }
 
-export function removeReactionRole(guild: Discord.Guild, channel: Discord.TextChannel, message: Discord.Message, emoji: string): boolean {
+export function removeReactionRole(guild: Discord.Guild, channel: Discord.TextChannel, message: Discord.Message, emoji: Discord.GuildEmoji) {
     const { Server, servers } = require("../../server");
 
     // Get server object
@@ -45,7 +45,10 @@ export function removeReactionRole(guild: Discord.Guild, channel: Discord.TextCh
 
     // Remove reaction role from server
     const reactionRoleIndex = getReactionRoleIndex(server.reactionRoles, channel, message, emoji)
-    if (!reactionRoleIndex) { return false; }
+    if (typeof(reactionRoleIndex) === "undefined") {
+        console.log("No reaction role found")
+        return false;
+    }
     server.reactionRoles.splice(reactionRoleIndex, 1);
     
     // Add to JSON
@@ -54,8 +57,11 @@ export function removeReactionRole(guild: Discord.Guild, channel: Discord.TextCh
         if (error) { return console.log(error); }
     });
 
-    const reaction = message.reactions.cache.get(emoji)
-    if (!reaction) { return false; }
+    const reaction = message.reactions.cache.get(emoji.id)
+    if (!reaction) {
+        console.log("No reaction found")
+        return false;
+    }
 
     reaction.remove()
 

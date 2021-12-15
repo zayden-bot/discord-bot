@@ -23,7 +23,8 @@ module.exports = {
         if (!msg) { return message.reply("Invalid message."); }
 
         // Handle Emoji
-        const emoji: string = args[2]
+        const emojiId: string = common.parseId(args[2])
+        const emoji: Discord.GuildEmoji = await guild.emojis.fetch(emojiId)
 
         // Create ReactionRole
         const status: boolean = require("./functions").removeReactionRole(guild, channel, msg, emoji)
