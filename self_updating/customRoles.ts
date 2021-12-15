@@ -9,7 +9,7 @@ module.exports = async function (client: Discord.Client, channelId: string) {
         .addField("Get a notification for Discord Server Events!", `:bell: <@&805766527889440778>`)
 
         .addField("Join one of the San Vallejo Fraternities!", `<:rr_apes:920490707721023558> <@&818365011554336809>
-        <:rr_wolves:920490706768887840> <@&818365035259887626>`)
+<:rr_wolves:920490706768887840> <@&818365035259887626>`)
 
         .addField("Choose a girl's fanclub to show your affection!", `<:rr_amber:920384376406159390> <@&920365569432244264>
 <:rr_aubrey:920384376217427979> <@&920365674591813693>
