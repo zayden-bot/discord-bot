@@ -89,7 +89,7 @@ client.on("ready", () => {
     moderation.init()
 
     // Self Updating
-    // const update_guidelines = require("./selfUpdating/updateGuidelines");
+    const update_guidelines = require("./selfUpdating/updateGuidelines");
     // update_guidelines(client, "879894434538459157")
 
     const customRoles = require("./self_updating/customRoles")
