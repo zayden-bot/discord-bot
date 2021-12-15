@@ -136,7 +136,7 @@ client.on("messageReactionAdd", (reaction, user) => {
     const server = servers[guild.id];
 
     for (const reactionRole of server.reactionRoles) {
-        if (reaction.message == reactionRole.message && reaction.emoji.name == reactionRole.emoji && user.id !== "907635513341644861") {
+        if (reaction.message.id == reactionRole.message.id && reaction.emoji.name == reactionRole.emoji && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) { break; }
             member.roles.add(reactionRole.role)

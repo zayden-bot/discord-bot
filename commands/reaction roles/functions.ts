@@ -37,7 +37,6 @@ export function addNormalReaction(guild: Discord.Guild, channel: Discord.TextCha
 }
 
 export function removeReactionRole(guild: Discord.Guild, channel: Discord.TextChannel, message: Discord.Message, emoji: string): boolean {
-    const { ReactionRole } = require("../../reactionRole");
     const { Server, servers } = require("../../server");
 
     // Get server object
@@ -46,6 +45,7 @@ export function removeReactionRole(guild: Discord.Guild, channel: Discord.TextCh
 
     // Remove reaction role from server
     const reactionRoleIndex = getReactionRoleIndex(server.reactionRoles, channel, message, emoji)
+    if (!reactionRoleIndex) { return false; }
     server.reactionRoles.splice(reactionRoleIndex, 1);
     
     // Add to JSON
