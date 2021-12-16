@@ -42,8 +42,8 @@ client.on("ready", () => {
         const guildId = path.parse(filename).name
 
         const server = new Server(guildId)
-        server.disabledCommands = serverConfig.disabledCommands
         server.reactionRoles = serverConfig.reactionRoles
+        server.disabledCommands = serverConfig.disabledCommands
         server.roles = serverConfig.roles
         server.channels = serverConfig.channels
         server.idNumber = serverConfig.idNumber
@@ -51,6 +51,8 @@ client.on("ready", () => {
         server.serverRules = serverConfig.serverRules
         server.serverGuidelines = serverConfig.serverGuidelines
         server.hidden = serverConfig.hidden
+        server.moderation = serverConfig.moderation
+        server.supportAnswers = serverConfig.supportAnswers
 
         servers[guildId] = server
     }

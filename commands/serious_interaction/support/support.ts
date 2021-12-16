@@ -11,12 +11,13 @@ module.exports = {
 
         const server = servers[guild.id]
 
-        const id = text[0].toUpperCase() + text.slice(1);
+        const id = text;
         const answer = server.supportAnswers[id.toLowerCase()];
+        console.log(answer);
         if (!answer) { return message.reply(`There is no support answer for ID: ${id}`); }
 
         const embed = new Discord.MessageEmbed()
-        .setTitle(`Support ID: ${id}`)
+        .setTitle(`Support ID: ${id[0].toUpperCase() + id.slice(1)}`)
         .setDescription(answer)
         .setColor("#ff0000")
         .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
