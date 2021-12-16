@@ -1,4 +1,6 @@
 import Discord from "discord.js"
+import fs from "fs"
+import { Server } from "./server";
 
 module.exports = {
     user_config_setup: function (message: Discord.Message) {
@@ -58,5 +60,15 @@ module.exports = {
     parseId: function (id: string): string | undefined {
         const match = id.match(/\d+/)
         if (match) { return match[0]; }
+    },
+
+    updateConfig: function (guild: Discord.Guild, server: Server) {
+        fs.writeFile(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4), (error: any) => {
+            if (error) { return console.log(error); }
+        });
+    },
+
+    updateConfigSync: function (guild: Discord.Guild, server: Server) {
+        fs.writeFileSync(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4));
     },
 }
