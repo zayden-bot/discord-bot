@@ -4,12 +4,12 @@ export class ReactionRole {
     channelId: string;
     messageId: string;
     roleId: string;
-    emojiId: string;
+    emoji: string;
 
-    constructor(channelId: string, messageId: string, roleId: string, emojiId: string) {
+    constructor(channelId: string, messageId: string, roleId: string, emoji: string) {
         this.channelId = channelId;
         this.messageId = messageId;
         this.roleId = roleId;
-        this.emojiId = emojiId;
+        this.emoji = emoji;
     }
 }

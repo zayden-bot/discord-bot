@@ -29,8 +29,7 @@ module.exports = {
         if (!role) { return message.reply("Invald Role."); }
 
         // Handle Emoji
-        const emojiId: string = common.parseId(args[3]);
-        const emoji: Discord.GuildEmoji = await guild.emojis.fetch(emojiId);
+        const emoji = args[3];
 
         // Create ReactionRole
         const status: boolean = require("./functions").addNormalReaction(guild, channel, msg, role, emoji)

@@ -8,7 +8,7 @@ import { Server, servers } from "./server";
 dotenv.config()
 
 
-const client = new Discord.Client({
+export const client = new Discord.Client({
     intents: [
         Discord.Intents.FLAGS.GUILDS,
         Discord.Intents.FLAGS.GUILD_MEMBERS,
@@ -89,7 +89,7 @@ client.on("ready", () => {
     moderation.init()
 
     // Self Updating
-    const update_guidelines = require("./selfUpdating/updateGuidelines");
+    const update_guidelines = require("./self_updating/updateGuidelines");
     // update_guidelines(client, "879894434538459157")
 
     const customRoles = require("./self_updating/customRoles")
@@ -132,13 +132,13 @@ client.on("messageCreate", message => {
 
 
 client.on("messageReactionAdd", async (reaction, user) => {
-    if (!reaction.message.guild) return;
-
     const guild = reaction.message.guild
-    const server = servers[guild.id];
+    if (!guild) return;
 
+    const server = servers[guild.id];
+    
     for (const reactionRole of server.reactionRoles) {        
-        if (reaction.message.id == reactionRole.messageId && reaction.emoji.id== reactionRole.emojiId && user.id !== "907635513341644861") {
+        if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) { break; }
 
@@ -154,13 +154,13 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
 
 client.on("messageReactionRemove", async (reaction, user) => {
-    if (!reaction.message.guild) return;
-
     const guild = reaction.message.guild
+    if (!guild) return;
+
     const server = servers[guild.id];
 
     for (const reactionRole of server.reactionRoles) {        
-        if (reaction.message.id == reactionRole.messageId && reaction.emoji.id== reactionRole.emojiId && user.id !== "907635513341644861") {
+        if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) { break; }
 
