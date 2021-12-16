@@ -11,8 +11,8 @@ module.exports = {
 
         const server = servers[guild.id]
 
-        const id = text[0].toUpperCase + text.slice(1);
-        const answer = server.supportAnswers[id];
+        const id = text[0].toUpperCase() + text.slice(1);
+        const answer = server.supportAnswers[id.toLowerCase()];
         if (!answer) { return message.reply(`There is no support answer for ID: ${id}`); }
 
         const embed = new Discord.MessageEmbed()
