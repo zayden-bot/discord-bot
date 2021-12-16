@@ -62,10 +62,10 @@ module.exports = {
 
                 const common = require("../../../common")
                 common.updateConfig(guild, server)
-                return interaction.update({ content: "Successfully added support option", components: [] })
+                return interaction.update({ content: "Successfully added support option", embeds: [], components: [] })
             }
             else {
-                return interaction.update({ content: "Canceled", components: [] })
+                return interaction.update({ content: "Canceled", embeds: [], components: [] })
             }
         })
         .catch((error) => {

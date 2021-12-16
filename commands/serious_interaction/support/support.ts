@@ -13,7 +13,6 @@ module.exports = {
 
         const id = text;
         const answer = server.supportAnswers[id.toLowerCase()];
-        console.log(answer);
         if (!answer) { return message.reply(`There is no support answer for ID: ${id}`); }
 
         const embed = new Discord.MessageEmbed()
