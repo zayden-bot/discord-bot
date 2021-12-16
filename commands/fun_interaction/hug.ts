@@ -17,7 +17,7 @@ module.exports = {
         const imgId = Math.floor(Math.random() * imgConfig.huggingImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`Sending hugs to ${member.nickname}`)
+            .setTitle(`Sending hugs to ${member.displayName}`)
             .setImage(imgConfig.huggingImgs[arrayId][imgId])
             .setColor("#FFC0CB")
 

@@ -16,7 +16,7 @@ module.exports = {
         const imgId = Math.floor(Math.random() * imgConfig.kissingImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`${message.author.username} kisses ${member.nickname}`)
+            .setTitle(`${message.author.username} kisses ${member.displayName}`)
             .setImage(imgConfig.kissingImgs[arrayId][imgId])
             .setColor("#FFC0CB")
 
