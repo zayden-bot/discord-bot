@@ -58,10 +58,10 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 }
 
                 // Check if the user is blacklisted
-                // const blacklist = require("../blacklist.js");
-                // if (guild && blacklist.isBlacklisted(member.id) && !botConfig.developers.includes(member.id)) {
-                //     return
-                // }
+                const blacklist = require("../blacklist");
+                if (guild && blacklist.isBlacklisted(member.id) && !botConfig.developers.includes(member.id)) {
+                    return
+                }
 
                 // Check if the command is on cooldown
                 try { var cooldownString = `${guild.id}-${member.id}-${commands[0]}` }
