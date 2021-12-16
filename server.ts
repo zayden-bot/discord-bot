@@ -12,7 +12,7 @@ export class Server {
     idNumber: number;
     hidden: Record<string, Record<string, string>>
     moderation: Record<string, Record<string, string>>
-
+    supportAnswers: Record<string, string>
 
     constructor(id: string) {
         this.id = id;
@@ -26,6 +26,7 @@ export class Server {
         this.serverGuidelines = [];
         this.hidden = {}
         this.moderation = {}
+        this.supportAnswers = {};
 
         servers[this.id] = this
     }
