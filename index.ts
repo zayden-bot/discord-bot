@@ -87,8 +87,8 @@ client.on("ready", () => {
     const blacklist = require("./blacklist")
     blacklist.init()
 
-    const moderation = require("./moderationFunctions")
-    moderation.init()
+    // const moderation = require("./moderationFunctions")
+    // moderation.init()
 
     // Self Updating
     const update_guidelines = require("./self_updating/updateGuidelines");
