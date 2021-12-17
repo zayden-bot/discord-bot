@@ -13,8 +13,8 @@ module.exports = {
         const server = servers[guild.id]
 
         args = text.split(',')
-        const id = args[0].toLowerCase()
-        const answer = args[1];
+        const id = args.shift()?.toLowerCase() as string
+        const answer = args.join(',');
         
         if (!answer) { return message.reply("Comma seperator not found.")}
 
