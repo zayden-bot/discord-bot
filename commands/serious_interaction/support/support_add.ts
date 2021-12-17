@@ -1,5 +1,4 @@
 import Discord from "discord.js";
-import { MessageActionRow, MessageButton } from "discord.js";
 import { servers } from "../../../server";
 
 module.exports = {
@@ -28,17 +27,17 @@ module.exports = {
         }
 
         // If ID already exists:
-        const confirm_button = new MessageButton()
+        const confirm_button = new Discord.MessageButton()
         .setCustomId("confirm")
         .setLabel("Confirm")
         .setStyle("SUCCESS");
 
-        const decline_button = new MessageButton()
+        const decline_button = new Discord.MessageButton()
         .setCustomId("decline")
         .setLabel("Decline")
         .setStyle("DANGER");
 
-        const row = new MessageActionRow()
+        const row = new Discord.MessageActionRow()
         .addComponents(
             confirm_button,
             decline_button
