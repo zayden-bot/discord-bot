@@ -17,11 +17,16 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
         callback
     } = commandOptions
 
-    if (typeof(commands) == "string") {
+    if (typeof (commands) == "string") {
         commands = [commands]
     }
-    if (typeof(requiredRoles) == "string") {
-            requiredRoles = [requiredRoles]
+
+    if (permissionError.length == 0) {
+        permissionError = "You do not have permission to run this command"
+    }
+
+    if (typeof (requiredRoles) == "string") {
+        requiredRoles = [requiredRoles]
     }
 
     client.on("messageCreate", message => {
@@ -42,7 +47,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 // Check if the user has the correct permissions to run the command
                 for (const permission of permissions) {
                     if (guild && !member.permissions.has(permission) && !botConfig.developers.includes(member.id)) {
-                        message.reply(permissionError)
+                        message.reply({ content: permissionError })
                         return
                     }
                 }
@@ -52,7 +57,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                     const role = guild.roles.cache.find(role => role.name === requiredRole)
 
                     if (!role || !member.roles.cache.has(role.id) && !botConfig.developers.includes(member.id)) {
-                        message.reply(permissionError)
+                        message.reply({ content: permissionError })
                         return
                     }
                 }
@@ -76,12 +81,12 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 args.shift()
 
                 // Check if the user inputed the correct number of arguments
-                if (args.length < minArgs || ( maxArgs !== null && args.length > maxArgs )) {
+                if (args.length < minArgs || (maxArgs !== null && args.length > maxArgs)) {
                     const embed = new Discord.MessageEmbed()
-                    .setColor("#ff0000")
-                    .setDescription(`Invalid command usage, try using it like:\n\`${botConfig.prefix}${alias} ${expectedArgs}\``)
-                    
-                    channel.send({embeds: [embed]});
+                        .setColor("#ff0000")
+                        .setDescription(`Invalid command usage, try using it like:\n\`${botConfig.prefix}${alias} ${expectedArgs}\``)
+
+                    channel.send({ embeds: [embed] });
                     return
                 }
 
