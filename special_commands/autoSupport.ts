@@ -3,11 +3,13 @@ import { servers } from "../server";
 
 module.exports = async function (message: Discord.Message) {
     const guild = message.guild
-    if (!guild
-        || !message.content
-        || !message.member
-        || message.channel.type !== "GUILD_TEXT"
-        || message.author.id == "787490197943091211") { return; }
+    const messageFiles = [...message.attachments.values()]
+
+    if (!guild ||
+        (message.content.length == 0 && messageFiles.length == 0) ||
+        !message.member ||
+        message.channel.type !== "GUILD_TEXT" ||
+        message.author.id == "787490197943091211") { return; }
 
     const server = servers[message.guild.id]
     if (!server.channels.supportChannels ||
@@ -27,16 +29,26 @@ module.exports = async function (message: Discord.Message) {
         autoArchiveDuration: 1440,
     })
 
+    thread.send(`<@&913374071239102504> ${message.author} wrote:`)
+
     if (message.content.length > 2000) {
-        thread.send(`<@&913374071239102504> ${message.author} Content length over 2000 characters please resend message.`)
+        thread.send(`Message Error: Content length over 2000 characters please resend message.`)
     }
-    else {
-        thread.send(`<@&913374071239102504> ${message.author} wrote:`)
+    else if (message.content.length > 0) {
         thread.send({
             content: message.content,
             embeds: message.embeds,
-            files: [...message.attachments.values()]
+            files: messageFiles
         })
+    }
+    else if (messageFiles.length > 0) {
+        thread.send({
+            embeds: message.embeds,
+            files: messageFiles
+        })
+    }
+    else {
+        thread.send(`Message Error: Unable to parse message please resend.`)
     }
 
     // Update json file.
