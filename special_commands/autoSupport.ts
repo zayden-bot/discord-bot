@@ -1,9 +1,13 @@
-import Discord from "discord.js"
+import Discord from "discord.js";
 import { servers } from "../server";
 
 module.exports = async function (message: Discord.Message) {
     const guild = message.guild
-    if (!guild || message.channel.type !== "GUILD_TEXT" || message.author.id == "787490197943091211" || !message.member) { return; }
+    if (!guild
+        || !message.content
+        || !message.member
+        || message.channel.type !== "GUILD_TEXT"
+        || message.author.id == "787490197943091211") { return; }
 
     const server = servers[message.guild.id]
     if (!server.channels.supportChannels ||
