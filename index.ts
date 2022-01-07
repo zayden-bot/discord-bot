@@ -1,9 +1,9 @@
-import Discord from "discord.js"
-import dotenv from "dotenv"
-import fs from "fs"
-import path from "path"
-
+import Discord from "discord.js";
+import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 import { Server, servers } from "./server";
+
 
 dotenv.config()
 
@@ -28,8 +28,8 @@ client.on("ready", () => {
     const botConfig = require("./configs/bot_config.json");
     console.log(`Zayden is Running, version: ${botConfig.version}`);
 
-    if (client.user) { 
-        client.user.setPresence({ activities: [{ name: "College Kings" }], status: "online"})
+    if (client.user) {
+        client.user.setPresence({ activities: [{ name: "College Kings" }], status: "online" })
     }
 
     const loadCommands = require("./commands/load_commands");
@@ -81,7 +81,7 @@ client.on("ready", () => {
         }
     })
 
-    
+
     // init.updateImages();
 
     const blacklist = require("./blacklist")
@@ -116,7 +116,7 @@ client.on("guildCreate", async guild => {
 
 client.on("guildDelete", async guild => {
     fs.unlink(`./server_configs/${guild.id}.json`, (error) => {
-        if (error) {console.log(error)}
+        if (error) { console.log(error) }
     })
 })
 
@@ -138,8 +138,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
     if (!guild) return;
 
     const server = servers[guild.id];
-    
-    for (const reactionRole of server.reactionRoles) {        
+
+    for (const reactionRole of server.reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) { break; }
@@ -148,7 +148,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
             if (!role) { break; }
 
             member.roles.add(role)
-            .catch((error) => console.log(error))
+                .catch((error) => console.log(error))
             break;
         }
     }
@@ -161,7 +161,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
 
     const server = servers[guild.id];
 
-    for (const reactionRole of server.reactionRoles) {        
+    for (const reactionRole of server.reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) { break; }
@@ -170,7 +170,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
             if (!role) { break; }
 
             member.roles.remove(role)
-            .catch((error) => console.log(error))
+                .catch((error) => console.log(error))
             break;
         }
     }
@@ -195,19 +195,19 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
         .first()
 
     // Is new role a patreon role
-    if (typeof(newRole) != "undefined" && newRole.id in patreonRoles) {
+    if (typeof (newRole) != "undefined" && newRole.id in patreonRoles) {
         const embed = new Discord.MessageEmbed()
-        .setTitle("New Patron")
-        .setColor(`${newRole.hexColor}`)
-        .setFooter(newMember.guild.name, newMember.guild.iconURL({ dynamic: true }) as string)
-        .setThumbnail("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8f5967b9-fc84-45f6-a9c3-3938bfba7232/dbujg26-4865d57d-8dcc-435c-ac6e-0d0590f9de37.png/v1/fill/w_1683,h_475,q_70,strp/patreon_logo_by_laprasking_dbujg26-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD01NzYiLCJwYXRoIjoiXC9mXC84ZjU5NjdiOS1mYzg0LTQ1ZjYtYTljMy0zOTM4YmZiYTcyMzJcL2RidWpnMjYtNDg2NWQ1N2QtOGRjYy00MzVjLWFjNmUtMGQwNTkwZjlkZTM3LnBuZyIsIndpZHRoIjoiPD0yMDQxIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.95jfkKc4e-WyhcxKoiDGebItWvxmMPadhqYsh7gIsnQ")
-        .addField("User", `<@${newMember.id}>`, true)
-        .addField("Amount", `$${patreonRoles[newRole.id]}`, true)
-        .setTimestamp();
+            .setTitle("New Patron")
+            .setColor(`${newRole.hexColor}`)
+            .setFooter(newMember.guild.name, newMember.guild.iconURL({ dynamic: true }) as string)
+            .setThumbnail("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8f5967b9-fc84-45f6-a9c3-3938bfba7232/dbujg26-4865d57d-8dcc-435c-ac6e-0d0590f9de37.png/v1/fill/w_1683,h_475,q_70,strp/patreon_logo_by_laprasking_dbujg26-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD01NzYiLCJwYXRoIjoiXC9mXC84ZjU5NjdiOS1mYzg0LTQ1ZjYtYTljMy0zOTM4YmZiYTcyMzJcL2RidWpnMjYtNDg2NWQ1N2QtOGRjYy00MzVjLWFjNmUtMGQwNTkwZjlkZTM3LnBuZyIsIndpZHRoIjoiPD0yMDQxIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.95jfkKc4e-WyhcxKoiDGebItWvxmMPadhqYsh7gIsnQ")
+            .addField("User", `<@${newMember.id}>`, true)
+            .addField("Amount", `$${patreonRoles[newRole.id]}`, true)
+            .setTimestamp();
 
         const channel = client.channels.cache.get(server_config.channels.patreonChannel)
         if (channel && channel.isText()) {
-            channel.send({embeds: [embed]});
+            channel.send({ embeds: [embed] });
         }
 
     }
@@ -222,3 +222,13 @@ client.on("error", error => {
 })
 
 client.login(process.env.TOKEN)
+
+process.on("uncaughtException", (error) => {
+    fs.writeFileSync("crash.txt", `Uncaught Exception: ${error.message}`);
+    process.exit(1);
+})
+
+process.on("unhandledRejection", (reason: Error, promise) => {
+    fs.writeFileSync("crash.txt", `Unhandled rejection at ${promise}, reason: ${reason.message}`);
+    process.exit(1);
+})
