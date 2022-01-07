@@ -32,7 +32,7 @@ module.exports = async function (message: Discord.Message) {
     thread.send(`<@&913374071239102504> ${message.author} wrote:`)
 
     if (message.content.length > 2000) {
-        thread.send(`Message Error: Content length over 2000 characters please resend message.`)
+        thread.send("Message Error: Content length over 2000 characters please resend message.")
     }
     else if (message.content.length > 0) {
         thread.send({
@@ -48,7 +48,7 @@ module.exports = async function (message: Discord.Message) {
         })
     }
     else {
-        thread.send(`Message Error: Unable to parse message please resend.`)
+        thread.send("Message Error: Unable to parse message please resend message.")
     }
 
     // Update json file.
