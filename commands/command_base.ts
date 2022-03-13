@@ -59,7 +59,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                     if (role) { roles.push(role) }
                 }
 
-                if (!member.roles.cache.hasAny(...roles.map(role => role.id)) && !botConfig.developers.includes(member.id)) {
+                if (roles.length > 0 && !member.roles.cache.hasAny(...roles.map(role => role.id)) && !botConfig.developers.includes(member.id)) {
                     message.reply({ content: permissionError })
                     return
                 }
