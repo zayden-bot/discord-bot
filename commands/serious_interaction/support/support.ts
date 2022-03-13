@@ -1,4 +1,4 @@
-import Discord from "discord.js"
+import Discord from "discord.js";
 import { servers } from "../../../server";
 
 module.exports = {
@@ -16,12 +16,13 @@ module.exports = {
         if (!answer) { return message.reply(`There is no support answer for ID: ${id}`); }
 
         const embed = new Discord.MessageEmbed()
-        .setTitle(`Support ID: ${id[0].toUpperCase() + id.slice(1)}`)
-        .setDescription(answer)
-        .setColor("#ff0000")
-        .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
-        
-        message.channel.send({embeds: [embed]});
+            .setTitle(`Support ID: ${id[0].toUpperCase() + id.slice(1)}`)
+            .setDescription(answer)
+            .setColor("#ff0000")
+            .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
+
+        message.channel.send({ embeds: [embed] });
+        message.delete()
     },
-    requiredRoles: ["Support Team"]
+    requiredRoles: ["Support Team", "Staff"]
 }

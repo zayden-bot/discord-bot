@@ -15,7 +15,7 @@ module.exports = {
             ids.push(id)
         }
 
-        message.reply(`\`\`\`${ids.join("\n")}\`\`\``)
+        message.reply(`\`\`\`${ids.sort().join("\n")}\`\`\``)
     },
-    requiredRoles: ["Admin"]
+    requiredRoles: ["Support Team"]
 }

@@ -1,4 +1,5 @@
 import Discord from "discord.js";
+import { servers } from "../../server";
 
 module.exports = {
     commands: ["give_star", "gs"],
@@ -18,14 +19,14 @@ module.exports = {
 
         const member_config = require(`../../user_configs/${member.id}.json`);
         const author_config = require(`../../user_configs/${author.id}.json`);
-        const server_config = require(`../../server_configs/${message.guild.id}.json`);
+        const server = servers[message.guild.id]
 
-        if (author_config["number_of_stars"] <= 0 && !author.roles.cache.has(server_config.roles.staffRoles)) {
+        if (author_config["number_of_stars"] <= 0 && !author.roles.cache.has(server.roles.staffRole)) {
             message.reply("Unable. You have no gold stars to give.");
             return;
         }
 
-        if (!author.roles.cache.has(server_config.roles.staffRoles)) {
+        if (!author.roles.cache.has(server.roles.staffRole)) {
             author_config["number_of_stars"] -= 1;
         }
         author_config["given_stars"] += 1;

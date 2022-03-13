@@ -1,6 +1,6 @@
 import Discord from "discord.js"
-import { Command } from "./command"
 import { servers } from "../server"
+import { Command } from "./command"
 
 let recentlyRan: string[] = []
 
@@ -53,13 +53,15 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 }
 
                 // Check if the user has the required roles to run the command
+                const roles: Discord.Role[] = []
                 for (const requiredRole of requiredRoles) {
                     const role = guild.roles.cache.find(role => role.name === requiredRole)
+                    if (role) { roles.push(role) }
+                }
 
-                    if (!role || !member.roles.cache.has(role.id) && !botConfig.developers.includes(member.id)) {
-                        message.reply({ content: permissionError })
-                        return
-                    }
+                if (!member.roles.cache.hasAny(...roles.map(role => role.id)) && !botConfig.developers.includes(member.id)) {
+                    message.reply({ content: permissionError })
+                    return
                 }
 
                 // Check if the user is blacklisted
@@ -86,7 +88,11 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                         .setColor("#ff0000")
                         .setDescription(`Invalid command usage, try using it like:\n\`${botConfig.prefix}${alias} ${expectedArgs}\``)
 
-                    channel.send({ embeds: [embed] });
+                    channel.send({ embeds: [embed] })
+                        .then(msg => {
+                            setTimeout(() => message.delete().catch((err: any) => { console.log(err) }))
+                            setTimeout(() => msg.delete(), 5000);
+                        });
                     return
                 }
 

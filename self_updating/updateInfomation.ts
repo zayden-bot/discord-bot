@@ -34,11 +34,10 @@ const field2b = `<#745662813036609548> ~ Highly moderated and regulated chat
 const field2c = `
 <#779064182259449896> ~ Find community suggestions here
 <#829463308629180447> ~ You want to ask a question and are not sure if someone else already asked? Take a look in here
-<#747428614500384788> ~ Do you need help or did you find any bugs? Make sure to ask about it here.
-<#888586464814854194> ~ The launcher gives some weird error or just doesn't work at all? Our Support Team will help you here`
+<#919950775134847016> ~ Do you need help or did you find any bugs? Make sure to ask about it here.`
 
 const field3 = `**Staff Roles:**
-<@&746717374761402438>, <@&807370330388693082>, <@&839484117895610378>, <@&764860044977504318>, <@&803393475440541727>, <@&787003873839022081>, <@&804524527191195668>, <@&913374071239102504>
+<@&746717374761402438>, <@&807370330388693082>, <@&839484117895610378>, <@&945350072386859028>, <@&803393475440541727>, <@&787003873839022081>, <@&804524527191195668>, <@&913374071239102504>
 
 **Patreon Roles:**
 <@&745663432560345218>, <@&745663409932206112>, <@&745663394543304704>, <@&745663375496708127>, <@&745663351756947656>, <@&768568151343497257>
@@ -54,14 +53,14 @@ module.exports = async function (client: Discord.Client, channelId: string) {
     if (!channel || channel.type !== "GUILD_TEXT") { return console.error("Invalid channel id") }
 
     const embed = new Discord.MessageEmbed()
-    .setAuthor(channel.guild.name, channel.guild.iconURL() as string)
-    .addField("College Kings Game", field1)
-    .addField("Information channels", field2a)
-    .addField("Discussion channels", field2b)
-    .addField("Support channels", field2c)
-    .addField("Roles", field3)
-    .setFooter(`Server Created: ${channel.guild.createdAt.getFullYear()}-${channel.guild.createdAt.getMonth()}-${channel.guild.createdAt.getDate()}`)
-    .setThumbnail(channel.guild.iconURL() as string)
-    
-    channel.messages.fetch("830931135780880415").then((message) => { message.edit({embeds: [embed]}) })
+        .setAuthor(channel.guild.name, channel.guild.iconURL() as string)
+        .addField("College Kings Game", field1)
+        .addField("Information channels", field2a)
+        .addField("Discussion channels", field2b)
+        .addField("Support channels", field2c)
+        .addField("Roles", field3)
+        .setFooter(`Server Created: ${channel.guild.createdAt.getFullYear()}-${channel.guild.createdAt.getMonth()}-${channel.guild.createdAt.getDate()}`)
+        .setThumbnail(channel.guild.iconURL() as string)
+
+    channel.messages.fetch("830931135780880415").then((message) => { message.edit({ embeds: [embed] }) })
 }
