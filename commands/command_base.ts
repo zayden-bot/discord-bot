@@ -90,7 +90,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
 
                     channel.send({ embeds: [embed] })
                         .then(msg => {
-                            setTimeout(() => message.delete().catch((err: any) => { console.log(err) }))
+                            setTimeout(() => message.delete().catch((err: any) => { console.log(err) }), 5000)
                             setTimeout(() => msg.delete(), 5000);
                         });
                     return
