@@ -5,6 +5,10 @@ module.exports = {
     expectedArgs: "<user>",
     maxArgs: 1,
     callback: (message: Discord.Message) => {
+        if (message.channel.id != "831959023662137394") {
+            return;
+        }
+
         const member = message.mentions.members?.first() || message.member
         if (!member) {
             return;
