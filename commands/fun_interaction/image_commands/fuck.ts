@@ -15,7 +15,7 @@ module.exports = {
             return;
         }
 
-        const imageConfig = require("../../configs/image_config.json")
+        const imageConfig = require("../../../configs/image_config.json")
         let arrayId = "global";
         if (message.author.id in imageConfig.fuckingImgs) {
             arrayId = message.author.id

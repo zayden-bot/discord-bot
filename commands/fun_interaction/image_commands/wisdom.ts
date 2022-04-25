@@ -4,7 +4,7 @@ import fs from "fs";
 module.exports = {
     commands: ["wisdomoftheday", "wisdom", "w"],
     callback: (message: Discord.Message) => {
-        const imageConfig = require("../../configs/image_config.json")
+        const imageConfig = require("../../../configs/image_config.json")
         const wisdomImages = imageConfig.wisdomImages
 
         // Returns 0 - 365

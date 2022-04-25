@@ -110,5 +110,20 @@
             "> We don't stumble accidentally into an amazing life. It takes decision, a commitment to consistently work on ourselves.\nKamal Ravikant\n*(ZenQuotes API)*"
         ],
         "fail": []
+    },
+    "slapImages": {
+        "global": [
+            "https://media.giphy.com/media/qyjexFwQwJp9yUvMxq/giphy.gif",
+            "https://media.giphy.com/media/gSIz6gGLhguOY/giphy.gif",
+            "https://media.giphy.com/media/uqSU9IEYEKAbS/giphy.gif",
+            "https://media.giphy.com/media/pfGBhQSaYAO5y/giphy.gif",
+            "https://media.giphy.com/media/uG3lKkAuh53wc/giphy.gif",
+            "https://media.giphy.com/media/mEtSQlxqBtWWA/giphy.gif",
+            "https://media.giphy.com/media/Qumf2QovTD4QxHPjy5/giphy.gif",
+            "https://media.giphy.com/media/l0MYthTiOGtg1zsT6/giphy.gif",
+            "https://media.giphy.com/media/lX03hULhgCYQ8/giphy.gif",
+            "https://media.giphy.com/media/3wtc9qlgBxaq4/giphy.gif",
+            "https://media.giphy.com/media/u8maN0dMhVWPS/giphy.gif"
+        ]
     }
 }

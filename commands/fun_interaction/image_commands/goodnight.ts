@@ -1,8 +1,7 @@
 import Discord from "discord.js";
 
-
 module.exports = {
-    commands: ["hug"],
+    commands: ["goodnight", "gn"],
     expectedArgs: "<user>",
     maxArgs: 1,
     callback: (message: Discord.Message) => {
@@ -11,18 +10,17 @@ module.exports = {
             return;
         }
 
-        const imageConfig = require("../../configs/image_config.json")
+        const imageConfig = require("../../../configs/image_config.json")
         let arrayId = "global";
-        if (message.author.id in imageConfig.huggingImgs) {
+        if (message.author.id in imageConfig.goodNightImgs) {
             arrayId = message.author.id
         }
 
-        const imgId = Math.floor(Math.random() * imageConfig.huggingImgs[arrayId].length)
+        const imgId = Math.floor(Math.random() * imageConfig.goodNightImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`Sending hugs to ${member.displayName}`)
-            .setImage(imageConfig.huggingImgs[arrayId][imgId])
-            .setColor("#FFC0CB")
+            .setTitle(`Good Night, ${member.displayName}`)
+            .setImage(imageConfig.goodNightImgs[arrayId][imgId])
 
         message.channel.send({embeds: [embed]})
     },
