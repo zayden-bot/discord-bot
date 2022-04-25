@@ -4,6 +4,7 @@ module.exports = {
     commands: ["fuck"],
     expectedArgs: "<user>",
     maxArgs: 1,
+    cooldown: 300,
     callback: (message: Discord.Message) => {
         if (message.channel.id != "831959023662137394") {
             return;

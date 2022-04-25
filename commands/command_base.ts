@@ -85,7 +85,10 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                     cooldownString = `privateMessage-${message.author.id}-${commands[0]}`;
                 }
                 if (cooldown > 0 && recentlyRan.includes(cooldownString) && !member.roles.cache.has(server.roles.moderationRole)) {
-                    await message.reply("You cannot use that command so soon, please wait")
+                    const reply = await message.reply({content: `You can only use this command once per ${cooldown} seconds`}).catch(error => console.log(error))
+                    if (reply) {
+                        setTimeout(() => reply.delete(), 5000)
+                    }
                     return
                 }
 
