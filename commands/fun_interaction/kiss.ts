@@ -4,13 +4,10 @@ module.exports = {
     commands: ["kiss"],
     expectedArgs: "<user>",
     maxArgs: 1,
-    callback: (message: Discord.Message, args: string[], text: string) => {
-        let member: Discord.GuildMember | undefined;
-        if (message.mentions.members) {
-            member = message.mentions.members.first();
-        }
+    callback: (message: Discord.Message) => {
+        const member = message.mentions.members?.first() || message.member
         if (!member) {
-            member = message.member as Discord.GuildMember
+            return;
         }
 
         const imageConfig = require("../../configs/image_config.json")

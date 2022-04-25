@@ -4,31 +4,24 @@ module.exports = {
     commands: ["fuck"],
     expectedArgs: "<user>",
     maxArgs: 1,
-    callback: (message: Discord.Message, args: string[], text: string) => {
-        if (!(message.channel.type == "GUILD_TEXT")) return;
-
-        if (!message.channel.nsfw) {
-            message.reply("This command can only be used in nsfw channels")
-            return
-        }
-        
-        // Check and get mentioned member
-        const mentions = message.mentions.members
-        let member = message.author.username
-        if ((mentions) && (mentions.size > 0)) {
-            member = mentions.first()?.user.username || ""
+    callback: (message: Discord.Message) => {
+        const member = message.mentions.members?.first() || message.member
+        if (!member) {
+            return;
         }
 
         const imageConfig = require("../../configs/image_config.json")
-        const imgId = Math.floor(Math.random() * imageConfig.fuckingImgs.length)
+        let arrayId = "global";
+        if (message.author.id in imageConfig.fuckingImgs) {
+            arrayId = message.author.id
+        }
+
+        const imgId = Math.floor(Math.random() * imageConfig.fuckingImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`${message.author.username} fucks ${member}`)
-            .setImage(imageConfig.fuckingImgs[imgId])
-            .setColor("#FFC0CB")
+            .setTitle(`Good Morning, ${member.displayName}`)
+            .setImage(imageConfig.goodMorningImgs[arrayId][imgId])
 
-        message.channel.send({
-            embeds: [embed],
-        })
+        message.channel.send({embeds: [embed]})
     }
 }
