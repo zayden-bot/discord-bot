@@ -6,17 +6,17 @@ module.exports = {
 
         for (const categoryName in imageConfig) {
             const category = imageConfig[categoryName]
-            let globalImages: Set<string> = new Set(category.Global);
+            let globalImages: Set<string> = new Set(category.global);
 
             for (const user in category) {
-                if (user == "Global") {
+                if (user == "global") {
                     continue;
                 }
                 const images = category[user]
                 images.forEach(image => globalImages.add(image))
             }
 
-            category.Global = [...globalImages];
+            category.global = [...globalImages];
         }
 
         // Update json file.

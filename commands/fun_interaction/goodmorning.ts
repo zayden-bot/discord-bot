@@ -6,12 +6,18 @@ module.exports = {
     maxArgs: 1,
     callback: (message: Discord.Message, args: string[], text: string) => {
         let member: Discord.GuildMember | undefined;
-        if (message.mentions.members) { member = message.mentions.members.first(); }
-        if (!member) { member = message.member as Discord.GuildMember }
+        if (message.mentions.members) {
+            member = message.mentions.members.first();
+        }
+        if (!member) {
+            member = message.member as Discord.GuildMember
+        }
 
         const imageConfig = require("../../configs/image_config.json")
-        let arrayId = "Global";
-        if (message.author.id in imageConfig.goodMorningImgs) { arrayId = message.author.id }
+        let arrayId = "global";
+        if (message.author.id in imageConfig.goodMorningImgs) {
+            arrayId = message.author.id
+        }
 
         const imgId = Math.floor(Math.random() * imageConfig.goodMorningImgs[arrayId].length)
 
