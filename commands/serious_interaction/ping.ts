@@ -4,7 +4,7 @@ module.exports = {
     commands: "ping",
     minArgs: 0,
     maxArgs: 0,
-    callback: (message: Discord.Message, args: string[], text: string) => {
-        message.reply("Pong!")
+    callback: async (message: Discord.Message) => {
+        await message.reply("Pong!")
     },
 }
