@@ -105,7 +105,9 @@
         ]
     },
     "wisdomImages": {
-        "global": [],
+        "global": [
+            "> We don't stumble accidentally into an amazing life. It takes decision, a commitment to consistently work on ourselves.\nKamal Ravikant\n*(ZenQuotes API)*"
+        ],
         "fail": []
     }
 }

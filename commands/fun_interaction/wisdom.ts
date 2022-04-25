@@ -1,9 +1,11 @@
 import Discord from "discord.js";
+import fs from "fs";
 
 module.exports = {
     commands: ["wisdomoftheday", "wisdom", "w"],
     callback: (message: Discord.Message) => {
-        const wisdomImages = require("../../configs/image_config.json").wisdomImages
+        const imageConfig = require("../../configs/image_config.json")
+        const wisdomImages = imageConfig.wisdomImages
 
         // Returns 0 - 365
         const now = new Date();
@@ -28,6 +30,13 @@ module.exports = {
                 body = body[0]
                 const messageContent = `> ${body.q}\n${body.a}\n*(ZenQuotes API)*`
                 wisdomImages.global.push(messageContent)
+
+                fs.writeFile(`./configs/image_config.json`, JSON.stringify(imageConfig, null, 4), (error: any) => {
+                    if (error) {
+                        return console.log(error);
+                    }
+                });
+
                 await message.channel.send(messageContent)
             });
 
