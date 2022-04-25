@@ -1,12 +1,12 @@
 module.exports = {
-    updateImages: function() {
+    updateImages: function () {
         const imageConfig: Record<string, Record<string, string[]>> = require("./configs/image_config.json");
-        
+
         // Update global images with user specific images
 
         for (const categoryName in imageConfig) {
             const category = imageConfig[categoryName]
-            let globalImages: Set<string> = new Set();
+            let globalImages: Set<string> = new Set(category.Global);
 
             for (const user in category) {
                 if (user == "Global") {
@@ -22,7 +22,9 @@ module.exports = {
         // Update json file.
         const fs = require("fs");
         fs.writeFile("./configs/image_config.json", JSON.stringify(imageConfig, null, 4), function writeJSON(err: any) {
-            if (err) { return console.log(err); }
+            if (err) {
+                return console.log(err);
+            }
         });
     }
 }
