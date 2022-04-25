@@ -19,8 +19,8 @@ module.exports = {
         const imgId = Math.floor(Math.random() * imageConfig.fuckingImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`Good Morning, ${member.displayName}`)
-            .setImage(imageConfig.goodMorningImgs[arrayId][imgId])
+            .setTitle(`${message.author.username} fucks ${member.displayName}`)
+            .setImage(imageConfig.fuckingImgs[arrayId][imgId])
 
         message.channel.send({embeds: [embed]})
     }
