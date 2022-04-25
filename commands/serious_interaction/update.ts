@@ -1,17 +1,21 @@
 import Discord from "discord.js";
-import { servers } from "../../server";
+import {servers} from "../../server";
 
 module.exports = {
     commands: ["update"],
-    callback: (message: Discord.Message, args: string[], text: string) => {
-        if (!message.guild || !message.member) { return; }
+    callback: async (message: Discord.Message) => {
+        if (!message.guild || !message.member) {
+            return;
+        }
 
         const server = servers[message.guild.id]
 
         if (message.channel.id != "776139754408247326" && !message.member.roles.cache.has(server.roles.staffRole)) {
             message.reply("You're an idiot. Use <#776139754408247326> for commands.")
                 .then(msg => {
-                    message.delete().catch((err: any) => { console.log(err) });
+                    message.delete().catch((err: any) => {
+                        console.log(err)
+                    });
                     setTimeout(() => msg.delete(), 5000);
                 });
             return;
@@ -27,8 +31,8 @@ module.exports = {
             .setImage("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg?width=1440&height=360")
             .setURL("https://www.patreon.com/collegekings")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png?width=1440&height=566")
-            .setFooter("https://www.patreon.com/collegekings")
+            .setFooter({text: "https://www.patreon.com/collegekings"})
 
-        message.reply({ embeds: [embed] })
+        await message.reply({embeds: [embed]});
     },
 }
