@@ -1,12 +1,14 @@
 import Discord from "discord.js";
-import { servers } from "../../../server";
+import {servers} from "../../../server";
 
 module.exports = {
     commands: ["support_ids"],
     maxArgs: 0,
-    callback: async (message: Discord.Message, args: string[], text: string) => {
+    callback: async (message: Discord.Message) => {
         const guild = message.guild
-        if (!guild) { return; }
+        if (!guild) {
+            return;
+        }
 
         const server = servers[guild.id]
 
@@ -15,7 +17,12 @@ module.exports = {
             ids.push(id)
         }
 
-        message.reply(`\`\`\`${ids.sort().join("\n")}\`\`\``)
+        if (ids.length == 0) {
+            await message.reply("No support ids for this server")
+            return
+        }
+
+        await message.reply(`\`\`\`${ids.sort().join("\n")}\`\`\``)
     },
     requiredRoles: ["Support Team"]
 }
