@@ -11,10 +11,8 @@ export function init() {
 
 
 export function isBlacklisted(id: string): boolean {
-    if (blacklistedUsers.includes(Number(id))) {
-        return true
-    }
-    return false
+    return blacklistedUsers.includes(Number(id));
+
 }
 
 
@@ -46,6 +44,5 @@ export function removeBlacklist(id: string): boolean{
 export function isProtectedUser(id: string): boolean{
     const botConfig = require("./configs/bot_config.json");
 
-    if (botConfig.developers.includes(id)) { return true } 
-    else { return false }
+    return !!botConfig.developers.includes(id);
 }

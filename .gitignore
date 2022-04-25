@@ -103,7 +103,6 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # Serverless directories
 .serverless/
@@ -132,7 +131,7 @@ server_configs/
 user_configs/
 
 # Database
-*.db
+*.sqlite
 
-# Webstorm
+# Jetbrains
 .idea/*

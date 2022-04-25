@@ -38,24 +38,46 @@ client.on("ready", () => {
     // Load server configs
     const serverConfigFiles = fs.readdirSync(path.join(__dirname, "server_configs"))
     for (const filename of serverConfigFiles) {
-        const serverConfig = require(path.join(__dirname, "server_configs", filename))
-        const guildId = path.parse(filename).name
-
+        const serverConfig = require(`./server_configs/${filename}`);
+        const guildId = path.parse(filename).name;
         const server = new Server(guildId)
-        server.reactionRoles = serverConfig.reactionRoles
-        server.disabledCommands = serverConfig.disabledCommands
-        server.roles = serverConfig.roles
-        server.channels = serverConfig.channels
-        server.idNumber = serverConfig.idNumber
-        server.gameVersions = serverConfig.gameVersions
-        server.serverRules = serverConfig.serverRules
-        server.serverGuidelines = serverConfig.serverGuidelines
-        server.hidden = serverConfig.hidden
-        server.moderation = serverConfig.moderation
-        server.supportAnswers = serverConfig.supportAnswers
 
+        if (serverConfig.hasOwnProperty("reactionRoles")) {
+            server.reactionRoles = serverConfig.reactionRoles
+        }
+        if (serverConfig.hasOwnProperty("disabledCommands")) {
+            server.disabledCommands = serverConfig.disabledCommands
+        }
+        if (serverConfig.hasOwnProperty("roles")) {
+            server.roles = serverConfig.roles
+        }
+        if (serverConfig.hasOwnProperty("channels")) {
+            server.channels = serverConfig.channels
+        }
+        if (serverConfig.hasOwnProperty("idNumber")) {
+            server.idNumber = serverConfig.idNumber
+        }
+        if (serverConfig.hasOwnProperty("gameVersions")) {
+            server.gameVersions = serverConfig.gameVersions
+        }
+        if (serverConfig.hasOwnProperty("serverRules")) {
+            server.serverRules = serverConfig.serverRules
+        }
+        if (serverConfig.hasOwnProperty("serverGuidelines")) {
+            server.serverGuidelines = serverConfig.serverGuidelines
+        }
+        if (serverConfig.hasOwnProperty("hidden")) {
+            server.hidden = serverConfig.hidden
+        }
+        if (serverConfig.hasOwnProperty("moderation")) {
+            server.moderation = serverConfig.moderation
+        }
+        if (serverConfig.hasOwnProperty("supportAnswers")) {
+            server.supportAnswers = serverConfig.supportAnswers
+        }
         servers[guildId] = server
     }
+
 
     client.guilds.cache.each(guild => {
         if (!(guild.id in servers)) {
@@ -91,17 +113,15 @@ client.on("ready", () => {
     // moderation.init()
 
     // Self Updating
-    const update_guidelines = require("./self_updating/updateGuidelines");
-    // update_guidelines(client, "879894434538459157")
 
-    const customRoles = require("./self_updating/customRoles")
-    customRoles(client, "805765564504473641")
+    // const customRoles = require("./self_updating/customRoles")
+    // customRoles(client, "805765564504473641")
+    //
+    // const updateInfomation = require("./self_updating/updateInfomation")
+    // updateInfomation(client, "830927865784565800")
 
-    const updateInfomation = require("./self_updating/updateInfomation")
-    updateInfomation(client, "830927865784565800")
-
-    const updateRules = require("./self_updating/updateRules")
-    updateRules(client, "747430712617074718")
+    // const updateRules = require("./self_updating/updateRules")
+    // updateRules(client, "747430712617074718")
 });
 
 
@@ -178,7 +198,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
 
 // Events
 client.on("guildMemberUpdate", (oldMember, newMember) => {
-    const server_config = require("./server_configs/745662812335898806.json");
+    const server_config = require(`./server_configs/${newMember.guild.id}.json`);
 
     const patreonRoles: Record<string, number> = {
         '745663316776714370': 1, // Freshman
@@ -213,22 +233,16 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
     }
 })
 
-client.on("disconnect", () => {
-    console.log("Bot shutting down.")
-})
-
-client.on("error", error => {
-    console.log(`Error Encountered`);
-})
-
 client.login(process.env.TOKEN)
 
-process.on("uncaughtException", (error) => {
-    fs.writeFileSync("crash.txt", `Uncaught Exception: ${error.message}`);
-    process.exit(1);
-})
-
-process.on("unhandledRejection", (reason: Error, promise) => {
-    fs.writeFileSync("crash.txt", `Unhandled rejection at ${promise}, reason: ${reason.message}`);
-    process.exit(1);
-})
+// process.on("uncaughtException", (error) => {
+//     console.log(`Uncaught Exception: ${error.message}`)
+//     fs.writeFileSync("crash.txt", `Uncaught Exception: ${error.message}`);
+//     process.exit(1);
+// })
+//
+// process.on("unhandledRejection", (reason: Error, promise) => {
+//     console.log(`Unhandled rejection at ${promise}, reason: ${reason.message}`)
+//     fs.writeFileSync("crash.txt", `Unhandled rejection at ${promise}, reason: ${reason.message}`);
+//     process.exit(1);
+// })

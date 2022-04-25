@@ -7,11 +7,11 @@ module.exports = {
         const guild = message.guild;
         if (!guild) { return; }
 
-        const config = require("../../server_configs/745662812335898806.json")
+        const serverConfig = require(`../../server_configs/${guild.id}.json`)
 
         const startTime = new Date();
         const statusMessage = await message.channel.send("Fetching information...");
-        const suggestionChannel = await guild.channels.fetch(config.suggestionChannel)
+        const suggestionChannel = await guild.channels.fetch(serverConfig.suggestionChannel)
         if (!suggestionChannel || !suggestionChannel.isText()) { return message.reply("Invalid suggestion channel"); }
 
         suggestionChannel.messages.fetch({limit: 100})
@@ -46,7 +46,7 @@ module.exports = {
                         if (!reaction) { return; }
 
                         if (index >= startIndex-1 && index <= endIndex-1) {
-                            embed.addField(`Position: ${index}, 👍: ${reaction.count-1}, 👎: ${reaction.count-1}`,`Link: https://discord.com/channels/${guild.id}/${config.suggestionChannel}/${element.id}`,false);
+                            embed.addField(`Position: ${index}, 👍: ${reaction.count-1}, 👎: ${reaction.count-1}`,`Link: https://discord.com/channels/${guild.id}/${serverConfig.suggestionChannel}/${element.id}`,false);
                         }
                     })
 

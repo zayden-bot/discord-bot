@@ -4,29 +4,55 @@ export class Server {
     id: string;
     reactionRoles: ReactionRole[]
     disabledCommands: string[];
-    roles: Record<string, string>;
-    channels: Record<string, string>;
-    gameVersions: Record<string, string>
+    roles: {
+        staffRole: string;
+        moderationRole: string;
+        supportRole: string;
+    };
+    channels: {
+        supportChannels: string[]
+    };
+    gameVersions: {
+        patreonUpdate: string;
+        patreonVersion: string;
+        steamUpdate: string;
+        steamVersion: string;
+    }
     serverRules: Record<string, string>
     serverGuidelines: Array<Array<string>>
     idNumber: number;
-    hidden: Record<string, Record<string, string>>
-    moderation: Record<string, Record<string, string>>
+    hidden: {
+        rules: Record<string, string>
+    }
+    moderation: Array<any>
     supportAnswers: Record<string, string>
 
     constructor(id: string) {
         this.id = id;
         this.reactionRoles = []
         this.disabledCommands = []
-        this.roles = {}
-        this.channels = {};
+        this.roles = {
+            staffRole: "",
+            moderationRole: "",
+            supportRole: ""
+        }
+        this.channels = {
+            supportChannels: []
+        };
         this.idNumber = 0;
-        this.gameVersions = {}
+        this.gameVersions = {
+            patreonUpdate: "1st Jan",
+            patreonVersion: "v0.0.0",
+            steamUpdate: "1st Jan",
+            steamVersion: "v0.0.0"
+        }
         this.serverRules = {}
         this.serverGuidelines = [];
-        this.hidden = {}
-        this.moderation = {}
-        this.supportAnswers = {};
+        this.hidden = {
+            rules: {}
+        }
+        this.moderation = []
+        this.supportAnswers = {}
 
         servers[this.id] = this
     }
