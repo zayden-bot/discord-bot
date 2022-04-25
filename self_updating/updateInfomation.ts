@@ -48,19 +48,33 @@ const field3 = `**Staff Roles:**
 **Custom Roles:** <#805765564504473641>
 To be added :)`
 
+const field4 = `**Special Mentions**
+Thank you to <@828728276193116181> for the College Kings' stickers`
+
 module.exports = async function (client: Discord.Client, channelId: string) {
-    const channel = await client.channels.fetch(channelId) as Discord.TextChannel
-    if (!channel || channel.type !== "GUILD_TEXT") { return console.error("Invalid channel id") }
+    const channel = await client.channels.fetch(channelId)
+    if (!channel || channel.type !== "GUILD_TEXT") {
+        return console.error("Invalid channel id")
+    }
+
+    const guildIconURL = channel.guild.iconURL({dynamic: true})
+    const guildCreationDate = channel.guild.createdAt
 
     const embed = new Discord.MessageEmbed()
-        .setAuthor(channel.guild.name, channel.guild.iconURL() as string)
         .addField("College Kings Game", field1)
         .addField("Information channels", field2a)
         .addField("Discussion channels", field2b)
         .addField("Support channels", field2c)
         .addField("Roles", field3)
-        .setFooter(`Server Created: ${channel.guild.createdAt.getFullYear()}-${channel.guild.createdAt.getMonth()}-${channel.guild.createdAt.getDate()}`)
-        .setThumbnail(channel.guild.iconURL() as string)
+        .addField("Special Mentions", field4)
+        .setFooter({text: `Server Created: ${guildCreationDate.getFullYear()}-${guildCreationDate.getMonth()}-${guildCreationDate.getDate()}`})
 
-    channel.messages.fetch("830931135780880415").then((message) => { message.edit({ embeds: [embed] }) })
+    if (guildIconURL) {
+        embed.setAuthor({name: channel.guild.name, iconURL: guildIconURL})
+        embed.setThumbnail(guildIconURL)
+    }
+
+    channel.messages.fetch("830931135780880415").then((message) => {
+        message.edit({embeds: [embed]})
+    })
 }
