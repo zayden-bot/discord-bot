@@ -1,5 +1,4 @@
 import Discord from "discord.js";
-const imgConfig = require("../../configs/image_config.json")
 
 module.exports = {
     commands: ["goodnight", "gn"],
@@ -10,15 +9,15 @@ module.exports = {
         if (message.mentions.members) { member = message.mentions.members.first(); }
         if (!member) { member = message.member as Discord.GuildMember }
 
-        const imgConfig = require("../../configs/image_config.json")
+        const imageConfig = require("../../configs/image_config.json")
         let arrayId = "Global";
-        if (message.author.id in imgConfig.goodNightImgs) { arrayId = message.author.id }
+        if (message.author.id in imageConfig.goodNightImgs) { arrayId = message.author.id }
 
-        const imgId = Math.floor(Math.random() * imgConfig.goodNightImgs[arrayId].length)
+        const imgId = Math.floor(Math.random() * imageConfig.goodNightImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Good Night, ${member.displayName}`)
-            .setImage(imgConfig.goodNightImgs[arrayId][imgId])
+            .setImage(imageConfig.goodNightImgs[arrayId][imgId])
 
         message.channel.send({embeds: [embed]})
     },

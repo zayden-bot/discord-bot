@@ -21,7 +21,7 @@ module.exports = {
 
         // Update json file.
         const fs = require("fs");
-        fs.writeFile("./configs/imgConfig.json", JSON.stringify(imageConfig, null, 4), function writeJSON(err: any) {
+        fs.writeFile("./configs/image_config.json", JSON.stringify(imageConfig, null, 4), function writeJSON(err: any) {
             if (err) { return console.log(err); }
         });
     }

@@ -9,15 +9,15 @@ module.exports = {
         if (message.mentions.members) { member = message.mentions.members.first(); }
         if (!member) { member = message.member as Discord.GuildMember }
 
-        const imgConfig = require("../../configs/image_config.json")
+        const imageConfig = require("../../configs/image_config.json")
         let arrayId = "Global";
-        if (message.author.id in imgConfig.goodMorningImgs) { arrayId = message.author.id }
+        if (message.author.id in imageConfig.goodMorningImgs) { arrayId = message.author.id }
 
-        const imgId = Math.floor(Math.random() * imgConfig.goodMorningImgs[arrayId].length)
+        const imgId = Math.floor(Math.random() * imageConfig.goodMorningImgs[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Good Morning, ${member.displayName}`)
-            .setImage(imgConfig.goodMorningImgs[arrayId][imgId])
+            .setImage(imageConfig.goodMorningImgs[arrayId][imgId])
 
         message.channel.send({embeds: [embed]})
     },

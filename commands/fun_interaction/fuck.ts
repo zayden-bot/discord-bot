@@ -19,12 +19,12 @@ module.exports = {
             member = mentions.first()?.user.username || ""
         }
 
-        const imgConfig = require("../../configs/imgConfig.json")
-        const imgId = Math.floor(Math.random() * imgConfig.fuckingImgs.length)
+        const imageConfig = require("../../configs/image_config.json")
+        const imgId = Math.floor(Math.random() * imageConfig.fuckingImgs.length)
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`${message.author.username} fucks ${member}`)
-            .setImage(imgConfig.fuckingImgs[imgId])
+            .setImage(imageConfig.fuckingImgs[imgId])
             .setColor("#FFC0CB")
 
         message.channel.send({
