@@ -27,7 +27,7 @@ module.exports = {
                 }
                 body = body[0]
                 const messageContent = `> ${body.q}\n${body.a}\n*(ZenQuotes API)*`
-                wisdomImages.push(messageContent)
+                wisdomImages.global.push(messageContent)
                 await message.channel.send(messageContent)
             });
 

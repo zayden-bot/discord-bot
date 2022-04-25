@@ -25,7 +25,7 @@ const inits = require("./init")
 inits.updateImages()
 
 // Init
-client.on("ready", () => {
+client.on("ready", async () => {
     const botConfig = require("./configs/bot_config.json");
     console.log(`Zayden is Running, version: ${botConfig.version}`);
 
@@ -125,14 +125,14 @@ client.on("ready", () => {
 
     // Self Updating
 
-    // const customRoles = require("./self_updating/customRoles")
-    // customRoles(client, "805765564504473641")
-    //
-    // const updateInformation = require("./self_updating/updateInformation")
-    // updateInformation(client, "830927865784565800")
+    const customRoles = require("./self_updating/customRoles")
+    await customRoles(client, "805765564504473641")
 
-    // const updateRules = require("./self_updating/updateRules")
-    // updateRules(client, "747430712617074718")
+    const updateInformation = require("./self_updating/updateInfomation")
+    await updateInformation(client, "830927865784565800")
+
+    const updateRules = require("./self_updating/updateRules")
+    await updateRules(client, "747430712617074718")
 });
 
 

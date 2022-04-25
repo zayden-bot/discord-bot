@@ -48,8 +48,7 @@ const field3 = `**Staff Roles:**
 **Custom Roles:** <#805765564504473641>
 To be added :)`
 
-const field4 = `**Special Mentions**
-Thank you to <@828728276193116181> for the College Kings' stickers`
+const field4 = `Thank you to <@828728276193116181> for the College Kings' stickers`
 
 module.exports = async function (client: Discord.Client, channelId: string) {
     const channel = await client.channels.fetch(channelId)
