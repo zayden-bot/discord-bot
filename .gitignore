@@ -133,3 +133,6 @@ user_configs/
 
 # Database
 *.db
+
+# Webstorm
+.idea/*
