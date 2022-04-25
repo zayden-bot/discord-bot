@@ -21,7 +21,8 @@ export const client = new Discord.Client({
 
 // Initialize database
 require("./sql").init()
-
+const inits = require("./init")
+inits.updateImages()
 
 // Init
 client.on("ready", () => {
@@ -117,8 +118,8 @@ client.on("ready", () => {
     // const customRoles = require("./self_updating/customRoles")
     // customRoles(client, "805765564504473641")
     //
-    // const updateInfomation = require("./self_updating/updateInfomation")
-    // updateInfomation(client, "830927865784565800")
+    // const updateInformation = require("./self_updating/updateInformation")
+    // updateInformation(client, "830927865784565800")
 
     // const updateRules = require("./self_updating/updateRules")
     // updateRules(client, "747430712617074718")
@@ -149,7 +150,7 @@ client.on("messageCreate", message => {
     questionMe(message)
 
     const autoSupport = require("./special_commands/autoSupport")
-    autoSupport(message)
+    autoSupport(message).then()
 })
 
 
@@ -233,7 +234,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
     }
 })
 
-client.login(process.env.TOKEN)
+client.login(process.env.TOKEN).then();
 
 // process.on("uncaughtException", (error) => {
 //     console.log(`Uncaught Exception: ${error.message}`)

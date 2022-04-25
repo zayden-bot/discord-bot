@@ -20,15 +20,11 @@ module.exports = {
 
         const fs = require("fs")
         if (!fs.existsSync(member_config)) {
-            fs.writeFileSync(member_config, JSON.stringify(default_config, null, 4), function writeJSON(err: any) {
-                if (err) { return console.log(err); }
-            });
+            fs.writeFileSync(member_config, JSON.stringify(default_config, null, 4));
         }
 
         if (!fs.existsSync(author_config)) {
-            fs.writeFileSync(author_config, JSON.stringify(default_config, null, 4), function writeJSON(err: any) {
-                if (err) { return console.log(err); }
-            });
+            fs.writeFileSync(author_config, JSON.stringify(default_config, null, 4));
         }
 
     },
@@ -41,19 +37,13 @@ module.exports = {
 
         const fs = require("fs")
         if (member_config != null) {
-            fs.writeFileSync(`./user_configs/${member.id}.json`, JSON.stringify(member_config, null, 4), function writeJSON(err: any) {
-                if (err) { return console.log(err); }
-            });
+            fs.writeFileSync(`./user_configs/${member.id}.json`, JSON.stringify(member_config, null, 4));
         }
         if (author_config != null) {
-            fs.writeFileSync(`./user_configs/${author?.id}.json`, JSON.stringify(author_config, null, 4), function writeJSON(err: any) {
-                if (err) { return console.log(err); }
-            });
+            fs.writeFileSync(`./user_configs/${author?.id}.json`, JSON.stringify(author_config, null, 4));
         }
         if (server_config != null) {
-            fs.writeFileSync(`./server_configs/${server?.id}.json`, JSON.stringify(server_config, null, 4), function writeJSON(err: any) {
-                if (err) { return console.log(err); }
-            });
+            fs.writeFileSync(`./server_configs/${server?.id}.json`, JSON.stringify(server_config, null, 4));
         }
     },
 
@@ -66,9 +56,5 @@ module.exports = {
         fs.writeFile(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4), (error: any) => {
             if (error) { return console.log(error); }
         });
-    },
-
-    updateConfigSync: function (guild: Discord.Guild, server: Server) {
-        fs.writeFileSync(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4));
     },
 }

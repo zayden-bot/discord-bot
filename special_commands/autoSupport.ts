@@ -18,6 +18,8 @@ module.exports = async function (message: Discord.Message) {
         message.member.roles.cache.has(server.roles.supportRole)) {
         return;
     }
+
+    // noinspection TypeScriptValidateJSTypes
     const idNumber = server.idNumber.toLocaleString('en', { minimumIntegerDigits: 4, useGrouping: false })
 
     // Create channel thread and send mentions
@@ -59,6 +61,5 @@ module.exports = async function (message: Discord.Message) {
         if (err) { return console.log(err); }
     });
 
-    message.delete()
-    message.channel.bulkDelete(1)
+    await Promise.all([message.delete(), message.channel.bulkDelete(1)])
 }
