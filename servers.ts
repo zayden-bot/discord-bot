@@ -1,4 +1,4 @@
-import {Server} from "./models/server";
+import {Server} from "./models/servers/server";
 import Discord from "discord.js";
 import mongoose from "mongoose";
 
