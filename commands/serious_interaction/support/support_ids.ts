@@ -10,10 +10,7 @@ module.exports = {
             return;
         }
 
-        const ids = []
-        for (const id in server.supportAnswers) {
-            ids.push(id)
-        }
+        const ids = Array.from(server.supportAnswers.keys())
 
         if (ids.length == 0) {
             await message.reply("No support ids for this server")
