@@ -1,44 +1,39 @@
 import Discord, {MessageActionRow, MessageButton} from "discord.js";
-import {Server} from "../../../models/server";
+import {IServer} from "../../../models/server";
 
 module.exports = {
     commands: ["support_remove"],
     expectedArgs: "<id>",
     minArgs: 1,
-    callback: async (message: Discord.Message, args: string[], text: string) => {
+    callback: async (message: Discord.Message, server: IServer, args: string[], text: string) => {
         const guild = message.guild
         if (!guild) {
             return;
         }
 
-        const server = await Server.findOne({id: guild.id}).exec()
-
         const id = text.toLowerCase()
-
-        if (!server.supportAnswers[id]) {
+        const answer = server.supportAnswers.get(id)
+        if (!answer) {
             return message.reply("No support ID found");
         }
 
         // If ID already exists:
-        const confirm_button = new MessageButton()
+        const confirmButton = new MessageButton()
             .setCustomId("confirm")
             .setLabel("Confirm")
             .setStyle("SUCCESS");
 
-        const decline_button = new MessageButton()
+        const declineButton = new MessageButton()
             .setCustomId("decline")
             .setLabel("Decline")
             .setStyle("DANGER");
 
         const row = new MessageActionRow()
-            .addComponents(
-                confirm_button,
-                decline_button
-            );
+            .addComponents(confirmButton, declineButton);
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Support ID: ${id}`)
-            .setDescription(server.supportAnswers[id])
+            .setDescription(answer)
             .setColor("#ff0000")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
@@ -48,27 +43,32 @@ module.exports = {
             components: [row]
         });
 
-        const filter = (interaction: Discord.MessageComponentInteraction) => (interaction.customId == confirm_button.customId || interaction.customId == decline_button.customId) && interaction.user.id == message.author.id;
-        msg.awaitMessageComponent({filter, time: 15_000})
-            .then(async (interaction) => {
-                console.log(`Interaction "${interaction.customId}" was clicked`)
+        const filter = (interaction: Discord.MessageComponentInteraction) => (
+            interaction.customId == confirmButton.customId
+            || interaction.customId == declineButton.customId
+            && interaction.user.id == message.author.id
+        );
 
-                if (interaction.customId == confirm_button.customId) {
-                    delete server.supportAnswers[id]
+        let interaction;
+        try {
+            interaction = await msg.awaitMessageComponent({filter, time: 15_000})
+        } catch {
+            msg.edit({content: "Time Expired. Canceled command", embeds: [], components: []})
+            return;
+        }
 
-                    const common = require("../../../common")
-                    common.updateConfig(guild, server)
-                    return interaction.update({
-                        content: "Successfully removed support option",
-                        embeds: [],
-                        components: []
-                    })
-                } else {
-                    return interaction.update({content: "Canceled", embeds: [], components: []})
-                }
-            })
-            .catch((error) => {
-                msg.edit({content: "Time Expired. Canceled command", embeds: [], components: []})
-            });
+        console.log(`Interaction "${interaction.customId}" was clicked`)
+
+        if (interaction.customId == confirmButton.customId) {
+            server.supportAnswers.delete(id)
+            await server.save()
+
+            interaction.update({content: "Successfully removed support option", embeds: [], components: []})
+            return;
+        }
+        if (interaction.customId == declineButton.customId) {
+            interaction.update({content: "Canceled", embeds: [], components: []})
+            return;
+        }
     },
 }

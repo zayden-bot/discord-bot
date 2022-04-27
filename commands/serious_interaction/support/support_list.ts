@@ -1,33 +1,24 @@
 import Discord from "discord.js"
-import {Server} from "../../../models/server";
+import {IServer} from "../../../models/server";
 
 
 module.exports = {
     commands: ["support_list"],
     minArgs: 0,
     maxArgs: 0,
-    callback: async (message: Discord.Message, args: string[], text: string) => {
+    callback: async (message: Discord.Message, server: IServer) => {
         const guild = message.guild;
         if (!guild) {
             return;
         }
 
-        const server = await Server.findOne({id: guild.id}).exec()
-
+        const supportEntries: Array<readonly [string, string]> = Array.from(server.supportAnswers, ([id, answer]) => ([id, answer]))
         const supportPages: Map<number, Map<string, string>> = new Map();
-        supportPages.set(1, new Map());
 
         let pageNumber = 1;
-        for (const [id, answer] of Object.entries(server.supportAnswers)) {
-            let currentPage = supportPages.get(pageNumber) as Map<string, string>
-
-            if (currentPage.size >= 5) {
-                pageNumber++;
-                supportPages.set(pageNumber, new Map());
-            }
-
-            currentPage = supportPages.get(pageNumber) as Map<string, string>
-            // currentPage.set(id, answer);
+        for (let i = 1; i <= supportEntries.length; i += 5) {
+            supportPages.set(pageNumber, new Map(supportEntries.slice(i - 1, i + 4)))
+            pageNumber++
         }
 
         const embed = new Discord.MessageEmbed()
@@ -68,6 +59,8 @@ module.exports = {
 
         pageNumber = 1;
         collector.on("collect", (i) => {
+            console.log(supportPages)
+
             if (i.customId == nextPage.customId) {
                 pageNumber++;
                 previousPage.setDisabled(false);
@@ -78,6 +71,7 @@ module.exports = {
                     .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
                 const supportPage = supportPages.get(pageNumber) as Map<string, string>
+                console.log(supportPage)
                 for (const [id, answer] of supportPage) {
                     embed.addField(id, answer);
                 }

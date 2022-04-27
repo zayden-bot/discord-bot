@@ -1,33 +1,34 @@
 import Discord from "discord.js";
-import {Server} from "../../../models/server";
+import {IServer} from "../../../models/server";
 
 module.exports = {
     commands: ["support_add"],
     expectedArgs: "<id>, <support_answer>",
     minArgs: 1,
-    callback: async (message: Discord.Message, args: string[], text: string) => {
+    callback: async (message: Discord.Message, server: IServer, args: string[], text: string) => {
         const guild = message.guild
         if (!guild) {
             return;
         }
 
-        const server = await Server.findOne({id: guild.id}).exec()
-
         args = text.split(',')
-        const id = args.shift()?.toLowerCase() as string
+        const id = args.shift()?.toLowerCase()
         const answer = args.join(',');
 
-        if (!answer) {
-            return message.reply("Comma separator not found.")
+        if (!id || !answer) {
+            await message.reply("Comma separator not found.")
+            return;
         }
 
-        if (!server.supportAnswers[id]) {
-            server.supportAnswers[id] = answer;
+        if (!server.supportAnswers.get(id)) {
+            server.supportAnswers.set(id, answer);
 
-            const common = require("../../../common")
-            common.updateConfig(guild, server)
+            await Promise.all([
+                server.save(),
+                message.reply("Successfully added support option")
+            ])
 
-            return message.reply("Successfully added support option");
+            return;
         }
 
         // If ID already exists:
@@ -49,7 +50,7 @@ module.exports = {
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Support ID: ${id}`)
-            .setDescription(server.supportAnswers[id])
+            .setDescription(server.supportAnswers.get(id) ?? "")
             .setColor("#ff0000")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
@@ -59,28 +60,34 @@ module.exports = {
             components: [row]
         });
 
-        const filter = (interaction: Discord.MessageComponentInteraction) => (interaction.customId == confirm_button.customId || interaction.customId == decline_button.customId) && interaction.user.id == message.author.id;
-        msg.awaitMessageComponent({filter, time: 15_000})
-            .then(async (interaction) => {
-                console.log(`Interaction "${interaction.customId}" was clicked`)
+        const filter = (interaction: Discord.MessageComponentInteraction) => (
+            interaction.customId == confirm_button.customId
+            || interaction.customId == decline_button.customId
+            && interaction.user.id == message.author.id
+        );
 
-                if (interaction.customId == confirm_button.customId) {
-                    server.supportAnswers[id] = answer;
+        let interaction;
+        try {
+            interaction = await msg.awaitMessageComponent({filter, time: 15_000});
+        } catch {
+            msg.edit({content: "Time Expired. Canceled command", embeds: [], components: []})
+            return;
+        }
 
-                    const common = require("../../../common")
-                    common.updateConfig(guild, server)
-                    return interaction.update({
-                        content: "Successfully added support option",
-                        embeds: [],
-                        components: []
-                    })
-                } else {
-                    return interaction.update({content: "Canceled", embeds: [], components: []})
-                }
-            })
-            .catch(() => {
-                msg.edit({content: "Time Expired. Canceled command", embeds: [], components: []})
-            });
+        console.log(`Interaction "${interaction.customId}" was clicked`)
+
+        if (interaction.customId == confirm_button.customId) {
+            server.supportAnswers.set(id, answer);
+            await Promise.all([
+                server.save(),
+                interaction.update({content: "Successfully added support option", embeds: [], components: []})
+            ])
+            return;
+        }
+        if (interaction.customId == decline_button.customId) {
+            interaction.update({content: "Canceled", embeds: [], components: []})
+            return;
+        }
     },
     requiredRoles: ["Admin"]
 }

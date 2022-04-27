@@ -54,7 +54,7 @@ export interface IServer {
         rules: Record<string, string>
     },
     moderation: IModeration[]
-    supportAnswers: Record<string, string>,
+    supportAnswers: Map<string, string>,
 
     save(): Promise<IServer>;
 }

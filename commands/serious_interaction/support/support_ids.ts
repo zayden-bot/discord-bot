@@ -1,16 +1,14 @@
 import Discord from "discord.js";
-import {Server} from "../../../models/server";
+import {IServer} from "../../../models/server";
 
 module.exports = {
     commands: ["support_ids"],
     maxArgs: 0,
-    callback: async (message: Discord.Message) => {
+    callback: async (message: Discord.Message, server: IServer) => {
         const guild = message.guild
         if (!guild) {
             return;
         }
-
-        const server = await Server.findOne({id: guild.id}).exec()
 
         const ids = []
         for (const id in server.supportAnswers) {
