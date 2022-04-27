@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import {Server} from "./models/server";
 
 dotenv.config()
-const dbURI = "mongodb+srv://oscar:S0rU4U5mT0ecZN5Tc9D3Ojh5if6RS5zR@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority"
+const dbURI = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority`
 mongoose.connect(dbURI)
 
 export const client = new Discord.Client({
