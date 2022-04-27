@@ -1,5 +1,5 @@
 import Discord from "discord.js"
-import {ImageConfig} from "../../../models/images/image-config";
+import {ImageConfig} from "../../../models/image-config";
 
 module.exports = {
     commands: ["add_personal"],

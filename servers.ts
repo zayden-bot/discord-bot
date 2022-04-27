@@ -1,4 +1,4 @@
-import {Server} from "./models/servers/server";
+import {Server} from "./models/server";
 import Discord from "discord.js";
 
 export function createServer(guild: Discord.Guild,) {

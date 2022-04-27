@@ -1,6 +1,6 @@
 import Discord from "discord.js"
 import {Command} from "./command"
-import {Server} from "../models/servers/server";
+import {Server} from "../models/server";
 
 let recentlyRan: string[] = []
 

@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {IImageConfig, ImageConfig} from "../../../models/images/image-config";
+import {IImageConfig, ImageConfig} from "../../../models/image-config";
 
 module.exports = {
     commands: ["wisdomoftheday", "wisdom", "w"],

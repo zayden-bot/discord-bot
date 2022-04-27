@@ -1,9 +1,8 @@
 import Discord from "discord.js";
 import dotenv from "dotenv";
-import fs from "fs";
 import {createServer} from "./servers";
 import mongoose from "mongoose";
-import {Server} from "./models/servers/server";
+import {Server} from "./models/server";
 
 dotenv.config()
 const dbURI = "mongodb+srv://oscar:S0rU4U5mT0ecZN5Tc9D3Ojh5if6RS5zR@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority"
@@ -59,15 +58,6 @@ client.on("ready", async () => {
 
 client.on("guildCreate", async guild => {
     await createServer(guild)
-})
-
-
-client.on("guildDelete", async guild => {
-    fs.unlink(`./server_configs/${guild.id}.json`, (error) => {
-        if (error) {
-            console.log(error)
-        }
-    })
 })
 
 

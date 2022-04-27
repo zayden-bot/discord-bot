@@ -1,5 +1,5 @@
 import Discord, {MessageActionRow, MessageButton} from "discord.js";
-import {Server} from "../../../models/servers/server";
+import {Server} from "../../../models/server";
 
 module.exports = {
     commands: ["support_remove"],

@@ -1,5 +1,5 @@
 import Discord from "discord.js"
-import {Server} from "../../../models/servers/server";
+import {Server} from "../../../models/server";
 
 
 module.exports = {
