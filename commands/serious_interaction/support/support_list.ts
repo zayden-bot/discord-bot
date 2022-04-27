@@ -1,5 +1,5 @@
 import Discord from "discord.js"
-import {servers} from "../../../servers";
+import {Server} from "../../../models/servers/server";
 
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
             return;
         }
 
-        const server = servers[guild.id];
+        const server = await Server.findOne({id: guild.id}).exec()
 
         const supportPages: Map<number, Map<string, string>> = new Map();
         supportPages.set(1, new Map());

@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {servers} from "../../../servers";
+import {Server} from "../../../models/servers/server";
 
 module.exports = {
     commands: ["support"],
@@ -11,7 +11,7 @@ module.exports = {
             return;
         }
 
-        const server = servers[guild.id]
+        const server = await Server.findOne({id: guild.id}).exec()
 
         const id = text;
         const answer = server.supportAnswers[id.toLowerCase()];

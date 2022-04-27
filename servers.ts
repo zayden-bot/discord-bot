@@ -1,22 +1,20 @@
 import {Server} from "./models/servers/server";
 import Discord from "discord.js";
 
-export let servers: Record<string, any> = {}
-
 export function createServer(guild: Discord.Guild,) {
     const server = new Server({id: guild.id})
-    servers[guild.id] = server
     server.save()
+    return server
 }
 
 export async function init(client: Discord.Client) {
     for (const g of await client.guilds.fetch()) {
         const guild = await client.guilds.fetch(g[0])
 
-        await createServer(guild)
+        let server = await Server.findOne({id: guild.id}).exec() || await createServer(guild);
 
         // Cache reaction messages
-        for (let reactionRole of servers[guild.id].reactionRoles) {
+        for (let reactionRole of server.reactionRoles) {
             const channel = await client.channels.fetch(reactionRole.channelId)
             if (!channel || channel.type != "GUILD_TEXT") {
                 break;

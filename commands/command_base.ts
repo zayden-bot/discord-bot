@@ -1,6 +1,6 @@
 import Discord from "discord.js"
-import {servers} from "../servers"
 import {Command} from "./command"
+import {Server} from "../models/servers/server";
 
 let recentlyRan: string[] = []
 
@@ -37,7 +37,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
             return
         }
 
-        const server = servers[guild.id]
+        const server = await Server.findOne({id: guild.id}).exec()
 
         const botConfig = require("../configs/bot_config.json");
 
@@ -93,7 +93,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 }
 
                 // Create the arguments variable
-                const args = content.split(/ +/)
+                const args = content.split(' ')
                 args.shift()
 
                 // Check if the user inputted the correct number of arguments

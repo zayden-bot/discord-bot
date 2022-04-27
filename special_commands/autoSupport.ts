@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {servers} from "../servers";
+import {Server} from "../models/servers/server";
 
 module.exports = async function (message: Discord.Message) {
     const guild = message.guild
@@ -13,7 +13,7 @@ module.exports = async function (message: Discord.Message) {
         return;
     }
 
-    const server = servers[message.guild.id]
+    const server = await Server.findOne({id: guild.id}).exec()
     if (!server.channels.supportChannels
         || !server.channels.supportChannels.includes(message.channel.id)
         || message.member.roles.cache.has(server.roles.moderationRole)

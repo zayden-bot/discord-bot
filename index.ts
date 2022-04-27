@@ -1,8 +1,9 @@
 import Discord from "discord.js";
 import dotenv from "dotenv";
 import fs from "fs";
-import {createServer, servers} from "./servers";
+import {createServer} from "./servers";
 import mongoose from "mongoose";
+import {Server} from "./models/servers/server";
 
 dotenv.config()
 const dbURI = "mongodb+srv://oscar:S0rU4U5mT0ecZN5Tc9D3Ojh5if6RS5zR@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority"
@@ -21,8 +22,6 @@ export const client = new Discord.Client({
 
 // Initialize database
 require("./sql").init()
-const inits = require("./init")
-inits.updateImages()
 
 // Init
 client.on("ready", async () => {
@@ -88,7 +87,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
     const guild = reaction.message.guild
     if (!guild) return;
 
-    const server = servers[guild.id];
+    const server = await Server.findOne({id: guild.id}).exec()
 
     for (const reactionRole of server.reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
@@ -114,7 +113,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
     const guild = reaction.message.guild
     if (!guild) return;
 
-    const server = servers[guild.id];
+    const server = await Server.findOne({id: guild.id}).exec()
 
     for (const reactionRole of server.reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {

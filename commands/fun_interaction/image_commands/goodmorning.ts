@@ -1,26 +1,27 @@
 import Discord from "discord.js";
+import {ImageConfig} from "../../../models/images/imageConfigSchema";
 
 module.exports = {
     commands: ["goodmorning", "gm"],
     expectedArgs: "<user>",
     maxArgs: 1,
-    callback: (message: Discord.Message) => {
+    callback: async (message: Discord.Message) => {
         const member = message.mentions.members?.first() || message.member
         if (!member) {
             return;
         }
 
-        const imageConfig = require("../../../configs/image_config.json")
+        const goodMorningImages = await ImageConfig.findOne({category: "goodMorning"}).exec()
         let arrayId = "global";
-        if (message.author.id in imageConfig.goodMorningImgs) {
+        if (message.author.id in goodMorningImages.users) {
             arrayId = message.author.id
         }
 
-        const imgId = Math.floor(Math.random() * imageConfig.goodMorningImgs[arrayId].length)
+        const imgId = Math.floor(Math.random() * goodMorningImages[arrayId].length)
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Good Morning, ${member.displayName}`)
-            .setImage(imageConfig.goodMorningImgs[arrayId][imgId])
+            .setImage(goodMorningImages[arrayId][imgId])
 
         message.channel.send({embeds: [embed]})
     },

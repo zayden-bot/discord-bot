@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {servers} from "../../servers";
+import {Server} from "../../models/servers/server";
 
 module.exports = {
     commands: ["give_star", "gs"],
@@ -25,7 +25,7 @@ module.exports = {
 
         const member_config = require(`../../user_configs/${member.id}.json`);
         const author_config = require(`../../user_configs/${author.id}.json`);
-        const server = servers[message.guild.id]
+        const server = await Server.findOne({id: message.guild.id}).exec()
 
         if (author_config["number_of_stars"] <= 0 && !author.roles.cache.has(server.roles.staffRole)) {
             await message.reply("Unable. You have no gold stars to give.");

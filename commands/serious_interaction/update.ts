@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {servers} from "../../servers";
+import {Server} from "../../models/servers/server";
 
 module.exports = {
     commands: ["update"],
@@ -8,7 +8,7 @@ module.exports = {
             return;
         }
 
-        const server = servers[message.guild.id]
+        const server = await Server.findOne({id: message.guild.id}).exec()
 
         if (message.channel.id != "776139754408247326" && !message.member.roles.cache.has(server.roles.staffRole)) {
             const msg = await message.reply("You're an idiot. Use <#776139754408247326> for commands.")
