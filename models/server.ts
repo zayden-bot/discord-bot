@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-interface IReactionRole {
+export interface IReactionRole {
     channelId: string,
     messageId: string,
     roleId: string,
