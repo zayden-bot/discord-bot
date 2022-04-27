@@ -1,19 +1,19 @@
 import Discord from "discord.js"
-import {IImageConfig, Image_config} from "../../../models/images/image_config";
+import {IImageConfig, ImageConfig} from "../../../models/images/image-config";
 
 module.exports = {
     commands: ["add_global"],
     expectedArgs: "<category>, <image_link>",
     minArgs: 2,
     maxArgs: 2,
-    callback: async (message: Discord.Message, server: any, args: string[]) => {
+    callback: async (message: Discord.Message, server: unknown, args: string[]) => {
         if (message.author.id != "211486447369322506") {
             return;
         }
 
         const imageLink = args[1]
 
-        const imageConfig: IImageConfig = await Image_config.findOne({category: args[0]}).exec()
+        const imageConfig: IImageConfig = await ImageConfig.findOne({category: args[0]}).exec()
 
         if (!imageConfig) {
             await message.reply("Category not found in image config.")

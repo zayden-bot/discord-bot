@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {Image_config} from "../../../models/images/image_config";
+import {getImage} from "./image_cmd_base";
 
 module.exports = {
     commands: ["goodmorning", "gm"],
@@ -11,17 +11,11 @@ module.exports = {
             return;
         }
 
-        const goodMorningImages = await Image_config.findOne({category: "goodMorning"}).exec()
-        let arrayId = "global";
-        if (message.author.id in goodMorningImages.users) {
-            arrayId = message.author.id
-        }
-
-        const imgId = Math.floor(Math.random() * goodMorningImages[arrayId].length)
+        const image = await getImage(message.author, "goodMorning")
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Good Morning, ${member.displayName}`)
-            .setImage(goodMorningImages[arrayId][imgId])
+            .setImage(image)
 
         message.channel.send({embeds: [embed]})
     },

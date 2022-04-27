@@ -1,12 +1,12 @@
 import Discord from "discord.js"
-import {Image_config} from "../../../models/images/image_config";
+import {ImageConfig} from "../../../models/images/image-config";
 
 module.exports = {
     commands: ["add_personal"],
     expectedArgs: "<category>, <image_link>",
     minArgs: 2,
     maxArgs: 2,
-    callback: async (message: Discord.Message, server: any, args: string[]) => {
+    callback: async (message: Discord.Message, server: unknown, args: string[]) => {
         const userId = message.author.id
 
         if (userId != "211486447369322506") {
@@ -15,7 +15,7 @@ module.exports = {
 
         const imageLink = args[1]
 
-        const imageConfig = await Image_config.findOne({category: args[0]}).exec()
+        const imageConfig = await ImageConfig.findOne({category: args[0]}).exec()
 
         if (!imageConfig) {
             await message.reply("Category not found in image config.")

@@ -1,26 +1,21 @@
 import Discord from "discord.js";
+import {getImage} from "./image_cmd_base";
 
 module.exports = {
     commands: ["goodnight", "gn"],
     expectedArgs: "<user>",
     maxArgs: 1,
-    callback: (message: Discord.Message) => {
+    callback: async (message: Discord.Message) => {
         const member = message.mentions.members?.first() || message.member
         if (!member) {
             return;
         }
 
-        const imageConfig = require("../../../configs/image_config.json")
-        let arrayId = "global";
-        if (message.author.id in imageConfig.goodNightImgs) {
-            arrayId = message.author.id
-        }
-
-        const imgId = Math.floor(Math.random() * imageConfig.goodNightImgs[arrayId].length)
+        const image = await getImage(message.author, "goodNight")
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Good Night, ${member.displayName}`)
-            .setImage(imageConfig.goodNightImgs[arrayId][imgId])
+            .setImage(image)
 
         message.channel.send({embeds: [embed]})
     },

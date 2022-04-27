@@ -1,4 +1,5 @@
 import Discord from "discord.js";
+import {getImage} from "./image_cmd_base";
 
 module.exports = {
     commands: ["slap"],
@@ -10,18 +11,12 @@ module.exports = {
             return;
         }
 
-        const imageConfig = require("../../../configs/image_config.json")
-        let arrayId = "global";
-        if (message.author.id in imageConfig.slapImages) {
-            arrayId = message.author.id
-        }
-
-        const imgId = Math.floor(Math.random() * imageConfig.slapImages[arrayId].length)
+        const image = await getImage(message.author, "slap")
 
         if (message.member?.id == "393046490966130688" && member.id == "211486447369322506") { // Sondwich
             const embed = new Discord.MessageEmbed()
                 .setTitle("Oscar slaps Sondwich")
-                .setImage(imageConfig.slapImages[arrayId][imgId]);
+                .setImage(image);
             try {
                 await message.reply({content: "Bitch! You don't slap me.", embeds: [embed]})
             } catch {
@@ -32,7 +27,7 @@ module.exports = {
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`${message.author.username} slaps ${member.displayName}`)
-            .setImage(imageConfig.slapImages[arrayId][imgId]);
+            .setImage(image);
 
         message.channel.send({embeds: [embed]})
     },

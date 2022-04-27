@@ -1,11 +1,15 @@
 import Discord from "discord.js";
-import fs from "fs";
+import {IImageConfig, ImageConfig} from "../../../models/images/image-config";
 
 module.exports = {
     commands: ["wisdomoftheday", "wisdom", "w"],
-    callback: (message: Discord.Message) => {
-        const imageConfig = require("../../../configs/image_config.json")
-        const wisdomImages = imageConfig.wisdomImages
+    callback: async (message: Discord.Message) => {
+        const imageConfig: IImageConfig = await ImageConfig.findOne({category: "wisdom"}).exec()
+
+        let images = imageConfig.global;
+        if (message.author.id in imageConfig.users) {
+            images = imageConfig.users[message.author.id]
+        }
 
         // Returns 0 - 365
         const now = new Date();
@@ -13,11 +17,13 @@ module.exports = {
         const oneDay = 1000 * 60 * 60 * 24;
         const imageIndex = Math.floor((now.valueOf() - start.valueOf()) / oneDay)
 
+        const image = images[imageIndex]
+
         // Check if index is within bounds of the global images
-        if (imageIndex < wisdomImages.length) {
+        if (image) {
             const embed = new Discord.MessageEmbed()
                 .setTitle("Today's Wisdom")
-                .setImage(wisdomImages[imageIndex])
+                .setImage(image)
 
             message.channel.send({embeds: [embed]})
         } else {
@@ -29,13 +35,6 @@ module.exports = {
                 }
                 body = body[0]
                 const messageContent = `> ${body.q}\n${body.a}\n*(ZenQuotes API)*`
-                wisdomImages.global.push(messageContent)
-
-                fs.writeFile(`./configs/image_config.json`, JSON.stringify(imageConfig, null, 4), (error: any) => {
-                    if (error) {
-                        return console.log(error);
-                    }
-                });
 
                 await message.channel.send(messageContent)
             });
