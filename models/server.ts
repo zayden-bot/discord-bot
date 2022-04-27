@@ -7,15 +7,12 @@ interface IReactionRole {
     emoji: string
 }
 
-interface IQuestion {
+export interface IQuestion {
     text: string,
     userId: string,
     questionId: number,
-    messageId: string,
-    answer: {
-        text: string,
-        userId: string,
-    }
+    messageId: string | null,
+    answer: { text: string; username: string; } | null
 }
 
 

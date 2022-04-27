@@ -1,56 +1,49 @@
-// noinspection JSIgnoredPromiseFromCall
-
 import Discord from "discord.js"
+import {IServer} from "../../models/server";
 
 module.exports = {
     commands: ["answer"],
     expectedArgs: "<id> <answer>",
     minArgs: 2,
-    callback: async (message: Discord.Message, args: string[], text: string) => {
+    callback: async (message: Discord.Message, server: IServer, args: string[], text: string) => {
         if (!message.guild) {
             return;
         }
 
         const id = Number(args.shift())
-
         if (isNaN(id)) {
-            message.reply("Missing question ID")
+            await message.reply("Missing question ID")
             return
         }
 
         text = args.join(" ")
 
-        const {questions} = require("./question")
-        let question = questions[id]
-        try {
-            question.setAnswer(text, message.author.username)
-        } catch {
+        let question = server.questions[id]
+        if (!question) {
             await message.reply("Couldn't find question. Please try again")
             return
         }
 
+        question.answer = {
+            text: text,
+            username: message.member?.displayName || message.author.username
+        }
+
         const embed = new Discord.MessageEmbed()
             .addField(`Question id: ${question.questionId}`, question.text)
-            .addField(`Answered by ${question.answer.user}`, question.answer.text)
+            .addField(`Answered by ${message.author.username}`, question.answer.text)
 
-        const serverConfig = require(`../../server_configs/${message.guild.id}.json`)
-        const channel = message.guild.channels.cache.get(serverConfig.channels.questionChannel)
+        const channel = await message.guild.channels.fetch(server.channels.questionChannel)
 
-        if (channel && channel.isText()) {
-            try {
-                const questionMessage = await channel.messages.fetch(question.messageId)
-                questionMessage.edit({embeds: [embed]})
-                await message.delete()
-            } catch {
-                message.reply("Failed to edit question. Did the original question get deleted?")
-            }
+        if (channel && channel.isText() && question.messageId) {
+            const questionMessage = await channel.messages.fetch(question.messageId)
+            questionMessage.edit({embeds: [embed]})
+            message.delete().catch()
         }
 
-        try {
-            question.user.send({embeds: [embed]})
-        } catch {
-        }
-
+        const questionUser = await message.client.users.fetch(question.userId)
+        questionUser.send({embeds: [embed]}).catch()
+        await server.save()
     },
     permissions: ["MANAGE_MESSAGES"],
 }
