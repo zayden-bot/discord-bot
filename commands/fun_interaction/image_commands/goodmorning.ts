@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {ImageConfig} from "../../../models/images/imageConfigSchema";
+import {Image_config} from "../../../models/images/image_config";
 
 module.exports = {
     commands: ["goodmorning", "gm"],
@@ -11,7 +11,7 @@ module.exports = {
             return;
         }
 
-        const goodMorningImages = await ImageConfig.findOne({category: "goodMorning"}).exec()
+        const goodMorningImages = await Image_config.findOne({category: "goodMorning"}).exec()
         let arrayId = "global";
         if (message.author.id in goodMorningImages.users) {
             arrayId = message.author.id

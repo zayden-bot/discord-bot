@@ -1,5 +1,5 @@
 import Discord from "discord.js"
-import {ImageConfig} from "../../../models/images/imageConfigSchema";
+import {Image_config} from "../../../models/images/image_config";
 
 module.exports = {
     commands: ["add_personal"],
@@ -15,7 +15,7 @@ module.exports = {
 
         const imageLink = args[1]
 
-        const imageConfig = await ImageConfig.findOne({category: args[0]}).exec()
+        const imageConfig = await Image_config.findOne({category: args[0]}).exec()
 
         if (!imageConfig) {
             await message.reply("Category not found in image config.")
