@@ -71,7 +71,7 @@ client.on("guildDelete", async guild => {
 })
 
 
-client.on("messageCreate", message => {
+client.on("messageCreate", async message => {
     const yesMaster = require("./special_commands/yesMaster")
     yesMaster(message)
 
@@ -79,7 +79,7 @@ client.on("messageCreate", message => {
     questionMe(message)
 
     const autoSupport = require("./special_commands/autoSupport")
-    autoSupport(message).then()
+    await autoSupport(message)
 })
 
 

@@ -8,21 +8,24 @@ module.exports = async function (message: Discord.Message) {
     if (!guild ||
         (message.content.length == 0 && messageFiles.length == 0)
         || !message.member
-        || message.channel.type !== "GUILD_TEXT"
-        || message.author.id == "787490197943091211") {
+        || message.channel.type !== "GUILD_TEXT") {
         return;
     }
 
     const server = await Server.findOne({id: guild.id}).exec()
-    if (!server.channels.supportChannels
-        || !server.channels.supportChannels.includes(message.channel.id)
+
+    if (server.channels.supportChannel != message.channel.id
         || message.member.roles.cache.has(server.roles.moderationRole)
         || message.member.roles.cache.has(server.roles.supportRole)) {
         return;
     }
 
+
+    if (!server.supportThreadId) {
+        server.supportThreadId = 0
+    }
     // noinspection TypeScriptValidateJSTypes
-    const idNumber = server.idNumber.toLocaleString('en', {minimumIntegerDigits: 4, useGrouping: false})
+    const idNumber = server.supportThreadId.toLocaleString('en', {minimumIntegerDigits: 4, useGrouping: false})
 
     // Create channel thread and send mentions
     let threadName = `${idNumber} - ${message.content}`
@@ -55,8 +58,11 @@ module.exports = async function (message: Discord.Message) {
     }
 
     // Update json file.
-    server.idNumber += 1
-    require("../common").updateConfig(guild, server)
+    server.supportThreadId += 1
 
-    await Promise.all([message.delete(), message.channel.bulkDelete(1)])
+    await Promise.all([
+        server.save(),
+        message.delete(),
+        message.channel.bulkDelete(1)
+    ])
 }
