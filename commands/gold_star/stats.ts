@@ -5,20 +5,15 @@ module.exports = {
     expectedArgs: "<user>",
     maxArgs: 1,
     callback: (message: Discord.Message) => {
-        let member: Discord.GuildMember | undefined;
-        if (message.mentions.members) {
-            member = message.mentions.members.first();
-        }
-        if (!member) {
-            member = message.member as Discord.GuildMember;
-        }
+        const mentionedMember = message.mentions.members?.first()
 
-        const common = require("../../common")
-        common.user_config_setup(message);
-        const member_config = require(`../../user_configs/${member.id}.json`);
+        const username = mentionedMember?.displayName || message.member?.displayName || message.author.username;
+        const userId = mentionedMember?.id || message.author.id
+
+        const member_config = require(`../../user_configs/${userId}.json`);
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`${member.user.username} Stats`)
+            .setTitle(`${username} Stats`)
             .addField("Number of Stars", member_config.number_of_stars.toString(), true)
             .addField("Given Stars", member_config.given_stars.toString(), true)
             .addField("Received Stars", member_config.received_stars.toString(), true)
