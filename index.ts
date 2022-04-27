@@ -18,10 +18,6 @@ export const client = new Discord.Client({
     partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 })
 
-
-// Initialize database
-require("./sql").init()
-
 // Init
 client.on("ready", async () => {
     const botConfig = require("./configs/bot_config.json");
@@ -31,14 +27,14 @@ client.on("ready", async () => {
         client.user.setPresence({activities: [{name: "College Kings"}], status: "online"})
     }
 
+    // Initialize Bot Config
+    await require("./bot-config").init()
+
     // Initialize Servers
     await require("./servers").init(client)
 
     const loadCommands = require("./commands/load_commands");
     loadCommands(client)
-
-    const blacklist = require("./blacklist")
-    blacklist.init()
 
     // const moderation = require("./moderationFunctions")
     // moderation.init()
@@ -125,9 +121,9 @@ client.on("messageReactionRemove", async (reaction, user) => {
 })
 
 // Events
-client.on("guildMemberUpdate", (oldMember, newMember) => {
-    const server_config = require(`./server_configs/${newMember.guild.id}.json`);
+client.on("guildMemberUpdate", async (oldMember, newMember) => {
     const guild = newMember.guild
+    const server = await Server.findOne({id: guild.id}).exec()
 
     const patreonRoles: Record<string, number> = {
         '745663316776714370': 1, // Freshman
@@ -158,7 +154,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
             embed.setFooter({text: guild.name, iconURL: serverIconURL})
         }
 
-        const channel = client.channels.cache.get(server_config.channels.patreonChannel)
+        const channel = client.channels.cache.get(server.channels.patreonChannel)
         if (channel && channel.isText()) {
             channel.send({embeds: [embed]});
         }

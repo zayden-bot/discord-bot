@@ -1,6 +1,7 @@
 import Discord from "discord.js"
 import {Command} from "./command"
 import {Server} from "../models/server";
+import {isBlacklisted} from "./moderation/functions";
 
 let recentlyRan: string[] = []
 
@@ -72,8 +73,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 }
 
                 // Check if the user is blacklisted
-                const blacklist = require("../blacklist");
-                if (guild && blacklist.isBlacklisted(member.id) && !botConfig.developers.includes(member.id)) {
+                if (guild && await isBlacklisted(member) && !botConfig.developers.includes(member.id)) {
                     return
                 }
 
