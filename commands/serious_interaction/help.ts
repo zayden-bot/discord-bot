@@ -3,15 +3,16 @@ import Discord from "discord.js"
 module.exports = {
     commands: ["help", "h", "?"],
     description: "Zayden Help Command",
-    callback: (message: Discord.Message, args: string[], text: string) => {
-        if (!message.member) { return; }
+    callback: (message: Discord.Message) => {
+        if (!message.member) {
+            return;
+        }
 
-        const { prefix } = require("../../configs/bot_config.json")
+        const {prefix} = require("../../configs/bot_config.json")
 
         let reply = "Zayden's Commands:\n"
 
-        const loadCommands = require("../load_commands")
-        const commands = loadCommands()
+        const commands = require("../load_commands")()
 
         for (let command of commands) {
             let permissions = command.permissions
@@ -20,9 +21,11 @@ module.exports = {
 
             // Check for permissions
             if (permissions) {
-                if (message.guild == null) { continue }
+                if (!message.guild) {
+                    continue
+                }
 
-                if (typeof permissions === "string") {
+                if (Symbol.iterator in Object(permissions)) {
                     permissions = [permissions]
                 }
 
@@ -36,7 +39,9 @@ module.exports = {
 
             // Check for requiredRoles
             if (roles) {
-                if (message.guild == null) { continue }
+                if (message.guild == null) {
+                    continue
+                }
                 if (typeof roles === "string") {
                     roles = [roles]
                 }
@@ -54,12 +59,12 @@ module.exports = {
             if (!hasPermission) {
                 continue
             }
-            
+
             const mainCommand = typeof command.commands === "string" ? command.commands : command.commands[0]
             const args = command.expectedArgs ? ` ${command.expectedArgs}` : ""
-            
+
             reply += `**${prefix}${mainCommand}${args}**\n`
-            
+
         }
 
         message.channel.send(reply)

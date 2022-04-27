@@ -1,26 +1,23 @@
 import Discord from "discord.js"
+import {IServer} from "../../models/server";
 
 module.exports = {
     commands: ["suggest", "suggestion"],
     expectedArgs: "<text>",
-    permissionError: "",
-    minArgs: 1,
-    callback: (message: Discord.Message, args: string[], text: string) => {
-        if (!message.guild) { return; }
-
-        const config = require(`../../server_configs/${message.guild.id}.json`);
+    callback: async (message: Discord.Message, server: IServer, args: string[], text: string) => {
+        if (!message.guild) {
+            return;
+        }
 
         const embed = new Discord.MessageEmbed()
-        .setTitle(`From: ${message.author.username}`)
-        .setDescription(text);
+            .setTitle(`From: ${message.author.username}`)
+            .setDescription(text);
 
-        let channel = message.guild.channels.cache.get(config.channels.suggestionChannel);
+        let channel = await message.guild.channels.fetch(server.channels.suggestionChannel);
         if (channel && channel.isText()) {
-            channel.send({embeds: [embed]})
-            .then((message: Discord.Message) => {
-                message.react("👍");
-                message.react("👎");
-            })
+            message = await channel.send({embeds: [embed]})
+            await message.react("👍");
+            await message.react("👎");
         }
     },
 }
