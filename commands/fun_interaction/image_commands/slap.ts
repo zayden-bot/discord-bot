@@ -10,11 +10,6 @@ module.exports = {
             return;
         }
 
-        if (member.id == "211486447369322506") {
-            await message.reply(`Sorry ${message.author} you cannot slap Master Six`)
-            return;
-        }
-
         const imageConfig = require("../../../configs/image_config.json")
         let arrayId = "global";
         if (message.author.id in imageConfig.slapImages) {
@@ -23,9 +18,8 @@ module.exports = {
 
         const imgId = Math.floor(Math.random() * imageConfig.slapImages[arrayId].length)
 
-        let embed;
         if (message.member?.id == "393046490966130688" && member.id == "211486447369322506") { // Sondwich
-            embed = new Discord.MessageEmbed()
+            const embed = new Discord.MessageEmbed()
                 .setTitle("Oscar slaps Sondwich")
                 .setImage(imageConfig.slapImages[arrayId][imgId]);
             try {
@@ -36,7 +30,7 @@ module.exports = {
             return;
         }
 
-        embed = new Discord.MessageEmbed()
+        const embed = new Discord.MessageEmbed()
             .setTitle(`${message.author.username} slaps ${member.displayName}`)
             .setImage(imageConfig.slapImages[arrayId][imgId]);
 

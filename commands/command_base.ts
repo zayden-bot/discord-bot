@@ -1,5 +1,5 @@
 import Discord from "discord.js"
-import {servers} from "../server"
+import {servers} from "../servers"
 import {Command} from "./command"
 
 let recentlyRan: string[] = []
@@ -33,7 +33,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
     client.on("messageCreate", async message => {
         const {member, content, guild, channel} = message
 
-        if (member == null || guild == null) {
+        if (!member || !guild) {
             return
         }
 
@@ -124,7 +124,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 }
 
                 console.log(`Running ${botConfig.prefix}${alias}`)
-                callback(message, args, args.join(" "))
+                callback(message, server, args, args.join(" "))
 
                 return
             }

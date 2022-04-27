@@ -1,6 +1,5 @@
 import Discord from "discord.js"
 import fs from "fs"
-import { Server } from "./server";
 
 module.exports = {
     user_config_setup: function (message: Discord.Message) {
@@ -13,7 +12,9 @@ module.exports = {
         }
 
         let member = message.mentions.members?.first();
-        if (!member) { member = message.member as Discord.GuildMember }
+        if (!member) {
+            member = message.member as Discord.GuildMember
+        }
         const author = message.member;
         let member_config = `./user_configs/${member.id}.json`
         let author_config = `./user_configs/${author?.id}.json`
@@ -28,10 +29,12 @@ module.exports = {
         }
 
     },
-    
-    update_configs: function (message: Discord.Message, member_config=null, author_config=null, server_config=null) {
+
+    update_configs: function (message: Discord.Message, member_config = null, author_config = null, server_config = null) {
         let member = message.mentions.members?.first();
-        if (!member) { member = message.member as Discord.GuildMember }
+        if (!member) {
+            member = message.member as Discord.GuildMember
+        }
         const author = message.member;
         const server = message.guild;
 
@@ -49,12 +52,16 @@ module.exports = {
 
     parseId: function (id: string): string | undefined {
         const match = id.match(/\d+/)
-        if (match) { return match[0]; }
+        if (match) {
+            return match[0];
+        }
     },
 
-    updateConfig: function (guild: Discord.Guild, server: Server) {
+    updateConfig: function (guild: Discord.Guild, server: any) {
         fs.writeFile(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4), (error: any) => {
-            if (error) { return console.log(error); }
+            if (error) {
+                return console.log(error);
+            }
         });
     },
 }

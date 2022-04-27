@@ -1,18 +1,24 @@
 import Discord from "discord.js";
-import { servers } from "../../server";
+import {servers} from "../../servers";
 
 module.exports = {
     commands: ["give_star", "gs"],
     expectedArgs: "<user> [text]",
     minArgs: 1,
-    callback: (message: Discord.Message, args: string[], text: string) => {
+    callback: async (message: Discord.Message) => {
         const author = message.member;
         const member = message.mentions.members?.first();
 
-        if (!message.guild || !author) { return; }
+        if (!message.guild || !author) {
+            return;
+        }
 
-        if (!member) { return message.reply("No member mentioned."); }
-        if (member.id == author.id) { return message.reply("You idiot..."); }
+        if (!member) {
+            return message.reply("No member mentioned.");
+        }
+        if (member.id == author.id) {
+            return message.reply("You idiot...");
+        }
 
         const common = require("../../common")
         common.user_config_setup(message);
@@ -22,7 +28,7 @@ module.exports = {
         const server = servers[message.guild.id]
 
         if (author_config["number_of_stars"] <= 0 && !author.roles.cache.has(server.roles.staffRole)) {
-            message.reply("Unable. You have no gold stars to give.");
+            await message.reply("Unable. You have no gold stars to give.");
             return;
         }
 
@@ -39,6 +45,6 @@ module.exports = {
             .setTitle(`⭐ NEW GOLDEN STAR ⭐`)
             .setDescription(`<@${member.id}> received a golden star from <@${author.id}> for a total of ${member_config["number_of_stars"]} stars`);
 
-        message.channel.send({ embeds: [embed] });
+        message.channel.send({embeds: [embed]});
     },
 }

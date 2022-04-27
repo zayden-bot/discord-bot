@@ -4,13 +4,17 @@ module.exports = {
     commands: ["stats"],
     expectedArgs: "<user>",
     maxArgs: 1,
-    callback: (message: Discord.Message, args: string[], text: string) => {
+    callback: (message: Discord.Message) => {
         let member: Discord.GuildMember | undefined;
-        if (message.mentions.members) { member = message.mentions.members.first(); }
-        if (!member) { member = message.member as Discord.GuildMember; }
+        if (message.mentions.members) {
+            member = message.mentions.members.first();
+        }
+        if (!member) {
+            member = message.member as Discord.GuildMember;
+        }
 
-        const commom = require("../../common")
-        commom.user_config_setup(message);
+        const common = require("../../common")
+        common.user_config_setup(message);
         const member_config = require(`../../user_configs/${member.id}.json`);
 
         const embed = new Discord.MessageEmbed()

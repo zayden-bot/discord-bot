@@ -1,12 +1,9 @@
 import Discord from "discord.js";
 import dotenv from "dotenv";
 import fs from "fs";
-import path from "path";
-import {Server, servers} from "./server";
-
+import {createServer, servers} from "./servers";
 
 dotenv.config()
-
 
 export const client = new Discord.Client({
     intents: [
@@ -33,89 +30,11 @@ client.on("ready", async () => {
         client.user.setPresence({activities: [{name: "College Kings"}], status: "online"})
     }
 
+    // Initialize Servers
+    await require("./servers").init(client)
+
     const loadCommands = require("./commands/load_commands");
     loadCommands(client)
-
-    // Load server configs
-    const serverConfigFiles = fs.readdirSync(path.join(__dirname, "server_configs"))
-    for (const filename of serverConfigFiles) {
-        const serverConfig = require(`./server_configs/${filename}`);
-        const guildId = path.parse(filename).name;
-        const server = new Server(guildId)
-
-        if (serverConfig.hasOwnProperty("reactionRoles")) {
-            server.reactionRoles = serverConfig.reactionRoles
-        }
-        if (serverConfig.hasOwnProperty("disabledCommands")) {
-            server.disabledCommands = serverConfig.disabledCommands
-        }
-        if (serverConfig.hasOwnProperty("roles")) {
-            server.roles = serverConfig.roles
-        }
-        if (serverConfig.hasOwnProperty("channels")) {
-            server.channels = serverConfig.channels
-        }
-        if (serverConfig.hasOwnProperty("idNumber")) {
-            server.idNumber = serverConfig.idNumber
-        }
-        if (serverConfig.hasOwnProperty("gameVersions")) {
-            server.gameVersions = serverConfig.gameVersions
-        }
-        if (serverConfig.hasOwnProperty("serverRules")) {
-            server.serverRules = serverConfig.serverRules
-        }
-        if (serverConfig.hasOwnProperty("serverGuidelines")) {
-            server.serverGuidelines = serverConfig.serverGuidelines
-        }
-        if (serverConfig.hasOwnProperty("hidden")) {
-            server.hidden = serverConfig.hidden
-        }
-        if (serverConfig.hasOwnProperty("moderation")) {
-            server.moderation = serverConfig.moderation
-        }
-        if (serverConfig.hasOwnProperty("supportAnswers")) {
-            server.supportAnswers = serverConfig.supportAnswers
-        }
-        servers[guildId] = server
-    }
-
-
-    client.guilds.cache.each(guild => {
-        if (!(guild.id in servers)) {
-            const server = new Server(guild.id)
-            servers[guild.id] = server
-
-            fs.writeFile(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4), function writeJSON(err) {
-                if (err) {
-                    return console.log(err);
-                }
-            });
-        }
-
-        // Cache reaction messages
-        for (let reactionRole of servers[guild.id].reactionRoles) {
-            const channel = client.channels.cache.get(reactionRole.channelId) as Discord.TextChannel
-            if (!channel) {
-                break;
-            }
-            reactionRole.channelId = channel.id;
-
-            channel.messages.fetch(reactionRole.messageId)
-                .then((msg: Discord.Message) => {
-                    reactionRole.messageId = msg.id
-                })
-
-            guild.roles.fetch(reactionRole.roleId)
-                .then(role => {
-                    if (role) {
-                        reactionRole.roleId = role.id;
-                    }
-                })
-        }
-    })
-
-
-    // init.updateImages();
 
     const blacklist = require("./blacklist")
     blacklist.init()
@@ -137,13 +56,7 @@ client.on("ready", async () => {
 
 
 client.on("guildCreate", async guild => {
-    const server = new Server(guild.id)
-
-    fs.writeFile(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4), function writeJSON(err) {
-        if (err) {
-            return console.log(err);
-        }
-    });
+    await createServer(guild)
 })
 
 

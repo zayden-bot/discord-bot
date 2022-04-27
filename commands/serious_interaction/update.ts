@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {servers} from "../../server";
+import {servers} from "../../servers";
 
 module.exports = {
     commands: ["update"],
