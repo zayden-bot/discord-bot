@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import {createServer} from "./servers";
 import mongoose from "mongoose";
 import {Server} from "./models/server";
+import {UserConfig} from "./models/user-config";
 
 switch (process.env.NODE_ENV) {
     case "development":
@@ -172,34 +173,31 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
 client.login(process.env.TOKEN).then();
 
-process.on("uncaughtException", (error) => {
-//     const fs = require("fs")
-//         if (member_config != null) {
-//             fs.writeFileSync(`./user_configs/${member.id}.json`, JSON.stringify(member_config, null, 4));
-//         }
-//         if (author_config != null) {
-//             fs.writeFileSync(`./user_configs/${author?.id}.json`, JSON.stringify(author_config, null, 4));
-//         }
-//         if (server_config != null) {
-//             fs.writeFileSync(`./server_configs/${server?.id}.json`, JSON.stringify(server_config, null, 4));
-//         }
-//     },
-//
-//     parseId: function (id: string): string | undefined {
-//     const match = id.match(/\d+/)
-//     if (match) { return match[0]; }
-// },
-//
-// updateConfig: function (guild: Discord.Guild, server: Server) {
-//     fs.writeFile(`./server_configs/${guild.id}.json`, JSON.stringify(server, null, 4), (error: any) => {
-//         if (error) { return console.log(error); }
-//     });
+async function saveAllDB() {
+    let tasks: Promise<any>[] = []
+
+    async function saveServers() {
+        for (const server of await Server.find().exec()) {
+            tasks.push(server.save())
+        }
+    }
+
+    async function saveUsers() {
+        for (const user of await UserConfig.find().exec()) {
+            tasks.push(user.save())
+        }
+    }
+
+    await Promise.all([saveServers(), saveUsers()])
+    return tasks
+}
+
+process.on("uncaughtException", async (error) => {
+    await Promise.all(await saveAllDB())
     console.error(error)
 })
-//
-// process.on("unhandledRejection", (reason: Error, promise) => {
-//     console.log(`Unhandled rejection at ${promise}, reason: ${reason.message}`)
-//     fs.writeFileSync("crash.txt", `Unhandled rejection at ${promise}, reason: ${reason.message}`);
-//     process.exit(1);
-// })
-// TODO: Update configs on bot exit or crash
+
+process.on("unhandledRejection", async (reason, promise) => {
+    await Promise.all(await saveAllDB())
+    console.error(`Unhandled Rejection at: ${promise}  reason: ${reason}`)
+})
