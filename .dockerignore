@@ -1,0 +1,10 @@
+crash.txt
+
+# Dependency directories
+node_modules/
+
+# dotenv environment variables file
+#.env.local
+
+# Jetbrains
+.idea/*

@@ -27,18 +27,6 @@ module.exports = {
 
             message.channel.send({embeds: [embed]})
         } else {
-            const request = require("request")
-
-            request("https://zenquotes.io/api/today", {json: true}, async (err: any, res: any, body: any) => {
-                if (err) {
-                    return console.log(err);
-                }
-                body = body[0]
-                const messageContent = `> ${body.q}\n${body.a}\n*(ZenQuotes API)*`
-
-                await message.channel.send(messageContent)
-            });
-
         }
 
     },
