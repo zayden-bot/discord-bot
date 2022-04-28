@@ -35,23 +35,27 @@ module.exports = {
             const muteMsg = new Discord.MessageEmbed()
                 .setTitle(`${member.user.username} has been warned before:`)
             for (const warning of warnings) {
-                muteMsg.addField(`Case ${warning}`, `**Moderator:** <@${warning.moderatorId}>\n**Reason:** ${warning.reason}\n\n`)
+                muteMsg.addField(`Case ${warning.caseNumber}`, `**Moderator:** <@${warning.moderatorId}>\n**Reason:** ${warning.reason}\n\n`)
             }
             message.channel.send({embeds: [muteMsg]})
 
             const filter = ((m: Discord.Message) => m.author.id === message.author.id)
             message.channel.send("Would you like to increase the warning to a 1 hour mute? \"YES\" / \"NO\"")
-            const msg = (await message.channel.awaitMessages({filter, max: 1, time: 30000, errors: ['time']})).first()
-            if (!msg) {
-                return;
-            }
-            if (msg.content.toUpperCase().startsWith('Y')) {
-                const mute = require("./mute")
-                await mute.callback(message, server, [member.id.toString(), "1h", reason])
-                return
-            } else {
-                throw "Warning Sent"
-            }
+
+            message.channel.awaitMessages({filter, max: 1, time: 30000, errors: ['time']})
+                .then(async messages => {
+                    const msg = messages.first()
+
+                    if (msg?.content.toUpperCase().startsWith('Y')) {
+                        const mute = require("./mute")
+                        await mute.callback(message, server, [member.id.toString(), "1h", reason])
+                    } else {
+                        await message.reply("Warning Sent")
+                    }
+                })
+                .catch(async () => {
+                    await message.reply("Warning sent (timed out)")
+                })
         }
     },
     permissions: ["MANAGE_MESSAGES"],
