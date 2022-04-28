@@ -1,7 +1,7 @@
 // module.exports = (client) => {
 //     client.on("messageCreate", message => {
 //         const { guild, member } = message
-//         // if (user is not in databse) { add user to database }
+//         // if (user is not in database) { add user to database }
 //     })
 // }
 
@@ -14,12 +14,12 @@
 //     }
 // }
 
+import Discord from "discord.js";
+
 module.exports = {
     commands: "workinprogress", // rank
-    minArgs: 0,
-    maxArgs: 0,
-    callback: (message, arguments, text) => {
-        message.reply("Work in progress")
+    callback: async (message: Discord.Message) => {
+        await message.reply("Work in progress")
     },
     permissions: ["ADMINISTRATOR"],
 }

@@ -59,6 +59,9 @@ export interface IServer {
     save(): Promise<IServer>;
 }
 
+export async function getServer(id: string) {
+    return await Server.findOne({id: id}).exec() || new Server({id: id})
+}
 
 const ServerSchema = new mongoose.Schema({
     id: String,
@@ -91,7 +94,7 @@ const ServerSchema = new mongoose.Schema({
             userId: String,
         }
     }],
-    supportThreadId: Number,
+    supportThreadId: {type: Number, default: 0},
     gameVersions: {
         patreonVersion: String,
         steamVersion: String,

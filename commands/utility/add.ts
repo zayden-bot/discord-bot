@@ -1,4 +1,5 @@
 import Discord from "discord.js"
+import {IServer} from "../../models/server";
 
 // Template Command
 module.exports = {
@@ -6,17 +7,17 @@ module.exports = {
     expectedArgs: "<num1> <num2> <num3> ...",
     permissionError: "",
     minArgs: 2,
-    callback: (message: Discord.Message, args: string[], text: string) => {
+    callback: async (message: Discord.Message, server: IServer, args: string[]) => {
         let sum = 0
         for (const arg of args) {
             if (isNaN(Number(arg))) {
-                message.reply("Invalid arguments")
+                await message.reply("Invalid arguments")
                 return;
             }
             sum += Number(arg);
         }
 
-        message.reply(`Answer: ${sum}`)
+        await message.reply(`Answer: ${sum}`)
     },
     permissions: ["MANAGE_MESSAGES"],
     requiredRoles: ["Staff"],

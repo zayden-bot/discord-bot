@@ -1,11 +1,9 @@
-const {MessageEmbed} = require("discord.js");
-
 module.exports = {
     event: "voiceStateUpdate",
-    callback: (...args: any) => {
+    callback: () => {
 
-        const oldState = args[0][0];
-        const newState = args[0][1];
+        // const oldState = args[0][0];
+        // const newState = args[0][1];
 
         // if (newState && newState.channelID) {
         //     const embed = new MessageEmbed()

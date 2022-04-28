@@ -36,5 +36,8 @@ module.exports = (client?: Discord.Client) => {
 
     readCommands("./")
 
+    if (client) {
+        console.log(`Loaded ${commands.length} commands`)
+    }
     return commands
 }

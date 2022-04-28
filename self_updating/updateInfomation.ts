@@ -4,7 +4,7 @@ const field1 = `This server is about the game "College Kings". The game is still
 You can always get the newest version on patreon.
 Get Act 1 for free here:
 https://store.steampowered.com/app/1463120/
-Get the lastest steam version here:
+Get the latest steam version here:
 https://store.steampowered.com/dlc/1463120/
 Get the latest patreon version here:
 https://patreon.com/collegekings`
