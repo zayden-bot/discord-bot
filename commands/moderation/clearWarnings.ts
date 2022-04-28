@@ -13,12 +13,14 @@ module.exports = {
             return;
         }
 
-        server.moderation.filter((log) => {
-            return log.userId == member.id && log.logType == LogType.Warn
+        const startLength = server.moderation.length
+
+        server.moderation = server.moderation.filter((log) => {
+            return !(log.userId == member.id && log.logType == LogType.Warn)
         })
         await server.save()
-        
-        message.channel.send(`Cleared ${member.user.username} warnings.`)
+
+        message.channel.send(`Cleared ${startLength - server.moderation.length} warnings from ${member.user.username}`)
     },
     permissions: ["MANAGE_MESSAGES"],
 }
