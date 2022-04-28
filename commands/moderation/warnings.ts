@@ -20,6 +20,11 @@ module.exports = {
             warningMsg += `**Case ${warning}**\n**Type:** ${warning.logType}\n**User:** <@${warning.userId}>\n**Moderator:** <@${warning.moderatorId}>\n**Reason:** ${warning.reason}\n\n`
         })
 
+        if (warnings.length == 0) {
+            await message.reply(`${member} has no warnings on record`)
+            return;
+        }
+        
         const embed = new Discord.MessageEmbed()
             .setTitle(`Warnings for ${member.user.username}#${member.user.discriminator}`)
             .setDescription(warningMsg)
