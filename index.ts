@@ -4,7 +4,15 @@ import {createServer} from "./servers";
 import mongoose from "mongoose";
 import {Server} from "./models/server";
 
-dotenv.config()
+switch (process.env.NODE_ENV) {
+    case "development":
+        dotenv.config({path: "./.env.local"})
+        break;
+    default:
+        dotenv.config()
+        break;
+}
+
 const dbURI = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority`
 mongoose.connect(dbURI)
 
