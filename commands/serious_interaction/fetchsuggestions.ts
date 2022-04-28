@@ -29,7 +29,6 @@ module.exports = {
             })))
             lastMessage = suggestionMessages.last()
             currentCollectionSize = suggestionMessages.size
-            console.log(suggestionMessages.size)
         }
         suggestionMessages = suggestionMessages
             .filter(message => message.author.id == message.client.user?.id && message.embeds.length > 0)
