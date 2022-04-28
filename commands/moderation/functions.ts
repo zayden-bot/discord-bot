@@ -20,7 +20,7 @@ export async function setup(message: Discord.Message, args: string[]) {
     let rv: ISetup = {
         guild: message.guild || undefined,
         member: undefined,
-        reason: args[1] ? args.slice(1).join(" ") : "No Reason Given"
+        reason: (args.length > 1) ? args.slice(1).join(" ").trim() : "No Reason Given"
     }
 
     const userId = parseId(args[0])
