@@ -37,8 +37,6 @@ module.exports = {
             }
         }
 
-        await addLog(server, LogType.Mute, guild, member, message.author, reason)
-
         let mutedRole = (guild.roles.cache.find(role => role.name == "Muted") || await guild.roles.create({
             name: "Muted",
             color: "#818386"
