@@ -123,12 +123,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Config files
-server_configs/
-user_configs/
-
-# Database
-*.sqlite
-
 # Jetbrains
 .idea/*
