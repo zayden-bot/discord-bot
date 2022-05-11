@@ -16,7 +16,7 @@ export interface IQuestion {
 }
 
 
-interface IModeration {
+export interface IModeration {
     caseNumber: number,
     guildId: string,
     userId: string,
@@ -103,7 +103,7 @@ const ServerSchema = new mongoose.Schema({
     },
     serverRules: [String],
     hidden: {
-        rules: {logType: Map, of: String}
+        rules: {type: Map, of: String}
     },
     moderation: [{
         caseNumber: Number,
@@ -113,7 +113,7 @@ const ServerSchema = new mongoose.Schema({
         moderatorId: String,
         reason: String
     }],
-    supportAnswers: {logType: Map, of: String},
+    supportAnswers: {type: Map, of: String},
 })
 
 export const Server = mongoose.model("Server", ServerSchema)
