@@ -6,17 +6,17 @@ module.exports = {
     expectedArgs: "<user>",
     maxArgs: 1,
     callback: async (message: Discord.Message) => {
-        const member = message.mentions.members?.first() || message.member
-        if (!member) {
-            return;
-        }
+        const memberDisplayName = message.mentions.members?.first()?.displayName || message.member?.displayName || message.author.username
 
         const image = await getImage(message.author, "goodNight")
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`Good Night, ${member.displayName}`)
+            .setTitle(`Good Night, ${memberDisplayName}`)
             .setImage(image)
 
         message.channel.send({embeds: [embed]})
+            .catch(reason => {
+                console.log("Failed to send goodnight message:", reason)
+            })
     },
 }
