@@ -27,7 +27,8 @@ module.exports = {
             .setDescription(`You were warned in ${guild.name} for: ${reason}`)
 
         message.channel.send({embeds: [serverMsg]})
-        await member.user.send({embeds: [privateMsg]})
+        member.user.send({embeds: [privateMsg]})
+            .catch()
 
         const warnings = server.moderation.filter(log => log.userId == member.id && log.logType == LogType.Warn.toString())
 
@@ -54,7 +55,7 @@ module.exports = {
                     }
                 })
                 .catch(async () => {
-                    await message.reply("Warning sent (timed out)")
+                    await message.reply("Warning sent (response timed out)")
                 })
         }
     },
