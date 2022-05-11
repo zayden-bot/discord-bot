@@ -44,20 +44,15 @@ module.exports = async function (message: Discord.Message) {
 
     if (threadMessages) {
         threadMessages.forEach(messageContent => {
-            thread.send({
-                content: messageContent,
-                embeds: message.embeds,
-                files: messageFiles
-            })
-        })
-    } else {
-        thread.send({
-            embeds: message.embeds,
-            files: messageFiles
+            thread.send({content: messageContent})
         })
     }
 
-    // Update json file.
+    thread.send({
+        embeds: message.embeds,
+        files: messageFiles
+    })
+
     server.supportThreadId += 1
 
     await Promise.all([
