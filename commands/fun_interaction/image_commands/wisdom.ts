@@ -4,6 +4,9 @@ import {IImageConfig, ImageConfig} from "../../../models/image-config";
 module.exports = {
     commands: ["wisdomoftheday", "wisdom", "w"],
     callback: async (message: Discord.Message) => {
+        await message.reply("Work in progress")
+        return
+
         const imageConfig: IImageConfig = await ImageConfig.findOne({category: "wisdom"}).exec()
 
         let images = imageConfig.global;
