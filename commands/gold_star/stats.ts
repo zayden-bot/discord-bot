@@ -20,5 +20,8 @@ module.exports = {
             .addField("Received Stars", member_config.stars.receivedStars.toString(), true)
 
         message.channel.send({embeds: [embed]})
+            .catch(reason => {
+                console.log("Failed to send stats message:", reason)
+            })
     },
 }
