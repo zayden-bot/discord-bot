@@ -1,21 +1,17 @@
 import Discord from "discord.js"
 import path from "path"
-import {Command} from "./command"
+import {Command} from "./commands_message/command"
 import fs from "fs";
 
 module.exports = (client?: Discord.Client) => {
     const ignoreFiles = ["command_base.ts", "load_commands.ts", "command.ts"]
-    const commandBase = require(`./command_base`)
 
     const commands: Array<Command> = []
 
-    const readCommands = (dir: string) => {
+    function readCommands(dir: string) {
         const files = fs.readdirSync(path.join(__dirname, dir))
 
-        for (const file of files) {
-            if (ignoreFiles.includes(file)) {
-                continue
-            }
+        for (const file of files.filter((file) => !ignoreFiles.includes(file))) {
 
             const stat = fs.lstatSync(path.join(__dirname, dir, file))
             if (stat.isDirectory()) {
@@ -24,13 +20,18 @@ module.exports = (client?: Discord.Client) => {
             }
 
             const options = require(path.join(__dirname, dir, file))
-            if (options.commands && options.callback) {
-                commands.push(options);
+            const parentDir = dir.split(path.sep)[0]
+
+            if ((options.commands || options.command) && options.callback) {
+                if (parentDir == "commands_prefix") {
+                    commands.push(options);
+                }
+
+                const commandBase = require(`./${parentDir}/command_base`)
                 if (client) {
                     commandBase(client, options)
                 }
             }
-
         }
     }
 

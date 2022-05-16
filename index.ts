@@ -66,18 +66,6 @@ client.on("guildCreate", async guild => {
 })
 
 
-client.on("messageCreate", async message => {
-    const yesMaster = require("./special_commands/yesMaster")
-    yesMaster(message)
-
-    const questionMe = require("./special_commands/questionMe")
-    questionMe(message)
-
-    const autoSupport = require("./special_commands/autoSupport")
-    await autoSupport(message)
-})
-
-
 client.on("messageReactionAdd", async (reaction, user) => {
     const guild = reaction.message.guild
     if (!guild) return;
