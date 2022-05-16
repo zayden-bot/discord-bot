@@ -51,7 +51,7 @@ export interface IServer {
     },
     serverRules: string[],
     hidden: {
-        rules: Record<string, string>
+        rules: Map<string, string>
     },
     moderation: IModeration[]
     supportAnswers: Map<string, string>,
