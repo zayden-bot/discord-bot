@@ -54,7 +54,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
 
                 // Check if the user has the correct permissions to run the command
                 for (const permission of permissions) {
-                    if (guild && !member.permissions.has(permission) && !botConfig.developers.includes(member.id)) {
+                    if (!member.permissions.has(permission) && !botConfig.developers.includes(member.id)) {
                         await message.reply({content: permissionError})
                         return
                     }
@@ -75,7 +75,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
                 }
 
                 // Check if the user is blacklisted
-                if (guild && await isBlacklisted(member) && !botConfig.developers.includes(member.id)) {
+                if (await isBlacklisted(member) && !botConfig.developers.includes(member.id)) {
                     return
                 }
 
