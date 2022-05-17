@@ -39,6 +39,7 @@ module.exports = {
             .setTitle(`Logs for ${member.user.username}#${member.user.discriminator}`)
             .setDescription(warningMsg)
             .setColor("#ff0000")
+            .setFooter({text: `Page ${pageNumber} of ${numberOfPages}`})
 
         const nextPageButton = new MessageButton()
             .setCustomId("nextPage")
