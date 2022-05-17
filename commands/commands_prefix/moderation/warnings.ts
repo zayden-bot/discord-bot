@@ -1,6 +1,12 @@
-import {IServer} from "../../../models/server";
-import Discord from "discord.js";
+// noinspection DuplicatedCode
+
+import {IModeration, IServer} from "../../../models/server";
+import Discord, {MessageActionRow, MessageButton} from "discord.js";
 import {LogType, setup} from "./functions";
+
+function getPageLogs(allLogs: IModeration[], pageNumber: number) {
+    return allLogs.slice((pageNumber - 1) * 5, pageNumber * 5)
+}
 
 module.exports = {
     commands: ["warnings"],
@@ -14,23 +20,90 @@ module.exports = {
             return
         }
 
-        let warningMsg = ""
-        const warnings = server.moderation.filter(logs => logs.userId == member.id && logs.logType == LogType.Warn.toString())
-        warnings.forEach(warning => {
-            warningMsg += `**Case ${warning.caseNumber}**\n**Type:** ${warning.logType}\n**User:** <@${warning.userId}>\n**Moderator:** <@${warning.moderatorId}>\n**Reason:** ${warning.reason}\n\n`
-        })
+        const warnings = server.moderation.filter(log => log.userId == member.id && log.logType == LogType.Warn.toString())
 
         if (warnings.length == 0) {
-            await message.reply(`${member} has no warnings on record`)
-            return;
+            message.reply("No warnings found for that user.").then()
+            return
+        }
+
+        const numberOfPages = Math.ceil(warnings.length / 5)
+        let pageNumber = 1
+
+        let warningMsg = ""
+        for (const log of getPageLogs(warnings, pageNumber)) {
+            warningMsg += `**Case ${log.caseNumber}**\n**Type:** ${log.logType}\n**User:** <@${log.userId}>\n**Moderator:** <@${log.moderatorId}>\n**Reason:** ${log.reason}\n\n`
         }
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`Warnings for ${member.user.username}#${member.user.discriminator}`)
+            .setTitle(`Logs for ${member.user.username}#${member.user.discriminator}`)
             .setDescription(warningMsg)
             .setColor("#ff0000")
 
-        message.channel.send({embeds: [embed]})
+        const nextPageButton = new MessageButton()
+            .setCustomId("nextPage")
+            .setLabel("Next Page")
+            .setStyle("PRIMARY")
+            .setDisabled(true);
+
+        if (numberOfPages > 1) {
+            nextPageButton.setDisabled(false)
+        }
+
+        const previousPageButton = new MessageButton()
+            .setCustomId("previousPage")
+            .setLabel("Previous Page")
+            .setStyle("PRIMARY")
+            .setDisabled(true);
+
+        const row = new MessageActionRow()
+            .addComponents(nextPageButton, previousPageButton);
+
+        const msg = await message.channel.send({embeds: [embed], components: [row]})
+
+        const filter = (interaction: Discord.MessageComponentInteraction) => (
+            interaction.customId == nextPageButton.customId
+            || interaction.customId == previousPageButton.customId
+            && interaction.user.id == message.author.id
+        );
+
+        const collector = msg.createMessageComponentCollector({filter});
+
+        collector.on("collect", i => {
+            console.log(`Interaction "${i.customId}" was clicked`)
+
+            // Next Page Interaction
+            if (i.customId == nextPageButton.customId) {
+                pageNumber += 1
+            }
+
+            // Previous Page Interaction
+            if (i.customId == previousPageButton.customId) {
+                pageNumber += 1
+            }
+
+            if (pageNumber + 1 > numberOfPages) {
+                nextPageButton.setDisabled(true)
+            } else {
+                nextPageButton.setDisabled(false)
+            }
+
+            if (pageNumber == 1) {
+                previousPageButton.setDisabled(true)
+            } else {
+                previousPageButton.setDisabled(false)
+            }
+
+            row.setComponents(nextPageButton, previousPageButton)
+
+            warningMsg = ""
+            for (const log of getPageLogs(warnings, pageNumber)) {
+                warningMsg += `**Case ${log.caseNumber}**\n**Type:** ${log.logType}\n**User:** <@${log.userId}>\n**Moderator:** <@${log.moderatorId}>\n**Reason:** ${log.reason}\n\n`
+            }
+
+            embed.setDescription(warningMsg)
+            i.update({embeds: [embed], components: [row]})
+        })
     },
     permissions: ["MANAGE_MESSAGES"],
 }
