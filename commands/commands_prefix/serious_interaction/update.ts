@@ -11,7 +11,7 @@ module.exports = {
         const server = await Server.findOne({id: message.guild.id}).exec()
 
         if (message.channel.id != "776139754408247326" && !message.member.roles.cache.has(server.roles.staffRole)) {
-            const msg = await message.reply("You're an idiot. Use <#776139754408247326> for commands_prefix.")
+            const msg = await message.reply("You're an idiot. Use <#776139754408247326> for commands.")
             await message.delete()
             setTimeout(() => msg.delete(), 5000);
             return;
