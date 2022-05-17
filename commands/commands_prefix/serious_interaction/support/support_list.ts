@@ -59,8 +59,6 @@ module.exports = {
 
         pageNumber = 1;
         collector.on("collect", (i) => {
-            console.log(supportPages)
-
             if (i.customId == nextPage.customId) {
                 pageNumber++;
                 previousPage.setDisabled(false);
