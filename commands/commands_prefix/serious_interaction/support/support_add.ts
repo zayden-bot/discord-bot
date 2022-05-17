@@ -12,8 +12,8 @@ module.exports = {
         }
 
         args = text.split(',')
-        const id = args.shift()?.toLowerCase()
-        const answer = args.join(',');
+        const id = args.shift()?.toLowerCase().trim()
+        const answer = args.join(',').trim();
 
         if (!id || !answer) {
             await message.reply("Comma separator not found.")
