@@ -13,6 +13,9 @@ module.exports = {
         }
 
         const image = await getImage(message.author, "hug")
+        if (!image) {
+            return message.reply("No \"hug\" image found")
+        }
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Sending hugs to ${member.displayName}`)

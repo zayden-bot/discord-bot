@@ -12,7 +12,10 @@ module.exports = {
         }
 
         const image = await getImage(message.author, "goodMorning")
-
+        if (!image) {
+            return message.reply("No \"good morning\" image found")
+        }
+        
         const embed = new Discord.MessageEmbed()
             .setTitle(`Good Morning, ${member.displayName}`)
             .setImage(image)

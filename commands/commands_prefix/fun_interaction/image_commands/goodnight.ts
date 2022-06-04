@@ -9,6 +9,9 @@ module.exports = {
         const memberDisplayName = message.mentions.members?.first()?.displayName || message.member?.displayName || message.author.username
 
         const image = await getImage(message.author, "goodNight")
+        if (!image) {
+            return message.reply("No \"good night\" image found")
+        }
 
         const embed = new Discord.MessageEmbed()
             .setTitle(`Good Night, ${memberDisplayName}`)

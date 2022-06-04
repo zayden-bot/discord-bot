@@ -12,17 +12,8 @@ module.exports = {
         }
 
         const image = await getImage(message.author, "slap")
-
-        if (message.member?.id == "393046490966130688" && member.id == "211486447369322506") { // Sondwich
-            const embed = new Discord.MessageEmbed()
-                .setTitle("Oscar slaps Sondwich")
-                .setImage(image);
-            try {
-                await message.reply({content: "Bitch! You don't slap me.", embeds: [embed]})
-            } catch {
-                message.channel.send({content: "Bitch! You don't slap me.", embeds: [embed]})
-            }
-            return;
+        if (!image) {
+            return message.reply("No \"slap\" image found")
         }
 
         const embed = new Discord.MessageEmbed()
