@@ -14,4 +14,4 @@ const ImageConfigSchema = new mongoose.Schema({
     users: {type: Map, of: [String]}
 })
 
-export const ImageConfig = mongoose.model("ImageConfigs", ImageConfigSchema)
+export const ImageConfig = mongoose.model("ImageConfig", ImageConfigSchema)

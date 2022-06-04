@@ -1,9 +1,9 @@
 import Discord from "discord.js";
 import dotenv from "dotenv";
-import {createServer} from "./servers";
 import mongoose from "mongoose";
 import {Server} from "./models/server";
 import {UserConfig} from "./models/user-config";
+import {createServer} from "./servers";
 
 switch (process.env.NODE_ENV) {
     case "development":
@@ -14,8 +14,10 @@ switch (process.env.NODE_ENV) {
         break;
 }
 
-const dbURI = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority`
+const dbURI = `mongodb+srv://oscar:${process.env.DB_PASSWORD}@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority`
 mongoose.connect(dbURI)
+    .then(() => console.log("Connected to DB"))
+    .catch(console.error)
 
 export const client = new Discord.Client({
     intents: [
@@ -180,12 +182,12 @@ async function saveAllDB() {
     return tasks
 }
 
-process.on("uncaughtException", async (error) => {
-    await Promise.all(await saveAllDB())
-    console.error(error)
-})
-
-process.on("unhandledRejection", async (reason, promise) => {
-    await Promise.all(await saveAllDB())
-    console.error(`Unhandled Rejection at: ${promise}  reason: ${reason}`)
-})
+// process.on("uncaughtException", async (error) => {
+//     await Promise.all(await saveAllDB())
+//     console.error(error)
+// })
+//
+// process.on("unhandledRejection", async (reason, promise) => {
+//     await Promise.all(await saveAllDB())
+//     console.error(`Unhandled Rejection at: ${promise}  reason: ${reason}`)
+// })

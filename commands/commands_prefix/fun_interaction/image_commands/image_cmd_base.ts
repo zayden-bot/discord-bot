@@ -2,7 +2,9 @@ import {IImageConfig, ImageConfig} from "../../../../models/image-config";
 import Discord from "discord.js";
 
 export async function getImage(author: Discord.User, imageArray: string) {
-    const imageConfig: IImageConfig = await ImageConfig.findOne({category: imageArray}).exec()
+    const imageConfig: IImageConfig | null = await ImageConfig.findOne({category: imageArray})
+
+    if (!imageConfig) return imageConfig
 
     if (!imageConfig.users) {
         imageConfig.users = {}
