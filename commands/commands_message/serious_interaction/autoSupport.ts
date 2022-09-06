@@ -1,5 +1,6 @@
 import Discord from "discord.js";
 import {IServer} from "../../../models/server";
+import {ChannelType, ThreadAutoArchiveDuration} from 'discord-api-types/v10';
 
 module.exports = {
     command: "questionMe",
@@ -10,7 +11,7 @@ module.exports = {
         if (!guild ||
             (message.content.length == 0 && messageFiles.length == 0)
             || !message.member
-            || message.channel.type !== "GUILD_TEXT") {
+            || message.channel.type !== ChannelType.GuildText) {
             return;
         }
 
@@ -35,7 +36,7 @@ module.exports = {
 
         const thread = await message.channel.threads.create({
             name: threadName,
-            autoArchiveDuration: 'MAX',
+            autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
         })
 
         thread.send(`<@&913374071239102504> ${message.author} wrote:`)

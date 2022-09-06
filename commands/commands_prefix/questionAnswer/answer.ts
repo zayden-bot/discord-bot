@@ -1,5 +1,6 @@
 import Discord from "discord.js"
 import {IServer} from "../../../models/server";
+import {ChannelType} from 'discord-api-types/v10';
 
 module.exports = {
     commands: ["answer"],
@@ -29,13 +30,15 @@ module.exports = {
             username: message.member?.displayName || message.author.username
         }
 
-        const embed = new Discord.MessageEmbed()
-            .addField(`Question id: ${question.questionId}`, question.text)
-            .addField(`Answered by ${message.author.username}`, question.answer.text)
+        const embed = new Discord.EmbedBuilder()
+            .addFields([
+                {name: `Question id: ${question.questionId}`, value: question.text},
+                {name: `Answered by ${message.author.username}`, value: question.answer.text}
+            ])
 
         const channel = await message.guild.channels.fetch(server.channels.questionChannel)
 
-        if (channel && channel.isText() && question.messageId) {
+        if (channel && channel.type == ChannelType.GuildText && question.messageId) {
             const questionMessage = await channel.messages.fetch(question.messageId)
             questionMessage.edit({embeds: [embed]})
             message.delete().catch()

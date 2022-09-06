@@ -60,6 +60,6 @@ export async function addLog(
 }
 
 export async function isBlacklisted(member: Discord.GuildMember | Discord.User) {
-    const botConfig: IBotConfig = await BotConfig.findOne().exec()
-    return botConfig.botBan.map(({userId}) => userId).includes(member.id)
+    const botConfig: IBotConfig | null = await BotConfig.findOne<IBotConfig>().exec()
+    return botConfig!.botBan.map(({userId}) => userId).includes(member.id)
 }

@@ -18,12 +18,12 @@ module.exports = {
 
         await addLog(server, LogType.Warn, guild, member, message.author, reason)
 
-        const serverMsg = new Discord.MessageEmbed()
+        const serverMsg = new Discord.EmbedBuilder()
             .setTitle(`User Warned`)
             .setDescription(`**<@${member.id}> has been warned by <@${message.author.id}>\nReason: ${reason}**`)
             .setColor("#ff0000")
 
-        const privateMsg = new Discord.MessageEmbed()
+        const privateMsg = new Discord.EmbedBuilder()
             .setDescription(`You were warned in ${guild.name} for: ${reason}`)
 
         message.channel.send({embeds: [serverMsg]})
@@ -33,10 +33,13 @@ module.exports = {
         const warnings = server.moderation.filter(log => log.userId == member.id && log.logType == LogType.Warn.toString())
 
         if (warnings.length > 1) {
-            const muteMsg = new Discord.MessageEmbed()
+            const muteMsg = new Discord.EmbedBuilder()
                 .setTitle(`${member.user.username} has been warned before:`)
             for (const warning of warnings) {
-                muteMsg.addField(`Case ${warning.caseNumber}`, `**Moderator:** <@${warning.moderatorId}>\n**Reason:** ${warning.reason}\n\n`)
+                muteMsg.spliceFields(-1, 0, {
+                    name: `Case ${warning.caseNumber}`,
+                    value: `**Moderator:** <@${warning.moderatorId}>\n**Reason:** ${warning.reason}\n\n`
+                })
             }
             message.channel.send({embeds: [muteMsg]})
 

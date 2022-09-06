@@ -13,8 +13,8 @@ module.exports = {
 
         const imageLink = args[1]
 
-        const imageConfig: IImageConfig = await ImageConfig.findOne({category: args[0]}).exec()
-
+        const imageConfig: IImageConfig | null = await ImageConfig.findOne<IImageConfig>({category: args[0]}).exec()
+        
         if (!imageConfig) {
             await message.reply("Category not found in image config.")
             return;

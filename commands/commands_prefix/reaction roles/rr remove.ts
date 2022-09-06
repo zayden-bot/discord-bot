@@ -1,6 +1,7 @@
 import Discord from "discord.js"
 import {parseId} from "../../../common";
 import {IServer} from "../../../models/server";
+import {ChannelType} from "discord-api-types/v10"
 
 module.exports = {
     commands: ["rrremove"],
@@ -25,7 +26,7 @@ module.exports = {
         // Handle Channel
         const channel = await guild.channels.fetch(channelId);
 
-        if (!channel || !channel.isText()) {
+        if (!channel || channel.type != ChannelType.GuildText) {
             return message.reply("Invalid channel.");
         }
 

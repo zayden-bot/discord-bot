@@ -10,7 +10,7 @@ module.exports = {
 
         const image = await getImage(message.author, "goodNight")
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`Good Night, ${memberDisplayName}`)
             .setImage(image)
 

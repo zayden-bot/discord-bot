@@ -1,5 +1,5 @@
 import {IModeration, IServer} from "../../../models/server";
-import Discord, {MessageActionRow, MessageButton} from "discord.js";
+import Discord, {ActionRowBuilder, ButtonBuilder, ButtonStyle} from "discord.js";
 import {setup} from "./functions";
 
 function getPageLogs(allLogs: IModeration[], pageNumber: number) {
@@ -33,35 +33,35 @@ module.exports = {
             logMsg += `**Case ${log.caseNumber}**\n**Type:** ${log.logType}\n**User:** <@${log.userId}>\n**Moderator:** <@${log.moderatorId}>\n**Reason:** ${log.reason}\n\n`
         }
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`Logs for ${member.user.username}#${member.user.discriminator}`)
             .setDescription(logMsg)
             .setColor("#ff0000")
 
-        const nextPageButton = new MessageButton()
+        const nextPageButton = new ButtonBuilder()
             .setCustomId("nextPage")
             .setLabel("Next Page")
-            .setStyle("PRIMARY")
+            .setStyle(ButtonStyle.Primary)
             .setDisabled(true);
 
         if (numberOfPages > 1) {
             nextPageButton.setDisabled(false)
         }
 
-        const previousPageButton = new MessageButton()
+        const previousPageButton = new ButtonBuilder()
             .setCustomId("previousPage")
             .setLabel("Previous Page")
-            .setStyle("PRIMARY")
+            .setStyle(ButtonStyle.Primary)
             .setDisabled(true);
 
-        const row = new MessageActionRow()
+        const row = new ActionRowBuilder<ButtonBuilder>()
             .addComponents(nextPageButton, previousPageButton);
 
         const msg = await message.channel.send({embeds: [embed], components: [row]})
 
         const filter = (interaction: Discord.MessageComponentInteraction) => (
-            interaction.customId == nextPageButton.customId
-            || interaction.customId == previousPageButton.customId
+            interaction.customId == "nextPage"
+            || interaction.customId == "previousPage"
             && interaction.user.id == message.author.id
         );
 
@@ -71,12 +71,12 @@ module.exports = {
             console.log(`Interaction "${i.customId}" was clicked`)
 
             // Next Page Interaction
-            if (i.customId == nextPageButton.customId) {
+            if (i.customId == "nextPage") {
                 pageNumber += 1
             }
 
             // Previous Page Interaction
-            if (i.customId == previousPageButton.customId) {
+            if (i.customId == "previousPage") {
                 pageNumber += 1
             }
 

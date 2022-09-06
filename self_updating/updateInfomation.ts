@@ -1,4 +1,5 @@
 import Discord from "discord.js"
+import {ChannelType} from "discord-api-types/v10"
 
 const field1 = `This server is about the game "College Kings". The game is still in active development. Supporting the game on patreon helps us a lot, so if you have the resources, consider joining the patreon.
 You can always get the newest version on patreon.
@@ -52,20 +53,22 @@ const field4 = `Thank you to <@828728276193116181> for the College Kings' sticke
 
 module.exports = async function (client: Discord.Client, channelId: string) {
     const channel = await client.channels.fetch(channelId)
-    if (!channel || channel.type !== "GUILD_TEXT") {
+    if (!channel || channel.type !== ChannelType.GuildText) {
         return console.error("Invalid channel id")
     }
 
-    const guildIconURL = channel.guild.iconURL({dynamic: true})
+    const guildIconURL = channel.guild.iconURL()
     const guildCreationDate = channel.guild.createdAt
 
-    const embed = new Discord.MessageEmbed()
-        .addField("College Kings Game", field1)
-        .addField("Information channels", field2a)
-        .addField("Discussion channels", field2b)
-        .addField("Support channels", field2c)
-        .addField("Roles", field3)
-        .addField("Special Mentions", field4)
+    const embed = new Discord.EmbedBuilder()
+        .addFields([
+            {name: "College Kings Game", value: field1},
+            {name: "Information channels", value: field2a},
+            {name: "Discussion channels", value: field2b},
+            {name: "Support channels", value: field2c},
+            {name: "Roles", value: field3},
+            {name: "Special Mentions", value: field4}
+        ])
         .setFooter({text: `Server Created: ${guildCreationDate.getFullYear()}-${guildCreationDate.getMonth()}-${guildCreationDate.getDate()}`})
 
     if (guildIconURL) {

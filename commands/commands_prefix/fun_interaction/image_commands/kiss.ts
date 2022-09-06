@@ -13,7 +13,7 @@ module.exports = {
 
         const image = await getImage(message.author, "kiss")
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`${message.author.username} kisses ${member.displayName}`)
             .setImage(image)
             .setColor("#FFC0CB")

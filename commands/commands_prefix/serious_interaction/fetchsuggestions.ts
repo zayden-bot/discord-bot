@@ -1,5 +1,6 @@
 import Discord from "discord.js";
 import {IServer} from "../../../models/server";
+import {ChannelType} from "discord-api-types/v10"
 
 module.exports = {
     commands: ["fetchsuggestions"],
@@ -13,7 +14,7 @@ module.exports = {
         const startTime = new Date();
         const statusMessage = await message.channel.send("Fetching information...");
         const suggestionChannel = await guild.channels.fetch(server.channels.suggestionChannel)
-        if (!suggestionChannel || !suggestionChannel.isText()) {
+        if (!suggestionChannel || suggestionChannel.type != ChannelType.GuildText) {
             return message.reply("Invalid suggestion channel");
         }
 
@@ -52,7 +53,7 @@ module.exports = {
             })
 
         let count = 1;
-        let embed = new Discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
             .setColor("#ff0000")
             .setTitle(`Top 10 suggestions!`)
             .setDescription(`Here are the top 10 suggestions, ordered by Votes`);
@@ -65,11 +66,13 @@ module.exports = {
                 continue
             }
 
-            embed.addField(
-                `Position: ${count}, 👍: ${thumbsUp.count - 1}, 👎: ${thumbsDown.count - 1}`,
-                `Link: https://discord.com/channels/${guild.id}/${server.channels.suggestionChannel}/${element.id}`,
-                false
-            );
+            embed.addFields([
+                {
+                    name: `Position: ${count}, 👍: ${thumbsUp.count - 1}, 👎: ${thumbsDown.count - 1}`,
+                    value: `Link: https://discord.com/channels/${guild.id}/${server.channels.suggestionChannel}/${element.id}`,
+                    inline: false
+                }
+            ]);
 
             if (count == 10) {
                 embed.setImage("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg?width=1440&height=360");

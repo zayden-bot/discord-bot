@@ -1,4 +1,5 @@
 import Discord from "discord.js";
+import {ChannelType} from 'discord-api-types/v10';
 import dotenv from "dotenv";
 import {createServer} from "./servers";
 import mongoose from "mongoose";
@@ -15,16 +16,16 @@ switch (process.env.NODE_ENV) {
 }
 
 const dbURI = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority`
-mongoose.connect(dbURI)
+mongoose.connect(dbURI).then()
 
 export const client = new Discord.Client({
     intents: [
-        Discord.Intents.FLAGS.GUILDS,
-        Discord.Intents.FLAGS.GUILD_MEMBERS,
-        Discord.Intents.FLAGS.GUILD_MESSAGES,
-        Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS
+        Discord.GatewayIntentBits.Guilds,
+        Discord.GatewayIntentBits.GuildMembers,
+        Discord.GatewayIntentBits.GuildMessages,
+        Discord.GatewayIntentBits.GuildMessageReactions
     ],
-    partials: ['MESSAGE', 'CHANNEL', 'REACTION']
+    partials: [Discord.Partials.Message, Discord.Partials.Channel, Discord.Partials.Reaction]
 })
 
 // Init
@@ -71,23 +72,25 @@ client.on("messageReactionAdd", async (reaction, user) => {
     if (!guild) return;
 
     const server = await Server.findOne({id: guild.id}).exec()
+    if (!server) return;
 
     for (const reactionRole of server.reactionRoles) {
-        if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
-            const member = guild.members.cache.find(member => member.id == user.id)
-            if (!member) {
-                break;
-            }
+        if (!(reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861")) {
+            return;
+        }
 
-            const role = await guild.roles.fetch(reactionRole.roleId)
-            if (!role) {
-                break;
-            }
-
-            member.roles.add(role)
-                .catch((error) => console.log(error))
+        const member = guild.members.cache.find(member => member.id == user.id)
+        if (!member) {
             break;
         }
+
+        const role = await guild.roles.fetch(reactionRole.roleId!)
+        if (!role) {
+            break;
+        }
+
+        member.roles.add(role)
+            .catch((error) => console.log(error))
     }
 })
 
@@ -97,6 +100,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
     if (!guild) return;
 
     const server = await Server.findOne({id: guild.id}).exec()
+    if (!server) return;
 
     for (const reactionRole of server.reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
@@ -105,7 +109,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
                 break;
             }
 
-            const role = await guild.roles.fetch(reactionRole.roleId)
+            const role = await guild.roles.fetch(reactionRole.roleId!)
             if (!role) {
                 break;
             }
@@ -138,21 +142,23 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
     // Is new role a patreon role
     if (typeof (newRole) != "undefined" && newRole.id in patreonRoles) {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle("New Patron")
             .setColor(`${newRole.hexColor}`)
             .setThumbnail("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8f5967b9-fc84-45f6-a9c3-3938bfba7232/dbujg26-4865d57d-8dcc-435c-ac6e-0d0590f9de37.png/v1/fill/w_1683,h_475,q_70,strp/patreon_logo_by_laprasking_dbujg26-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD01NzYiLCJwYXRoIjoiXC9mXC84ZjU5NjdiOS1mYzg0LTQ1ZjYtYTljMy0zOTM4YmZiYTcyMzJcL2RidWpnMjYtNDg2NWQ1N2QtOGRjYy00MzVjLWFjNmUtMGQwNTkwZjlkZTM3LnBuZyIsIndpZHRoIjoiPD0yMDQxIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.95jfkKc4e-WyhcxKoiDGebItWvxmMPadhqYsh7gIsnQ")
-            .addField("User", `<@${newMember.id}>`, true)
-            .addField("Amount", `$${patreonRoles[newRole.id]}`, true)
+            .addFields([
+                {name: "User", value: `<@${newMember.id}>`, inline: true},
+                {name: "Amount", value: `$${patreonRoles[newRole.id]}`, inline: true}
+            ])
             .setTimestamp();
 
-        const serverIconURL = guild.iconURL({dynamic: true})
+        const serverIconURL = guild.iconURL()
         if (serverIconURL) {
             embed.setFooter({text: guild.name, iconURL: serverIconURL})
         }
 
-        const channel = client.channels.cache.get(server.channels.patreonChannel)
-        if (channel && channel.isText()) {
+        const channel = client.channels.cache.get(server?.channels?.patreonChannel!)
+        if (channel && channel.type == ChannelType.GuildText) {
             channel.send({embeds: [embed]});
         }
 

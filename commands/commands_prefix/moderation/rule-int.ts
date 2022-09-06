@@ -18,7 +18,7 @@ module.exports = {
             return message.reply(`There is no rule with the id ${id}`);
         }
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`Rule ${id}`)
             .setDescription(`**${id}.** ${rule}\n\n**Please read the rest of the rules in <#747430712617074718>!**`)
             .setColor("#ff0000")

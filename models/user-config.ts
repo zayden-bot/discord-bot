@@ -19,7 +19,7 @@ export async function getUserConfig(id: string) {
     return await UserConfig.findOne({id: id}).exec() || new UserConfig({id: id})
 }
 
-const UserConfigSchema = new mongoose.Schema({
+const UserConfigSchema = new mongoose.Schema<IUserConfig>({
     id: String,
     stars: {
         numberOfStars: {type: Number, default: 0},

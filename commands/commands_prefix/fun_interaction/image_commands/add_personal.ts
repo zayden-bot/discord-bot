@@ -28,7 +28,7 @@ module.exports = {
         userImages.add(imageLink)
         globalImages.add(imageLink)
 
-        imageConfig.users[userId] = userImages
+        imageConfig.users[userId] = [...userImages]
         imageConfig.global = [...globalImages]
 
         await Promise.all([

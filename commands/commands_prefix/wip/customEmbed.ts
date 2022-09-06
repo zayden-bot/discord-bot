@@ -3,7 +3,7 @@ import Discord from "discord.js";
 module.exports = {
     commands: ["custom", "cm"],
     callback: (message: Discord.Message) => {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`Join a CK Custom Club!`)
             .setDescription(`
             :one: <@&805766527889440778>

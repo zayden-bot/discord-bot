@@ -21,19 +21,19 @@ module.exports = {
             return;
         }
 
-        const botConfig: IBotConfig = await BotConfig.findOne().exec()
-        const botBans = new Set(botConfig.botBan)
+        const botConfig: IBotConfig | null = await BotConfig.findOne<IBotConfig>().exec()
+        const botBans = new Set(botConfig!.botBan)
             .add({
-                caseNumber: botConfig.botBan.length,
+                caseNumber: botConfig!.botBan.length,
                 userId: member.id,
                 logType: LogType.BotBan.toString(),
                 moderatorId: message.author.id,
                 reason: reason
             })
-        botConfig.botBan = Array.from(botBans)
+        botConfig!.botBan = Array.from(botBans)
 
         await Promise.all([
-            botConfig.save(),
+            botConfig!.save(),
             message.reply(`Successfully bot banned ${member}`)
         ])
     },

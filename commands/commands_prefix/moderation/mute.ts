@@ -50,19 +50,19 @@ module.exports = {
         guild.channels.cache.forEach((channel) => {
             if (!(channel instanceof Discord.ThreadChannel)) {
                 channel.permissionOverwrites.create(mutedRole, {
-                    SEND_MESSAGES: false,
-                    SPEAK: false,
-                    ADD_REACTIONS: false
+                    SendMessages: false,
+                    Speak: false,
+                    AddReactions: false
                 })
             }
         })
 
-        const serverMsg = new Discord.MessageEmbed()
+        const serverMsg = new Discord.EmbedBuilder()
             .setTitle(`User Muted`)
             .setDescription(`<@${member.id}> has been muted by CK Staff for: ${reason}`)
             .setColor("#ff0000")
 
-        const privateMsg = new Discord.MessageEmbed()
+        const privateMsg = new Discord.EmbedBuilder()
             .setDescription(`You were muted in ${guild.name} for: ${reason}`)
 
         await addLog(server, LogType.Mute, guild, member, message.author, reason)

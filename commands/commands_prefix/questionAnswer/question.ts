@@ -1,5 +1,6 @@
 import Discord from "discord.js"
 import {IQuestion, IServer} from "../../../models/server";
+import {ChannelType} from "discord-api-types/v10"
 
 module.exports = {
     commands: ["question", "ask"],
@@ -11,7 +12,7 @@ module.exports = {
         }
 
         const questionChannel = await message.guild.channels.fetch(server.channels.questionChannel)
-        if (!questionChannel || !questionChannel.isText()) {
+        if (!questionChannel || questionChannel.type != ChannelType.GuildText) {
             return;
         }
 
@@ -23,8 +24,10 @@ module.exports = {
             answer: null
         }
 
-        const embed = new Discord.MessageEmbed()
-            .addField(`Question id: ${question.questionId}`, text)
+        const embed = new Discord.EmbedBuilder()
+            .addFields([
+                {name: `Question id: ${question.questionId}`, value: text}
+            ])
 
         questionChannel.send({embeds: [embed]})
             .then((msg) => {

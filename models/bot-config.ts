@@ -14,7 +14,7 @@ export interface IBotConfig {
     save(): Promise<IBotConfig>;
 }
 
-const BotConfigSchema = new mongoose.Schema({
+const BotConfigSchema = new mongoose.Schema<IBotConfig>({
     botBan: [{
         caseNumber: Number,
         userId: String,

@@ -3,7 +3,7 @@ import Discord from "discord.js"
 module.exports = {
     commands: ["patreon"],
     callback: async (message: Discord.Message) => {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle("Pledge to College Kings")
             .setURL(`https://www.patreon.com/collegekings`)
             .setDescription("**Interested In Getting Early Updates, Patron-only behind the scenes/post... and more?\n\nCheck it all out here!**\nhttps://www.patreon.com/collegekings")

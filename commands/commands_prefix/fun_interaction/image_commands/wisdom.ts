@@ -7,11 +7,11 @@ module.exports = {
         await message.reply("Work in progress")
         return
 
-        const imageConfig: IImageConfig = await ImageConfig.findOne({category: "wisdom"}).exec()
+        const imageConfig: IImageConfig | null = await ImageConfig.findOne<IImageConfig>({category: "wisdom"}).exec()
 
-        let images = imageConfig.global;
-        if (message.author.id in imageConfig.users) {
-            images = imageConfig.users[message.author.id]
+        let images = imageConfig!.global;
+        if (message.author.id in imageConfig!.users) {
+            images = imageConfig!.users[message.author.id]
         }
 
         // Returns 0 - 365
@@ -24,7 +24,7 @@ module.exports = {
 
         // Check if index is within bounds of the global images
         if (image) {
-            const embed = new Discord.MessageEmbed()
+            const embed = new Discord.EmbedBuilder()
                 .setTitle("Today's Wisdom")
                 .setImage(image)
 

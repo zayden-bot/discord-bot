@@ -1,4 +1,4 @@
-import Discord from "discord.js";
+import Discord, {ButtonBuilder, ButtonStyle} from "discord.js";
 import {IServer} from "../../../../models/server";
 
 module.exports = {
@@ -32,23 +32,23 @@ module.exports = {
         }
 
         // If ID already exists:
-        const confirm_button = new Discord.MessageButton()
+        const confirm_button = new Discord.ButtonBuilder()
             .setCustomId("confirm")
             .setLabel("Confirm")
-            .setStyle("SUCCESS");
+            .setStyle(ButtonStyle.Success);
 
-        const decline_button = new Discord.MessageButton()
+        const decline_button = new Discord.ButtonBuilder()
             .setCustomId("decline")
             .setLabel("Decline")
-            .setStyle("DANGER");
+            .setStyle(ButtonStyle.Danger);
 
-        const row = new Discord.MessageActionRow()
+        const row = new Discord.ActionRowBuilder<ButtonBuilder>()
             .addComponents(
                 confirm_button,
                 decline_button
             );
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`Support ID: ${id}`)
             .setDescription(server.supportAnswers.get(id) ?? "")
             .setColor("#ff0000")
@@ -61,8 +61,8 @@ module.exports = {
         });
 
         const filter = (interaction: Discord.MessageComponentInteraction) => (
-            interaction.customId == confirm_button.customId
-            || interaction.customId == decline_button.customId
+            interaction.customId == "confirm"
+            || interaction.customId == "decline"
             && interaction.user.id == message.author.id
         );
 
@@ -76,7 +76,7 @@ module.exports = {
 
         console.log(`Interaction "${interaction.customId}" was clicked`)
 
-        if (interaction.customId == confirm_button.customId) {
+        if (interaction.customId == "confirm") {
             server.supportAnswers.set(id, answer);
             await Promise.all([
                 server.save(),
@@ -84,7 +84,7 @@ module.exports = {
             ])
             return;
         }
-        if (interaction.customId == decline_button.customId) {
+        if (interaction.customId == "decline") {
             interaction.update({content: "Canceled", embeds: [], components: []})
             return;
         }

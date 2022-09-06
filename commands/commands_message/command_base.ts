@@ -2,7 +2,7 @@
 
 import Discord from "discord.js"
 import {Command} from "./command"
-import {Server} from "../../models/server";
+import {IServer, Server} from "../../models/server";
 import {isBlacklisted} from "../commands_prefix/moderation/functions";
 
 let recentlyRan: string[] = []
@@ -34,7 +34,8 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
         }
 
         const botConfig = require("../../configs/bot_config.json");
-        const server = await Server.findOne({id: guild.id}).exec()
+        const server: IServer | null = await Server.findOne<IServer>({id: guild.id}).exec()
+        if (!server) return;
 
         // Check if the command is enabled in that server
         if (server.disabledCommands.includes(command) && !botConfig.developers.includes(member.id)) {

@@ -1,9 +1,10 @@
 import {Server} from "./models/server";
 import Discord from "discord.js";
+import {ChannelType} from 'discord-api-types/v10';
 
 export function createServer(guild: Discord.Guild,) {
     const server = new Server({id: guild.id})
-    server.save()
+    server.save().then()
     return server
 }
 
@@ -16,7 +17,7 @@ export async function init(client: Discord.Client) {
         // Cache reaction messages
         for (let reactionRole of server.reactionRoles) {
             const channel = await client.channels.fetch(reactionRole.channelId)
-            if (!channel || channel.type != "GUILD_TEXT") {
+            if (!channel || channel.type != ChannelType.GuildText) {
                 break;
             }
 
@@ -24,7 +25,7 @@ export async function init(client: Discord.Client) {
             reactionRole.messageId = msg.id
 
             const role = await guild.roles.fetch(reactionRole.roleId)
-            reactionRole.roleId = role?.id
+            reactionRole.roleId = role!.id
         }
     }
 }

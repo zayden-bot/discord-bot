@@ -8,7 +8,7 @@ export interface IImageConfig {
     save(): Promise<IImageConfig>;
 }
 
-const ImageConfigSchema = new mongoose.Schema({
+const ImageConfigSchema = new mongoose.Schema<IImageConfig>({
     category: String,
     global: [],
     users: {type: Map, of: [String]}

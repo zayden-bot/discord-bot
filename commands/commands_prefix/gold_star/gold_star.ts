@@ -33,7 +33,7 @@ module.exports = {
         member_config.stars.numberOfStars += 1;
         member_config.stars.receivedStars += 1;
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`⭐ NEW GOLDEN STAR ⭐`)
             .setDescription(`<@${member.id}> received a golden star from <@${author.id}> for a total of ${member_config.stars.numberOfStars} stars`);
 

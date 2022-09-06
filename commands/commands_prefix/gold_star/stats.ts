@@ -13,11 +13,13 @@ module.exports = {
 
         const member_config: IUserConfig = await getUserConfig(userId);
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`${username} Stats`)
-            .addField("Number of Stars", member_config.stars.numberOfStars.toString(), true)
-            .addField("Given Stars", member_config.stars.givenStars.toString(), true)
-            .addField("Received Stars", member_config.stars.receivedStars.toString(), true)
+            .addFields([
+                {name: "Number of Stars", value: member_config.stars.numberOfStars.toString(), inline: true},
+                {name: "Given Stars", value: member_config.stars.givenStars.toString(), inline: true},
+                {name: "Received Stars", value: member_config.stars.receivedStars.toString(), inline: true}
+            ])
 
         message.channel.send({embeds: [embed]})
             .catch(reason => {

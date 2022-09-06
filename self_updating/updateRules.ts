@@ -1,11 +1,12 @@
 import Discord from "discord.js";
 import {getServer} from "../models/server";
+import {ChannelType} from "discord-api-types/v10"
 
 module.exports = async function (client: Discord.Client, channelId: string) {
     const serverConfig = await getServer("745662812335898806")
 
     const channel = await client.channels.fetch(channelId)
-    if (!channel || !channel.isText()) {
+    if (!channel || channel.type != ChannelType.GuildText) {
         return console.error("Invalid channel id")
     }
 
@@ -14,7 +15,7 @@ module.exports = async function (client: Discord.Client, channelId: string) {
         serverRules += `**${rule}.** ${serverConfig.serverRules[rule]}\n\n`
     }
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new Discord.EmbedBuilder()
         .setTitle(`𝒞𝑜𝓁𝓁𝑒𝑔𝑒 𝒦𝒾𝓃𝑔𝓈 𝒪𝒻𝒻𝒾𝒸𝒾𝒶𝓁 𝒮𝑒𝓇𝓋𝑒𝓇\n\n__**ꜱᴇʀᴠᴇʀ ʀᴜʟᴇꜱ**__`)
         .setDescription(`${serverRules}`)
         .setColor("#ff0000")

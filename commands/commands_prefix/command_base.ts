@@ -2,7 +2,7 @@
 
 import Discord from "discord.js"
 import {Command} from "./command"
-import {Server} from "../../models/server";
+import {IServer, Server} from "../../models/server";
 import {isBlacklisted} from "./moderation/functions";
 
 let recentlyRan: string[] = []
@@ -40,7 +40,8 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
             return
         }
 
-        const server = await Server.findOne({id: guild.id}).exec()
+        const server: IServer | null = await Server.findOne<IServer>({id: guild.id}).exec()
+        if (!server) return;
 
         const botConfig = require("../../configs/bot_config.json");
 
@@ -100,7 +101,7 @@ module.exports = (client: Discord.Client, commandOptions: Command) => {
 
                 // Check if the user inputted the correct number of arguments
                 if (args.length < minArgs || (maxArgs !== null && args.length > maxArgs)) {
-                    const embed = new Discord.MessageEmbed()
+                    const embed = new Discord.EmbedBuilder()
                         .setColor("#ff0000")
                         .setDescription(`Invalid command usage, try using it like:\n\`${botConfig.prefix}${alias} ${expectedArgs}\``)
 

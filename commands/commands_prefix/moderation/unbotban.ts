@@ -14,11 +14,11 @@ module.exports = {
             return
         }
 
-        const botConfig: IBotConfig = await BotConfig.findOne().exec()
-        botConfig.botBan = botConfig.botBan.filter((banLog) => banLog.userId != member.id)
+        const botConfig: IBotConfig | null = await BotConfig.findOne<IBotConfig>().exec()
+        botConfig!.botBan = botConfig!.botBan.filter((banLog) => banLog.userId != member.id)
 
         await Promise.all([
-            botConfig.save(),
+            botConfig!.save(),
             message.reply(`Successfully Removed Bot Ban from ${member}`)
         ])
     },

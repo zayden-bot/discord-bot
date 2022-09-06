@@ -63,7 +63,7 @@ export async function getServer(id: string) {
     return await Server.findOne({id: id}).exec() || new Server({id: id})
 }
 
-const ServerSchema = new mongoose.Schema({
+const ServerSchema = new mongoose.Schema<IServer>({
     id: String,
     reactionRoles: [{
         channelId: String,

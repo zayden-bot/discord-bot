@@ -1,6 +1,7 @@
 import Discord from "discord.js"
 import {IReactionRole, IServer} from "../../../models/server";
 import {parseId} from "../../../common";
+import {ChannelType} from "discord-api-types/v10"
 
 module.exports = {
     commands: ["rr add", "rradd"],
@@ -26,7 +27,7 @@ module.exports = {
         // Handle Channel
         const channel = await guild.channels.fetch(channelId);
 
-        if (!channel || !channel.isText()) {
+        if (!channel || channel.type != ChannelType.GuildText) {
             await message.reply("Invalid channel.");
             return;
         }

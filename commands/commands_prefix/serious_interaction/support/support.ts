@@ -18,7 +18,7 @@ module.exports = {
             return;
         }
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`Support ID: ${id[0].toUpperCase() + id.slice(1)}`)
             .setDescription(answer)
             .setColor("#ff0000")

@@ -1,4 +1,5 @@
 import Discord from "discord.js"
+import {ChannelType} from "discord-api-types/v10"
 
 module.exports = {
     commands: ["serverinfo"],
@@ -11,14 +12,28 @@ module.exports = {
 
         const icon = message.guild.iconURL() as string;
 
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({name: message.guild.name, iconURL: icon})
-            .addField("Owner", `<@${message.guild.ownerId}>`, true)
-            .addField("Channel Categories", message.guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").size.toString(), true)
-            .addField("Text Channels", message.guild.channels.cache.filter(channel => channel.type === "GUILD_TEXT").size.toString(), true)
-            .addField("Voice Channels", message.guild.channels.cache.filter(channel => channel.type === "GUILD_VOICE").size.toString(), true)
-            .addField("Members", message.guild.memberCount.toString(), true)
-            .addField("Roles", message.guild.roles.cache.size.toString(), true)
+            .addFields([
+                {name: "Owner", value: `<@${message.guild.ownerId}>`, inline: true},
+                {
+                    name: "Channel Categories",
+                    value: message.guild.channels.cache.filter(channel => channel.type === ChannelType.GuildCategory).size.toString(),
+                    inline: true
+                },
+                {
+                    name: "Text Channels",
+                    value: message.guild.channels.cache.filter(channel => channel.type === ChannelType.GuildText).size.toString(),
+                    inline: true
+                },
+                {
+                    name: "Voice Channels",
+                    value: message.guild.channels.cache.filter(channel => channel.type === ChannelType.GuildVoice).size.toString(),
+                    inline: true
+                },
+                {name: "Members", value: message.guild.memberCount.toString(), inline: true},
+                {name: "Roles", value: message.guild.roles.cache.size.toString(), inline: true}
+            ])
             .setFooter({text: `ID: ${message.guild.id} | Server Created: ${message.guild.createdAt.getFullYear()}-${message.guild.createdAt.getMonth()}-${message.guild.createdAt.getDate()}`})
             .setThumbnail(icon)
 

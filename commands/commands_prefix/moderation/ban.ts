@@ -16,18 +16,18 @@ module.exports = {
             return;
         }
 
-        const serverMsg = new Discord.MessageEmbed()
+        const serverMsg = new Discord.EmbedBuilder()
             .setTitle(`User Banned`)
             .setDescription(`${member} has been banned by College Kings Staff`)
             .setColor("#ff0000")
 
-        const privateMsg = new Discord.MessageEmbed()
+        const privateMsg = new Discord.EmbedBuilder()
             .setDescription(`You were banned in ${guild.name} for:\n${reason}`)
 
         await addLog(server, LogType.Ban, guild, member, message.author, reason)
 
         Promise.all([
-            member.ban({days: 7, reason: reason}),
+            member.ban({deleteMessageDays: 7, reason: reason}),
             message.channel.send({embeds: [serverMsg]}),
             member.user.send({embeds: [privateMsg]})
         ]).catch(() => {
