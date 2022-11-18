@@ -1,7 +1,6 @@
 import {IImageConfig, ImageConfig} from "../../../../models/image-config";
-import Discord from "discord.js";
 
-export async function getImage(author: Discord.User, imageArray: string) {
+export async function getImage(memberId: string, imageArray: string) {
     const imageConfig: IImageConfig | null = await ImageConfig.findOne({category: imageArray})
 
     if (!imageConfig) return imageConfig
@@ -11,8 +10,8 @@ export async function getImage(author: Discord.User, imageArray: string) {
     }
 
     let images = imageConfig.global;
-    if (author.id in imageConfig.users) {
-        images = imageConfig.users[author.id]
+    if (memberId in imageConfig.users) {
+        images = imageConfig.users[memberId]
     }
 
     const imgId = Math.floor(Math.random() * images.length)

@@ -1,4 +1,5 @@
 import Discord from "discord.js"
+import {client} from "../../../index";
 
 module.exports = {
     commands: ["help", "h", "?"],
@@ -12,9 +13,7 @@ module.exports = {
 
         let reply = "Zayden's Commands:\n"
 
-        const commands = require("../../load_commands")()
-
-        for (let command of commands) {
+        for (let command of client.slashCommands) {
             let permissions = command.permissions
             let roles = command.requiredRoles
             let hasPermission = true

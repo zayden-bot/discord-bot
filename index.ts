@@ -4,6 +4,9 @@ import mongoose from "mongoose";
 import {Server} from "./models/server";
 import {UserConfig} from "./models/user-config";
 import {createServer} from "./servers";
+import {Zayden} from "./client"
+import loadSlashCommands from "./commands/load_slash_commands";
+import deployCommands from "./deploy_commands";
 
 switch (process.env.NODE_ENV) {
     case "development":
@@ -19,14 +22,19 @@ mongoose.connect(dbURI)
     .then(() => console.log("Connected to DB"))
     .catch(console.error)
 
-export const client = new Discord.Client({
+export const client = new Zayden({
     intents: [
-        Discord.Intents.FLAGS.GUILDS,
-        Discord.Intents.FLAGS.GUILD_MEMBERS,
-        Discord.Intents.FLAGS.GUILD_MESSAGES,
-        Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS
+        Discord.GatewayIntentBits.Guilds,
+        Discord.GatewayIntentBits.GuildMessages,
+        Discord.GatewayIntentBits.GuildMembers,
+        Discord.GatewayIntentBits.GuildMessageReactions,
+        Discord.GatewayIntentBits.MessageContent,
     ],
-    partials: ['MESSAGE', 'CHANNEL', 'REACTION']
+    partials: [
+        Discord.Partials.Message,
+        Discord.Partials.Channel,
+        Discord.Partials.Reaction,
+    ]
 })
 
 // Init
@@ -44,8 +52,11 @@ client.on("ready", async () => {
     // Initialize Servers
     await require("./servers").init(client)
 
-    const loadCommands = require("./commands/load_commands");
-    loadCommands(client)
+    loadSlashCommands(client)
+
+    if (process.env.NODE_ENV == "development") {
+        deployCommands(client).then()
+    }
 
     // const moderation = require("./moderationFunctions")
     // moderation.init()
@@ -73,6 +84,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
     if (!guild) return;
 
     const server = await Server.findOne({id: guild.id}).exec()
+    if (!server) return;
 
     for (const reactionRole of server.reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
@@ -99,6 +111,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
     if (!guild) return;
 
     const server = await Server.findOne({id: guild.id}).exec()
+    if (!server) return;
 
     for (const reactionRole of server.reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
@@ -123,6 +136,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
     const guild = newMember.guild
     const server = await Server.findOne({id: guild.id}).exec()
+    if (!server) return;
 
     const patreonRoles: Record<string, number> = {
         '745663316776714370': 1, // Freshman
@@ -140,25 +154,50 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
     // Is new role a patreon role
     if (typeof (newRole) != "undefined" && newRole.id in patreonRoles) {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle("New Patron")
             .setColor(`${newRole.hexColor}`)
             .setThumbnail("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8f5967b9-fc84-45f6-a9c3-3938bfba7232/dbujg26-4865d57d-8dcc-435c-ac6e-0d0590f9de37.png/v1/fill/w_1683,h_475,q_70,strp/patreon_logo_by_laprasking_dbujg26-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD01NzYiLCJwYXRoIjoiXC9mXC84ZjU5NjdiOS1mYzg0LTQ1ZjYtYTljMy0zOTM4YmZiYTcyMzJcL2RidWpnMjYtNDg2NWQ1N2QtOGRjYy00MzVjLWFjNmUtMGQwNTkwZjlkZTM3LnBuZyIsIndpZHRoIjoiPD0yMDQxIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.95jfkKc4e-WyhcxKoiDGebItWvxmMPadhqYsh7gIsnQ")
-            .addField("User", `<@${newMember.id}>`, true)
-            .addField("Amount", `$${patreonRoles[newRole.id]}`, true)
+            .addFields([
+                {name: "User", value: `<@${newMember.id}>`, inline: true},
+                {name: "Amount", value: `$${patreonRoles[newRole.id]}`, inline: true}
+            ])
             .setTimestamp();
 
-        const serverIconURL = guild.iconURL({dynamic: true})
+        const serverIconURL = guild.iconURL()
         if (serverIconURL) {
             embed.setFooter({text: guild.name, iconURL: serverIconURL})
         }
 
         const channel = client.channels.cache.get(server.channels.patreonChannel)
-        if (channel && channel.isText()) {
+        if (channel && channel.type == Discord.ChannelType.GuildText) {
             channel.send({embeds: [embed]});
         }
 
     }
+})
+
+client.on(Discord.Events.InteractionCreate, async interaction => {
+    if (!interaction.isChatInputCommand()) return;
+
+    const client = interaction.client as Zayden
+    const command = client.slashCommands?.get(interaction.commandName);
+
+    if (!command) {
+        console.error(`No command matching ${interaction.commandName} was found.`);
+        return;
+    }
+
+    try {
+        await command.execute(interaction)
+    } catch (error) {
+        console.error(error);
+        await interaction.reply({
+            content: "There was an error while executing this command!",
+            ephemeral: true
+        })
+    }
+
 })
 
 client.login(process.env.TOKEN).then();
