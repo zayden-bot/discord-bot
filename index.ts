@@ -23,7 +23,8 @@ export const client = new Discord.Client({
         Discord.GatewayIntentBits.Guilds,
         Discord.GatewayIntentBits.GuildMembers,
         Discord.GatewayIntentBits.GuildMessages,
-        Discord.GatewayIntentBits.GuildMessageReactions
+        Discord.GatewayIntentBits.GuildMessageReactions,
+        Discord.GatewayIntentBits.MessageContent,
     ],
     partials: [Discord.Partials.Message, Discord.Partials.Channel, Discord.Partials.Reaction]
 })
@@ -75,8 +76,12 @@ client.on("messageReactionAdd", async (reaction, user) => {
     if (!server) return;
 
     for (const reactionRole of server.reactionRoles) {
-        if (!(reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861")) {
-            return;
+        if (!(reaction.message.id == reactionRole.messageId && user.id !== "907635513341644861")) {
+            break;
+        }
+
+        if (reaction.emoji.toString() != reactionRole.emoji) {
+            continue;
         }
 
         const member = guild.members.cache.find(member => member.id == user.id)
@@ -90,7 +95,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
         }
 
         member.roles.add(role)
+            .then()
             .catch((error) => console.log(error))
+        break;
     }
 })
 
