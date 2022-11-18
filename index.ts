@@ -1,10 +1,9 @@
 import Discord from "discord.js";
-import {ChannelType} from 'discord-api-types/v10';
 import dotenv from "dotenv";
-import {createServer} from "./servers";
 import mongoose from "mongoose";
 import {Server} from "./models/server";
 import {UserConfig} from "./models/user-config";
+import {createServer} from "./servers";
 
 switch (process.env.NODE_ENV) {
     case "development":
@@ -15,18 +14,19 @@ switch (process.env.NODE_ENV) {
         break;
 }
 
-const dbURI = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority`
-mongoose.connect(dbURI).then()
+const dbURI = `mongodb+srv://oscar:${process.env.DB_PASSWORD}@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority`
+mongoose.connect(dbURI)
+    .then(() => console.log("Connected to DB"))
+    .catch(console.error)
 
 export const client = new Discord.Client({
     intents: [
-        Discord.GatewayIntentBits.Guilds,
-        Discord.GatewayIntentBits.GuildMembers,
-        Discord.GatewayIntentBits.GuildMessages,
-        Discord.GatewayIntentBits.GuildMessageReactions,
-        Discord.GatewayIntentBits.MessageContent,
+        Discord.Intents.FLAGS.GUILDS,
+        Discord.Intents.FLAGS.GUILD_MEMBERS,
+        Discord.Intents.FLAGS.GUILD_MESSAGES,
+        Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS
     ],
-    partials: [Discord.Partials.Message, Discord.Partials.Channel, Discord.Partials.Reaction]
+    partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 })
 
 // Init
@@ -73,31 +73,23 @@ client.on("messageReactionAdd", async (reaction, user) => {
     if (!guild) return;
 
     const server = await Server.findOne({id: guild.id}).exec()
-    if (!server) return;
 
     for (const reactionRole of server.reactionRoles) {
-        if (!(reaction.message.id == reactionRole.messageId && user.id !== "907635513341644861")) {
+        if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
+            const member = guild.members.cache.find(member => member.id == user.id)
+            if (!member) {
+                break;
+            }
+
+            const role = await guild.roles.fetch(reactionRole.roleId)
+            if (!role) {
+                break;
+            }
+
+            member.roles.add(role)
+                .catch((error) => console.log(error))
             break;
         }
-
-        if (reaction.emoji.toString() != reactionRole.emoji) {
-            continue;
-        }
-
-        const member = guild.members.cache.find(member => member.id == user.id)
-        if (!member) {
-            break;
-        }
-
-        const role = await guild.roles.fetch(reactionRole.roleId!)
-        if (!role) {
-            break;
-        }
-
-        member.roles.add(role)
-            .then()
-            .catch((error) => console.log(error))
-        break;
     }
 })
 
@@ -107,7 +99,6 @@ client.on("messageReactionRemove", async (reaction, user) => {
     if (!guild) return;
 
     const server = await Server.findOne({id: guild.id}).exec()
-    if (!server) return;
 
     for (const reactionRole of server.reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
@@ -116,7 +107,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
                 break;
             }
 
-            const role = await guild.roles.fetch(reactionRole.roleId!)
+            const role = await guild.roles.fetch(reactionRole.roleId)
             if (!role) {
                 break;
             }
@@ -149,23 +140,21 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
 
     // Is new role a patreon role
     if (typeof (newRole) != "undefined" && newRole.id in patreonRoles) {
-        const embed = new Discord.EmbedBuilder()
+        const embed = new Discord.MessageEmbed()
             .setTitle("New Patron")
             .setColor(`${newRole.hexColor}`)
             .setThumbnail("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8f5967b9-fc84-45f6-a9c3-3938bfba7232/dbujg26-4865d57d-8dcc-435c-ac6e-0d0590f9de37.png/v1/fill/w_1683,h_475,q_70,strp/patreon_logo_by_laprasking_dbujg26-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD01NzYiLCJwYXRoIjoiXC9mXC84ZjU5NjdiOS1mYzg0LTQ1ZjYtYTljMy0zOTM4YmZiYTcyMzJcL2RidWpnMjYtNDg2NWQ1N2QtOGRjYy00MzVjLWFjNmUtMGQwNTkwZjlkZTM3LnBuZyIsIndpZHRoIjoiPD0yMDQxIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.95jfkKc4e-WyhcxKoiDGebItWvxmMPadhqYsh7gIsnQ")
-            .addFields([
-                {name: "User", value: `<@${newMember.id}>`, inline: true},
-                {name: "Amount", value: `$${patreonRoles[newRole.id]}`, inline: true}
-            ])
+            .addField("User", `<@${newMember.id}>`, true)
+            .addField("Amount", `$${patreonRoles[newRole.id]}`, true)
             .setTimestamp();
 
-        const serverIconURL = guild.iconURL()
+        const serverIconURL = guild.iconURL({dynamic: true})
         if (serverIconURL) {
             embed.setFooter({text: guild.name, iconURL: serverIconURL})
         }
 
-        const channel = client.channels.cache.get(server?.channels?.patreonChannel!)
-        if (channel && channel.type == ChannelType.GuildText) {
+        const channel = client.channels.cache.get(server.channels.patreonChannel)
+        if (channel && channel.isText()) {
             channel.send({embeds: [embed]});
         }
 
@@ -193,12 +182,12 @@ async function saveAllDB() {
     return tasks
 }
 
-process.on("uncaughtException", async (error) => {
-    await Promise.all(await saveAllDB())
-    console.error(error)
-})
-
-process.on("unhandledRejection", async (reason, promise) => {
-    await Promise.all(await saveAllDB())
-    console.error(`Unhandled Rejection at: ${promise}  reason: ${reason}`)
-})
+// process.on("uncaughtException", async (error) => {
+//     await Promise.all(await saveAllDB())
+//     console.error(error)
+// })
+//
+// process.on("unhandledRejection", async (reason, promise) => {
+//     await Promise.all(await saveAllDB())
+//     console.error(`Unhandled Rejection at: ${promise}  reason: ${reason}`)
+// })

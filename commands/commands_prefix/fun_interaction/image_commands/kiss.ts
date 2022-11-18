@@ -12,6 +12,9 @@ module.exports = {
         }
 
         const image = await getImage(message.author, "kiss")
+        if (!image) {
+            return message.reply("No \"kiss\" image found")
+        }
 
         const embed = new Discord.EmbedBuilder()
             .setTitle(`${message.author.username} kisses ${member.displayName}`)

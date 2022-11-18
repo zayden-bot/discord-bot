@@ -5,6 +5,7 @@ import {ChannelType} from "discord-api-types/v10"
 module.exports = {
     commands: ["suggest", "suggestion"],
     expectedArgs: "<text>",
+    minArgs: 1,
     callback: async (message: Discord.Message, server: IServer, args: string[], text: string) => {
         if (!message.guild) {
             return;
