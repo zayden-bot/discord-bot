@@ -4,7 +4,7 @@ import fs from "fs";
 import {Zayden} from "../client";
 import {ISlashCommand} from "./commands_slash/command";
 
-const ignoreFiles = ["command_base.ts", "command.ts", "image_cmd_base.ts"]
+const ignoreFiles = ["command.ts", "image_functions.ts"]
 
 export default function loadSlashCommands(client: Zayden) {
     client.slashCommands = new Discord.Collection();

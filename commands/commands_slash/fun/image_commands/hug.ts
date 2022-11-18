@@ -3,11 +3,11 @@ import {getImage} from "./image_functions";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
-        .setName("goodmorning")
-        .setDescription("Send good morning message")
+        .setName("hug")
+        .setDescription("Send a hug message")
         .addUserOption(option =>
             option.setName("member")
-                .setDescription("Member to say good morning too")),
+                .setDescription("Member to give a hug too")),
 
     async execute(interaction: Discord.ChatInputCommandInteraction) {
         if (!(interaction.member instanceof Discord.GuildMember)) {
@@ -19,13 +19,13 @@ module.exports = {
             return interaction.reply("Unknown member mentioned");
         }
 
-        const image = await getImage(interaction.member.id, "goodMorning")
+        const image = await getImage(interaction.member.id, "hug")
         if (!image) {
-            return interaction.reply("No \"good morning\" image found")
+            return interaction.reply("No \"hug\" image found")
         }
 
         const embed = new Discord.EmbedBuilder()
-            .setTitle(`Good Morning, ${member.displayName}`)
+            .setTitle(`Sending hugs to ${member.displayName}`)
             .setImage(image)
 
         interaction.reply({embeds: [embed]}).then()

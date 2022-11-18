@@ -1,12 +1,12 @@
 import Discord from "discord.js";
-import {getImage} from "./image_cmd_base";
+import {getImage} from "./image_functions";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
         .setName("goodnight")
         .setDescription("Send good night message")
         .addUserOption(option =>
-            option.setName("user")
+            option.setName("member")
                 .setDescription("Member to say good night too")),
 
     async execute(interaction: Discord.ChatInputCommandInteraction) {
@@ -14,7 +14,7 @@ module.exports = {
             return;
         }
 
-        const member = interaction.options.getMember("user") || interaction.member
+        const member = interaction.options.getMember("member") || interaction.member
         if (!(member instanceof Discord.GuildMember)) {
             return interaction.reply("Unknown member mentioned");
         }
