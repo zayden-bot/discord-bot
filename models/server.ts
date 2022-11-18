@@ -11,8 +11,8 @@ export interface IQuestion {
     text: string,
     userId: string,
     questionId: number,
-    messageId: string | null,
-    answer: { text: string; username: string; } | null
+    messageId: string | undefined,
+    answer: { text: string; username: string; } | undefined
 }
 
 
