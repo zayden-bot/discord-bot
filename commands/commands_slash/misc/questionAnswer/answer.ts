@@ -26,7 +26,7 @@ module.exports = {
             return interaction.reply({content: "Invalid ID", ephemeral: true})
         }
 
-        const text = interaction.options.getString("answer") || ""
+        const text = interaction.options.getString("answer", true)
 
         let question = server.questions[id]
         if (!question) {

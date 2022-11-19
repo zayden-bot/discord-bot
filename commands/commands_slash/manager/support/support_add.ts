@@ -22,8 +22,8 @@ module.exports = {
 
         const server = await getServer(interaction.guild.id)
 
-        const id = interaction.options.getString("id") || ""
-        const text = interaction.options.getString("text") || ""
+        const id = interaction.options.getString("id", true)
+        const text = interaction.options.getString("text", true)
 
         if (!server.supportAnswers.get(id)) {
             server.supportAnswers.set(id, text);

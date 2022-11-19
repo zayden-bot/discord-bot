@@ -19,7 +19,7 @@ module.exports = {
 
         const server = await getServer(interaction.guild.id)
 
-        const id = interaction.options.getString("id")?.toLowerCase() || "";
+        const id = interaction.options.getString("id", true).toLowerCase();
         const answer = server.supportAnswers.get(id);
         if (!answer) {
             return interaction.reply({content: `There is no support answer for ID: ${id}`, ephemeral: true});

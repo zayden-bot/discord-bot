@@ -15,9 +15,9 @@ module.exports = {
             return;
         }
 
-        if (server.channels.supportChannel != message.channel.id) {
-            // || message.member.roles.cache.has(server.roles.moderationRole)
-            // || message.member.roles.cache.has(server.roles.supportRole)) {
+        if (server.channels.supportChannel != message.channel.id
+            || message.member.roles.cache.has(server.roles.moderationRole)
+            || message.member.roles.cache.has(server.roles.supportRole)) {
             return;
         }
 

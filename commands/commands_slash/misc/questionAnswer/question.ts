@@ -23,7 +23,7 @@ module.exports = {
             return;
         }
 
-        const text = interaction.options.getString("question") || ""
+        const text = interaction.options.getString("question", true)
 
         const question: IQuestion = {
             text: text,
