@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {getImage} from "./image_functions";
+import {getImage} from "./functions";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
