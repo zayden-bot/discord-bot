@@ -5,7 +5,7 @@ import {Server} from "./models/server";
 import {UserConfig} from "./models/user-config";
 import {createServer} from "./servers";
 import {Zayden} from "./client"
-import loadSlashCommands from "./commands/load_slash_commands";
+import {loadMessageCommands, loadSlashCommands} from "./commands/load_commands";
 import deployCommands from "./deploy_commands";
 
 switch (process.env.NODE_ENV) {
@@ -52,6 +52,7 @@ client.on("ready", async () => {
     // Initialize Servers
     await require("./servers").init(client)
 
+    loadMessageCommands(client)
     loadSlashCommands(client)
 
     if (process.env.NODE_ENV == "development") {

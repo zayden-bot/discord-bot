@@ -6,7 +6,7 @@ module.exports = {
     data: new Discord.SlashCommandBuilder()
         .setName("answer")
         .setDescription("Answer a user's question")
-        .setDefaultMemberPermissions(Discord.PermissionsBitField.Flags.ManageMessages)
+        .setDefaultMemberPermissions(Discord.PermissionFlagsBits.ManageMessages)
         .addNumberOption(option =>
             option.setName("id")
                 .setDescription("The member's question ID"))

@@ -1,16 +1,19 @@
 import Discord, {ButtonBuilder, ButtonStyle} from "discord.js"
-import {IServer} from "../../../../models/server";
 import {ComponentType} from "discord-api-types/v10"
+import {getServer} from "../../../../models/server";
 
 module.exports = {
-    commands: ["support_list"],
-    minArgs: 0,
-    maxArgs: 0,
-    callback: async (message: Discord.Message, server: IServer) => {
-        const guild = message.guild;
-        if (!guild) {
+    data: new Discord.SlashCommandBuilder()
+        .setName("support_list")
+        .setDescription("Get list of valid support IDs")
+        .setDefaultMemberPermissions(Discord.PermissionFlagsBits.MoveMembers),
+
+    async execute(interaction: Discord.ChatInputCommandInteraction) {
+        if (!interaction.guild) {
             return;
         }
+
+        const server = await getServer(interaction.guild.id)
 
         const supportEntries: Array<readonly [string, string]> = Array.from(server.supportAnswers, ([id, answer]) => ([id, answer]))
         const supportPages: Map<number, Map<string, string>> = new Map();
@@ -49,11 +52,11 @@ module.exports = {
         const row = new Discord.ActionRowBuilder<ButtonBuilder>()
             .addComponents(nextPage, previousPage)
 
-        const msg = await message.channel.send({embeds: [embed], components: [row]});
+        const msg = await interaction.reply({embeds: [embed], components: [row]});
 
-        const filter = (interaction: Discord.MessageComponentInteraction) => (
-            ["next-page", "prev-page"].includes(interaction.customId) &&
-            interaction.user.id == message.author.id);
+        const filter = (buttonInteraction: Discord.MessageComponentInteraction) => (
+            ["next-page", "prev-page"].includes(buttonInteraction.customId) &&
+            buttonInteraction.user.id == interaction.user.id);
 
         const collector = msg.createMessageComponentCollector({filter, componentType: ComponentType.Button})
 
@@ -69,7 +72,7 @@ module.exports = {
                     .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
                 const supportPage = supportPages.get(pageNumber) as Map<string, string>
-                console.log(supportPage)
+
                 for (const [id, answer] of supportPage) {
                     embed.spliceFields(-1, 0, {name: id, value: answer});
                 }
@@ -102,7 +105,7 @@ module.exports = {
                 }
 
                 const row = new Discord.ActionRowBuilder<ButtonBuilder>()
-                    .addComponents(nextPage, previousPage)
+                    .addComponents(previousPage, nextPage)
 
                 i.update({embeds: [embed], components: [row]})
             }
@@ -111,6 +114,5 @@ module.exports = {
         collector.on("end", (_collected, reason) => {
             console.log("Ended collector", reason)
         })
-    },
-    requiredRoles: ["Support Team"]
+    }
 }

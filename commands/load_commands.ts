@@ -4,16 +4,15 @@ import fs from "fs";
 import {Zayden} from "../client";
 import {ISlashCommand} from "./commands_slash/command";
 
-const ignoreFiles = ["command.ts", "image_functions.ts"]
+const ignoreFiles = ["command.ts", "command_base.ts", "image_functions.ts"]
 
-export default function loadSlashCommands(client: Zayden) {
+export function loadSlashCommands(client: Zayden) {
     client.slashCommands = new Discord.Collection();
 
     function readCommands(dir: string) {
         const files = fs.readdirSync(path.join(__dirname, dir)).filter(file => !ignoreFiles.includes(file));
 
         for (const file of files) {
-
             const stat = fs.lstatSync(path.join(__dirname, dir, file))
             if (stat.isDirectory()) {
                 readCommands(path.join(dir, file))
@@ -35,4 +34,27 @@ export default function loadSlashCommands(client: Zayden) {
     if (client) {
         console.log(`Loaded ${client.slashCommands.size} slash commands`)
     }
+}
+
+export function loadMessageCommands(client: Zayden) {
+    function readCommands(dir: string) {
+        const files = fs.readdirSync(path.join(__dirname, dir)).filter(file => !ignoreFiles.includes(file));
+
+        for (const file of files) {
+            const stat = fs.lstatSync(path.join(__dirname, dir, file))
+            if (stat.isDirectory()) {
+                readCommands(path.join(dir, file))
+                continue;
+            }
+
+            const command = require(path.join(__dirname, dir, file))
+
+            if (client) {
+                const commandBase = require("./commands_message/command_base")
+                commandBase(client, command)
+            }
+        }
+    }
+
+    readCommands("./commands_message")
 }
