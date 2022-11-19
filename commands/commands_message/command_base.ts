@@ -3,7 +3,7 @@
 import Discord from "discord.js"
 import {Command} from "./command"
 import {IServer, Server} from "../../models/server";
-import {isBlacklisted} from "../commands_prefix/moderation/functions";
+import {isBlacklisted} from "../commands_slash/moderator/functions";
 
 let recentlyRan: string[] = []
 

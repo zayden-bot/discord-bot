@@ -1,28 +1,36 @@
-import {IModeration, IServer} from "../../../models/server";
+import {getServer, IModeration} from "../../../models/server";
 import Discord, {ActionRowBuilder, ButtonBuilder, ButtonStyle} from "discord.js";
-import {setup} from "./functions";
 
 function getPageLogs(allLogs: IModeration[], pageNumber: number) {
     return allLogs.slice((pageNumber - 1) * 5, pageNumber * 5)
 }
 
 module.exports = {
-    commands: ["logs", "log"],
-    expectedArgs: "<user>",
-    minArgs: 1,
-    callback: async (message: Discord.Message, server: IServer, args: string[]) => {
-        const {member} = await setup(message, args)
+    data: new Discord.SlashCommandBuilder()
+        .setName("logs")
+        .setDescription("Check the logs of a member")
+        .setDefaultMemberPermissions(Discord.PermissionFlagsBits.ManageMessages)
+        .addUserOption(option =>
+            option.setName("member")
+                .setDescription("Member to check the logs")
+                .setRequired(true)),
 
-        if (!member) {
-            message.reply("Please mention a valid member").then()
-            return
+    async execute(interaction: Discord.ChatInputCommandInteraction) {
+        if (!interaction.guild) {
+            return;
+        }
+
+        const server = await getServer(interaction.guild.id)
+        const member = interaction.options.getMember("member")
+
+        if (!(member instanceof Discord.GuildMember)) {
+            return interaction.reply({content: "Invalid member mention", ephemeral: true})
         }
 
         const logs = server.moderation.filter(log => log.userId == member.id)
 
         if (logs.length == 0) {
-            message.reply("No logs found for that user.").then()
-            return
+            return interaction.reply("No logs found for that user.")
         }
 
         const numberOfPages = Math.ceil(logs.length / 5)
@@ -57,17 +65,17 @@ module.exports = {
         const row = new ActionRowBuilder<ButtonBuilder>()
             .addComponents(nextPageButton, previousPageButton);
 
-        const msg = await message.channel.send({embeds: [embed], components: [row]})
+        const response = await interaction.reply({embeds: [embed], components: [row]})
 
-        const filter = (interaction: Discord.MessageComponentInteraction) => (
-            interaction.customId == "nextPage"
-            || interaction.customId == "previousPage"
-            && interaction.user.id == message.author.id
+        const filter = (buttonInteraction: any) => (
+            buttonInteraction.customId == "nextPage"
+            || buttonInteraction.customId == "previousPage"
+            && buttonInteraction.user.id == interaction.user.id
         );
 
-        const collector = msg.createMessageComponentCollector({filter});
+        const collector = response.createMessageComponentCollector({filter});
 
-        collector.on("collect", i => {
+        collector.on("collect", (i: Discord.ButtonInteraction) => {
             console.log(`Interaction "${i.customId}" was clicked`)
 
             // Next Page Interaction
@@ -102,6 +110,5 @@ module.exports = {
             embed.setDescription(logMsg)
             i.update({embeds: [embed], components: [row]})
         })
-    },
-    permissions: ["MANAGE_MESSAGES"],
+    }
 }

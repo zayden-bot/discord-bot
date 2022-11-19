@@ -1,38 +1,12 @@
 import {IServer} from "../../../models/server";
 import Discord from "discord.js";
-import {parseId} from "../../../common";
 import {BotConfig, IBotConfig} from "../../../models/bot-config";
-
-interface ISetup {
-    guild: Discord.Guild | undefined,
-    member: Discord.GuildMember | undefined,
-    reason: string
-}
 
 export enum LogType {
     Ban = "BAN",
     BotBan = "BOT BAN",
     Mute = "MUTE",
     Warn = "WARN"
-}
-
-export async function setup(message: Discord.Message, args: string[]) {
-    let rv: ISetup = {
-        guild: message.guild || undefined,
-        member: undefined,
-        reason: (args.length > 1) ? args.slice(1).join(" ").trim() : "No Reason Given"
-    }
-
-    const userId = parseId(args[0])
-    if (!userId) {
-        return rv
-    }
-    try {
-        rv.member = await message.guild?.members.fetch(userId)
-    } catch {
-    }
-
-    return rv
 }
 
 export async function addLog(

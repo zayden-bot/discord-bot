@@ -1,30 +1,39 @@
 // noinspection DuplicatedCode
 
-import {IModeration, IServer} from "../../../models/server";
+import {getServer, IModeration} from "../../../models/server";
 import Discord, {ActionRowBuilder, ButtonBuilder, ButtonStyle} from "discord.js";
-import {LogType, setup} from "./functions";
+import {LogType} from "./functions";
 
 function getPageLogs(allLogs: IModeration[], pageNumber: number) {
     return allLogs.slice((pageNumber - 1) * 5, pageNumber * 5)
 }
 
 module.exports = {
-    commands: ["warnings"],
-    expectedArgs: "<user>",
-    minArgs: 1,
-    callback: async (message: Discord.Message, server: IServer, args: string[]) => {
-        const {member} = await setup(message, args)
+    data: new Discord.SlashCommandBuilder()
+        .setName("warnings")
+        .setDescription("Check the warnings of a member")
+        .setDefaultMemberPermissions(Discord.PermissionFlagsBits.ManageMessages)
+        .addUserOption(option =>
+            option.setName("member")
+                .setDescription("Member to check the warnings")
+                .setRequired(true)),
 
-        if (!member) {
-            await message.reply("Please mention a valid member")
-            return
+    async execute(interaction: Discord.ChatInputCommandInteraction) {
+        if (!interaction.guild) {
+            return;
+        }
+
+        const server = await getServer(interaction.guild.id)
+        const member = interaction.options.getMember("member")
+
+        if (!(member instanceof Discord.GuildMember)) {
+            return interaction.reply({content: "Invalid member mention", ephemeral: true})
         }
 
         const warnings = server.moderation.filter(log => log.userId == member.id && log.logType == LogType.Warn.toString())
 
         if (warnings.length == 0) {
-            message.reply("No warnings found for that user.").then()
-            return
+            return interaction.reply("No warnings found for that user.");
         }
 
         const numberOfPages = Math.ceil(warnings.length / 5)
@@ -60,17 +69,17 @@ module.exports = {
         const row = new ActionRowBuilder<ButtonBuilder>()
             .addComponents(nextPageButton, previousPageButton);
 
-        const msg = await message.channel.send({embeds: [embed], components: [row]})
+        const response = await interaction.reply({embeds: [embed], components: [row]})
 
-        const filter = (interaction: Discord.MessageComponentInteraction) => (
-            interaction.customId == "nextPage"
-            || interaction.customId == "previousPage"
-            && interaction.user.id == message.author.id
+        const filter = (buttonInteraction: any) => (
+            buttonInteraction.customId == "nextPage"
+            || buttonInteraction.customId == "previousPage"
+            && buttonInteraction.user.id == interaction.user.id
         );
 
-        const collector = msg.createMessageComponentCollector({filter});
+        const collector = response.createMessageComponentCollector({filter});
 
-        collector.on("collect", i => {
+        collector.on("collect", (i: Discord.ButtonInteraction) => {
             console.log(`Interaction "${i.customId}" was clicked`)
 
             // Next Page Interaction
@@ -105,6 +114,5 @@ module.exports = {
             embed.setDescription(warningMsg)
             i.update({embeds: [embed], components: [row]})
         })
-    },
-    permissions: ["MANAGE_MESSAGES"],
+    }
 }

@@ -1,8 +1,11 @@
 import Discord from "discord.js"
 
 module.exports = {
-    commands: ["getRole", "patreonRole"],
-    callback: (message: Discord.Message) => {
+    data: new Discord.SlashCommandBuilder()
+        .setName("getrole")
+        .setDescription("How do I get my Discord role"),
+
+    async execute(interaction: Discord.ChatInputCommandInteraction) {
         const embed = new Discord.EmbedBuilder()
             .setTitle("How do I get my Discord role when I become a patron?")
             .setURL(`https://support.patreon.com/hc/en-us/articles/212052266-Get-my-Discord-role`)
@@ -28,6 +31,6 @@ module.exports = {
             .setFooter({text: "https://www.patreon.com/collegekings"})
             .setColor("#ff0000")
 
-        message.channel.send({embeds: [embed]})
+        interaction.reply({embeds: [embed]}).then()
     },
 }

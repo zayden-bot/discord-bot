@@ -23,12 +23,12 @@ module.exports = {
         }
 
         const globalImages = new Set(imageConfig.global)
-        const userImages = new Set(imageConfig.users[userId])
+        const userImages = new Set(imageConfig.users?.get(userId))
 
         userImages.add(imageLink)
         globalImages.add(imageLink)
 
-        imageConfig.users[userId] = [...userImages]
+        imageConfig.users?.set(userId, [...userImages])
         imageConfig.global = [...globalImages]
 
         await Promise.all([

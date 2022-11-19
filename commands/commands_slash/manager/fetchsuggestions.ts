@@ -1,21 +1,25 @@
 import Discord from "discord.js";
-import {IServer} from "../../../models/server";
 import {ChannelType} from "discord-api-types/v10"
+import {getServer} from "../../../models/server";
 
 module.exports = {
-    commands: ["fetchsuggestions"],
-    permissionError: "",
-    callback: async (message: Discord.Message, server: IServer) => {
-        const guild = message.guild;
-        if (!guild) {
+    data: new Discord.SlashCommandBuilder()
+        .setName("fetch_suggestions")
+        .setDescription("Fetch top community suggestions")
+        .setDefaultMemberPermissions(Discord.PermissionFlagsBits.ManageMessages),
+
+    async execute(interaction: Discord.ChatInputCommandInteraction) {
+        if (!interaction.guild) {
             return;
         }
 
+        const server = await getServer(interaction.guild.id)
+
         const startTime = new Date();
-        const statusMessage = await message.channel.send("Fetching information...");
-        const suggestionChannel = await guild.channels.fetch(server.channels.suggestionChannel)
+        interaction.reply({content: "Fetching information...", ephemeral: true}).then();
+        const suggestionChannel = await interaction.guild.channels.fetch(server.channels.suggestionChannel)
         if (!suggestionChannel || suggestionChannel.type != ChannelType.GuildText) {
-            return message.reply("Invalid suggestion channel");
+            return interaction.editReply({content: "Invalid suggestion channel"});
         }
 
         let suggestionMessages: Discord.Collection<string, Discord.Message> = new Discord.Collection();
@@ -69,7 +73,7 @@ module.exports = {
             embed.addFields([
                 {
                     name: `Position: ${count}, 👍: ${thumbsUp.count - 1}, 👎: ${thumbsDown.count - 1}`,
-                    value: `Link: https://discord.com/channels/${guild.id}/${server.channels.suggestionChannel}/${element.id}`,
+                    value: `Link: https://discord.com/channels/${interaction.guild.id}/${server.channels.suggestionChannel}/${element.id}`,
                     inline: false
                 }
             ]);
@@ -78,7 +82,7 @@ module.exports = {
                 embed.setImage("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg?width=1440&height=360");
                 embed.setTimestamp();
 
-                await message.author.send({embeds: [embed]});
+                await interaction.user.send({embeds: [embed]});
                 break;
             }
             count++
@@ -86,7 +90,6 @@ module.exports = {
 
         const endTime = new Date();
 
-        statusMessage.edit(`Sent the top 10 suggestions out of ${suggestionMessages.size}, elapsed time: ${Math.round((endTime.getTime() - startTime.getTime()) / 1000)} second(s)!`);
+        interaction.editReply(`Sent the top 10 suggestions out of ${suggestionMessages.size}, elapsed time: ${Math.round((endTime.getTime() - startTime.getTime()) / 1000)} second(s)!`).then();
     },
-    permissions: ["MANAGE_MESSAGES"],
 }
