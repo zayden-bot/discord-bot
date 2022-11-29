@@ -1,10 +1,4 @@
-import Discord from "discord.js"
-
-export interface Command {
+export interface IMessageCommand {
     command: string
-    permissionError: string
-    cooldown: number
-    permissions: Discord.PermissionResolvable[]
-    requiredRoles: string | string[]
     callback: Function
 }
