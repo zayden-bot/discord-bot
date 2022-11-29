@@ -7,12 +7,14 @@ module.exports = {
         .setName("answer")
         .setDescription("Answer a user's question")
         .setDefaultMemberPermissions(Discord.PermissionFlagsBits.ManageMessages)
-        .addNumberOption(option =>
+        .addIntegerOption(option =>
             option.setName("id")
-                .setDescription("The member's question ID"))
+                .setDescription("The member's question ID")
+                .setRequired(true))
         .addStringOption(option =>
             option.setName("answer")
-                .setDescription("Your answer")),
+                .setDescription("Your answer")
+                .setRequired(true)),
 
     async execute(interaction: Discord.ChatInputCommandInteraction) {
         if (!interaction.guild || !(interaction.member instanceof Discord.GuildMember)) {
