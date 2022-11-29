@@ -59,11 +59,7 @@ client.on("ready", async () => {
         deployCommands(client).then()
     }
 
-    // const moderation = require("./moderationFunctions")
-    // moderation.init()
-
     // Self Updating
-
     const customRoles = require("./self_updating/customRoles")
     await customRoles(client, "805765564504473641")
 
@@ -75,12 +71,18 @@ client.on("ready", async () => {
 });
 
 
-client.on("guildCreate", async guild => {
-    await createServer(guild)
+client.on(Discord.Events.GuildCreate, guild => {
+    createServer(guild)
 })
 
 
-client.on("messageReactionAdd", async (reaction, user) => {
+client.on(Discord.Events.MessageCreate, message => {
+    const client = message.client as Zayden
+
+    Promise.all(Array.from(client.messageCommands.values()).map(command => command.callback(message))).then()
+})
+
+client.on(Discord.Events.MessageReactionAdd, async (reaction, user) => {
     const guild = reaction.message.guild
     if (!guild) return;
 
@@ -107,7 +109,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 })
 
 
-client.on("messageReactionRemove", async (reaction, user) => {
+client.on(Discord.Events.MessageReactionRemove, async (reaction, user) => {
     const guild = reaction.message.guild
     if (!guild) return;
 
@@ -134,7 +136,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
 })
 
 // Events
-client.on("guildMemberUpdate", async (oldMember, newMember) => {
+client.on(Discord.Events.GuildMemberUpdate, async (oldMember, newMember) => {
     const guild = newMember.guild
     const server = await Server.findOne({id: guild.id}).exec()
     if (!server) return;
@@ -198,7 +200,6 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
             ephemeral: true
         })
     }
-
 })
 
 client.login(process.env.TOKEN).then();
@@ -222,12 +223,15 @@ async function saveAllDB() {
     return tasks
 }
 
-// process.on("uncaughtException", async (error) => {
-//     await Promise.all(await saveAllDB())
-//     console.error(error)
-// })
-//
-// process.on("unhandledRejection", async (reason, promise) => {
-//     await Promise.all(await saveAllDB())
-//     console.error(`Unhandled Rejection at: ${promise}  reason: ${reason}`)
-// })
+if (process.env.NODE_ENV != "development") {
+    process.on("uncaughtException", async (error) => {
+        await Promise.all(await saveAllDB())
+        console.error(error)
+    })
+
+    process.on("unhandledRejection", async (reason, promise) => {
+        await Promise.all(await saveAllDB())
+        console.error(`Unhandled Rejection at: ${promise}  reason: ${reason}`)
+    })
+}
+
