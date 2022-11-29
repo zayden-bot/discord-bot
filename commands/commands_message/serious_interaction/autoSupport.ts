@@ -1,10 +1,10 @@
 import Discord from "discord.js";
-import {IServer} from "../../../models/server";
+import {getServer} from "../../../models/server";
 import {ChannelType, ThreadAutoArchiveDuration} from 'discord-api-types/v10';
 
 module.exports = {
     command: "questionMe",
-    callback: async (message: Discord.Message, server: IServer) => {
+    callback: async (message: Discord.Message) => {
         const guild = message.guild
         const messageFiles = [...message.attachments.values()]
 
@@ -14,6 +14,8 @@ module.exports = {
             || message.channel.type !== ChannelType.GuildText) {
             return;
         }
+
+        const server = await getServer(guild.id)
 
         if (server.channels.supportChannel != message.channel.id
             || message.member.roles.cache.has(server.roles.moderationRole)
