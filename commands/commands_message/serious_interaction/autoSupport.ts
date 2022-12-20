@@ -17,7 +17,7 @@ module.exports = {
 
         const server = await getServer(guild.id)
 
-        if (server.channels.supportChannel != message.channel.id
+        if ((!server.channels.supportChannels.includes(message.channel.id) && server.channels.supportChannel != message.channel.id)
             || message.member.roles.cache.has(server.roles.moderationRole)
             || message.member.roles.cache.has(server.roles.supportRole)) {
             return;

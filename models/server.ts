@@ -27,36 +27,37 @@ export interface IModeration {
 
 
 export interface IServer {
-    id: string,
-    reactionRoles: IReactionRole[],
-    disabledCommands: string[],
-    roles: {
-        moderationRole: string,
-        supportRole: string
-    },
     channels: {
-        suggestionChannel: string,
         logsChannel: string,
         patreonChannel: string,
         questionChannel: string,
-        supportChannel: string
+        suggestionChannel: string,
+        supportChannel: string,
+        supportChannels: string[]
     },
-    questions: IQuestion[],
-    supportThreadId: number
+    disabledCommands: string[],
     gameVersions: {
         patreonVersion: string,
         steamVersion: string,
         patreonUpdate: string,
         steamUpdate: string
     },
-    serverRules: string[],
     hidden: {
         rules: Map<string, string>
     },
-    moderation: IModeration[]
+    id: string,
+    moderation: IModeration[],
+    questions: IQuestion[]
+    reactionRoles: IReactionRole[],
+    roles: {
+        moderationRole: string,
+        supportRole: string
+    },
+    serverRules: string[]
     supportAnswers: Map<string, string>,
+    supportThreadId: number;
 
-    save(): Promise<IServer>;
+    save(): Promise<IServer>,
 }
 
 export async function getServer(id: string): Promise<IServer> {
@@ -82,7 +83,8 @@ const ServerSchema = new mongoose.Schema<IServer>({
         logsChannel: String,
         patreonChannel: String,
         questionChannel: String,
-        supportChannel: String
+        supportChannel: String,
+        supportChannels: [String]
     },
     questions: [{
         text: String,
