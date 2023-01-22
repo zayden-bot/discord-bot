@@ -56,7 +56,7 @@ client.on("ready", async () => {
     loadSlashCommands(client)
 
     if (process.env.NODE_ENV == "development") {
-        deployCommands(client).then()
+        await deployCommands(client)
     }
 
     // Self Updating
