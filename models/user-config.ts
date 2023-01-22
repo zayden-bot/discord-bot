@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 export interface IUserConfig {
     id: string
+    infractions: number
     stars: {
         numberOfStars: number,
         givenStars: number,
@@ -15,12 +16,13 @@ export interface IUserConfig {
     save(): Promise<IUserConfig>;
 }
 
-export async function getUserConfig(id: string) {
+export async function getUserConfig(id: string): Promise<IUserConfig> {
     return await UserConfig.findOne({id: id}).exec() || new UserConfig({id: id})
 }
 
 const UserConfigSchema = new mongoose.Schema<IUserConfig>({
     id: String,
+    infractions: {type: Number, default: 0},
     stars: {
         numberOfStars: {type: Number, default: 0},
         givenStars: {type: Number, default: 0},
