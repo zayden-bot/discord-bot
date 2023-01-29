@@ -1,6 +1,7 @@
 import Discord from "discord.js"
 import {parseId} from "../../../common";
-import {getServer} from "../../../models/server";
+import {getConnection} from "../../../servers";
+import {IReactionRole} from "../../../models/server_settings/ReactionRoleSchema";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -26,8 +27,6 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
-
         const channel = interaction.options.getChannel("channel", true) as Discord.TextChannel;
         const messageId = parseId(interaction.options.getString("message_id", true)) || "";
         const emoji = interaction.options.getString("emoji", true)
@@ -40,14 +39,14 @@ module.exports = {
         }
 
         // Find ReactionRole
-        const reactionRoleIndex = server.reactionRoles.findIndex((element) => {
-            return element.channelId == channel.id && element.messageId == message.id && element.emoji == emoji
+        const conn = getConnection(interaction.guild.id)
+        const reactionRole = await conn.model<IReactionRole>("ReactionRoles").findOneAndDelete({
+            channelId: channel.id,
+            messageId: message.id,
+            emoji: emoji
         })
-
-        if (reactionRoleIndex == -1) {
-            return interaction.reply({content: "No reaction role found", ephemeral: true});
-        }
-        server.reactionRoles.splice(reactionRoleIndex, 1);
+        if (!reactionRole)
+            return interaction.reply({content: "No reaction role found", ephemeral: true})
 
         const reaction = message.reactions.cache.get(emoji)
         if (!reaction) {
@@ -55,10 +54,6 @@ module.exports = {
         }
 
         await reaction.remove()
-
-        await Promise.all([
-            await server.save(),
-            await interaction.reply("Successfully removed reaction")
-        ])
+        await interaction.reply("Successfully removed reaction")
     }
 }

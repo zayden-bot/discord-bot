@@ -1,6 +1,7 @@
 import Discord from "discord.js"
 import {ChannelType} from 'discord-api-types/v10';
-import {getServer, IServer} from "../../../../models/server";
+import {IQuestion} from "../../../../models/server_settings/QuestionSchema";
+import {getConnection} from "../../../../servers";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -20,24 +21,27 @@ module.exports = {
         if (!interaction.guild || !(interaction.member instanceof Discord.GuildMember)) {
             return;
         }
+        const conn = getConnection(interaction.guild.id)
 
-        const server: IServer = await getServer(interaction.guild.id)
-
-        const id = interaction.options.getInteger("id")
-        if (!id) {
-            return interaction.reply({content: "Invalid ID", ephemeral: true})
-        }
-
+        const id = interaction.options.getInteger("id", true)
         const text = interaction.options.getString("answer", true)
 
-        let question = server.questions[id]
+        const questionChannel = await conn.model<IQuestion>("Channels").findOne({category: "question"})
+        if (!questionChannel) {
+            return interaction.reply({
+                content: "Couldn't find question channel. Please contact server admin",
+                ephemeral: true
+            })
+        }
+
+        const question = await conn.model<IQuestion>("Questions").findOne({questionId: id})
         if (!question) {
             return interaction.reply({content: "Couldn't find question. Please try again", ephemeral: true})
         }
 
         question.answer = {
             text: text,
-            username: interaction.member.displayName
+            userId: interaction.member.id
         }
 
         const embed = new Discord.EmbedBuilder()
@@ -46,7 +50,7 @@ module.exports = {
                 {name: `Answered by ${interaction.member.displayName}`, value: question.answer.text}
             ])
 
-        const channel = await interaction.guild.channels.fetch(server.channels.questionChannel)
+        const channel = await interaction.guild.channels.fetch(questionChannel.id)
 
         if (channel && channel.type == ChannelType.GuildText && question.messageId) {
             const questionMessage = await channel.messages.fetch(question.messageId)
@@ -57,7 +61,7 @@ module.exports = {
         await Promise.all([
             questionUser.send({embeds: [embed]}),
             interaction.reply({content: "Question answered successfully", ephemeral: true}),
-            server.save()
+            question.save()
         ])
     },
 }

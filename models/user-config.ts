@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import {getConnection} from "../servers";
 
 export interface IUserConfig {
     id: string
@@ -12,15 +13,18 @@ export interface IUserConfig {
         unopenedCardPacks: number,
         openedCardPacks: number
     }
-
-    save(): Promise<IUserConfig>;
 }
 
-export async function getUserConfig(id: string): Promise<IUserConfig> {
-    return await UserConfig.findOne({id: id}).exec() || new UserConfig({id: id})
+export async function getUserConfig(userId: string) {
+    const conn = getConnection("Zayden")
+    let user = await conn.model<IUserConfig>("UserConfigs").findOne({id: userId})
+    if (!user)
+        user = await conn.model<IUserConfig>("UserConfigs").create({id: userId})
+
+    return user
 }
 
-const UserConfigSchema = new mongoose.Schema<IUserConfig>({
+export const UserConfigSchema = new mongoose.Schema<IUserConfig>({
     id: String,
     infractions: {type: Number, default: 0},
     stars: {
@@ -33,5 +37,3 @@ const UserConfigSchema = new mongoose.Schema<IUserConfig>({
         openedCardPacks: {type: Number, default: 0}
     }
 })
-
-export const UserConfig = mongoose.model("UserConfig", UserConfigSchema)

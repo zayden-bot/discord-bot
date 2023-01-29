@@ -1,5 +1,7 @@
 import Discord from "discord.js";
-import {getServer} from "../../../../models/server";
+import {getConnection} from "../../../../servers";
+import {ISupportFAQ} from "../../../../models/server_settings/SupportFAQSchema";
+
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -12,15 +14,13 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
+        const conn = getConnection(interaction.guild.id)
+        const supportIds = (await conn.model<ISupportFAQ>("SupportFAQ").find().lean()).map(support => support._id)
 
-        const ids = Array.from(server.supportAnswers.keys())
-
-        if (ids.length == 0) {
+        if (supportIds.length == 0) {
             return interaction.reply({content: "No support ids for this server", ephemeral: true})
         }
 
-        await interaction.reply(`\`\`\`${ids.sort().join("\n")}\`\`\``)
-    },
-    requiredRoles: ["Support Team"]
+        await interaction.reply(`\`\`\`${supportIds.sort().join("\n")}\`\`\``)
+    }
 }

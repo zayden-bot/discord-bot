@@ -1,6 +1,5 @@
 import Discord from "discord.js"
 import {addLog, LogType} from "./functions";
-import {getServer} from "../../../models/server";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -20,7 +19,6 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
         const member = interaction.options.getMember("member")
         const reason = interaction.options.getString("reason") ?? "Compromised account: Sending scam links."
 
@@ -36,7 +34,7 @@ module.exports = {
         const privateMsg = new Discord.EmbedBuilder()
             .setDescription(`You were soft banned in ${interaction.guild.name} for:\n${reason}`)
 
-        await addLog(server, LogType.SoftBan, interaction.guild, member, interaction.user, reason)
+        await addLog(interaction.guild.id, LogType.SoftBan, member, interaction.user.id, reason)
 
         member.user.send({embeds: [privateMsg]}).catch()
 

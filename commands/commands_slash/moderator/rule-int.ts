@@ -1,5 +1,6 @@
 import Discord from "discord.js";
-import {getServer} from "../../../models/server";
+import {getConnection} from "../../../servers";
+import {IRule} from "../../../models/server_settings/RulesSchema";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -15,10 +16,10 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
-
         const id = interaction.options.getString("id", true);
-        const rule = server.serverRules[Number(id)] || server.hidden.rules.get(id)
+
+        const conn = getConnection(interaction.guild.id)
+        const rule = await conn.model<IRule>("Rules").findOne({ruleId: id})
 
         if (!rule) {
             return interaction.reply(`There is no rule with the id ${id}`);

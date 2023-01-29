@@ -1,6 +1,7 @@
 import Discord from "discord.js";
-import {getUserConfig, IUserConfig} from "../../../models/user-config";
-import {getServer, IServer} from "../../../models/server";
+import {getUserConfig} from "../../../models/user-config";
+import {getConnection} from "../../../servers";
+import {IMiscellaneous} from "../../../models/server_settings/MiscellaneousSchema";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -27,15 +28,16 @@ module.exports = {
             return interaction.reply({content: "You idiot...", ephemeral: true});
         }
 
-        const server: IServer = await getServer(interaction.guild.id)
-        const member_config: IUserConfig = await getUserConfig(member.id)
-        const author_config: IUserConfig = await getUserConfig(author.id)
+        const conn = getConnection(interaction.guild.id)
+        const misc = (await conn.model<IMiscellaneous>("Miscellaneous").findOne())!
+        const member_config = await getUserConfig(member.id)
+        const author_config = await getUserConfig(author.id)
 
-        if (author_config.stars.numberOfStars <= 0 && !author.roles.cache.has(server.roles.moderationRole)) {
+        if (author_config.stars.numberOfStars <= 0 && !author.roles.cache.hasAny(...misc.moderationRoles)) {
             return interaction.reply("Unable. You have no gold stars to give.");
         }
 
-        if (!author.roles.cache.has(server.roles.moderationRole)) {
+        if (!author.roles.cache.hasAny(...misc.moderationRoles)) {
             author_config.stars.numberOfStars -= 1;
         }
         author_config.stars.givenStars += 1;

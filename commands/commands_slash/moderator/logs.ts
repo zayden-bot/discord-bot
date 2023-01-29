@@ -1,7 +1,8 @@
-import {getServer, IModeration} from "../../../models/server";
 import Discord, {ActionRowBuilder, ButtonBuilder, ButtonStyle} from "discord.js";
+import {getConnection} from "../../../servers";
+import {IModLog} from "../../../models/server_settings/ModLogSchema";
 
-function getPageLogs(allLogs: IModeration[], pageNumber: number) {
+function getPageLogs(allLogs: IModLog[], pageNumber: number) {
     return allLogs.slice((pageNumber - 1) * 5, pageNumber * 5)
 }
 
@@ -20,14 +21,13 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
         const member = interaction.options.getMember("member")
-
         if (!(member instanceof Discord.GuildMember)) {
             return interaction.reply({content: "Invalid member mention", ephemeral: true})
         }
 
-        const logs = server.moderation.filter(log => log.userId == member.id)
+        const conn = getConnection(interaction.guild.id)
+        const logs = await conn.model<IModLog>("ModLogs").find({userId: member.id})
 
         if (logs.length == 0) {
             return interaction.reply("No logs found for that user.")
@@ -38,7 +38,7 @@ module.exports = {
 
         let logMsg = ""
         for (const log of getPageLogs(logs, pageNumber)) {
-            logMsg += `**Case ${log.caseNumber}**\n**Type:** ${log.logType}\n**User:** <@${log.userId}>\n**Moderator:** <@${log.moderatorId}>\n**Reason:** ${log.reason}\n\n`
+            logMsg += `**Case ${log.logId}**\n**Type:** ${log.logType}\n**User:** <@${log.userId}>\n**Moderator:** <@${log.moderatorId}>\n**Reason:** ${log.reason}\n\n`
         }
 
         const embed = new Discord.EmbedBuilder()
@@ -104,7 +104,7 @@ module.exports = {
 
             logMsg = ""
             for (const log of getPageLogs(logs, pageNumber)) {
-                logMsg += `**Case ${log.caseNumber}**\n**Type:** ${log.logType}\n**User:** <@${log.userId}>\n**Moderator:** <@${log.moderatorId}>\n**Reason:** ${log.reason}\n\n`
+                logMsg += `**Case ${log.logId}**\n**Type:** ${log.logType}\n**User:** <@${log.userId}>\n**Moderator:** <@${log.moderatorId}>\n**Reason:** ${log.reason}\n\n`
             }
 
             embed.setDescription(logMsg)

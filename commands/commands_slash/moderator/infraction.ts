@@ -1,6 +1,5 @@
 import Discord from "discord.js"
 import {addLog, ban, LogType, mute, warn} from "./functions";
-import {getServer} from "../../../models/server";
 import {getUserConfig} from "../../../models/user-config";
 
 module.exports = {
@@ -25,8 +24,7 @@ module.exports = {
         if (!interaction.guild) {
             return;
         }
-
-        const server = await getServer(interaction.guild.id)
+        
         const member = interaction.options.getMember("member")
         const reason = interaction.options.getString("reason") ?? "No reason given"
         const infractionPoints = interaction.options.getInteger("points") ?? 1
@@ -40,19 +38,19 @@ module.exports = {
         user.infractions = Math.min(infractionPoints + user.infractions, 5)
         switch (user.infractions) {
             case 1:
-                await warn(server, interaction.guild, interaction.channel!, member, interaction.user, reason);
+                await warn(interaction.guild, interaction.channel!, member, interaction.user, reason);
                 break;
             case 2:
-                await mute(server, interaction.guild, interaction.channel!, member, interaction.user, 3600000, reason)
+                await mute(interaction.guild, interaction.channel!, member, interaction.user, 3600000, reason)
                 break;
             case 3:
-                await mute(server, interaction.guild, interaction.channel!, member, interaction.user, 28800000, reason)
+                await mute(interaction.guild, interaction.channel!, member, interaction.user, 28800000, reason)
                 break;
             case 4:
-                await mute(server, interaction.guild, interaction.channel!, member, interaction.user, 604800000, reason)
+                await mute(interaction.guild, interaction.channel!, member, interaction.user, 604800000, reason)
                 break;
             case 5:
-                await ban(server, interaction.guild, interaction.channel!, member, interaction.user, reason)
+                await ban(interaction.guild, interaction.channel!, member, interaction.user, reason)
                 break;
             default:
                 break;
@@ -64,7 +62,7 @@ module.exports = {
             .setColor("#ff0000")
 
         await Promise.all([
-            addLog(server, LogType.Infraction, interaction.guild, member, interaction.user, reason),
+            addLog(interaction.guild.id, LogType.Infraction, member, interaction.user.id, reason),
             interaction.reply({embeds: [response], ephemeral: true})
         ])
     }

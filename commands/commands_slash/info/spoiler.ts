@@ -1,5 +1,6 @@
 import Discord from "discord.js"
-import {getServer} from "../../../models/server";
+import {getConnection} from "../../../servers";
+import {IChannel} from "../../../models/server_settings/ChannelSchema";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -11,8 +12,12 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
+        const conn = getConnection(interaction.guild.id)
+        const supportChannel = await conn.model<IChannel>("Channels").findOne({category: "support"})
+        const spoilerChannel = await conn.model<IChannel>("Channels").findOne({category: "spoiler"})
+        if (!supportChannel || !spoilerChannel)
+            return
 
-        interaction.reply(`Please keep all conversations about the new update to <#770621445637799946>\nIf you have any bugs or questions please post them in <#${server.channels.supportChannel}>`).then()
+        await interaction.reply(`Please keep all conversations about the new update to <#${spoilerChannel.id}>\nIf you have any bugs or questions please post them in <#${supportChannel.id}>`)
     },
 }

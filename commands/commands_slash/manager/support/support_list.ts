@@ -1,6 +1,7 @@
 import Discord, {ButtonBuilder, ButtonStyle} from "discord.js"
 import {ComponentType} from "discord-api-types/v10"
-import {getServer} from "../../../../models/server";
+import {getConnection} from "../../../../servers";
+import {ISupportFAQ} from "../../../../models/server_settings/SupportFAQSchema";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -13,25 +14,20 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
-
-        const supportEntries: Array<readonly [string, string]> = Array.from(server.supportAnswers, ([id, answer]) => ([id, answer]))
-        const supportPages: Map<number, Map<string, string>> = new Map();
-
-        let pageNumber = 1;
-        for (let i = 1; i <= supportEntries.length; i += 5) {
-            supportPages.set(pageNumber, new Map(supportEntries.slice(i - 1, i + 4)))
-            pageNumber++
-        }
-
         const embed = new Discord.EmbedBuilder()
             .setTitle("List of support options")
             .setColor("#ff0000")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
-        const firstPage = supportPages.get(1) as Map<string, string>
-        for (const [id, answer] of firstPage) {
-            embed.spliceFields(-1, 0, {name: id, value: answer});
+        const pageSize = 5
+        let pageNumber = 1
+
+        const conn = getConnection(interaction.guild.id)
+        const supportCollection = await conn.model<ISupportFAQ>("SupportFAQ")
+        let supportEntries = await supportCollection.find().limit(pageSize)
+
+        for (const entry of supportEntries) {
+            embed.spliceFields(-1, 0, {name: entry.id, value: entry.answer});
         }
 
         const nextPage = new Discord.ButtonBuilder()
@@ -45,9 +41,8 @@ module.exports = {
             .setStyle(ButtonStyle.Primary)
             .setDisabled(true);
 
-        if (supportPages.size <= 1) {
-            nextPage.setDisabled(true);
-        }
+        if (pageNumber > Math.ceil((await supportCollection.count()) / pageSize))
+            nextPage.setDisabled(true)
 
         const row = new Discord.ActionRowBuilder<ButtonBuilder>()
             .addComponents(nextPage, previousPage)
@@ -60,8 +55,7 @@ module.exports = {
 
         const collector = msg.createMessageComponentCollector({filter, componentType: ComponentType.Button})
 
-        pageNumber = 1;
-        collector.on("collect", (i) => {
+        collector.on("collect", async (i) => {
             if (i.customId == "next-page") {
                 pageNumber++;
                 previousPage.setDisabled(false);
@@ -71,15 +65,14 @@ module.exports = {
                     .setColor("#ff0000")
                     .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
-                const supportPage = supportPages.get(pageNumber) as Map<string, string>
+                supportEntries = await supportCollection.find().skip((pageNumber - 1) * pageSize).limit(pageSize)
 
-                for (const [id, answer] of supportPage) {
-                    embed.spliceFields(-1, 0, {name: id, value: answer});
+                for (const entry of supportEntries) {
+                    embed.spliceFields(-1, 0, {name: entry.id, value: entry.answer});
                 }
 
-                if (pageNumber >= supportPages.size) {
-                    nextPage.setDisabled(true);
-                }
+                if (pageNumber > Math.ceil((await supportCollection.count()) / pageSize))
+                    nextPage.setDisabled(true)
 
                 const row = new Discord.ActionRowBuilder<ButtonBuilder>()
                     .addComponents(nextPage, previousPage)
@@ -95,11 +88,11 @@ module.exports = {
                     .setColor("#ff0000")
                     .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
-                const supportPage = supportPages.get(pageNumber) as Map<string, string>
-                for (const [id, answer] of supportPage) {
-                    embed.spliceFields(-1, 0, {name: id, value: answer});
+                supportEntries = await supportCollection.find().skip((pageNumber - 1) * pageSize).limit(pageSize)
+                for (const entry of supportEntries) {
+                    embed.spliceFields(-1, 0, {name: entry.id, value: entry.answer});
                 }
-
+                
                 if (pageNumber <= 1) {
                     previousPage.setDisabled(true);
                 }

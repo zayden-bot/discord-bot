@@ -1,6 +1,8 @@
 import Discord from "discord.js";
-import {getServer} from "../../../models/server";
 import {ChannelType, ThreadAutoArchiveDuration} from 'discord-api-types/v10';
+import {IChannel} from "../../../models/server_settings/ChannelSchema";
+import {IMiscellaneous} from "../../../models/server_settings/MiscellaneousSchema";
+import {getConnection} from "../../../servers";
 
 module.exports = {
     command: "questionMe",
@@ -15,20 +17,23 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(guild.id)
-
-        if ((!server.channels.supportChannels.includes(message.channel.id) && server.channels.supportChannel != message.channel.id)
-            || message.member.roles.cache.has(server.roles.moderationRole)
-            || message.member.roles.cache.has(server.roles.supportRole)) {
+        const conn = getConnection(guild.id)
+        const supportChannel = await conn.model("Channels").findOne<IChannel>({
+            id: message.channel.id,
+            category: "support"
+        });
+        if (!supportChannel)
             return;
-        }
 
-        if (!server.supportThreadId) {
-            server.supportThreadId = 0
-        }
+        const miscellaneous = (await conn.model<IMiscellaneous>("Miscellaneous").find())[0]
+        if (message.member.roles.cache.hasAny(...miscellaneous.supportRoles, ...miscellaneous.moderationRoles))
+            return;
 
         // noinspection TypeScriptValidateJSTypes
-        const idNumber = server.supportThreadId.toLocaleString('en', {minimumIntegerDigits: 4, useGrouping: false})
+        const idNumber = miscellaneous.supportThreadId.toLocaleString('en', {
+            minimumIntegerDigits: 4,
+            useGrouping: false
+        })
 
         // Create channel thread and send mentions
         let threadName = `${idNumber} - ${message.content}`
@@ -58,12 +63,12 @@ module.exports = {
             })
         }
 
-        server.supportThreadId += 1
+        miscellaneous.supportThreadId += 1
 
-        Promise.all([
-            server.save(),
+        await Promise.all([
+            miscellaneous.save(),
             message.delete(),
             message.channel.bulkDelete(1)
-        ]).then()
+        ])
     }
 }

@@ -1,6 +1,7 @@
 import Discord from "discord.js"
-import {getServer, IReactionRole} from "../../../models/server";
 import {parseId} from "../../../common";
+import {getConnection} from "../../../servers";
+import {IReactionRole} from "../../../models/server_settings/ReactionRoleSchema";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -30,7 +31,8 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
+        const conn = getConnection(interaction.guild.id)
+        const reactionRoles = await conn.model<IReactionRole>("ReactionRoles")
 
         const channel = interaction.options.getChannel("channel", true) as Discord.TextChannel;
         const messageId = parseId(interaction.options.getString("message_id", true)) || "";
@@ -45,17 +47,15 @@ module.exports = {
         }
 
         // Create ReactionRole
-        const reactionRole: IReactionRole = {
+        await (await reactionRoles.create({
             channelId: channel.id,
             messageId: message.id,
             roleId: role.id,
             emoji: emoji
-        }
-        server.reactionRoles.push(reactionRole);
+        })).save()
 
         await Promise.all([
             message.react(emoji),
-            server.save(),
             interaction.reply("Successfully added reaction")
         ])
     },

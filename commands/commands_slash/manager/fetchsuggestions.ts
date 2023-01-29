@@ -1,6 +1,6 @@
 import Discord from "discord.js";
-import {ChannelType} from "discord-api-types/v10"
-import {getServer} from "../../../models/server";
+import {IChannel} from "../../../models/server_settings/ChannelSchema";
+import {getConnection} from "../../../servers";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -8,33 +8,40 @@ module.exports = {
         .setDescription("Fetch top community suggestions")
         .setDefaultMemberPermissions(Discord.PermissionFlagsBits.ManageMessages),
 
-    async execute(interaction: Discord.ChatInputCommandInteraction) {
+    execute: async function (interaction: Discord.ChatInputCommandInteraction) {
         if (!interaction.guild) {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
-
         const startTime = new Date();
-        interaction.reply({content: "Fetching information...", ephemeral: true}).then();
-        const suggestionChannel = await interaction.guild.channels.fetch(server.channels.suggestionChannel)
-        if (!suggestionChannel || suggestionChannel.type != ChannelType.GuildText) {
-            return interaction.editReply({content: "Invalid suggestion channel"});
-        }
+        await interaction.deferReply({ephemeral: true});
+
+        const conn = getConnection(interaction.guild.id)
+        const suggestionChannels = await Promise.all((await conn.model("Channels").find<IChannel>({category: "suggestion"}))
+            .map(channel => interaction.guild!.channels.fetch(channel.id)))
 
         let suggestionMessages: Discord.Collection<string, Discord.Message> = new Discord.Collection();
         let lastMessage;
         let previousCollectionSize = -1;
         let currentCollectionSize = suggestionMessages.size
-        while (previousCollectionSize != currentCollectionSize) {
-            previousCollectionSize = currentCollectionSize
-            suggestionMessages = suggestionMessages.concat((await suggestionChannel.messages.fetch({
-                limit: 100,
-                before: lastMessage?.id
-            })))
-            lastMessage = suggestionMessages.last()
-            currentCollectionSize = suggestionMessages.size
+
+        for (const channel of suggestionChannels) {
+            if (channel?.type != Discord.ChannelType.GuildText) {
+                return interaction.editReply("Invalid suggestion channel present, cancelling operation")
+            }
+
+            while (previousCollectionSize != currentCollectionSize) {
+                previousCollectionSize = currentCollectionSize
+
+                suggestionMessages = suggestionMessages.concat((await channel.messages.fetch({
+                    limit: 100,
+                    before: lastMessage?.id
+                })))
+                lastMessage = suggestionMessages.last()
+                currentCollectionSize = suggestionMessages.size
+            }
         }
+
         suggestionMessages = suggestionMessages
             .filter(message => message.author.id == message.client.user?.id && message.embeds.length > 0)
             .sort((a, b) => {
@@ -73,7 +80,7 @@ module.exports = {
             embed.addFields([
                 {
                     name: `Position: ${count}, 👍: ${thumbsUp.count - 1}, 👎: ${thumbsDown.count - 1}`,
-                    value: `Link: https://discord.com/channels/${interaction.guild.id}/${server.channels.suggestionChannel}/${element.id}`,
+                    value: `Link: https://discord.com/channels/${interaction.guild.id}/${element.channel.id}/${element.id}`,
                     inline: false
                 }
             ]);

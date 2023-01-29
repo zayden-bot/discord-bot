@@ -1,26 +1,19 @@
 import Discord from "discord.js";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-import {Server} from "./models/server";
-import {UserConfig} from "./models/user-config";
-import {createServer} from "./servers";
 import {Zayden} from "./client"
 import {loadMessageCommands, loadSlashCommands} from "./commands/load_commands";
+import {saveAndCloseDbConnections} from "./mongoDb";
 import deployCommands from "./deploy_commands";
+import {IReactionRole} from "./models/server_settings/ReactionRoleSchema";
+import {IChannel} from "./models/server_settings/ChannelSchema";
+import {getConnection} from "./servers";
 
-switch (process.env.NODE_ENV) {
-    case "development":
-        dotenv.config({path: "./.env.local"})
-        break;
-    default:
-        dotenv.config()
-        break;
+
+if (process.env.NODE_ENV == "development") {
+    dotenv.config({path: "./.env.local"})
+} else {
+    dotenv.config()
 }
-
-const dbURI = `mongodb+srv://oscar:${process.env.DB_PASSWORD}@zayden.wcx6n.mongodb.net/Zayden?retryWrites=true&w=majority`
-mongoose.connect(dbURI)
-    .then(() => console.log("Connected to DB"))
-    .catch(console.error)
 
 export const client = new Zayden({
     intents: [
@@ -37,17 +30,10 @@ export const client = new Zayden({
     ]
 })
 
-// Init
 client.on("ready", async () => {
-    const botConfig = require("./configs/bot_config.json");
-    console.log(`Zayden is Running, version: ${botConfig.version}`);
+    console.log(`${client.constructor.name} is Running, version: ${client.version.join('.')}`);
 
-    if (client.user) {
-        client.user.setPresence({activities: [{name: "College Kings"}], status: "online"})
-    }
-
-    // Initialize Bot Config
-    await require("./bot-config").init()
+    client.user?.setPresence({activities: client.activities, status: "online"})
 
     // Initialize Servers
     await require("./servers").init(client)
@@ -65,16 +51,10 @@ client.on("ready", async () => {
 
     const updateInformation = require("./self_updating/updateInfomation")
     await updateInformation(client, "830927865784565800")
-
-    const updateRules = require("./self_updating/updateRules")
-    await updateRules(client, "747430712617074718")
+    //
+    // const updateRules = require("./self_updating/updateRules")
+    // await updateRules(client, "747430712617074718")
 });
-
-
-client.on(Discord.Events.GuildCreate, guild => {
-    createServer(guild)
-})
-
 
 client.on(Discord.Events.MessageCreate, message => {
     const client = message.client as Zayden
@@ -86,10 +66,10 @@ client.on(Discord.Events.MessageReactionAdd, async (reaction, user) => {
     const guild = reaction.message.guild
     if (!guild) return;
 
-    const server = await Server.findOne({id: guild.id}).exec()
-    if (!server) return;
+    const conn = getConnection(guild.id)
+    const reactionRoles = await conn.model<IReactionRole>("ReactionRoles").find()
 
-    for (const reactionRole of server.reactionRoles) {
+    for (const reactionRole of reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) {
@@ -108,15 +88,14 @@ client.on(Discord.Events.MessageReactionAdd, async (reaction, user) => {
     }
 })
 
-
 client.on(Discord.Events.MessageReactionRemove, async (reaction, user) => {
     const guild = reaction.message.guild
     if (!guild) return;
 
-    const server = await Server.findOne({id: guild.id}).exec()
-    if (!server) return;
+    const conn = getConnection(guild.id)
+    const reactionRoles = await conn.model<IReactionRole>("ReactionRoles").find()
 
-    for (const reactionRole of server.reactionRoles) {
+    for (const reactionRole of reactionRoles) {
         if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) {
@@ -135,11 +114,12 @@ client.on(Discord.Events.MessageReactionRemove, async (reaction, user) => {
     }
 })
 
-// Events
 client.on(Discord.Events.GuildMemberUpdate, async (oldMember, newMember) => {
     const guild = newMember.guild
-    const server = await Server.findOne({id: guild.id}).exec()
-    if (!server) return;
+
+    const conn = getConnection(guild.id)
+    const channels = await conn.model<IChannel>("Channels").findOne({category: "patreonChannel"})
+    if (!channels) return;
 
     const patreonRoles: Record<string, number> = {
         '745663316776714370': 1, // Freshman
@@ -172,11 +152,10 @@ client.on(Discord.Events.GuildMemberUpdate, async (oldMember, newMember) => {
             embed.setFooter({text: guild.name, iconURL: serverIconURL})
         }
 
-        const channel = client.channels.cache.get(server.channels.patreonChannel)
+        const channel = client.channels.cache.get(channels.id)
         if (channel && channel.type == Discord.ChannelType.GuildText) {
             channel.send({embeds: [embed]});
         }
-
     }
 })
 
@@ -204,34 +183,16 @@ client.on(Discord.Events.InteractionCreate, async interaction => {
 
 client.login(process.env.TOKEN).then();
 
-async function saveAllDB() {
-    let tasks: Promise<any>[] = []
-
-    async function saveServers() {
-        for (const server of await Server.find().exec()) {
-            tasks.push(server.save())
-        }
-    }
-
-    async function saveUsers() {
-        for (const user of await UserConfig.find().exec()) {
-            tasks.push(user.save())
-        }
-    }
-
-    await Promise.all([saveServers(), saveUsers()])
-    return tasks
-}
-
 if (process.env.NODE_ENV != "development") {
     process.on("uncaughtException", async (error) => {
-        await Promise.all(await saveAllDB())
+        await saveAndCloseDbConnections()
+
         console.error(error)
     })
 
     process.on("unhandledRejection", async (reason, promise) => {
-        await Promise.all(await saveAllDB())
+        await saveAndCloseDbConnections()
+
         console.error(`Unhandled Rejection at: ${promise}  reason: ${reason}`)
     })
 }
-

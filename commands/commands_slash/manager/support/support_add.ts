@@ -1,5 +1,6 @@
 import Discord, {ButtonBuilder, ButtonStyle} from "discord.js";
-import {getServer} from "../../../../models/server";
+import {getConnection} from "../../../../servers";
+import {ISupportFAQ} from "../../../../models/server_settings/SupportFAQSchema";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -20,18 +21,22 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
-
         const id = interaction.options.getString("id", true)
         const text = interaction.options.getString("text", true)
 
-        if (!server.supportAnswers.get(id)) {
-            server.supportAnswers.set(id, text);
+        const conn = await getConnection(interaction.guild.id)
+        const supportCollection = conn.model<ISupportFAQ>("SupportFAQ")
+        const existingDocument = await supportCollection.findOne({supportId: id})
 
-            return await Promise.all([
-                server.save(),
-                interaction.reply("Successfully added support option")
-            ])
+        if (!existingDocument) {
+            const document = await supportCollection.create({
+                id: id,
+                answer: text
+            })
+
+            await interaction.reply("Successfully added support option")
+            await document.save()
+            return
         }
 
         // If ID already exists:
@@ -53,7 +58,7 @@ module.exports = {
 
         const embed = new Discord.EmbedBuilder()
             .setTitle(`Support ID: ${id}`)
-            .setDescription(server.supportAnswers.get(id) ?? "")
+            .setDescription(existingDocument.answer)
             .setColor("#ff0000")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
@@ -84,11 +89,11 @@ module.exports = {
 
         switch (buttonInteraction.customId) {
             case "confirm":
-                server.supportAnswers.set(id, text);
-                return await Promise.all([
-                    server.save(),
-                    interaction.editReply({content: "Successfully added support option", embeds: [], components: []})
-                ])
+                existingDocument.answer = text
+                await existingDocument.save()
+                await interaction.editReply({content: "Successfully added support option", embeds: [], components: []})
+                return
+
             case "decline":
                 return interaction.editReply({content: "Canceled", embeds: [], components: []})
         }

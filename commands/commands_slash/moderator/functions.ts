@@ -1,6 +1,7 @@
-import {IServer} from "../../../models/server";
 import Discord from "discord.js";
-import {BotConfig, IBotConfig} from "../../../models/bot-config";
+import {IModLog} from "../../../models/server_settings/ModLogSchema";
+import {getConnection} from "../../../servers";
+import {IChannel} from "../../../models/server_settings/ChannelSchema";
 
 export enum LogType {
     Ban = "BAN",
@@ -13,42 +14,46 @@ export enum LogType {
 }
 
 export async function addLog(
-    server: IServer,
+    guildId: string,
     logType: LogType,
-    guild: Discord.Guild,
     member: Discord.GuildMember,
-    moderator: Discord.User | Discord.GuildMember,
+    moderatorId: string,
     reason: string = ""
 ) {
-    const log = {
-        caseNumber: server.moderation.length,
-        guildId: guild.id,
-        userId: member.id,
-        logType: logType.toString(),
-        moderatorId: moderator.id,
-        reason: reason
+
+    const conn = getConnection(guildId)
+    const modLogs = conn.model<IModLog>("modLogs")
+
+    const log: IModLog = {
+        logId: await modLogs.count(),
+        logType: logType,
+        moderatorId: moderatorId,
+        reason: reason,
+        userId: member.id
     }
 
-    const logChannel = await guild.channels.fetch(server.channels.logsChannel)
-    if (logChannel && logChannel.isTextBased()) {
-        const embed = new Discord.EmbedBuilder()
-            .setTitle(`Case ${log.caseNumber} | ${log.logType} | ${member.user.tag}`)
-            .setFields(
-                {name: "User", value: member.toString(), inline: true},
-                {name: "Moderator", value: moderator.toString(), inline: true},
-                {name: "Reason", value: log.reason, inline: true}
-            )
-            .setFooter({text: `ID: ${log.userId}`})
-            .setTimestamp()
-        logChannel.send({embeds: [embed]})
-    }
+    await (await modLogs.create(log)).save()
 
-    server.moderation.push(log)
-    await server.save()
-    return true;
+    const embed = new Discord.EmbedBuilder()
+        .setTitle(`Case ${log.logId} | ${log.logType} | ${member.user.tag}`)
+        .setFields(
+            {name: "User", value: member.toString(), inline: true},
+            {name: "Moderator", value: `<@${moderatorId}>`, inline: true},
+            {name: "Reason", value: log.reason, inline: true}
+        )
+        .setFooter({text: `ID: ${log.userId}`})
+        .setTimestamp()
+
+    const logChannels = await conn.model<IChannel>("Channels").find({category: "log"})
+    for (const logChannel of logChannels) {
+        const channel = await member.guild.channels.fetch(logChannel.id)
+
+        if (channel?.type == Discord.ChannelType.GuildText)
+            channel.send({embeds: [embed]})
+    }
 }
 
-export async function warn(server: IServer, guild: Discord.Guild, channel: Discord.TextBasedChannel, member: Discord.GuildMember, moderator: Discord.User, reason: string) {
+export async function warn(guild: Discord.Guild, channel: Discord.TextBasedChannel, member: Discord.GuildMember, moderator: Discord.User, reason: string = "") {
     const serverMsg = new Discord.EmbedBuilder()
         .setTitle(`User Warned`)
         .setDescription(`**${member} has been warned.\nReason: ${reason}**`)
@@ -58,13 +63,13 @@ export async function warn(server: IServer, guild: Discord.Guild, channel: Disco
         .setDescription(`You were warned in ${guild.name} for: ${reason}`)
 
     await Promise.all([
-        addLog(server, LogType.Warn, guild, member, moderator, reason),
+        addLog(guild.id, LogType.Warn, member, moderator.id, reason),
         channel.send({embeds: [serverMsg]}),
         member.user.send({embeds: [privateMsg]})
     ])
 }
 
-export async function mute(server: IServer, guild: Discord.Guild, channel: Discord.TextBasedChannel, member: Discord.GuildMember, moderator: Discord.User, duration: number, reason: string) {
+export async function mute(guild: Discord.Guild, channel: Discord.TextBasedChannel, member: Discord.GuildMember, moderator: Discord.User, duration: number, reason: string) {
     const serverMsg = new Discord.EmbedBuilder()
         .setTitle(`User Muted`)
         .setDescription(`**${member} has been muted.\nReason: ${reason}**`)
@@ -74,14 +79,14 @@ export async function mute(server: IServer, guild: Discord.Guild, channel: Disco
         .setDescription(`You were muted in ${guild.name} for: ${reason}`)
 
     await Promise.all([
-        addLog(server, LogType.Mute, guild, member, moderator, reason),
+        addLog(guild.id, LogType.Mute, member, moderator.id, reason),
         member.timeout(duration),
         channel.send({embeds: [serverMsg]}),
         member.user.send({embeds: [privateMsg]})
     ])
 }
 
-export async function ban(server: IServer, guild: Discord.Guild, channel: Discord.TextBasedChannel, member: Discord.GuildMember, moderator: Discord.User, reason: string) {
+export async function ban(guild: Discord.Guild, channel: Discord.TextBasedChannel, member: Discord.GuildMember, moderator: Discord.User, reason: string) {
     const serverMsg = new Discord.EmbedBuilder()
         .setTitle("User Banned")
         .setDescription(`**${member} has been banned.\nReason: ${reason}**`)
@@ -91,14 +96,9 @@ export async function ban(server: IServer, guild: Discord.Guild, channel: Discor
         .setDescription(`You were banned in ${guild.name} for: ${reason}`)
 
     await Promise.all([
-        addLog(server, LogType.Ban, guild, member, moderator, reason),
+        addLog(guild.id, LogType.Ban, member, moderator.id, reason),
         member.user.send({embeds: [privateMsg]}),
         member.ban({deleteMessageSeconds: 604800, reason: reason}),
         channel.send({embeds: [serverMsg]}),
     ])
-}
-
-export async function isBlacklisted(member: Discord.GuildMember | Discord.User) {
-    const botConfig: IBotConfig | null = await BotConfig.findOne<IBotConfig>().exec()
-    return botConfig!.botBan.map(({userId}) => userId).includes(member.id)
 }

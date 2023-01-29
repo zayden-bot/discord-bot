@@ -1,5 +1,6 @@
 import Discord from "discord.js"
-import {getServer} from "../../../models/server";
+import {getConnection} from "../../../servers";
+import {IChannel} from "../../../models/server_settings/ChannelSchema";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -11,8 +12,11 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
+        const conn = getConnection(interaction.guild.id)
+        const supportChannel = await conn.model<IChannel>("Channels").findOne({category: "support"})
+        if (!supportChannel)
+            return
 
-        interaction.reply(`We do our best to retain save integrity with every update however due to the dynamic nature of game development saves might break. If you experience a save problem please let us know in <#${server.channels.supportChannel}>\n\nReminder:\nWith the major changes in v0.6 saves before this version will not work. We are sorry for the inconvenience. Use CTRL/TAB to quickly skip through the content you have seen`).then()
-    },
+        await interaction.reply(`We do our best to retain save integrity with every update however due to the dynamic nature of game development saves might break. If you experience a save problem please let us know in <#${supportChannel.id}>`)
+    }
 }

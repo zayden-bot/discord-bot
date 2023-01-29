@@ -1,5 +1,6 @@
 import Discord, {ActionRowBuilder, ButtonBuilder, ButtonStyle} from "discord.js";
-import {getServer} from "../../../../models/server";
+import {getConnection} from "../../../../servers";
+import {ISupportFAQ} from "../../../../models/server_settings/SupportFAQSchema";
 
 module.exports = {
     data: new Discord.SlashCommandBuilder()
@@ -16,10 +17,10 @@ module.exports = {
             return;
         }
 
-        const server = await getServer(interaction.guild.id)
-
         const id = interaction.options.getString("id", true).toLowerCase();
-        const answer = server.supportAnswers.get(id)
+
+        const conn = getConnection(interaction.guild.id)
+        const answer = await conn.model<ISupportFAQ>("SupportFAQ").findOne({supportId: id})
         if (!answer) {
             return interaction.reply({content: "No support ID found", ephemeral: true});
         }
@@ -40,7 +41,7 @@ module.exports = {
 
         const embed = new Discord.EmbedBuilder()
             .setTitle(`Support ID: ${id}`)
-            .setDescription(answer)
+            .setDescription(answer.answer)
             .setColor("#ff0000")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
@@ -69,12 +70,9 @@ module.exports = {
         console.log(`Interaction "${buttonInteraction.customId}" was clicked`)
 
         if (buttonInteraction.customId == "confirm") {
-            server.supportAnswers.delete(id)
-            await server.save()
-
+            await answer.remove()
             return interaction.editReply({content: "Successfully removed support option", embeds: [], components: []})
-        }
-        if (buttonInteraction.customId == "decline") {
+        } else if (buttonInteraction.customId == "decline") {
             return interaction.editReply({content: "Canceled", embeds: [], components: []})
         }
     },
