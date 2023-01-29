@@ -3,7 +3,7 @@ import {Zayden} from "./client";
 
 const commands: string[] = [];
 
-export default async function deploy_commands(client: Zayden) {
+export default async function deployCommands(client: Zayden) {
     const rest = new Discord.REST({version: '10'}).setToken(process.env.TOKEN!);
 
     for (const command of client.slashCommands.values()) {
