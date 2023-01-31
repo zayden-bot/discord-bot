@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import {getUserConfig, IUserConfig} from "../../../models/user-config";
+import {getUserConfig} from "../../../models/user-config";
 
 module.exports = {
     commands: ["give_pack", "givepack"],
@@ -12,7 +12,7 @@ module.exports = {
             return;
         }
 
-        const member_config: IUserConfig = await getUserConfig(member.id)
+        const member_config = await getUserConfig(member.id)
 
         member_config.tradingCards.unopenedCardPacks += 1;
 
