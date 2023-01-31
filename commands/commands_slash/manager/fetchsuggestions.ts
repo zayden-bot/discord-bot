@@ -89,7 +89,7 @@ module.exports = {
                 embed.setImage("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg?width=1440&height=360");
                 embed.setTimestamp();
 
-                await interaction.user.send({embeds: [embed]});
+                await interaction.user.send({embeds: [embed]}).catch();
                 break;
             }
             count++

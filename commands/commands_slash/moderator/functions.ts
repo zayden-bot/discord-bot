@@ -66,7 +66,7 @@ export async function warn(guild: Discord.Guild, channel: Discord.TextBasedChann
         addLog(guild.id, LogType.Warn, member, moderator.id, reason),
         channel.send({embeds: [serverMsg]}),
         member.user.send({embeds: [privateMsg]})
-    ])
+    ]).catch()
 }
 
 export async function mute(guild: Discord.Guild, channel: Discord.TextBasedChannel, member: Discord.GuildMember, moderator: Discord.User, duration: number, reason: string) {
@@ -83,7 +83,7 @@ export async function mute(guild: Discord.Guild, channel: Discord.TextBasedChann
         member.timeout(duration),
         channel.send({embeds: [serverMsg]}),
         member.user.send({embeds: [privateMsg]})
-    ])
+    ]).catch()
 }
 
 export async function ban(guild: Discord.Guild, channel: Discord.TextBasedChannel, member: Discord.GuildMember, moderator: Discord.User, reason: string) {
@@ -100,5 +100,5 @@ export async function ban(guild: Discord.Guild, channel: Discord.TextBasedChanne
         member.user.send({embeds: [privateMsg]}),
         member.ban({deleteMessageSeconds: 604800, reason: reason}),
         channel.send({embeds: [serverMsg]}),
-    ])
+    ]).catch()
 }
