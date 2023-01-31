@@ -22,7 +22,7 @@ export async function addLog(
 ) {
 
     const conn = getConnection(guildId)
-    const modLogs = conn.model<IModLog>("modLogs")
+    const modLogs = conn.model<IModLog>("ModLogs")
 
     const log: IModLog = {
         logId: await modLogs.count(),
