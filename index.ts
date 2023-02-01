@@ -7,7 +7,8 @@ import deployCommands from "./deploy_commands";
 import {IReactionRole} from "./models/server_settings/ReactionRoleSchema";
 import {IChannel} from "./models/server_settings/ChannelSchema";
 import {getConnection} from "./servers";
-
+import autoUpdating from "./autoUpdating";
+import cron from "node-cron";
 
 if (process.env.NODE_ENV == "development") {
     dotenv.config({path: "./.env.local"})
@@ -45,15 +46,7 @@ client.on("ready", async () => {
         await deployCommands(client)
     }
 
-    // Self Updating
-    const customRoles = require("./self_updating/customRoles")
-    await customRoles(client, "805765564504473641")
-
-    const updateInformation = require("./self_updating/updateInfomation")
-    await updateInformation(client, "830927865784565800")
-    //
-    // const updateRules = require("./self_updating/updateRules")
-    // await updateRules(client, "747430712617074718")
+    cron.schedule("0 0 0 * * *", async () => await autoUpdating(client))
 });
 
 client.on(Discord.Events.MessageCreate, message => {
@@ -70,7 +63,7 @@ client.on(Discord.Events.MessageReactionAdd, async (reaction, user) => {
     const reactionRoles = await conn.model<IReactionRole>("ReactionRoles").find()
 
     for (const reactionRole of reactionRoles) {
-        if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
+        if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== client.user?.id) {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) {
                 break;
@@ -96,7 +89,7 @@ client.on(Discord.Events.MessageReactionRemove, async (reaction, user) => {
     const reactionRoles = await conn.model<IReactionRole>("ReactionRoles").find()
 
     for (const reactionRole of reactionRoles) {
-        if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== "907635513341644861") {
+        if (reaction.message.id == reactionRole.messageId && reaction.emoji.toString() == reactionRole.emoji && user.id !== client.user?.id) {
             const member = guild.members.cache.find(member => member.id == user.id)
             if (!member) {
                 break;
@@ -136,7 +129,7 @@ client.on(Discord.Events.GuildMemberUpdate, async (oldMember, newMember) => {
         .first()
 
     // Is new role a patreon role
-    if (typeof (newRole) != "undefined" && newRole.id in patreonRoles) {
+    if (newRole && newRole.id in patreonRoles) {
         const embed = new Discord.EmbedBuilder()
             .setTitle("New Patron")
             .setColor(`${newRole.hexColor}`)
