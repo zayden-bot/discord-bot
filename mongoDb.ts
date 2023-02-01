@@ -15,6 +15,7 @@ import {
     KissImageSchema,
     SlapImageSchema
 } from "./models/global/IImageSchema";
+import {AutoUpdatingSchema} from "./models/server_settings/AutoUpdating";
 
 export function connectionFactory(connectionId: string) {
     const conn = mongoose.createConnection(process.env.MONGODB_CONNECTION_STRING!.replace("{dbName}", connectionId))
@@ -34,6 +35,7 @@ export function connectionFactory(connectionId: string) {
         return conn
     }
 
+    conn.model("AutoUpdating", AutoUpdatingSchema)
     conn.model("Channels", ChannelSchema)
     conn.model("Miscellaneous", MiscellaneousSchema)
     conn.model("ModLogs", ModLogSchema)
