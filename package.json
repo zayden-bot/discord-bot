@@ -18,11 +18,14 @@
   },
   "homepage": "https://github.com/College-Kings/Zayden#readme",
   "dependencies": {
+    "canvas": "latest",
     "discord.js": "latest",
     "dotenv": "latest",
-    "mongoose": "latest"
+    "mongoose": "latest",
+    "node-cron": "latest"
   },
   "devDependencies": {
+    "@types/node-cron": "latest",
     "ts-node": "latest"
   }
 }
