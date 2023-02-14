@@ -27,7 +27,7 @@ module.exports = {
 
         const embed = new Discord.EmbedBuilder()
             .setTitle(`Rule ${id}`)
-            .setDescription(`**${id}.** ${rule}\n\n**Please read the rest of the rules in <#747430712617074718>!**`)
+            .setDescription(`**${id}.** ${rule.ruleText}\n\n**Please read the rest of the rules in <#747430712617074718>!**`)
             .setColor("#ff0000")
             .setThumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png");
 
