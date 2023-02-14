@@ -17,9 +17,9 @@ export interface IUserConfig {
 
 export async function getUserConfig(userId: string) {
     const conn = getConnection("Zayden")
-    let user = await conn.model<IUserConfig>("UserConfigs").findOne({id: userId})
+    let user = await conn.model<IUserConfig>("UserConfig").findOne({id: userId})
     if (!user)
-        user = await conn.model<IUserConfig>("UserConfigs").create({id: userId})
+        user = await conn.model<IUserConfig>("UserConfig").create({id: userId})
 
     return user
 }
