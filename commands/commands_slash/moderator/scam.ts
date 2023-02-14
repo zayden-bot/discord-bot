@@ -36,7 +36,10 @@ module.exports = {
 
         await addLog(interaction.guild.id, LogType.SoftBan, member, interaction.user.id, reason)
 
-        member.user.send({embeds: [privateMsg]}).catch()
+        try {
+            await member.user.send({embeds: [privateMsg]})
+        } catch {
+        }
 
         member.ban({
             deleteMessageSeconds: 604800,
