@@ -20,7 +20,8 @@ module.exports = {
         const id = interaction.options.getString("id", true).toLowerCase();
 
         const conn = getConnection(interaction.guild.id)
-        const answer = await conn.model<ISupportFAQ>("SupportFAQ").findOne({supportId: id})
+        const model = conn.model<ISupportFAQ>("SupportFAQ")
+        const answer = await model.findOne({supportId: id})
         if (!answer) {
             return interaction.reply({content: "No support ID found", ephemeral: true});
         }
@@ -70,7 +71,7 @@ module.exports = {
         console.log(`Interaction "${buttonInteraction.customId}" was clicked`)
 
         if (buttonInteraction.customId == "confirm") {
-            await answer.remove()
+            await model.deleteOne({_id: answer._id})
             return interaction.editReply({content: "Successfully removed support option", embeds: [], components: []})
         } else if (buttonInteraction.customId == "decline") {
             return interaction.editReply({content: "Canceled", embeds: [], components: []})
