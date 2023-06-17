@@ -7,10 +7,9 @@ mod commands {
 }
 mod handler;
 
-use std::env;
-use serenity::Client;
 use serenity::prelude::GatewayIntents;
-
+use serenity::Client;
+use std::env;
 
 #[tokio::main]
 async fn main() {
