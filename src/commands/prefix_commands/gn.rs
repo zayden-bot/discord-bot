@@ -19,6 +19,8 @@ pub async fn run(ctx: Context, msg: Message) {
 
     let good_night_message = good_night_messages.choose(&mut rand::thread_rng());
 
-    msg.channel_id.say(&ctx.http, good_night_message.unwrap()).await
+    msg.channel_id
+        .say(&ctx.http, good_night_message.unwrap())
+        .await
         .expect("Error sending message");
 }

@@ -2,6 +2,8 @@ use serenity::model::channel::Message;
 use serenity::prelude::Context;
 
 pub async fn run(ctx: Context, msg: Message) {
-    msg.channel_id.say(&ctx.http, "Pong!").await
+    msg.channel_id
+        .say(&ctx.http, "Pong!")
+        .await
         .expect("Error sending message");
 }

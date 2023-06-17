@@ -1,9 +1,9 @@
+use crate::commands::prefix_commands::*;
 use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::{Activity, Ready};
 use serenity::model::user::OnlineStatus;
 use serenity::prelude::{Context, EventHandler};
-use crate::commands::prefix_commands::*;
 
 pub struct Handler;
 

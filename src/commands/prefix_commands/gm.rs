@@ -2,7 +2,6 @@ use rand::seq::SliceRandom;
 use serenity::model::channel::Message;
 use serenity::prelude::Context;
 
-
 pub async fn run(ctx: Context, msg: Message) {
     let good_morning_messages = [
         "Wakey Wakey Fuck Facey",
@@ -20,6 +19,8 @@ pub async fn run(ctx: Context, msg: Message) {
     ];
     let good_morning_message = good_morning_messages.choose(&mut rand::thread_rng());
 
-    msg.channel_id.say(&ctx.http, good_morning_message.unwrap()).await
+    msg.channel_id
+        .say(&ctx.http, good_morning_message.unwrap())
+        .await
         .expect("Error sending message");
 }
