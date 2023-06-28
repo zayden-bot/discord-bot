@@ -1,20 +1,25 @@
-use crate::commands::prefix_commands::*;
 use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::{Activity, Ready};
 use serenity::model::user::OnlineStatus;
 use serenity::prelude::{Context, EventHandler};
+use crate::commands::message_commands::*;
+use crate::commands::prefix_commands::*;
 
 pub struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
-        match msg.content.to_lowercase().as_str() {
+        if msg.author.bot {
+            return;
+        }
+
+        match msg.content.to_lowercase().split_whitespace().next().unwrap() {
             "!ping" => ping::run(ctx, msg).await,
             "!gm" => gm::run(ctx, msg).await,
             "!gn" => gn::run(ctx, msg).await,
-            _ => {}
+            _ => auto_support::run(ctx, msg).await,
         }
     }
 
