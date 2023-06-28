@@ -1,9 +1,10 @@
 use rand::seq::SliceRandom;
 use serenity::model::channel::Message;
 use serenity::prelude::Context;
+use crate::diesel_lib::get_good_night_images;
 
 pub async fn run(ctx: Context, msg: Message) {
-    let good_night_messages = [
+    let mut good_night_options = vec![
         "I hope you have nightmares that keep you awake all night.",
         "Finally, a moment of peace without your annoying presence.",
         "Don't let the bedbugs bite, although they'd probably prefer you.",
@@ -17,10 +18,16 @@ pub async fn run(ctx: Context, msg: Message) {
         "You and I both know it's way past when you actually want to sleep, and now you feel shitty about your choices, you worthless sack of meat",
     ];
 
-    let good_night_message = good_night_messages.choose(&mut rand::thread_rng());
+    let result = get_good_night_images();
 
-    msg.channel_id
-        .say(&ctx.http, good_night_message.unwrap())
-        .await
-        .expect("Error sending message");
+    good_night_options.extend(result.iter().map(|s| s.as_str()));
+
+    let good_night_message = match good_night_options.choose(&mut rand::thread_rng()) {
+        Some(message) => message,
+        None => return,
+    };
+
+    if let Err(_) = msg.channel_id.say(&ctx, good_night_message).await {
+        println!("Error sending message");
+    }
 }
