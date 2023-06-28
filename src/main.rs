@@ -1,21 +1,29 @@
 mod commands {
+    pub mod message_commands {
+        pub mod auto_support;
+    }
     pub mod prefix_commands {
         pub mod gm;
         pub mod gn;
         pub mod ping;
     }
 }
+mod diesel_lib;
 mod handler;
+mod models;
+mod schema;
+mod test_images;
 
 use serenity::prelude::GatewayIntents;
 use serenity::Client;
 use std::env;
+use dotenvy::dotenv;
 
 #[tokio::main]
 async fn main() {
-    dotenvy::dotenv().unwrap();
+    dotenv().ok();
 
-    let token = env::var("TOKEN").expect("Expected a token in the environment");
+    let token = env::var("VIKTOR_TOKEN").expect("Expected a token in the environment");
 
     let mut client = Client::builder(&token, GatewayIntents::all())
         .event_handler(handler::Handler)
