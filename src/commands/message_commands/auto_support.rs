@@ -1,16 +1,17 @@
 use std::borrow::Cow;
-use serenity::model::channel::{Message, AttachmentType};
+
+use serenity::model::channel::{AttachmentType, Message};
 use serenity::model::prelude::*;
 use serenity::prelude::Context;
 
-fn get_welcome_message(support_role: Role, user: User) -> String {
+fn get_welcome_message(support_role: &Role, user: &User) -> String {
     format!("{} {} wrote:", support_role, user)
 }
 
-async fn get_attachment_type_from_attachment(attachment: Attachment) -> AttachmentType<'static> {
+async fn get_attachment_type_from_attachment(attachment: &Attachment) -> AttachmentType<'static> {
     let attachment_type = AttachmentType::Bytes {
         data: Cow::from(attachment.download().await.unwrap()),
-        filename: attachment.filename,
+        filename: attachment.filename.clone(),
     };
 
     attachment_type
@@ -24,17 +25,15 @@ pub async fn run(ctx: Context, msg: Message) {
         return;
     }
 
-    let message_content = msg.content.clone();
-
-    let mut thread_name = message_content.clone();
+    let mut thread_name = msg.content.clone();
     if thread_name.len() > 100 {
         thread_name = thread_name[..100].to_string();
     }
 
     let mut attachments = Vec::new();
 
-    for attachment in msg.attachments.clone() {
-        attachments.push(get_attachment_type_from_attachment(attachment).await);
+    for attachment in msg.attachments {
+        attachments.push(get_attachment_type_from_attachment(&attachment).await);
     }
 
     let thread = msg.channel_id.create_private_thread(&ctx, |f| {
@@ -46,9 +45,9 @@ pub async fn run(ctx: Context, msg: Message) {
 
     let support_role = ctx.cache.role(msg.guild_id.unwrap(), SUPPORT_ROLE_ID).unwrap();
 
-    thread.say(&ctx, get_welcome_message(support_role, msg.author.clone())).await.unwrap();
+    thread.say(&ctx, get_welcome_message(&support_role, &msg.author)).await.unwrap();
 
-    thread.send_files(&ctx, attachments, |m| m.content(message_content)).await.unwrap();
+    thread.send_files(&ctx, attachments, |m| m.content(&msg.content)).await.unwrap();
 
     msg.delete(&ctx).await.unwrap();
 }
