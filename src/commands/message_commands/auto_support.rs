@@ -32,7 +32,7 @@ pub async fn run(ctx: Context, msg: Message) {
 
     let mut attachments = Vec::new();
 
-    for attachment in msg.attachments {
+    for attachment in &msg.attachments {
         attachments.push(get_attachment_type_from_attachment(&attachment).await);
     }
 
@@ -43,7 +43,7 @@ pub async fn run(ctx: Context, msg: Message) {
         f
     }).await.unwrap();
 
-    let support_role = ctx.cache.role(msg.guild_id.unwrap(), SUPPORT_ROLE_ID).unwrap();
+    let support_role = ctx.cache.role(&msg.guild_id.unwrap(), SUPPORT_ROLE_ID).unwrap();
 
     thread.say(&ctx, get_welcome_message(&support_role, &msg.author)).await.unwrap();
 
