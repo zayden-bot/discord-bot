@@ -1,8 +1,7 @@
+use crate::sqlx_lib::get_good_morning_images;
 use rand::seq::SliceRandom;
 use serenity::model::channel::Message;
 use serenity::prelude::Context;
-use crate::sqlx_lib::get_good_morning_images;
-
 
 pub async fn run(ctx: Context, msg: Message) {
     let mut good_morning_options = vec![
@@ -33,4 +32,3 @@ pub async fn run(ctx: Context, msg: Message) {
         println!("Error sending message");
     }
 }
-

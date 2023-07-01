@@ -36,18 +36,31 @@ pub async fn run(ctx: Context, msg: Message) {
         attachments.push(get_attachment_type_from_attachment(&attachment).await);
     }
 
-    let thread = msg.channel_id.create_private_thread(&ctx, |f| {
-        f.name(thread_name);
-        f.kind(ChannelType::PrivateThread);
-        f.auto_archive_duration(10080);
-        f
-    }).await.unwrap();
+    let thread = msg
+        .channel_id
+        .create_private_thread(&ctx, |f| {
+            f.name(thread_name);
+            f.kind(ChannelType::PrivateThread);
+            f.auto_archive_duration(10080);
+            f
+        })
+        .await
+        .unwrap();
 
-    let support_role = ctx.cache.role(&msg.guild_id.unwrap(), SUPPORT_ROLE_ID).unwrap();
+    let support_role = ctx
+        .cache
+        .role(&msg.guild_id.unwrap(), SUPPORT_ROLE_ID)
+        .unwrap();
 
-    thread.say(&ctx, get_welcome_message(&support_role, &msg.author)).await.unwrap();
+    thread
+        .say(&ctx, get_welcome_message(&support_role, &msg.author))
+        .await
+        .unwrap();
 
-    thread.send_files(&ctx, attachments, |m| m.content(&msg.content)).await.unwrap();
+    thread
+        .send_files(&ctx, attachments, |m| m.content(&msg.content))
+        .await
+        .unwrap();
 
     msg.delete(&ctx).await.unwrap();
 }

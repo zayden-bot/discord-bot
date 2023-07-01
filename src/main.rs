@@ -12,10 +12,10 @@ mod handler;
 mod models;
 mod sqlx_lib;
 
+use dotenvy::dotenv;
 use serenity::prelude::GatewayIntents;
 use serenity::Client;
 use std::env;
-use dotenvy::dotenv;
 
 #[tokio::main]
 async fn main() {

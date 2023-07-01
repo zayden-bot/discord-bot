@@ -1,7 +1,7 @@
-use std::env;
-use sqlx::PgPool;
-use sqlx::postgres::PgPoolOptions;
 use crate::models::Image;
+use sqlx::postgres::PgPoolOptions;
+use sqlx::PgPool;
+use std::env;
 
 async fn get_pool() -> PgPool {
     PgPoolOptions::new()
@@ -19,7 +19,6 @@ async fn fetch_images(query: &str) -> Vec<Image> {
         .await
         .expect("Failed to fetch images")
 }
-
 
 pub async fn get_good_morning_images() -> Vec<Image> {
     fetch_images("SELECT * FROM good_morning_images").await
