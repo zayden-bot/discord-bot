@@ -1,23 +1,8 @@
-use std::env;
 use rand::seq::SliceRandom;
 use serenity::model::channel::Message;
 use serenity::prelude::Context;
-use sqlx::postgres::PgPoolOptions;
+use crate::sqlx_lib::get_good_morning_images;
 
-async fn get_good_morning_images() -> Vec<String> {
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&env::var("DATABASE_URL").expect("Expected a database url in the environment"))
-        .await
-        .expect("Failed to connect to database");
-
-    let rows = sqlx::query!("SELECT image_url FROM good_morning_images")
-        .fetch_all(&pool)
-        .await
-        .expect("Failed to fetch good morning images");
-
-    rows.iter().map(|row| row.image_url.clone()).collect()
-}
 
 pub async fn run(ctx: Context, msg: Message) {
     let mut good_morning_options = vec![
@@ -37,7 +22,7 @@ pub async fn run(ctx: Context, msg: Message) {
 
     let result = get_good_morning_images().await;
 
-    good_morning_options.extend(result.iter().map(|s| s.as_str()));
+    good_morning_options.extend(result.iter().map(|s| s.image_url.as_str()));
 
     let good_night_message = match good_morning_options.choose(&mut rand::thread_rng()) {
         Some(message) => message,

@@ -9,6 +9,8 @@ mod commands {
     }
 }
 mod handler;
+mod models;
+mod sqlx_lib;
 
 use serenity::prelude::GatewayIntents;
 use serenity::Client;
