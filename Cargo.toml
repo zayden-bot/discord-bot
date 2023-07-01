@@ -6,10 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-diesel = {version="2.1.0", features=["postgres"]}
 dotenvy = "0.15.7"
 rand = "0.8.5"
-serenity = { version = "0.11.5", default-features = false, features = [
+sqlx = {version="0.6.3", features=["runtime-tokio-rustls", "postgres", "offline"]}
+tokio = { version = "1.28.2", features = ["macros", "rt-multi-thread"] }
+
+[dependencies.serenity]
+version = "0.11.5"
+default-features = false
+features = [
     "builder",
     "cache",
     "collector",
@@ -18,5 +23,4 @@ serenity = { version = "0.11.5", default-features = false, features = [
     "model",
     "utils",
     "rustls_backend",
-] }
-tokio = { version = "1.28.2", features = ["macros", "rt-multi-thread"] }
+]
