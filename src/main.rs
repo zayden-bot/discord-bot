@@ -8,11 +8,7 @@ mod commands {
         pub mod ping;
     }
 }
-mod diesel_lib;
 mod handler;
-mod models;
-mod schema;
-mod test_images;
 
 use serenity::prelude::GatewayIntents;
 use serenity::Client;
@@ -23,9 +19,9 @@ use dotenvy::dotenv;
 async fn main() {
     dotenv().ok();
 
-    let token = env::var("VIKTOR_TOKEN").expect("Expected a token in the environment");
+    let token = &env::var("VIKTOR_TOKEN").expect("Expected a token in the environment");
 
-    let mut client = Client::builder(&token, GatewayIntents::all())
+    let mut client = Client::builder(token, GatewayIntents::all())
         .event_handler(handler::Handler)
         .await
         .expect("Err creating client");

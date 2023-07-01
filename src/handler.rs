@@ -15,7 +15,12 @@ impl EventHandler for Handler {
             return;
         }
 
-        match msg.content.to_lowercase().split_whitespace().next().unwrap() {
+        let command = match msg.content.split_whitespace().next() {
+            Some(command) => command,
+            None => return,
+        };
+
+        match command.to_lowercase().as_str() {
             "!ping" => ping::run(ctx, msg).await,
             "!gm" => gm::run(ctx, msg).await,
             "!gn" => gn::run(ctx, msg).await,
