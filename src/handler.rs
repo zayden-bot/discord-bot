@@ -27,8 +27,6 @@ impl EventHandler for Handler {
         match command.to_lowercase().as_str() {
             "!create_qr_code" => create_qr_code::run(ctx, msg).await,
             "!ping" => ping::run(ctx, msg).await,
-            "!gm" => gm::run(ctx, msg).await,
-            "!gn" => gn::run(ctx, msg).await,
             _ => auto_support::run(ctx, msg).await,
         }
     }
@@ -52,6 +50,8 @@ impl EventHandler for Handler {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
             let context = match command.data.name.as_str() {
+                "good_morning" => good_morning::run(&command.data.options).await,
+                "good_night" => good_night::run(&command.data.options).await,
                 "ping" => ping::run(&command.data.options),
                 _ => "Unknown command".to_string(),
             };
