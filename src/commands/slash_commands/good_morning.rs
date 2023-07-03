@@ -8,7 +8,7 @@ pub async fn run(_options: &[CommandDataOption]) -> String {
 
     match good_morning_options.choose(&mut rand::thread_rng()) {
         Some(message) => message.image_url.clone(),
-        None => "Error getting good morning image",
+        None => String::from("Error getting good morning image"),
     }
 }
 
