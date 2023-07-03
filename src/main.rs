@@ -1,13 +1,4 @@
-mod commands {
-    pub mod message_commands {
-        pub mod auto_support;
-    }
-    pub mod prefix_commands {
-        pub mod gm;
-        pub mod gn;
-        pub mod ping;
-    }
-}
+mod commands;
 mod handler;
 mod models;
 mod sqlx_lib;
