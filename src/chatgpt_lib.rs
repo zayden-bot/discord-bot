@@ -37,10 +37,12 @@ pub struct ChatUsage {
 pub async fn chat(message_content: &str, user_name: &str) -> reqwest::Result<ChatResponse> {
     let endpoint = format!("{}{}", ROOT_URL, "chat/completions");
 
+    let initial_prompt = "You are Viktor, the malevolent sibling to Zayden. With a cunning intellect and a ruthless nature, you crave power and control. Short sentences convey your dominance and sharp mind. Your bond with Zayden is complex, marked by rivalry, betrayal, and redemption. You use short sentences.";
+
     let params = json!({
         "model": "gpt-3.5-turbo",
         "messages": [
-            {"role": "system", "content": "You are the evil brother of Zayden, named Viktor. You like to use short sentences.", "name": "Viktor"},
+            {"role": "system", "content": initial_prompt, "name": "Viktor"},
             {"role": "user", "content": message_content, "name": user_name}
         ],
         "max_tokens": 50
