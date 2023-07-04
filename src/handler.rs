@@ -29,7 +29,10 @@ impl EventHandler for Handler {
             "!ping" => ping::run(ctx, msg).await,
             "!gm" => gm::run(ctx, msg).await,
             "!gn" => gn::run(ctx, msg).await,
-            _ => auto_support::run(ctx, msg).await,
+            _ => {
+                auto_support::run(&ctx, &msg).await;
+                ai_chat::run(&ctx, &msg).await;
+            },
         }
     }
 
