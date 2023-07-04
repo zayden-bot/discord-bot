@@ -57,8 +57,7 @@ pub async fn chat(message_content: &str, user_name: &str) -> reqwest::Result<Cha
         )
         .json(&params)
         .send()
-        .await
-        .unwrap();
+        .await?;
 
     res.json::<ChatResponse>().await
 }
