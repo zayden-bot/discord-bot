@@ -53,8 +53,7 @@ pub async fn chat(message_content: &str, user_name: &str) -> reqwest::Result<Cha
         .header("Authorization", format!("Bearer {}", env::var("OPENAI_API_KEY").unwrap()))
         .json(&params)
         .send()
-        .await
-        .unwrap();
+        .await?;
 
     res.json::<ChatResponse>().await
 }
