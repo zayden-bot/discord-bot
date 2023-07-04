@@ -2,6 +2,7 @@ mod commands;
 mod handler;
 mod models;
 mod sqlx_lib;
+mod chatgpt_lib;
 
 use dotenvy::dotenv;
 use serenity::prelude::GatewayIntents;

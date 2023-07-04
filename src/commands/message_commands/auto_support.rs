@@ -17,7 +17,7 @@ async fn get_attachment_type_from_attachment(attachment: &Attachment) -> Attachm
     attachment_type
 }
 
-pub async fn run(ctx: Context, msg: Message) {
+pub async fn run(ctx: &Context, msg: &Message) {
     const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
     const SUPPORT_ROLE_ID: u64 = 913374071239102504;
 
@@ -62,5 +62,10 @@ pub async fn run(ctx: Context, msg: Message) {
         .await
         .unwrap();
 
-    msg.delete(&ctx).await.unwrap();
+    match msg.delete(&ctx).await {
+        Ok(_) => {}
+        Err(_) => {
+            println!("Failed to delete message");
+        }
+    }
 }

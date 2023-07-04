@@ -2,8 +2,8 @@ use crate::commands::slash_commands::*;
 use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::{Activity, Ready};
-use serenity::model::prelude::{Interaction, InteractionResponseType};
 use serenity::model::prelude::command::Command;
+use serenity::model::prelude::{Interaction, InteractionResponseType};
 use serenity::model::user::OnlineStatus;
 use serenity::prelude::{Context, EventHandler};
 
@@ -27,7 +27,12 @@ impl EventHandler for Handler {
         match command.to_lowercase().as_str() {
             "!create_qr_code" => create_qr_code::run(ctx, msg).await,
             "!ping" => ping::run(ctx, msg).await,
-            _ => auto_support::run(ctx, msg).await,
+            "!gm" => gm::run(ctx, msg).await,
+            "!gn" => gn::run(ctx, msg).await,
+            _ => {
+                auto_support::run(&ctx, &msg).await;
+                ai_chat::run(&ctx, &msg).await;
+            }
         }
     }
 
@@ -39,7 +44,9 @@ impl EventHandler for Handler {
                 .create_application_command(|command| good_morning::register(command))
                 .create_application_command(|command| good_night::register(command))
                 .create_application_command(|command| ping::register(command))
-        }).await.expect("Failed to register slash command");
+        })
+        .await
+        .expect("Failed to register slash command");
 
         let activity = Activity::watching("for the chosen one");
         ctx.set_presence(Some(activity), OnlineStatus::Online).await;
@@ -64,9 +71,11 @@ impl EventHandler for Handler {
                     response
                         .kind(InteractionResponseType::ChannelMessageWithSource)
                         .interaction_response_data(|message| message.content(context))
-                }).await {
-                    println!("Cannot respond to slash command: {}", why);
-                }
+                })
+                .await
+            {
+                println!("Cannot respond to slash command: {}", why);
+            }
         }
     }
 }
