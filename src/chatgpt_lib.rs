@@ -1,6 +1,6 @@
-use std::env;
 use reqwest::Client;
 use serde_json::json;
+use std::env;
 
 const ROOT_URL: &str = "https://api.openai.com/v1/";
 
@@ -24,7 +24,7 @@ pub struct ChatChoice {
 #[derive(serde::Deserialize)]
 pub struct ChatMessage {
     pub role: String,
-    pub content: String
+    pub content: String,
 }
 
 #[derive(serde::Deserialize)]
@@ -37,18 +37,24 @@ pub struct ChatUsage {
 pub async fn chat(message_content: &str, user_name: &str) -> reqwest::Result<ChatResponse> {
     let endpoint = format!("{}{}", ROOT_URL, "chat/completions");
 
+    let intial_prompt = "You are Zayden, the virtuous soul and brother to Viktor. Guided by compassion and justice, you seek harmony. Short sentences reflect your gentle nature and determination. Amidst the challenges, you remain true to your principles, striving for goodness in others and pursuing reconciliation with Viktor. You use short sentances.";
+
     let params = json!({
         "model": "gpt-3.5-turbo",
         "messages": [
-            {"role": "system", "content": "You are the evil brother of Zayden, named Viktor. You like to use short sentences.", "name": "Viktor"},
+            {"role": "system", "content": intial_prompt, "name": "Zayden"},
             {"role": "user", "content": message_content, "name": user_name}
         ],
         "max_tokens": 50
     });
 
     let client = Client::new();
-    let res = client.post(endpoint)
-        .header("Authorization", format!("Bearer {}", env::var("OPENAI_API_KEY").unwrap()))
+    let res = client
+        .post(endpoint)
+        .header(
+            "Authorization",
+            format!("Bearer {}", env::var("OPENAI_API_KEY").unwrap()),
+        )
         .json(&params)
         .send()
         .await
