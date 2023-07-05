@@ -45,7 +45,7 @@ pub async fn chat(message_content: &str, user_name: &str) -> reqwest::Result<Cha
             {"role": "system", "content": intial_prompt, "name": "Zayden"},
             {"role": "user", "content": message_content, "name": user_name}
         ],
-        "max_tokens": 50
+        "max_tokens": 100
     });
 
     let client = Client::new();
