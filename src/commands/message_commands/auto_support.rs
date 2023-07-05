@@ -3,30 +3,36 @@ use std::borrow::Cow;
 use serenity::model::channel::{AttachmentType, Message};
 use serenity::model::prelude::*;
 use serenity::prelude::Context;
-use crate::sqlx_lib::{get_support_thead_id, post_support_thread_id, update_support_thread_id};
+use crate::sqlx_lib::*;
 
 fn get_welcome_message(support_role: &Role, user: &User) -> String {
     format!("{} {} wrote:", support_role, user)
 }
 
-async fn get_attachment_type_from_attachment(attachment: &Attachment) -> AttachmentType<'static> {
-    let attachment_type = AttachmentType::Bytes {
-        data: Cow::from(attachment.download().await.unwrap()),
-        filename: attachment.filename.clone(),
-    };
-
-    attachment_type
+#[allow(unused_qualifications)]
+async fn get_attachments(msg: &Message) -> serenity::Result<Vec<AttachmentType>> {
+    let mut attachments = Vec::new();
+    for attachment in &msg.attachments {
+        attachments.push(AttachmentType::Bytes {
+            data: Cow::from(attachment.download().await?),
+            filename: attachment.filename.clone(),
+        });
+    }
+    Ok(attachments)
 }
 
 pub async fn run(ctx: &Context, msg: &Message) {
-    const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
-    const SUPPORT_ROLE_ID: u64 = 913374071239102504;
+    let guild_id = match msg.guild_id {
+        Some(id) => id,
+        None => return,
+    };
 
-    if msg.channel_id.0 != SUPPORT_CHANNEL_ID {
+    let support_channel_ids = get_support_channel_ids(&(guild_id.0 as i64)).await.unwrap();
+    if !support_channel_ids.contains(&(msg.channel_id.0 as i64)) {
         return;
     }
 
-    let guild_id = msg.guild_id.unwrap();
+    let attachments = get_attachments(&msg).await.unwrap();
 
     let thread_id = match get_support_thead_id(guild_id.0 as i64).await {
         Ok(id) => {
@@ -44,12 +50,6 @@ pub async fn run(ctx: &Context, msg: &Message) {
         thread_name = thread_name[..100].to_string();
     }
 
-    let mut attachments = Vec::new();
-
-    for attachment in &msg.attachments {
-        attachments.push(get_attachment_type_from_attachment(&attachment).await);
-    }
-
     let thread = msg
         .channel_id
         .create_private_thread(&ctx, |f| {
@@ -61,9 +61,10 @@ pub async fn run(ctx: &Context, msg: &Message) {
         .await
         .unwrap();
 
+    let support_role_ids = get_support_role_ids(&(msg.guild_id.unwrap().0 as i64)).await.unwrap();
     let support_role = ctx
         .cache
-        .role(&guild_id, SUPPORT_ROLE_ID)
+        .role(&guild_id, support_role_ids[0] as u64)
         .unwrap();
 
     thread
