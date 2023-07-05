@@ -43,6 +43,22 @@ async fn parse_mentions(ctx: &Context, message: &Message) -> String {
     parsed_content
 }
 
+fn process_referenced_messages(ctx: &Context, msg: &Message) -> Vec<(bool, String)> {
+    let mut contents = Vec::new();
+
+    if let Some(referenced_message) = &msg.referenced_message {
+        contents.push((
+            &referenced_message.author.id == &ctx.cache.current_user_id(),
+            referenced_message.content.to_string(),
+        ));
+
+        let nested_contents = process_referenced_messages(&ctx, &referenced_message);
+        contents.extend(nested_contents);
+    }
+
+    contents
+}
+
 pub async fn run(ctx: &Context, msg: &Message) {
     if msg.content.ends_with("?") {
         if let Some(mention) = msg.mentions.first() {
@@ -57,7 +73,10 @@ pub async fn run(ctx: &Context, msg: &Message) {
                     }
                 };
 
-                let response = match chatgpt_lib::chat(&parsed_message, author_name).await {
+                let replies = process_referenced_messages(&ctx, &msg);
+
+                let response = match chatgpt_lib::chat(&parsed_message, author_name, replies).await
+                {
                     Ok(response) => response,
                     Err(why) => {
                         msg.reply(&ctx, format!("Error: {}", why)).await.unwrap();
