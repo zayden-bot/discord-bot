@@ -60,34 +60,38 @@ fn process_referenced_messages(ctx: &Context, msg: &Message) -> Vec<(bool, Strin
 }
 
 pub async fn run(ctx: &Context, msg: &Message) {
-    if msg.content.ends_with("?") {
-        if let Some(mention) = msg.mentions.first() {
-            if mention.id == ctx.cache.current_user_id() {
-                let parsed_message = parse_mentions(&ctx, &msg).await;
-
-                let author_name = match parse_author_name(&msg.author.name) {
-                    Some(name) => name,
-                    None => {
-                        msg.reply(&ctx, "Error: Invalid author name").await.unwrap();
-                        return;
-                    }
-                };
-
-                let replies = process_referenced_messages(&ctx, &msg);
-
-                let response = match chatgpt_lib::chat(&parsed_message, author_name, replies).await
-                {
-                    Ok(response) => response,
-                    Err(why) => {
-                        msg.reply(&ctx, format!("Error: {}", why)).await.unwrap();
-                        return;
-                    }
-                };
-
-                msg.reply(&ctx, &response.choices[0].message.content)
-                    .await
-                    .unwrap();
-            }
-        }
+    // Check if message starts with ? and mentions the bot
+    if !(msg.content.starts_with("?")
+        && msg
+            .mentions
+            .iter()
+            .any(|mention| mention.id == ctx.cache.current_user_id()))
+    {
+        return;
     }
+
+    let parsed_message = parse_mentions(&ctx, &msg).await;
+
+    let author_name = match parse_author_name(&msg.author.name) {
+        Some(name) => name,
+        None => {
+            msg.reply(&ctx, "Error: Invalid author name").await.unwrap();
+            return;
+        }
+    };
+
+    let replies = process_referenced_messages(&ctx, &msg);
+
+    let response = match chatgpt_lib::chat(&parsed_message, author_name, replies).await
+    {
+        Ok(response) => response,
+        Err(why) => {
+            msg.reply(&ctx, format!("Error: {}", why)).await.unwrap();
+            return;
+        }
+    };
+
+    msg.reply(&ctx, &response.choices[0].message.content)
+        .await
+        .unwrap();
 }
