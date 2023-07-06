@@ -1,39 +1,49 @@
 {
   "db": "PostgreSQL",
-  "9542c7daa3cc50a88ff9b34725a36b06e5b2dbc919e256a71bf878a7649dc79f": {
+  "967f5afa3fa72eba2bedb930b70574d5d0b6b64004bf89c51c0ec7ec4de67378": {
     "describe": {
-      "columns": [
-        {
-          "name": "image_url",
-          "ordinal": 0,
-          "type_info": "Varchar"
-        }
-      ],
-      "nullable": [
-        false
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Int4",
+          "Int8"
+        ]
       }
     },
-    "query": "SELECT image_url FROM good_night_images"
+    "query": "UPDATE servers SET support_thread_id = $1 WHERE id = $2"
   },
-  "a966fbd72b4550f943b7abbcf16e601a0e2c072b5c5e3c0305951f2e18cc7699": {
+  "ba7ac2ab7e6e5973b2f457c7d085d3f08371805302fe1564d24eec7114a794d7": {
     "describe": {
       "columns": [
         {
-          "name": "image_url",
+          "name": "support_thread_id",
           "ordinal": 0,
-          "type_info": "Varchar"
+          "type_info": "Int4"
         }
       ],
       "nullable": [
         false
       ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Int8"
+        ]
       }
     },
-    "query": "SELECT image_url FROM good_morning_images"
+    "query": "SELECT support_thread_id FROM servers WHERE id = $1"
+  },
+  "c9f44fbd41d56862a16aca134c63d8a7e2fe68423159c23c46b07f9edaf5bf16": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO servers (id, support_thread_id) VALUES ($1, $2)"
   }
 }
