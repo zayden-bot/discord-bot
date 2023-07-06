@@ -43,6 +43,7 @@ impl EventHandler for Handler {
             command
                 .create_application_command(|command| gold_star::register(command))
                 .create_application_command(|command| ping::register(command))
+                .create_application_command(|command| stars::register(command))
         }).await.expect("Failed to register slash command");
 
         let activity = Activity::watching("for the chosen one");
@@ -57,8 +58,9 @@ impl EventHandler for Handler {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
             let context = match command.data.name.as_str() {
-                "ping" => ping::run(&command.data.options),
                 "gold_star" => gold_star::run(&command).await,
+                "ping" => ping::run(&command),
+                "stars" => stars::run(&command).await,
                 _ => "Unknown command".to_string(),
             };
 
