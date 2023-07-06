@@ -14,10 +14,13 @@ async fn get_pool() -> PgPool {
 async fn fetch_images(query: &str) -> Vec<Image> {
     let pool = get_pool().await;
 
-    sqlx::query_as::<_, Image>(query)
+    let result = sqlx::query_as::<_, Image>(query)
         .fetch_all(&pool)
         .await
-        .expect("Failed to fetch images")
+        .expect("Failed to fetch images");
+
+    pool.close().await;
+    result
 }
 
 pub async fn get_good_morning_images() -> Vec<Image> {
@@ -35,6 +38,7 @@ pub async fn get_support_thead_id(server_id: i64) -> Result<i32, Error> {
         .fetch_one(&pool)
         .await?;
 
+    pool.close().await;
     Ok(result.support_thread_id)
 }
 
@@ -45,6 +49,7 @@ pub async fn post_support_thread_id(server_id: i64, thread_id: i32) -> Result<()
         .execute(&pool)
         .await?;
 
+    pool.close().await;
     Ok(())
 }
 
@@ -55,6 +60,7 @@ pub async fn update_support_thread_id(server_id: i64, thread_id: i32) -> Result<
         .execute(&pool)
         .await?;
 
+    pool.close().await;
     Ok(())
 }
 
@@ -68,6 +74,7 @@ pub async fn get_support_channel_ids(server_id: &i64) -> Result<Vec<i64>, Error>
         .map(|record| record.id)
         .collect::<Vec<i64>>();
 
+    pool.close().await;
     Ok(results)
 }
 
@@ -81,5 +88,6 @@ pub async fn get_support_role_ids(server_id: &i64) -> Result<Vec<i64>, Error> {
         .map(|record| record.id)
         .collect::<Vec<i64>>();
 
+    pool.close().await;
     Ok(results)
 }
