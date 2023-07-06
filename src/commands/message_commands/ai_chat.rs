@@ -43,19 +43,14 @@ async fn parse_mentions(ctx: &Context, message: &Message) -> String {
     parsed_content
 }
 
-fn guard_message(ctx: &Context, msg: &Message) -> bool {
-    if msg.content.ends_with("?") {
-        if let Some(mention) = msg.mentions.first() {
-            if mention.id == ctx.cache.current_user_id() {
-                return true;
-            }
-        }
-    }
-    false
-}
-
 pub async fn run(ctx: &Context, msg: &Message) {
-    if !guard_message(&ctx, &msg) {
+    // Check if message starts with ? and mentions the bot
+    if !(msg.content.starts_with("?")
+        && msg
+            .mentions
+            .iter()
+            .any(|mention| mention.id == ctx.cache.current_user_id()))
+    {
         return;
     }
 
