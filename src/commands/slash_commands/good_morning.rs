@@ -1,9 +1,9 @@
 use rand::seq::SliceRandom;
 use serenity::builder::CreateApplicationCommand;
-use serenity::model::prelude::application_command::CommandDataOption;
+use serenity::model::prelude::application_command::{ApplicationCommandInteraction};
 use crate::sqlx_lib::get_good_morning_images;
 
-pub async fn run(_options: &[CommandDataOption]) -> String {
+pub async fn run(_interaction: &ApplicationCommandInteraction) -> String {
     let good_morning_options = get_good_morning_images().await;
 
     match good_morning_options.choose(&mut rand::thread_rng()) {
