@@ -1,8 +1,8 @@
+use crate::chatgpt_lib;
 use regex::Regex;
 use serenity::model::channel::Message;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use crate::chatgpt_lib;
 
 async fn get_display_name(ctx: &Context, guild_id: GuildId, user_id: UserId) -> Option<String> {
     if let Some(member) = guild_id.member(ctx, &user_id).await.ok() {
@@ -16,7 +16,6 @@ fn parse_author_name(author_name: &str) -> Option<&str> {
 
     let re = Regex::new(regex_pattern).unwrap();
     let matched_text = re.find(author_name);
-
 
     if let Some(m) = matched_text {
         return Some(m.as_str());
@@ -39,31 +38,43 @@ async fn parse_mentions(ctx: &Context, message: &Message) -> String {
     parsed_content
 }
 
-pub async fn run(ctx: &Context, msg: &Message) {
+fn guard_message(ctx: &Context, msg: &Message) -> bool {
     if msg.content.ends_with("?") {
         if let Some(mention) = msg.mentions.first() {
             if mention.id == ctx.cache.current_user_id() {
-
-                let parsed_message = parse_mentions(&ctx, &msg).await;
-
-                let author_name = match parse_author_name(&msg.author.name) {
-                    Some(name) => name,
-                    None => {
-                        msg.reply(&ctx, "Error: Invalid author name").await.unwrap();
-                        return;
-                    }
-                };
-
-                let response = match chatgpt_lib::chat(&parsed_message, author_name).await {
-                    Ok(response) => response,
-                    Err(why) => {
-                        msg.reply(&ctx, format!("Error: {}", why)).await.unwrap();
-                        return;
-                    }
-                };
-
-                msg.reply(&ctx, &response.choices[0].message.content).await.unwrap();
+                return true;
             }
         }
     }
+    false
+}
+
+pub async fn run(ctx: &Context, msg: &Message) {
+    if !guard_message(&ctx, &msg) {
+        return;
+    }
+
+    let msg_ref = msg.referenced_message.as_ref().unwrap();
+
+    let parsed_message = parse_mentions(&ctx, &msg).await;
+
+    let author_name = match parse_author_name(&msg.author.name) {
+        Some(name) => name,
+        None => {
+            msg.reply(&ctx, "Error: Invalid author name").await.unwrap();
+            return;
+        }
+    };
+
+    let response = match chatgpt_lib::chat(&parsed_message, author_name).await {
+        Ok(response) => response,
+        Err(why) => {
+            msg.reply(&ctx, format!("Error: {}", why)).await.unwrap();
+            return;
+        }
+    };
+
+    msg.reply(&ctx, &response.choices[0].message.content)
+        .await
+        .unwrap();
 }
