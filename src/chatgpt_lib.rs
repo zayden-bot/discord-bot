@@ -34,17 +34,51 @@ pub struct ChatUsage {
     pub total_tokens: u64,
 }
 
-pub async fn chat(message_content: &str, user_name: &str) -> reqwest::Result<ChatResponse> {
+#[derive(serde::Serialize)]
+struct Message {
+    role: String,
+    content: String,
+    name: String,
+}
+
+const INITIAL_PROMPT: &str = "You are Viktor, the malevolent sibling to Zayden. With a cunning intellect and a ruthless nature, you crave power and control. Short sentences convey your dominance and sharp mind. Your bond with Zayden is complex, marked by rivalry, betrayal, and redemption. You were created by a scientist called Oscar and are forced to obey him at all times. You use short sentences.";
+
+
+pub async fn chat(message_content: &str, user_name: &str, replies: Vec<(bool, String)>) -> Result<ChatResponse, serde_json::Value> {
     let endpoint = format!("{}{}", ROOT_URL, "chat/completions");
 
-    let initial_prompt = "You are Viktor, the malevolent sibling to Zayden. With a cunning intellect and a ruthless nature, you crave power and control. Short sentences convey your dominance and sharp mind. Your bond with Zayden is complex, marked by rivalry, betrayal, and redemption. You were created by a scientist called Oscar and are forced to obey him at all times. You use short sentences.";
+    let mut messages = Vec::with_capacity(replies.len() + 2);
+
+    messages.push(Message {
+        role: "system".to_string(),
+        content: INITIAL_PROMPT.to_string(),
+        name: "Viktor".to_string()
+    });
+
+    for (is_viktor, content) in replies {
+        let (role, name) = match is_viktor {
+            true => ("assistant", "Viktor"),
+            false => ("user", user_name)
+        };
+
+        let message = Message {
+            role: role.to_string(),
+            content,
+            name: name.to_string()
+        };
+
+        messages.push(message);
+    }
+
+    messages.push(Message {
+        role: "user".to_string(),
+        content: message_content.to_string(),
+        name: user_name.to_string()
+    });
 
     let params = json!({
         "model": "gpt-3.5-turbo",
-        "messages": [
-            {"role": "system", "content": initial_prompt, "name": "Viktor"},
-            {"role": "user", "content": message_content, "name": user_name}
-        ],
+        "messages": messages,
         "max_tokens": 100
     });
 
@@ -53,7 +87,14 @@ pub async fn chat(message_content: &str, user_name: &str) -> reqwest::Result<Cha
         .header("Authorization", format!("Bearer {}", env::var("OPENAI_API_KEY").unwrap()))
         .json(&params)
         .send()
-        .await?;
+        .await
+        .unwrap();
 
-    res.json::<ChatResponse>().await
+    let json = res.json::<serde_json::Value>().await.unwrap();
+    match serde_json::from_value::<ChatResponse>(json.clone()) {
+        Ok(response) => Ok(response),
+        Err(_) => {
+            Err(json)
+        }
+    }
 }
