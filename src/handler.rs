@@ -43,6 +43,7 @@ impl EventHandler for Handler {
                 .create_application_command(|command| good_morning::register(command))
                 .create_application_command(|command| good_night::register(command))
                 .create_application_command(|command| ping::register(command))
+                .create_application_command(|command| stars::register(command))
         })
         .await
         .expect("Failed to register slash command");
@@ -63,6 +64,7 @@ impl EventHandler for Handler {
                 "good_morning" => good_morning::run(&command).await,
                 "good_night" => good_night::run(&command).await,
                 "ping" => ping::run(&command),
+                "stars" => stars::run(&command).await,
                 _ => "Unknown command".to_string(),
             };
 
