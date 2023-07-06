@@ -39,8 +39,10 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
 
-        Command::create_global_application_command(&ctx, |command| {
-            ping::register(command)
+        Command::set_global_application_commands(&ctx, |command| {
+            command
+                .create_application_command(|command| gold_star::register(command))
+                .create_application_command(|command| ping::register(command))
         }).await.expect("Failed to register slash command");
 
         let activity = Activity::watching("for the chosen one");
@@ -56,6 +58,7 @@ impl EventHandler for Handler {
 
             let context = match command.data.name.as_str() {
                 "ping" => ping::run(&command.data.options),
+                "gold_star" => gold_star::run(&command).await,
                 _ => "Unknown command".to_string(),
             };
 
