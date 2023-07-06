@@ -27,10 +27,15 @@ async fn parse_mentions(ctx: &Context, message: &Message) -> String {
     let mut parsed_content = message.content.clone();
 
     for mention in &message.mentions {
+        let mention_tag = format!("<@{}>", mention.id);
+
+        if mention.id == ctx.cache.current_user_id() {
+            parsed_content = parsed_content.replace(&mention_tag, "");
+            continue;
+        }
+
         let guild_id = message.guild_id.unwrap();
         if let Some(name) = get_display_name(&ctx, guild_id, mention.id).await {
-            let mention_tag = format!("<@{}>", mention.id);
-
             parsed_content = parsed_content.replace(&mention_tag, &name);
         }
     }
