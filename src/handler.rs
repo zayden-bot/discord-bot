@@ -41,6 +41,7 @@ impl EventHandler for Handler {
 
         Command::set_global_application_commands(&ctx, |command| {
             command
+                .create_application_command(|command| get_discord_role::register(command))
                 .create_application_command(|command| gold_star::register(command))
                 .create_application_command(|command| ping::register(command))
                 .create_application_command(|command| stars::register(command))
@@ -58,6 +59,7 @@ impl EventHandler for Handler {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
             let context = match command.data.name.as_str() {
+                "get_discord_role" => get_discord_role::run(&command),
                 "gold_star" => gold_star::run(&command).await,
                 "ping" => ping::run(&command),
                 "stars" => stars::run(&command).await,
