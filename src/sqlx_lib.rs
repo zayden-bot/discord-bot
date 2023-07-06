@@ -114,7 +114,7 @@ pub async fn remove_star_from_author(user_id: i64, stars_to_add: i32, last_free_
 pub async fn add_star_to_user(user_id: i64, stars_to_add: i32) -> Result<(), Error> {
     let pool = get_pool().await;
 
-    sqlx::query!("UPDATE gold_stars SET received_stars = received_stars + $2 WHERE id = $1", user_id, stars_to_add)
+    sqlx::query!("UPDATE gold_stars SET number_of_stars = number_of_stars + $2, received_stars = received_stars + $2 WHERE id = $1", user_id, stars_to_add)
         .execute(&pool)
         .await?;
 
