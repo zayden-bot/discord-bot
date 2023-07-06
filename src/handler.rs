@@ -39,6 +39,7 @@ impl EventHandler for Handler {
 
         Command::set_global_application_commands(&ctx, |command| {
             command
+                .create_application_command(|command| gold_star::register(command))
                 .create_application_command(|command| good_morning::register(command))
                 .create_application_command(|command| good_night::register(command))
                 .create_application_command(|command| ping::register(command))
@@ -46,7 +47,7 @@ impl EventHandler for Handler {
         .await
         .expect("Failed to register slash command");
 
-        let activity = Activity::watching("for the chosen one");
+        let activity = Activity::playing("College Kings");
         ctx.set_presence(Some(activity), OnlineStatus::Online).await;
 
         // TODO: Load Commands
@@ -58,6 +59,7 @@ impl EventHandler for Handler {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
             let context = match command.data.name.as_str() {
+                "gold_star" => gold_star::run(&command).await,
                 "good_morning" => good_morning::run(&command).await,
                 "good_night" => good_night::run(&command).await,
                 "ping" => ping::run(&command),
