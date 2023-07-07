@@ -44,6 +44,7 @@ impl EventHandler for Handler {
             command
                 .create_application_command(|command| get_discord_role::register(command))
                 .create_application_command(|command| gold_star::register(command))
+                .create_application_command(|command| member_count::register(command))
                 .create_application_command(|command| ping::register(command))
                 .create_application_command(|command| reputation::register(command))
                 .create_application_command(|command| stars::register(command))
@@ -64,11 +65,12 @@ impl EventHandler for Handler {
             response.kind(InteractionResponseType::ChannelMessageWithSource);
 
             response = match command.data.name.as_str() {
-                "get_discord_role" => get_discord_role::run(&command, response),
-                "gold_star" => gold_star::run(&command, response).await,
-                "ping" => ping::run(&command, response),
-                "reputation" => reputation::run(&command, response),
-                "stars" => stars::run(&command, response).await,
+                "get_discord_role" => get_discord_role::run(&ctx, &command, response),
+                "gold_star" => gold_star::run(&ctx, &command, response).await,
+                "member_count" => member_count::run(&ctx, &command, response),
+                "ping" => ping::run(&ctx, &command, response),
+                "reputation" => reputation::run(&ctx, &command, response),
+                "stars" => stars::run(&ctx, &command, response).await,
                 _ => {
                     response.interaction_response_data(|message| message.content("Unknown command"));
                     response
