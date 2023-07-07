@@ -40,21 +40,26 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
 
+        // TODO: Load Commands
+
+        // Deploy Commands
         Command::set_global_application_commands(&ctx, |command| {
             command
                 .create_application_command(|command| get_discord_role::register(command))
                 .create_application_command(|command| gold_star::register(command))
                 .create_application_command(|command| member_count::register(command))
+                .create_application_command(|command| patreon::register(command))
                 .create_application_command(|command| ping::register(command))
                 .create_application_command(|command| reputation::register(command))
+                .create_application_command(|command| saves::register(command))
+                .create_application_command(|command| server_info::register(command))
+                .create_application_command(|command| spoilers::register(command))
                 .create_application_command(|command| stars::register(command))
         }).await.expect("Failed to register slash command");
 
-        let activity = Activity::watching("for the chosen one");
+        let mut activity = Activity::playing("College Kings");
+        activity.url = Some("https://www.patreon.com/collegekings".parse().unwrap());
         ctx.set_presence(Some(activity), OnlineStatus::Online).await;
-
-        // TODO: Load Commands
-        // TODO: Deploy Commands
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
@@ -68,8 +73,12 @@ impl EventHandler for Handler {
                 "get_discord_role" => get_discord_role::run(&ctx, &command, response),
                 "gold_star" => gold_star::run(&ctx, &command, response).await,
                 "member_count" => member_count::run(&ctx, &command, response),
+                "patreon" => patreon::run(&ctx, &command, response),
                 "ping" => ping::run(&ctx, &command, response),
                 "reputation" => reputation::run(&ctx, &command, response),
+                "saves" => saves::run(&ctx, &command, response).await,
+                "server_info" => server_info::run(&ctx, &command, response),
+                "spoilers" => spoilers::run(&ctx, &command, response).await,
                 "stars" => stars::run(&ctx, &command, response).await,
                 _ => {
                     response.interaction_response_data(|message| message.content("Unknown command"));
