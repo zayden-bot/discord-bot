@@ -5,6 +5,9 @@ use serenity::model::prelude::*;
 use serenity::prelude::Context;
 use crate::sqlx_lib::{get_support_thead_id, post_support_thread_id, update_support_thread_id};
 
+const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
+const SUPPORT_ROLE_ID: u64 = 913374071239102504;
+
 fn get_welcome_message(support_role: &Role, user: &User) -> String {
     format!("{} {} wrote:", support_role, user)
 }
@@ -19,8 +22,7 @@ async fn get_attachment_type_from_attachment(attachment: &Attachment) -> Attachm
 }
 
 pub async fn run(ctx: &Context, msg: &Message) {
-    const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
-    const SUPPORT_ROLE_ID: u64 = 913374071239102504;
+    return;
 
     if msg.channel_id.0 != SUPPORT_CHANNEL_ID {
         return;

@@ -1,5 +1,6 @@
 use crate::commands::slash_commands::*;
 use serenity::async_trait;
+use serenity::builder::CreateInteractionResponse;
 use serenity::model::channel::Message;
 use serenity::model::gateway::{Activity, Ready};
 use serenity::model::prelude::{Interaction, InteractionResponseType};
@@ -44,6 +45,7 @@ impl EventHandler for Handler {
                 .create_application_command(|command| get_discord_role::register(command))
                 .create_application_command(|command| gold_star::register(command))
                 .create_application_command(|command| ping::register(command))
+                .create_application_command(|command| reputation::register(command))
                 .create_application_command(|command| stars::register(command))
         }).await.expect("Failed to register slash command");
 
@@ -58,19 +60,26 @@ impl EventHandler for Handler {
         if let Interaction::ApplicationCommand(command) = interaction {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
-            let context = match command.data.name.as_str() {
-                "get_discord_role" => get_discord_role::run(&command),
-                "gold_star" => gold_star::run(&command).await,
-                "ping" => ping::run(&command),
-                "stars" => stars::run(&command).await,
-                _ => "Unknown command".to_string(),
+            let mut response = CreateInteractionResponse::default();
+            response.kind(InteractionResponseType::ChannelMessageWithSource);
+
+            response = match command.data.name.as_str() {
+                "get_discord_role" => get_discord_role::run(&command, response),
+                "gold_star" => gold_star::run(&command, response).await,
+                "ping" => ping::run(&command, response),
+                "reputation" => reputation::run(&command, response),
+                "stars" => stars::run(&command, response).await,
+                _ => {
+                    response.interaction_response_data(|message| message.content("Unknown command"));
+                    response
+                }
             };
 
             if let Err(why) = command
-                .create_interaction_response(&ctx, |response| {
-                    response
-                        .kind(InteractionResponseType::ChannelMessageWithSource)
-                        .interaction_response_data(|message| message.content(context))
+                .create_interaction_response(&ctx, |message| {
+                    message.0 = response.0;
+                    message.1 = response.1;
+                    message
                 }).await {
                     println!("Cannot respond to slash command: {}", why);
                 }

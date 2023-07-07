@@ -1,8 +1,9 @@
-use serenity::builder::CreateApplicationCommand;
+use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
 use serenity::model::prelude::application_command::ApplicationCommandInteraction;
 
-pub fn run(_interaction: &ApplicationCommandInteraction) -> String {
-    "Hey, I'm alive!".to_string()
+pub fn run<'a>(_interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+    response.interaction_response_data(|message| message.content("Hey, I'm alive!"));
+    response
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
