@@ -74,8 +74,8 @@ impl EventHandler for Handler {
             response = match command.data.name.as_str() {
                 "get_discord_role" => get_discord_role::run(&ctx, &command, response),
                 "gold_star" => gold_star::run(&ctx, &command, response).await,
-                "good_morning" => good_morning::run(&command).await,
-                "good_night" => good_night::run(&command).await,
+                "good_morning" => good_morning::run(&ctx, &command, response).await,
+                "good_night" => good_night::run(&ctx, &command, response).await,
                 "member_count" => member_count::run(&ctx, &command, response),
                 "patreon" => patreon::run(&ctx, &command, response),
                 "ping" => ping::run(&ctx, &command, response),

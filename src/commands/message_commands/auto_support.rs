@@ -22,13 +22,12 @@ async fn get_attachments(msg: &Message) -> serenity::Result<Vec<AttachmentType>>
 }
 
 pub async fn run(ctx: &Context, msg: &Message) {
-    return;
     let guild_id = match msg.guild_id {
         Some(id) => id,
         None => return,
     };
 
-    let support_channel_ids = get_support_channel_ids(&(guild_id.0 as i64)).await.unwrap();
+    let support_channel_ids = get_support_channel_ids(guild_id.0 as i64).await.unwrap();
     if !support_channel_ids.contains(&(msg.channel_id.0 as i64)) {
         return;
     }
@@ -62,7 +61,7 @@ pub async fn run(ctx: &Context, msg: &Message) {
         .await
         .unwrap();
 
-    let support_role_ids = get_support_role_ids(&(msg.guild_id.unwrap().0 as i64)).await.unwrap();
+    let support_role_ids = get_support_role_ids(msg.guild_id.unwrap().0 as i64).await.unwrap();
     let support_role = ctx
         .cache
         .role(&guild_id, support_role_ids[0] as u64)

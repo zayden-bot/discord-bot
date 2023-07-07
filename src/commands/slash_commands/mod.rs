@@ -1,8 +1,7 @@
 pub mod get_discord_role;
-pub mod ping;
+pub mod gold_star;
 pub mod good_morning;
 pub mod good_night;
-pub mod gold_star;
 pub mod member_count;
 pub mod patreon;
 pub mod ping;
