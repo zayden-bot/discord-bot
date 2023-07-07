@@ -1,10 +1,11 @@
 use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
 use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOptionValue};
 use serenity::model::prelude::command::CommandOptionType;
+use serenity::prelude::Context;
 use crate::models::GoldStar;
 use crate::sqlx_lib::get_gold_stars;
 
-pub async fn run<'a>(interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+pub async fn run<'a>(_ctx: &Context, interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
     let member = match interaction.data.options.get(0) {
         Some(option) => {
             if let Some(CommandDataOptionValue::User(user, _member)) = option.resolved.as_ref() {

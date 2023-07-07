@@ -1,7 +1,8 @@
 use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
 use serenity::model::prelude::application_command::ApplicationCommandInteraction;
+use serenity::prelude::Context;
 
-pub fn run<'a>(_interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+pub fn run<'a>(_ctx: &Context, _interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
     let content = "**How do I get my Discord role when I become a patreon?**\n".to_string()
         + "1. Make sure you're in the right Tier. If you made a “custom pledge,” instead of joining a Tier, you'll not be assigned any Discord roles.\n"
         + "2. After you confirm your payment amount, and Tier selection, you'll be taken to your creator's Welcome note. You can get started by clicking the **Connect to Discord** button.\n"
