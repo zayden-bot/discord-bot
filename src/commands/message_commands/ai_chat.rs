@@ -61,7 +61,7 @@ fn process_referenced_messages(ctx: &Context, msg: &Message) -> Vec<(bool, Strin
 
 pub async fn run(ctx: &Context, msg: &Message) {
     // Check if message starts with ? and mentions the bot
-    if !(msg.content.starts_with("?")
+    if !(msg.content.ends_with("?")
         && msg
             .mentions
             .iter()

@@ -1,6 +1,7 @@
-use serenity::builder::CreateApplicationCommand;
+use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
 use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOptionValue};
 use serenity::model::prelude::command::CommandOptionType;
+use serenity::prelude::Context;
 use crate::models::GoldStar;
 use crate::sqlx_lib::{create_user, get_gold_stars, remove_star_from_author, add_star_to_user};
 
@@ -15,51 +16,68 @@ async fn get_user_stars(user_id: u64) -> Result<GoldStar, String> {
     }
 }
 
-pub async fn run(interaction: &ApplicationCommandInteraction) -> String {
+pub async fn run<'a>(_ctx: &Context, interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
     let author = &interaction.user;
 
     let member = if let Some(CommandDataOptionValue::User(user, _member)) = interaction.data.options[0].resolved.as_ref() {
         user
     } else {
-        return "Please provide a valid user".to_string();
+        response.interaction_response_data(|message| message.content("Please provide a valid user"));
+        return response;
     };
     let reason = interaction.data.options.get(1);
 
     if author.id == member.id {
-        return "You can't give yourself a star!".to_string();
+        response.interaction_response_data(|message| message.content("You can't give yourself a star!"));
+        return response;
     }
 
     let author_stars = match get_user_stars(author.id.0).await {
         Ok(stars) => stars,
-        Err(_) => return "Error retrieving author stars".to_string(),
+        Err(_) => {
+            response.interaction_response_data(|message| message.content("Error retrieving author stars"));
+            return response;
+        },
     };
     let member_stars = match get_user_stars(member.id.0).await {
         Ok(stars) => stars,
-        Err(_) => return "Error retrieving author stars".to_string(),
+        Err(_) => {
+            response.interaction_response_data(|message| message.content("Error retrieving author stars"));
+            return response;
+        },
     };
 
     let has_free_star = author_stars.last_free_star.map(|star| star.timestamp() >= 86400).unwrap_or(true);
 
     if author_stars.number_of_stars < STARS_TO_GIVE && !has_free_star {
-        return "You don't have any stars to give!".to_string();
+        response.interaction_response_data(|message| message.content("You don't have any stars to give!"));
+        return response;
     }
 
     if let Err(_) = remove_star_from_author(author.id.0 as i64, STARS_TO_GIVE, has_free_star).await {
-        return "Error removing star from author".to_string();
+        response.interaction_response_data(|message| message.content("Error removing star from author"));
+        return response;
     }
     if let Err(_) = add_star_to_user(member.id.0 as i64, STARS_TO_GIVE).await {
-        return "Error adding star to user".to_string();
+        response.interaction_response_data(|message| message.content("Error adding star to user"));
+        return response;
     }
 
-    let mut response = "⭐ NEW GOLDEN STAR ⭐\n".to_string();
-    response += &format!("{} received a golden star from {} for a total of {} stars.", member, author, member_stars.number_of_stars + STARS_TO_GIVE);
-    if let Some(reason) = reason {
-        if let Some(CommandDataOptionValue::String(reason)) = reason.resolved.as_ref() {
-            response += &format!("\nReason: {}", reason)
-        }
-    }
+    response.interaction_response_data(|message| {
+        message.embed(|e| {
+            let mut description = format!("{} received a golden star from {} for a total of **{}** stars.", member, author, member_stars.number_of_stars + STARS_TO_GIVE);
 
-    response
+            if let Some(reason) = reason {
+                if let Some(CommandDataOptionValue::String(reason)) = reason.resolved.as_ref() {
+                    description += &format!("\nReason: {}", reason)
+                }
+            }
+
+            e.title("⭐ NEW GOLDEN STAR ⭐")
+                .description(description)
+        })
+    });
+    return response;
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {

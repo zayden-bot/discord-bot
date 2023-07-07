@@ -1,5 +1,13 @@
+pub mod get_discord_role;
 pub mod ping;
 pub mod good_morning;
 pub mod good_night;
 pub mod gold_star;
+pub mod member_count;
+pub mod patreon;
+pub mod ping;
+pub mod reputation;
+pub mod saves;
+pub mod server_info;
+pub mod spoilers;
 pub mod stars;

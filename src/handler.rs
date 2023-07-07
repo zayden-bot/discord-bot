@@ -1,5 +1,6 @@
 use crate::commands::slash_commands::*;
 use serenity::async_trait;
+use serenity::builder::CreateInteractionResponse;
 use serenity::model::channel::Message;
 use serenity::model::gateway::{Activity, Ready};
 use serenity::model::prelude::command::Command;
@@ -37,47 +38,66 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
 
+        // TODO: Load Commands
+
+        // Deploy Commands
         Command::set_global_application_commands(&ctx, |command| {
             command
+                .create_application_command(|command| get_discord_role::register(command))
                 .create_application_command(|command| gold_star::register(command))
+                .create_application_command(|command| member_count::register(command))
+                .create_application_command(|command| patreon::register(command))
                 .create_application_command(|command| good_morning::register(command))
                 .create_application_command(|command| good_night::register(command))
                 .create_application_command(|command| ping::register(command))
+                .create_application_command(|command| reputation::register(command))
+                .create_application_command(|command| saves::register(command))
+                .create_application_command(|command| server_info::register(command))
+                .create_application_command(|command| spoilers::register(command))
                 .create_application_command(|command| stars::register(command))
         })
         .await
         .expect("Failed to register slash command");
 
-        let activity = Activity::playing("College Kings");
+        let mut activity = Activity::playing("College Kings");
+        activity.url = Some("https://www.patreon.com/collegekings".parse().unwrap());
         ctx.set_presence(Some(activity), OnlineStatus::Online).await;
-
-        // TODO: Load Commands
-        // TODO: Deploy Commands
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::ApplicationCommand(command) = interaction {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
-            let context = match command.data.name.as_str() {
-                "gold_star" => gold_star::run(&command).await,
+            let mut response = CreateInteractionResponse::default();
+            response.kind(InteractionResponseType::ChannelMessageWithSource);
+
+            response = match command.data.name.as_str() {
+                "get_discord_role" => get_discord_role::run(&ctx, &command, response),
+                "gold_star" => gold_star::run(&ctx, &command, response).await,
                 "good_morning" => good_morning::run(&command).await,
                 "good_night" => good_night::run(&command).await,
-                "ping" => ping::run(&command),
-                "stars" => stars::run(&command).await,
-                _ => "Unknown command".to_string(),
+                "member_count" => member_count::run(&ctx, &command, response),
+                "patreon" => patreon::run(&ctx, &command, response),
+                "ping" => ping::run(&ctx, &command, response),
+                "reputation" => reputation::run(&ctx, &command, response),
+                "saves" => saves::run(&ctx, &command, response).await,
+                "server_info" => server_info::run(&ctx, &command, response),
+                "spoilers" => spoilers::run(&ctx, &command, response).await,
+                "stars" => stars::run(&ctx, &command, response).await,
+                _ => {
+                    response.interaction_response_data(|message| message.content("Unknown command"));
+                    response
+                }
             };
 
             if let Err(why) = command
-                .create_interaction_response(&ctx, |response| {
-                    response
-                        .kind(InteractionResponseType::ChannelMessageWithSource)
-                        .interaction_response_data(|message| message.content(context))
-                })
-                .await
-            {
-                println!("Cannot respond to slash command: {}", why);
-            }
+                .create_interaction_response(&ctx, |message| {
+                    message.0 = response.0;
+                    message.1 = response.1;
+                    message
+                }).await {
+                    println!("Cannot respond to slash command: {}", why);
+                }
         }
     }
 }
