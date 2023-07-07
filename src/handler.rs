@@ -28,8 +28,8 @@ impl EventHandler for Handler {
             "!create_qr_code" => create_qr_code::run(ctx, msg).await,
             "!ping" => ping::run(ctx, msg).await,
             _ => {
-                auto_support::run(&ctx, &msg).await;
                 ai_chat::run(&ctx, &msg).await;
+                auto_support::run(&ctx, &msg).await;
             }
         }
     }
