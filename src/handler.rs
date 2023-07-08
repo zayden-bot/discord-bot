@@ -45,6 +45,7 @@ impl EventHandler for Handler {
         // Deploy Commands
         Command::set_global_application_commands(&ctx, |command| {
             command
+                .create_application_command(|command| answer::register(command))
                 .create_application_command(|command| get_discord_role::register(command))
                 .create_application_command(|command| gold_star::register(command))
                 .create_application_command(|command| member_count::register(command))
@@ -52,6 +53,7 @@ impl EventHandler for Handler {
                 .create_application_command(|command| good_morning::register(command))
                 .create_application_command(|command| good_night::register(command))
                 .create_application_command(|command| ping::register(command))
+                .create_application_command(|command| question::register(command))
                 .create_application_command(|command| reputation::register(command))
                 .create_application_command(|command| saves::register(command))
                 .create_application_command(|command| server_info::register(command))
@@ -75,12 +77,14 @@ impl EventHandler for Handler {
             response.kind(InteractionResponseType::ChannelMessageWithSource);
 
             response = match command.data.name.as_str() {
+                "answer" => answer::run(&ctx, &command, response).await,
                 "get_discord_role" => get_discord_role::run(&ctx, &command, response),
                 "gold_star" => gold_star::run(&ctx, &command, response).await,
                 "good_morning" => good_morning::run(&ctx, &command, response).await,
                 "good_night" => good_night::run(&ctx, &command, response).await,
                 "member_count" => member_count::run(&ctx, &command, response),
-                "patreon" => patreon::run(&ctx, &command, response),
+                "patreon" => patreon::run(&ctx, &command, response).await,
+                "question" => question::run(&ctx, &command, response).await,
                 "ping" => ping::run(&ctx, &command, response),
                 "reputation" => reputation::run(&ctx, &command, response),
                 "saves" => saves::run(&ctx, &command, response).await,
