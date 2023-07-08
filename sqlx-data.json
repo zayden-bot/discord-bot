@@ -33,6 +33,20 @@
     },
     "query": "UPDATE gold_stars SET number_of_stars = number_of_stars + $2, received_stars = received_stars + $2 WHERE id = $1"
   },
+  "0579422a3aa28222f7aaca46c0bb7cab71a2f41321757944f87974f12e1edf98": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO support_faq (id, answer, guild_id) VALUES ($1, $2, $3)"
+  },
   "13327e50e94c709ff67b101b38450cc2b17c19344bab469a271fd74ea7bf34dc": {
     "describe": {
       "columns": [],
@@ -45,6 +59,51 @@
       }
     },
     "query": "UPDATE gold_stars SET number_of_stars = number_of_stars - $2, given_stars = given_stars + $2 WHERE id = $1"
+  },
+  "1bfecf22eb35f3d17d6ae2cae429923ce5cec321cb0ef6980eebccfc177f1ca6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "question",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "answer",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "message_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE questions SET answer = $1 WHERE id = $2 RETURNING *"
   },
   "23b916051e28a598fdfafffb000e59cda2596c88fe14a36054e82c24ade26227": {
     "describe": {
@@ -65,6 +124,72 @@
       }
     },
     "query": "SELECT id FROM channels WHERE guild_id = $1 AND category = 'support'"
+  },
+  "4ed7d215c6d9694048bab3773bd9f12655869d74efcf3cdcaceb53c793509fce": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "answer",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "guild_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM support_faq WHERE guild_id = $1"
+  },
+  "55fdd4ef1ff0139fcf4b47dfd1058d1746da57b39e9f34ab65c26aaca985be42": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "DELETE FROM support_faq WHERE id = $1 AND guild_id = $2"
+  },
+  "595822ad4fd99dc36647340222fa9407246ae95d37986a3bc26a0176b021ddb9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "rule_text",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT rule_text FROM server_rules WHERE rule_id = $1 AND guild_id = $2"
   },
   "684c4b0322b2802d552d74e0e4ac027a3b59ed4667603de04b9b606f07abbfbe": {
     "describe": {
@@ -159,6 +284,64 @@
       }
     },
     "query": "SELECT answer FROM support_faq WHERE id = $1 AND guild_id = $2"
+  },
+  "a8b2fb4b03ba30febb93f1694416dbabd844f05569e925d71555dfb180b30197": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "question",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "answer",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "message_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO questions (question, user_id) VALUES ($1, $2) RETURNING *"
+  },
+  "a989b46d6ee04b14872717eedd37f866f163c42b6c977cb79bc1e882cd1c6490": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE questions SET message_id = $1 WHERE id = $2"
   },
   "ba7ac2ab7e6e5973b2f457c7d085d3f08371805302fe1564d24eec7114a794d7": {
     "describe": {
