@@ -57,6 +57,7 @@ impl EventHandler for Handler {
                 .create_application_command(|command| server_info::register(command))
                 .create_application_command(|command| spoilers::register(command))
                 .create_application_command(|command| stars::register(command))
+                .create_application_command(|command| support::register(command))
         })
         .await
         .expect("Failed to register slash command");
@@ -86,6 +87,7 @@ impl EventHandler for Handler {
                 "server_info" => server_info::run(&ctx, &command, response),
                 "spoilers" => spoilers::run(&ctx, &command, response).await,
                 "stars" => stars::run(&ctx, &command, response).await,
+                "support" => support::run(&ctx, &command, response).await,
                 _ => {
                     response.interaction_response_data(|message| message.content("Unknown command"));
                     response

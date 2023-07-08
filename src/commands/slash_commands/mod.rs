@@ -10,3 +10,4 @@ pub mod saves;
 pub mod server_info;
 pub mod spoilers;
 pub mod stars;
+pub mod support;
