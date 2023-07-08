@@ -8,6 +8,7 @@ pub mod patreon;
 pub mod ping;
 pub mod question;
 pub mod reputation;
+pub mod rule;
 pub mod saves;
 pub mod server_info;
 pub mod spoilers;

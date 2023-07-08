@@ -240,3 +240,14 @@ pub async fn update_question_answer(question_id: i32, answer: &str) -> Result<Qu
     pool.close().await;
     Ok(Question {id: result.id, question: result.question, answer: result.answer, user_id: result.user_id, message_id: result.message_id})
 }
+
+pub async fn get_rule(rule_id: &str, guild_id: i64) -> Result<String, Error> {
+    let pool = get_pool().await;
+
+    let result = sqlx::query!("SELECT rule_text FROM server_rules WHERE rule_id = $1 AND guild_id = $2", rule_id, guild_id)
+        .fetch_one(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(result.rule_text)
+}

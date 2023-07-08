@@ -56,6 +56,7 @@ impl EventHandler for Handler {
                 .create_application_command(|command| question::register(command))
                 .create_application_command(|command| reputation::register(command))
                 .create_application_command(|command| saves::register(command))
+                .create_application_command(|command| rule::register(command))
                 .create_application_command(|command| server_info::register(command))
                 .create_application_command(|command| spoilers::register(command))
                 .create_application_command(|command| stars::register(command))
@@ -87,6 +88,7 @@ impl EventHandler for Handler {
                 "question" => question::run(&ctx, &command, response).await,
                 "ping" => ping::run(&ctx, &command, response),
                 "reputation" => reputation::run(&ctx, &command, response),
+                "rule" => rule::run(&ctx, &command, response).await,
                 "saves" => saves::run(&ctx, &command, response).await,
                 "server_info" => server_info::run(&ctx, &command, response),
                 "spoilers" => spoilers::run(&ctx, &command, response).await,
