@@ -22,6 +22,8 @@ async fn get_attachments(msg: &Message) -> serenity::Result<Vec<AttachmentType>>
 }
 
 pub async fn run(ctx: &Context, msg: &Message) {
+    return;
+
     let guild_id = match msg.guild_id {
         Some(id) => id,
         None => return,
