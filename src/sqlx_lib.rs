@@ -193,6 +193,7 @@ pub async fn create_support_faq(server_id: i64, support_id: &str, answer: &str) 
         .execute(&pool)
         .await?;
 
+    pool.close().await;
     Ok(())
 }
 
@@ -203,5 +204,39 @@ pub async fn delete_support_faq(server_id: i64, support_id: &str) -> Result<(), 
         .execute(&pool)
         .await?;
 
+    pool.close().await;
     Ok(())
+}
+
+pub async fn create_question(question: &str, user_id: i64) -> Result<Question, Error> {
+    let pool = get_pool().await;
+
+    let result = sqlx::query!("INSERT INTO questions (question, user_id) VALUES ($1, $2) RETURNING *", question, user_id)
+        .fetch_one(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(Question {id: result.id, question: result.question, answer: result.answer, user_id: result.user_id, message_id: result.message_id})
+}
+
+pub async fn update_question_message_id(question_id: i32, message_id: i64) -> Result<(), Error> {
+    let pool = get_pool().await;
+
+    sqlx::query!("UPDATE questions SET message_id = $1 WHERE id = $2", message_id, question_id)
+        .execute(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(())
+}
+
+pub async fn update_question_answer(question_id: i32, answer: &str) -> Result<Question, Error> {
+    let pool = get_pool().await;
+
+    let result = sqlx::query!("UPDATE questions SET answer = $1 WHERE id = $2 RETURNING *", answer, question_id)
+        .fetch_one(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(Question {id: result.id, question: result.question, answer: result.answer, user_id: result.user_id, message_id: result.message_id})
 }
