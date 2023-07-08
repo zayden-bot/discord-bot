@@ -1,5 +1,51 @@
 {
   "db": "PostgreSQL",
+  "0346af5d5e6b7955ad2b7e830a80033a768ea8bfbec86aad96f43a831cbc3557": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id FROM channels WHERE guild_id = $1 AND category = 'spoiler'"
+  },
+  "03846412898abbdb0728e11f50a76d3cbce909bc351a39c9c15417b808a44da9": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE gold_stars SET number_of_stars = number_of_stars + $2, received_stars = received_stars + $2 WHERE id = $1"
+  },
+  "13327e50e94c709ff67b101b38450cc2b17c19344bab469a271fd74ea7bf34dc": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE gold_stars SET number_of_stars = number_of_stars - $2, given_stars = given_stars + $2 WHERE id = $1"
+  },
   "23b916051e28a598fdfafffb000e59cda2596c88fe14a36054e82c24ade26227": {
     "describe": {
       "columns": [
@@ -20,6 +66,66 @@
     },
     "query": "SELECT id FROM channels WHERE guild_id = $1 AND category = 'support'"
   },
+  "684c4b0322b2802d552d74e0e4ac027a3b59ed4667603de04b9b606f07abbfbe": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4",
+          "Int4",
+          "Int4",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gold_stars (id, number_of_stars, given_stars, received_stars, last_free_star) VALUES ($1, $2, $3, $4, $5)"
+  },
+  "6afef18ed8eeeab114681c7fcfd73addf396edacbda79065ac986f5cf737a014": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "number_of_stars",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "given_stars",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "received_stars",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "last_free_star",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM gold_stars WHERE id = $1"
+  },
   "967f5afa3fa72eba2bedb930b70574d5d0b6b64004bf89c51c0ec7ec4de67378": {
     "describe": {
       "columns": [],
@@ -32,6 +138,27 @@
       }
     },
     "query": "UPDATE servers SET support_thread_id = $1 WHERE id = $2"
+  },
+  "a2a27b4d20c1630dcaccb4061604944464dd667ef649610c13d35022942bc460": {
+    "describe": {
+      "columns": [
+        {
+          "name": "answer",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT answer FROM support_faq WHERE id = $1 AND guild_id = $2"
   },
   "ba7ac2ab7e6e5973b2f457c7d085d3f08371805302fe1564d24eec7114a794d7": {
     "describe": {
@@ -52,6 +179,20 @@
       }
     },
     "query": "SELECT support_thread_id FROM servers WHERE id = $1"
+  },
+  "c9df11b97d231382d7b983dd192e191ce7946c09f74938aa9d5680c328ab1199": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "UPDATE gold_stars SET given_stars = given_stars + $2, last_free_star = $3 WHERE id = $1"
   },
   "c9f44fbd41d56862a16aca134c63d8a7e2fe68423159c23c46b07f9edaf5bf16": {
     "describe": {

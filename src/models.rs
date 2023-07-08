@@ -15,3 +15,10 @@ pub struct GoldStar {
     pub received_stars: i32,
     pub last_free_star: Option<NaiveDateTime>,
 }
+
+#[derive(FromRow)]
+pub struct SupportFAQ {
+    pub id: String,
+    pub answer: String,
+    pub guild_id: i64,
+}

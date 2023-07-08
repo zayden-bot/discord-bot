@@ -163,3 +163,45 @@ pub async fn add_star_to_user(user_id: i64, stars_to_add: i32) -> Result<(), Err
     pool.close().await;
     Ok(())
 }
+
+pub async fn get_support_answer(server_id: i64, support_id: &str) -> Result<String, Error> {
+    let pool = get_pool().await;
+
+    let result = sqlx::query!("SELECT answer FROM support_faq WHERE id = $1 AND guild_id = $2", support_id, server_id)
+        .fetch_one(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(result.answer)
+}
+
+pub async fn get_all_support_faq(server_id: i64) -> Result<Vec<SupportFAQ>, Error> {
+    let pool = get_pool().await;
+
+    let results = sqlx::query!("SELECT * FROM support_faq WHERE guild_id = $1", server_id)
+        .fetch_all(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(results.into_iter().map(|result| SupportFAQ {id: result.id, answer: result.answer, guild_id: result.guild_id}).collect())
+}
+
+pub async fn create_support_faq(server_id: i64, support_id: &str, answer: &str) -> Result<(), Error> {
+    let pool = get_pool().await;
+
+    sqlx::query!("INSERT INTO support_faq (id, answer, guild_id) VALUES ($1, $2, $3)", support_id, answer, server_id)
+        .execute(&pool)
+        .await?;
+
+    Ok(())
+}
+
+pub async fn delete_support_faq(server_id: i64, support_id: &str) -> Result<(), Error> {
+    let pool = get_pool().await;
+
+    sqlx::query!("DELETE FROM support_faq WHERE id = $1 AND guild_id = $2", support_id, server_id)
+        .execute(&pool)
+        .await?;
+
+    Ok(())
+}
