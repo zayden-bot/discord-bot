@@ -31,3 +31,13 @@ pub struct Question {
     pub user_id: i64,
     pub message_id: Option<i64>,
 }
+
+#[derive(FromRow)]
+pub struct ReactionRole {
+    pub id: i32,
+    pub guild_id: i64,
+    pub channel_id: i64,
+    pub message_id: i64,
+    pub role_id: i64,
+    pub emoji: String,
+}

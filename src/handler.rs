@@ -1,12 +1,14 @@
 use crate::commands::slash_commands::*;
 use serenity::async_trait;
 use serenity::builder::CreateInteractionResponse;
-use serenity::model::channel::Message;
+use serenity::model::channel::{Message, Reaction};
 use serenity::model::gateway::{Activity, Ready};
 use serenity::model::prelude::command::Command;
-use serenity::model::prelude::{Interaction, InteractionResponseType};
+use serenity::model::prelude::{Interaction, InteractionResponseType, Member};
 use serenity::model::user::OnlineStatus;
 use serenity::prelude::{Context, EventHandler};
+use crate::models::ReactionRole;
+use crate::sqlx_lib::get_reaction_roles;
 
 pub struct Handler;
 
@@ -37,6 +39,54 @@ impl EventHandler for Handler {
         }
     }
 
+    async fn reaction_add(&self, ctx: Context, reaction: Reaction) {
+        let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
+            Ok(reaction_data) => reaction_data,
+            Err(why) => {
+                println!("{}", why);
+                return;
+            },
+        };
+
+        for reaction_role in reaction_roles {
+            if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
+                continue;
+            }
+
+            match member.add_role(&ctx, reaction_role.role_id as u64).await {
+                Ok(_) => { return; }
+                Err(why) => {
+                    println!("Cannot add role: {}", why);
+                    return;
+                }
+            }
+        }
+    }
+
+    async fn reaction_remove(&self, ctx: Context, reaction: Reaction) {
+        let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
+            Ok(reaction_data) => reaction_data,
+            Err(why) => {
+                println!("{}", why);
+                return;
+            },
+        };
+
+        for reaction_role in reaction_roles {
+            if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
+                continue;
+            }
+
+            match member.remove_role(&ctx, reaction_role.role_id as u64).await {
+                Ok(_) => { return; }
+                Err(why) => {
+                    println!("Cannot remove role: {}", why);
+                    return;
+                }
+            }
+        }
+    }
+
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
 
@@ -55,8 +105,9 @@ impl EventHandler for Handler {
                 .create_application_command(|command| ping::register(command))
                 .create_application_command(|command| question::register(command))
                 .create_application_command(|command| reputation::register(command))
-                .create_application_command(|command| saves::register(command))
                 .create_application_command(|command| rule::register(command))
+                .create_application_command(|command| saves::register(command))
+                .create_application_command(|command| scam::register(command))
                 .create_application_command(|command| server_info::register(command))
                 .create_application_command(|command| spoilers::register(command))
                 .create_application_command(|command| stars::register(command))
@@ -90,6 +141,7 @@ impl EventHandler for Handler {
                 "reputation" => reputation::run(&ctx, &command, response),
                 "rule" => rule::run(&ctx, &command, response).await,
                 "saves" => saves::run(&ctx, &command, response).await,
+                "scam" => scam::run(&ctx, &command, response).await,
                 "server_info" => server_info::run(&ctx, &command, response),
                 "spoilers" => spoilers::run(&ctx, &command, response).await,
                 "stars" => stars::run(&ctx, &command, response).await,
@@ -110,4 +162,33 @@ impl EventHandler for Handler {
                 }
         }
     }
+}
+
+async fn get_reaction_data(ctx: &Context, reaction: &Reaction) -> Result<(Vec<ReactionRole>, Message, Member), String> {
+    let guild_id = match reaction.guild_id {
+        Some(guild_id) => guild_id,
+        None => return Err("Cannot get guild id".to_string()),
+    };
+
+    let reaction_message = match reaction.message(&ctx).await {
+        Ok(reaction_message) => reaction_message,
+        Err(why) => return Err(format!("Cannot get reaction message: {}", why)),
+    };
+
+    let user_id = match reaction.user_id {
+        Some(user_id) => user_id,
+        None => return Err("Cannot get user id".to_string()),
+    };
+
+    let member = match guild_id.member(&ctx, user_id).await {
+        Ok(member) => member,
+        Err(why) => return Err(format!("Cannot get member: {}", why)),
+    };
+
+    let reaction_roles = match get_reaction_roles(guild_id.0 as i64).await {
+        Ok(reaction_roles) => reaction_roles,
+        Err(why) => return Err(format!("Cannot get reaction roles: {}", why)),
+    };
+
+    Ok((reaction_roles, reaction_message, member))
 }

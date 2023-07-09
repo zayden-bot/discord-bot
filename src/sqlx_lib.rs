@@ -110,12 +110,12 @@ pub async fn get_support_role_ids(server_id: i64) -> Result<Vec<i64>, Error> {
 pub async fn get_gold_stars(user_id: i64) -> Result<GoldStar, Error> {
     let pool = get_pool().await;
 
-    let result = sqlx::query!("SELECT * FROM gold_stars WHERE id = $1", user_id)
+    let result = sqlx::query_as!(GoldStar, "SELECT * FROM gold_stars WHERE id = $1", user_id)
         .fetch_one(&pool)
         .await?;
 
     pool.close().await;
-    Ok(GoldStar {id: result.id, number_of_stars: result.number_of_stars, given_stars: result.given_stars, received_stars: result.received_stars, last_free_star: result.last_free_star})
+    Ok(result)
 }
 
 pub async fn create_user(user_id: i64, given_stars: i32, received_stars: i32) -> Result<GoldStar, Error> {
@@ -124,16 +124,14 @@ pub async fn create_user(user_id: i64, given_stars: i32, received_stars: i32) ->
         _ => Some(Utc::now().naive_utc()),
     } ;
 
-    let gold_star = GoldStar {id: user_id, number_of_stars: received_stars, given_stars, received_stars, last_free_star };
-
     let pool = get_pool().await;
 
-    sqlx::query!("INSERT INTO gold_stars (id, number_of_stars, given_stars, received_stars, last_free_star) VALUES ($1, $2, $3, $4, $5)", &gold_star.id, &gold_star.number_of_stars, &gold_star.given_stars, &gold_star.received_stars, gold_star.last_free_star)
-        .execute(&pool)
+    let result = sqlx::query_as!(GoldStar, "INSERT INTO gold_stars (id, number_of_stars, given_stars, received_stars, last_free_star) VALUES ($1, $2, $3, $4, $5) RETURNING *", user_id, received_stars, given_stars, received_stars, last_free_star)
+        .fetch_one(&pool)
         .await?;
 
     pool.close().await;
-    Ok(gold_star)
+    Ok(result)
 }
 
 pub async fn remove_star_from_author(user_id: i64, stars_to_add: i32, last_free_star: bool) -> Result<(), Error> {
@@ -178,12 +176,12 @@ pub async fn get_support_answer(server_id: i64, support_id: &str) -> Result<Stri
 pub async fn get_all_support_faq(server_id: i64) -> Result<Vec<SupportFAQ>, Error> {
     let pool = get_pool().await;
 
-    let results = sqlx::query!("SELECT * FROM support_faq WHERE guild_id = $1", server_id)
+    let results = sqlx::query_as!(SupportFAQ, "SELECT * FROM support_faq WHERE guild_id = $1", server_id)
         .fetch_all(&pool)
         .await?;
 
     pool.close().await;
-    Ok(results.into_iter().map(|result| SupportFAQ {id: result.id, answer: result.answer, guild_id: result.guild_id}).collect())
+    Ok(results)
 }
 
 pub async fn create_support_faq(server_id: i64, support_id: &str, answer: &str) -> Result<(), Error> {
@@ -211,12 +209,12 @@ pub async fn delete_support_faq(server_id: i64, support_id: &str) -> Result<(), 
 pub async fn create_question(question: &str, user_id: i64) -> Result<Question, Error> {
     let pool = get_pool().await;
 
-    let result = sqlx::query!("INSERT INTO questions (question, user_id) VALUES ($1, $2) RETURNING *", question, user_id)
+    let result = sqlx::query_as!(Question, "INSERT INTO questions (question, user_id) VALUES ($1, $2) RETURNING *", question, user_id)
         .fetch_one(&pool)
         .await?;
 
     pool.close().await;
-    Ok(Question {id: result.id, question: result.question, answer: result.answer, user_id: result.user_id, message_id: result.message_id})
+    Ok(result)
 }
 
 pub async fn update_question_message_id(question_id: i32, message_id: i64) -> Result<(), Error> {
@@ -233,12 +231,12 @@ pub async fn update_question_message_id(question_id: i32, message_id: i64) -> Re
 pub async fn update_question_answer(question_id: i32, answer: &str) -> Result<Question, Error> {
     let pool = get_pool().await;
 
-    let result = sqlx::query!("UPDATE questions SET answer = $1 WHERE id = $2 RETURNING *", answer, question_id)
+    let result = sqlx::query_as!(Question, "UPDATE questions SET answer = $1 WHERE id = $2 RETURNING *", answer, question_id)
         .fetch_one(&pool)
         .await?;
 
     pool.close().await;
-    Ok(Question {id: result.id, question: result.question, answer: result.answer, user_id: result.user_id, message_id: result.message_id})
+    Ok(result)
 }
 
 pub async fn get_rule(rule_id: &str, guild_id: i64) -> Result<String, Error> {
@@ -250,4 +248,15 @@ pub async fn get_rule(rule_id: &str, guild_id: i64) -> Result<String, Error> {
 
     pool.close().await;
     Ok(result.rule_text)
+}
+
+pub async fn get_reaction_roles(guild_id: i64) -> Result<Vec<ReactionRole>, Error> {
+    let pool = get_pool().await;
+
+    let results = sqlx::query_as!(ReactionRole, "SELECT * FROM reaction_roles WHERE guild_id = $1", guild_id)
+        .fetch_all(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(results)
 }
