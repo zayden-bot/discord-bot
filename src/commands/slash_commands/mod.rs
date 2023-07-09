@@ -15,3 +15,4 @@ pub mod spoilers;
 pub mod stars;
 pub mod support;
 pub mod scam;
+pub mod fetch_suggestions;
