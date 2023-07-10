@@ -16,3 +16,5 @@ pub mod stars;
 pub mod support;
 pub mod scam;
 pub mod fetch_suggestions;
+pub mod add_artist;
+pub mod reaction_role;

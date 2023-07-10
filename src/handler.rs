@@ -3,12 +3,14 @@ use serenity::async_trait;
 use serenity::model::channel::{Message, Reaction};
 use serenity::model::gateway::{Activity, Ready};
 use serenity::model::prelude::command::Command;
-use serenity::model::prelude::{Interaction, Member};
+use serenity::model::prelude::{GuildId, Interaction, Member};
 use serenity::model::user::OnlineStatus;
 use serenity::prelude::{Context, EventHandler};
 use crate::models::ReactionRole;
 use crate::sqlx_lib::get_reaction_roles;
 use crate::utils::respond_with_message;
+
+const COLLEGE_KINGS_GUILD_ID: u64 = 745662812335898806;
 
 pub struct Handler;
 
@@ -87,24 +89,30 @@ impl EventHandler for Handler {
         // TODO: Load Commands
 
         // Deploy Commands
-        Command::set_global_application_commands(&ctx, |command| {
-            command
+        GuildId::set_application_commands(&GuildId(COLLEGE_KINGS_GUILD_ID), &ctx, |commands| {
+            commands
+                .create_application_command(|command| add_artist::register(command))
                 .create_application_command(|command| answer::register(command))
                 .create_application_command(|command| fetch_suggestions::register(command))
                 .create_application_command(|command| get_discord_role::register(command))
-                .create_application_command(|command| gold_star::register(command))
-                .create_application_command(|command| member_count::register(command))
                 .create_application_command(|command| patreon::register(command))
                 .create_application_command(|command| good_morning::register(command))
                 .create_application_command(|command| good_night::register(command))
-                .create_application_command(|command| ping::register(command))
                 .create_application_command(|command| question::register(command))
                 .create_application_command(|command| reputation::register(command))
-                .create_application_command(|command| rule::register(command))
                 .create_application_command(|command| saves::register(command))
+                .create_application_command(|command| spoilers::register(command))
+        }).await.expect("Failed to register slash command");
+
+        Command::set_global_application_commands(&ctx, |commands| {
+            commands
+                .create_application_command(|command| gold_star::register(command))
+                .create_application_command(|command| member_count::register(command))
+                .create_application_command(|command| ping::register(command))
+                .create_application_command(|command| reaction_role::register(command))
+                .create_application_command(|command| rule::register(command))
                 .create_application_command(|command| scam::register(command))
                 .create_application_command(|command| server_info::register(command))
-                .create_application_command(|command| spoilers::register(command))
                 .create_application_command(|command| stars::register(command))
                 .create_application_command(|command| support::register(command))
         })
@@ -121,6 +129,7 @@ impl EventHandler for Handler {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
             let result = match command.data.name.as_str() {
+                "add_artist" => add_artist::run(&ctx, &command).await,
                 "answer" => answer::run(&ctx, &command).await,
                 "fetch_suggestions" => fetch_suggestions::run(&ctx, &command).await,
                 "get_discord_role" => get_discord_role::run(&ctx, &command).await,
@@ -130,6 +139,7 @@ impl EventHandler for Handler {
                 "member_count" => member_count::run(&ctx, &command).await,
                 "patreon" => patreon::run(&ctx, &command).await,
                 "question" => question::run(&ctx, &command).await,
+                "reaction_role" => reaction_role::run(&ctx, &command).await,
                 "ping" => ping::run(&ctx, &command).await,
                 "reputation" => reputation::run(&ctx, &command).await,
                 "rule" => rule::run(&ctx, &command).await,

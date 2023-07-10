@@ -260,3 +260,25 @@ pub async fn get_reaction_roles(guild_id: i64) -> Result<Vec<ReactionRole>, Erro
     pool.close().await;
     Ok(results)
 }
+
+pub async fn create_reaction_role(guild_id: i64, channel_id: i64, message_id: &i64, role_id: i64, emoji: &str) -> Result<(), Error> {
+    let pool = get_pool().await;
+
+    sqlx::query!("INSERT INTO reaction_roles (guild_id, channel_id, message_id, role_id, emoji) VALUES ($1, $2, $3, $4, $5)", guild_id, channel_id, message_id, role_id, emoji)
+        .execute(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(())
+}
+
+pub async fn delete_reaction_role(guild_id: i64, channel_id: i64, message_id: &i64, emoji: &str) -> Result<(), Error> {
+    let pool = get_pool().await;
+
+    sqlx::query!("DELETE FROM reaction_roles WHERE guild_id = $1 AND channel_id = $2 AND message_id = $3 AND emoji = $4", guild_id, channel_id, message_id, emoji)
+        .execute(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(())
+}
