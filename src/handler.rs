@@ -40,47 +40,45 @@ impl EventHandler for Handler {
     }
 
     async fn reaction_add(&self, ctx: Context, reaction: Reaction) {
-        return;
-        // let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
-        //     Ok(reaction_data) => reaction_data,
-        //     Err(why) => return println!("{}", why),
-        // };
-        //
-        // for reaction_role in reaction_roles {
-        //     if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
-        //         continue;
-        //     }
-        //
-        //     match member.add_role(&ctx, reaction_role.role_id as u64).await {
-        //         Ok(_) => { return; }
-        //         Err(why) => {
-        //             println!("Cannot add role: {}", why);
-        //             return;
-        //         }
-        //     }
-        // }
+        let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
+            Ok(reaction_data) => reaction_data,
+            Err(why) => return println!("{}", why),
+        };
+
+        for reaction_role in reaction_roles {
+            if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
+                continue;
+            }
+
+            match member.add_role(&ctx, reaction_role.role_id as u64).await {
+                Ok(_) => { return; }
+                Err(why) => {
+                    println!("Cannot add role: {}", why);
+                    return;
+                }
+            }
+        }
     }
 
     async fn reaction_remove(&self, ctx: Context, reaction: Reaction) {
-        return;
-        // let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
-        //     Ok(reaction_data) => reaction_data,
-        //     Err(why) => return println!("{}", why),
-        // };
-        //
-        // for reaction_role in reaction_roles {
-        //     if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
-        //         continue;
-        //     }
-        //
-        //     match member.remove_role(&ctx, reaction_role.role_id as u64).await {
-        //         Ok(_) => { return; }
-        //         Err(why) => {
-        //             println!("Cannot remove role: {}", why);
-        //             return;
-        //         }
-        //     }
-        // }
+        let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
+            Ok(reaction_data) => reaction_data,
+            Err(why) => return println!("{}", why),
+        };
+
+        for reaction_role in reaction_roles {
+            if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
+                continue;
+            }
+
+            match member.remove_role(&ctx, reaction_role.role_id as u64).await {
+                Ok(_) => { return; }
+                Err(why) => {
+                    println!("Cannot remove role: {}", why);
+                    return;
+                }
+            }
+        }
     }
 
     async fn ready(&self, ctx: Context, ready: Ready) {
