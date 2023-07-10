@@ -13,7 +13,7 @@ use std::env;
 async fn main() {
     dotenv().ok();
 
-    let token = &env::var("VIKTOR_TOKEN").expect("Expected a token in the environment");
+    let token = &env::var("ZAYDEN_TOKEN").expect("Expected a token in the environment");
 
     let mut client = Client::builder(token, GatewayIntents::all())
         .event_handler(handler::Handler)
