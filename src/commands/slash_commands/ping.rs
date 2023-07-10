@@ -1,10 +1,10 @@
-use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
+use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::application_command::ApplicationCommandInteraction;
 use serenity::prelude::Context;
+use crate::utils::respond_with_message;
 
-pub fn run<'a>(_ctx: &Context, _interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
-    response.interaction_response_data(|message| message.content("Hey, I'm alive!"));
-    response
+pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), serenity::Error> {
+    respond_with_message(ctx, interaction, "Pong!").await
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {

@@ -1,14 +1,14 @@
 use crate::commands::slash_commands::*;
 use serenity::async_trait;
-use serenity::builder::CreateInteractionResponse;
 use serenity::model::channel::{Message, Reaction};
 use serenity::model::gateway::{Activity, Ready};
 use serenity::model::prelude::command::Command;
-use serenity::model::prelude::{Interaction, InteractionResponseType, Member};
+use serenity::model::prelude::{Interaction, Member};
 use serenity::model::user::OnlineStatus;
 use serenity::prelude::{Context, EventHandler};
 use crate::models::ReactionRole;
 use crate::sqlx_lib::get_reaction_roles;
+use crate::utils::respond_with_message;
 
 pub struct Handler;
 
@@ -40,53 +40,45 @@ impl EventHandler for Handler {
     }
 
     async fn reaction_add(&self, ctx: Context, reaction: Reaction) {
-        return;
-        // let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
-        //     Ok(reaction_data) => reaction_data,
-        //     Err(why) => {
-        //         println!("{}", why);
-        //         return;
-        //     },
-        // };
-        //
-        // for reaction_role in reaction_roles {
-        //     if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
-        //         continue;
-        //     }
-        //
-        //     match member.add_role(&ctx, reaction_role.role_id as u64).await {
-        //         Ok(_) => { return; }
-        //         Err(why) => {
-        //             println!("Cannot add role: {}", why);
-        //             return;
-        //         }
-        //     }
-        // }
+        let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
+            Ok(reaction_data) => reaction_data,
+            Err(why) => return println!("{}", why),
+        };
+
+        for reaction_role in reaction_roles {
+            if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
+                continue;
+            }
+
+            match member.add_role(&ctx, reaction_role.role_id as u64).await {
+                Ok(_) => { return; }
+                Err(why) => {
+                    println!("Cannot add role: {}", why);
+                    return;
+                }
+            }
+        }
     }
 
     async fn reaction_remove(&self, ctx: Context, reaction: Reaction) {
-        return;
-        // let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
-        //     Ok(reaction_data) => reaction_data,
-        //     Err(why) => {
-        //         println!("{}", why);
-        //         return;
-        //     },
-        // };
-        //
-        // for reaction_role in reaction_roles {
-        //     if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
-        //         continue;
-        //     }
-        //
-        //     match member.remove_role(&ctx, reaction_role.role_id as u64).await {
-        //         Ok(_) => { return; }
-        //         Err(why) => {
-        //             println!("Cannot remove role: {}", why);
-        //             return;
-        //         }
-        //     }
-        // }
+        let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
+            Ok(reaction_data) => reaction_data,
+            Err(why) => return println!("{}", why),
+        };
+
+        for reaction_role in reaction_roles {
+            if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
+                continue;
+            }
+
+            match member.remove_role(&ctx, reaction_role.role_id as u64).await {
+                Ok(_) => { return; }
+                Err(why) => {
+                    println!("Cannot remove role: {}", why);
+                    return;
+                }
+            }
+        }
     }
 
     async fn ready(&self, ctx: Context, ready: Ready) {
@@ -98,6 +90,7 @@ impl EventHandler for Handler {
         Command::set_global_application_commands(&ctx, |command| {
             command
                 .create_application_command(|command| answer::register(command))
+                .create_application_command(|command| fetch_suggestions::register(command))
                 .create_application_command(|command| get_discord_role::register(command))
                 .create_application_command(|command| gold_star::register(command))
                 .create_application_command(|command| member_count::register(command))
@@ -127,41 +120,31 @@ impl EventHandler for Handler {
         if let Interaction::ApplicationCommand(command) = interaction {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
-            let mut response = CreateInteractionResponse::default();
-            response.kind(InteractionResponseType::ChannelMessageWithSource);
-
-            response = match command.data.name.as_str() {
-                "answer" => answer::run(&ctx, &command, response).await,
-                "get_discord_role" => get_discord_role::run(&ctx, &command, response),
-                "gold_star" => gold_star::run(&ctx, &command, response).await,
-                "good_morning" => good_morning::run(&ctx, &command, response).await,
-                "good_night" => good_night::run(&ctx, &command, response).await,
-                "member_count" => member_count::run(&ctx, &command, response),
-                "patreon" => patreon::run(&ctx, &command, response).await,
-                "question" => question::run(&ctx, &command, response).await,
-                "ping" => ping::run(&ctx, &command, response),
-                "reputation" => reputation::run(&ctx, &command, response),
-                "rule" => rule::run(&ctx, &command, response).await,
-                "saves" => saves::run(&ctx, &command, response).await,
-                "scam" => scam::run(&ctx, &command, response).await,
-                "server_info" => server_info::run(&ctx, &command, response),
-                "spoilers" => spoilers::run(&ctx, &command, response).await,
-                "stars" => stars::run(&ctx, &command, response).await,
-                "support" => support::run(&ctx, &command, response).await,
-                _ => {
-                    response.interaction_response_data(|message| message.content("Unknown command"));
-                    response
-                }
+            let result = match command.data.name.as_str() {
+                "answer" => answer::run(&ctx, &command).await,
+                "fetch_suggestions" => fetch_suggestions::run(&ctx, &command).await,
+                "get_discord_role" => get_discord_role::run(&ctx, &command).await,
+                "gold_star" => gold_star::run(&ctx, &command).await,
+                "good_morning" => good_morning::run(&ctx, &command).await,
+                "good_night" => good_night::run(&ctx, &command).await,
+                "member_count" => member_count::run(&ctx, &command).await,
+                "patreon" => patreon::run(&ctx, &command).await,
+                "question" => question::run(&ctx, &command).await,
+                "ping" => ping::run(&ctx, &command).await,
+                "reputation" => reputation::run(&ctx, &command).await,
+                "rule" => rule::run(&ctx, &command).await,
+                "saves" => saves::run(&ctx, &command).await,
+                "scam" => scam::run(&ctx, &command).await,
+                "server_info" => server_info::run(&ctx, &command).await,
+                "spoilers" => spoilers::run(&ctx, &command).await,
+                "stars" => stars::run(&ctx, &command).await,
+                "support" => support::run(&ctx, &command).await,
+                _ => respond_with_message(&ctx, &command, "Command not found").await,
             };
 
-            if let Err(why) = command
-                .create_interaction_response(&ctx, |message| {
-                    message.0 = response.0;
-                    message.1 = response.1;
-                    message
-                }).await {
-                    println!("Cannot respond to slash command: {}", why);
-                }
+            if let Err(why) = result {
+                println!("Cannot respond to slash command: {}", why);
+            }
         }
     }
 }

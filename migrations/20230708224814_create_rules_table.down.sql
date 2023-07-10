@@ -1,2 +1,2 @@
 -- Add down migration script here
-DROP TABLE rules;
+DROP TABLE server_rules;

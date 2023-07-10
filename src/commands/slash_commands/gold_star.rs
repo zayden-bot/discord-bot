@@ -1,9 +1,10 @@
-use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
+use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOptionValue};
 use serenity::model::prelude::command::CommandOptionType;
 use serenity::prelude::Context;
 use crate::models::GoldStar;
 use crate::sqlx_lib::{create_user, get_gold_stars, remove_star_from_author, add_star_to_user};
+use crate::utils::{respond_with_embed, respond_with_message};
 
 const STARS_TO_GIVE: i32 = 1;
 
@@ -16,68 +17,54 @@ async fn get_user_stars(user_id: u64) -> Result<GoldStar, String> {
     }
 }
 
-pub async fn run<'a>(_ctx: &Context, interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), serenity::Error> {
     let author = &interaction.user;
 
-    let member = if let Some(CommandDataOptionValue::User(user, _member)) = interaction.data.options[0].resolved.as_ref() {
-        user
-    } else {
-        response.interaction_response_data(|message| message.content("Please provide a valid user"));
-        return response;
+    let member = match interaction.data.options[0].resolved.as_ref() {
+        Some(CommandDataOptionValue::User(user, _member)) => user,
+        _ => return respond_with_message(ctx, interaction, "Please provide a valid user").await,
     };
+
     let reason = interaction.data.options.get(1);
 
     if author.id == member.id {
-        response.interaction_response_data(|message| message.content("You can't give yourself a star!"));
-        return response;
+        return respond_with_message(ctx, interaction, "You can't give yourself a star").await;
     }
 
     let author_stars = match get_user_stars(author.id.0).await {
         Ok(stars) => stars,
-        Err(_) => {
-            response.interaction_response_data(|message| message.content("Error retrieving author stars"));
-            return response;
-        },
+        Err(_) => return respond_with_message(ctx, interaction, "Error retrieving author stars").await,
     };
     let member_stars = match get_user_stars(member.id.0).await {
         Ok(stars) => stars,
-        Err(_) => {
-            response.interaction_response_data(|message| message.content("Error retrieving author stars"));
-            return response;
-        },
+        Err(_) => return respond_with_message(ctx, interaction, "Error retrieving member stars").await,
     };
 
     let has_free_star = author_stars.last_free_star.map(|star| star.timestamp() >= 86400).unwrap_or(true);
 
     if author_stars.number_of_stars < STARS_TO_GIVE && !has_free_star {
-        response.interaction_response_data(|message| message.content("You don't have any stars to give!"));
-        return response;
+        return respond_with_message(ctx, interaction, "You don't have enough stars to give").await;
     }
 
-    if let Err(_) = remove_star_from_author(author.id.0 as i64, STARS_TO_GIVE, has_free_star).await {
-        response.interaction_response_data(|message| message.content("Error removing star from author"));
-        return response;
+    if (remove_star_from_author(author.id.0 as i64, STARS_TO_GIVE, has_free_star).await).is_err() {
+        return respond_with_message(ctx, interaction, "Error removing star from author").await;
     }
-    if let Err(_) = add_star_to_user(member.id.0 as i64, STARS_TO_GIVE).await {
-        response.interaction_response_data(|message| message.content("Error adding star to user"));
-        return response;
+    if (add_star_to_user(member.id.0 as i64, STARS_TO_GIVE).await).is_err() {
+        return respond_with_message(ctx, interaction, "Error adding star to member").await;
     }
 
-    response.interaction_response_data(|message| {
-        message.embed(|e| {
-            let mut description = format!("{} received a golden star from {} for a total of **{}** stars.", member, author, member_stars.number_of_stars + STARS_TO_GIVE);
+    let mut description = format!("{} received a golden star from {} for a total of **{}** stars.", member, author, member_stars.number_of_stars + STARS_TO_GIVE);
 
-            if let Some(reason) = reason {
-                if let Some(CommandDataOptionValue::String(reason)) = reason.resolved.as_ref() {
-                    description += &format!("\nReason: {}", reason)
-                }
-            }
+    if let Some(reason) = reason {
+        if let Some(CommandDataOptionValue::String(reason)) = reason.resolved.as_ref() {
+            description += &format!("\nReason: {}", reason)
+        }
+    }
 
-            e.title("⭐ NEW GOLDEN STAR ⭐")
-                .description(description)
-        })
-    });
-    return response;
+    respond_with_embed(ctx, interaction, |e| {
+        e.title("⭐ NEW GOLDEN STAR ⭐")
+            .description(description)
+    }).await
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
