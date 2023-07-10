@@ -27,7 +27,7 @@ pub async fn run(ctx: Context, msg: Message) {
         None => return,
     };
 
-    if let Err(_) = msg.channel_id.say(&ctx, good_night_message).await {
+    if (msg.channel_id.say(&ctx, good_night_message).await).is_err() {
         println!("Error sending message");
     }
 }

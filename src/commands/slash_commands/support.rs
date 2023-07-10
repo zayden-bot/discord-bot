@@ -1,10 +1,11 @@
-use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
+use serenity::builder::CreateApplicationCommand;
 use serenity::model::Permissions;
 use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOption, CommandDataOptionValue};
 use serenity::model::prelude::command::CommandOptionType;
 use serenity::model::prelude::GuildId;
 use serenity::prelude::Context;
 use crate::sqlx_lib::{create_support_faq, delete_support_faq, get_all_support_faq, get_support_answer};
+use crate::utils::{respond_with_embed, respond_with_message};
 
 fn get_support_id(subcommand: &CommandDataOption) -> Result<&String, &str> {
     match subcommand.options[0].resolved.as_ref() {
@@ -13,119 +14,87 @@ fn get_support_id(subcommand: &CommandDataOption) -> Result<&String, &str> {
     }
 }
 
-async fn get<'a>(_ctx: &Context, subcommand: &CommandDataOption, guild_id: GuildId, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+async fn get(ctx: &Context, interaction: &ApplicationCommandInteraction, subcommand: &CommandDataOption, guild_id: GuildId) -> Result<(), serenity::Error> {
     let support_id = match get_support_id(subcommand) {
         Ok(support_id) => support_id,
-        Err(err) => {
-            response.interaction_response_data(|message| message.content(err));
-            return response;
-        }
+        Err(err) => return respond_with_message(ctx, interaction, err).await,
     };
 
     let answer = match get_support_answer(guild_id.0 as i64, &support_id.to_lowercase()).await {
         Ok(answer) => answer,
-        Err(_) => {
-            response.interaction_response_data(|message| message.content(format!("Support ID: `{}` not found", support_id)));
-            return response;
-        },
+        Err(_) => return respond_with_message(ctx, interaction, "Error getting support info").await,
     };
 
-    response.interaction_response_data(|message| message.embed(|e| {
+    respond_with_embed(ctx, interaction, |e| {
         e.title(support_id)
             .description(answer)
-    }));
-
-    response
+    }).await
 }
 
-async fn add<'a>(_ctx: &Context, subcommand: &CommandDataOption, guild_id: GuildId, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+async fn add(ctx: &Context, interaction: &ApplicationCommandInteraction, subcommand: &CommandDataOption, guild_id: GuildId) -> Result<(), serenity::Error> {
     let support_id = match get_support_id(subcommand) {
         Ok(support_id) => support_id,
-        Err(err) => {
-            response.interaction_response_data(|message| message.content(err));
-            return response;
-        }
+        Err(err) => return respond_with_message(ctx, interaction, err).await,
     };
 
-    let answer = if let Some(CommandDataOptionValue::String(answer)) = subcommand.options[1].resolved.as_ref() {
-        answer
-    } else {
-        response.interaction_response_data(|message| message.content("Invalid support answer"));
-        return response;
+    let answer = match subcommand.options[1].resolved.as_ref() {
+        Some(CommandDataOptionValue::String(answer)) => answer,
+        _ => return respond_with_message(ctx, interaction, "Invalid answer").await,
     };
 
     match create_support_faq(guild_id.0 as i64, &support_id.to_lowercase(), answer).await {
         Ok(_) => {},
-        Err(_) => {
-            response.interaction_response_data(|message| message.content("Error adding support info"));
-            return response;
-        },
+        Err(_) => return respond_with_message(ctx, interaction, "Error adding support info").await,
     };
 
-    response.interaction_response_data(|message| message.content(format!("Add support info with ID `{}`", support_id)));
-    response
+    respond_with_message(ctx, interaction, "Support info added").await
 }
 
-async fn list<'a>(_ctx: &Context, guild_id: GuildId, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+async fn list(ctx: &Context, interaction: &ApplicationCommandInteraction, guild_id: GuildId) -> Result<(), serenity::Error> {
     let faqs = match get_all_support_faq(guild_id.0 as i64).await {
         Ok(faqs) => faqs,
-        Err(_) => {
-            response.interaction_response_data(|message| message.content("Error getting support info"));
-            return response;
-        },
+        Err(_) => return respond_with_message(ctx, interaction, "Error getting support info").await,
     };
 
     if faqs.is_empty() {
-        response.interaction_response_data(|message| message.content("No support info found"));
-        return response;
+        return respond_with_message(ctx, interaction, "No support for this server").await;
     }
 
     let ids = faqs.into_iter().map(|faq| faq.id).collect::<Vec<String>>();
 
-    response.interaction_response_data(|message| message.content(format!("```{}```", ids.join("\n"))));
-    response
+    respond_with_embed(ctx, interaction, |e| {
+        e.title("Support IDs")
+            .description(ids.join("\n"))
+    }).await
 }
 
-async fn remove<'a>(_ctx: &Context, subcommand: &CommandDataOption, guild_id: GuildId, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+async fn remove(ctx: &Context, interaction: &ApplicationCommandInteraction, subcommand: &CommandDataOption, guild_id: GuildId) -> Result<(), serenity::Error> {
     let support_id = match get_support_id(subcommand) {
         Ok(support_id) => support_id,
-        Err(err) => {
-            response.interaction_response_data(|message| message.content(err));
-            return response;
-        }
+        Err(err) => return respond_with_message(ctx, interaction, err).await,
     };
 
     match delete_support_faq(guild_id.0 as i64, &support_id.to_lowercase()).await {
         Ok(_) => {},
-        Err(_) => {
-            response.interaction_response_data(|message| message.content("Error removing support info"));
-            return response;
-        },
+        Err(_) => return respond_with_message(ctx, interaction, "Error removing support info").await,
     };
 
-    response.interaction_response_data(|message| message.content(format!("Removed support info with ID `{}`", support_id)));
-    response
+    respond_with_message(ctx, interaction, "Support info removed").await
 }
 
-pub async fn run<'a>(_ctx: &Context, interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
-        None => {
-            response.interaction_response_data(|message| message.content("This command can only be used in a server"));
-            return response;
-        },
+        None => return respond_with_message(ctx, interaction, "This command can only be used in a server").await,
     };
 
     let subcommand = &interaction.data.options[0];
     return match subcommand.name.as_str() {
-        "get" => get(_ctx, subcommand, guild_id, response).await,
-        "add" => add(_ctx, subcommand, guild_id, response).await,
-        "list" => list(_ctx, guild_id, response).await,
-        "remove" => remove(_ctx, subcommand, guild_id, response).await,
-        _ => {
-            response.interaction_response_data(|message| message.content("Invalid subcommand"));
-            response
-        },
+        "get" => get(ctx, interaction, subcommand, guild_id).await,
+        "add" => add(ctx, interaction, subcommand, guild_id).await,
+        "list" => list(ctx, interaction, guild_id).await,
+        "remove" => remove(ctx, interaction, subcommand, guild_id).await,
+        _ => respond_with_message(ctx, interaction, "Invalid subcommand").await,
     }
 }
 

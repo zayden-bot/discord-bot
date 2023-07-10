@@ -5,7 +5,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 async fn get_display_name(ctx: &Context, guild_id: GuildId, user_id: UserId) -> Option<String> {
-    if let Some(member) = guild_id.member(ctx, &user_id).await.ok() {
+    if let Ok(member) = guild_id.member(ctx, &user_id).await {
         return Some(member.display_name().to_string());
     }
     None
@@ -35,7 +35,7 @@ async fn parse_mentions(ctx: &Context, message: &Message) -> String {
         }
 
         let guild_id = message.guild_id.unwrap();
-        if let Some(name) = get_display_name(&ctx, guild_id, mention.id).await {
+        if let Some(name) = get_display_name(ctx, guild_id, mention.id).await {
             parsed_content = parsed_content.replace(&mention_tag, &name);
         }
     }
@@ -48,11 +48,11 @@ fn process_referenced_messages(ctx: &Context, msg: &Message) -> Vec<(bool, Strin
 
     if let Some(referenced_message) = &msg.referenced_message {
         contents.push((
-            &referenced_message.author.id == &ctx.cache.current_user_id(),
+            referenced_message.author.id == ctx.cache.current_user_id(),
             referenced_message.content.to_string(),
         ));
 
-        let nested_contents = process_referenced_messages(&ctx, &referenced_message);
+        let nested_contents = process_referenced_messages(ctx, referenced_message);
         contents.extend(nested_contents);
     }
 
@@ -61,7 +61,7 @@ fn process_referenced_messages(ctx: &Context, msg: &Message) -> Vec<(bool, Strin
 
 pub async fn run(ctx: &Context, msg: &Message) {
     // Check if message starts with ? and mentions the bot
-    if !(msg.content.ends_with("?")
+    if !(msg.content.ends_with('?')
         && msg
             .mentions
             .iter()
@@ -70,7 +70,7 @@ pub async fn run(ctx: &Context, msg: &Message) {
         return;
     }
 
-    let parsed_message = parse_mentions(&ctx, &msg).await;
+    let parsed_message = parse_mentions(ctx, msg).await;
 
     let author_name = match parse_author_name(&msg.author.name) {
         Some(name) => name,
@@ -80,7 +80,7 @@ pub async fn run(ctx: &Context, msg: &Message) {
         }
     };
 
-    let replies = process_referenced_messages(&ctx, &msg);
+    let replies = process_referenced_messages(ctx, msg);
 
     let response = match chatgpt_lib::chat(&parsed_message, author_name, replies).await
     {

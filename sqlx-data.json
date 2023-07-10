@@ -191,22 +191,6 @@
     },
     "query": "SELECT rule_text FROM server_rules WHERE rule_id = $1 AND guild_id = $2"
   },
-  "684c4b0322b2802d552d74e0e4ac027a3b59ed4667603de04b9b606f07abbfbe": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int4",
-          "Int4",
-          "Int4",
-          "Timestamp"
-        ]
-      }
-    },
-    "query": "INSERT INTO gold_stars (id, number_of_stars, given_stars, received_stars, last_free_star) VALUES ($1, $2, $3, $4, $5)"
-  },
   "6afef18ed8eeeab114681c7fcfd73addf396edacbda79065ac986f5cf737a014": {
     "describe": {
       "columns": [
@@ -250,6 +234,56 @@
       }
     },
     "query": "SELECT * FROM gold_stars WHERE id = $1"
+  },
+  "7dfce51820c0edceeac86ba681c68a5f1d8fd4103f720e3ab453b419304695d2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "guild_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "message_id",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "role_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "emoji",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM reaction_roles WHERE guild_id = $1"
   },
   "967f5afa3fa72eba2bedb930b70574d5d0b6b64004bf89c51c0ec7ec4de67378": {
     "describe": {
@@ -409,5 +443,53 @@
       }
     },
     "query": "SELECT id FROM roles WHERE guild_id = $1 AND category = 'support'"
+  },
+  "eacca50c4f534f455bbed2a191e994b8ee84934d2e64bece8744e9822f12b5f4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "number_of_stars",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "given_stars",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "received_stars",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "last_free_star",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4",
+          "Int4",
+          "Int4",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gold_stars (id, number_of_stars, given_stars, received_stars, last_free_star) VALUES ($1, $2, $3, $4, $5) RETURNING *"
   }
 }

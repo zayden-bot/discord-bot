@@ -32,7 +32,7 @@ pub async fn run(ctx: &Context, msg: &Message) {
         return;
     }
 
-    let attachments = get_attachments(&msg).await.unwrap();
+    let attachments = get_attachments(msg).await.unwrap();
 
     let thread_id = match get_support_thead_id(guild_id.0 as i64).await {
         Ok(id) => {
@@ -64,7 +64,7 @@ pub async fn run(ctx: &Context, msg: &Message) {
     let support_role_ids = get_support_role_ids(msg.guild_id.unwrap().0 as i64).await.unwrap();
     let support_role = ctx
         .cache
-        .role(&guild_id, support_role_ids[0] as u64)
+        .role(guild_id, support_role_ids[0] as u64)
         .unwrap();
 
     thread

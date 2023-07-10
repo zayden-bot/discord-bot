@@ -1,23 +1,18 @@
-use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
+use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::application_command::ApplicationCommandInteraction;
 use serenity::model::prelude::{Channel, ChannelType};
 use serenity::prelude::Context;
+use crate::utils::{respond_with_embed, respond_with_message};
 
-pub fn run<'a>(ctx: &Context, interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
-        None => {
-            response.interaction_response_data(|message| message.content("This command can only be used in a server"));
-            return response;
-        },
+        None => return respond_with_message(ctx, interaction, "This command can only be used in a server").await,
     };
 
     let guild = match guild_id.to_guild_cached(ctx) {
         Some(guild) => guild,
-        None => {
-            response.interaction_response_data(|message| message.content("Error retrieving guild"));
-            return response;
-        },
+        None => return respond_with_message(ctx, interaction, "Error retrieving server information").await,
     };
 
     let mut category_channel_count = 0;
@@ -36,7 +31,7 @@ pub fn run<'a>(ctx: &Context, interaction: &ApplicationCommandInteraction, mut r
         _ => (),
     });
 
-    response.interaction_response_data(|message| message.embed(|e| {
+    respond_with_embed(ctx, interaction, |e| {
         e.author(|author| {
             author.name(&guild.name);
             author.icon_url(guild.icon_url().unwrap_or_default())
@@ -47,8 +42,7 @@ pub fn run<'a>(ctx: &Context, interaction: &ApplicationCommandInteraction, mut r
         .field("Voice Channels", voice_channel_count, true)
         .field("Members", guild.member_count, true)
         .field("Roles", guild.roles.len(), true)
-    }));
-    response
+    }).await
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {

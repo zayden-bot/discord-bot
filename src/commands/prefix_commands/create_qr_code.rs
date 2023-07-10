@@ -25,13 +25,10 @@ pub async fn run(ctx: Context, msg: Message) {
 
     let client = Client::new();
 
-    match client.post("https://api.lovense.com/api/lan/getQrCode").json(&data).send().await {
-        Ok(res) => {
-            let response_json = res.json::<LovenseQrCodeResponse>().await.unwrap();
-            let qr_code_url = response_json.data.get("qr").unwrap();
+    if let Ok(res) = client.post("https://api.lovense.com/api/lan/getQrCode").json(&data).send().await {
+        let response_json = res.json::<LovenseQrCodeResponse>().await.unwrap();
+        let qr_code_url = response_json.data.get("qr").unwrap();
 
-            msg.channel_id.say(&ctx, qr_code_url).await.unwrap();
-        }
-        Err(_) => {}
+        msg.channel_id.say(&ctx, qr_code_url).await.unwrap();
     };
 }

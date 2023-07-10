@@ -1,43 +1,32 @@
-use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
+use serenity::builder::CreateApplicationCommand;
 use serenity::model::Permissions;
 use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOptionValue};
 use serenity::model::prelude::command::CommandOptionType;
 use serenity::prelude::Context;
 use crate::sqlx_lib::update_question_answer;
+use crate::utils::respond_with_message;
 
 const QUESTION_CHANNEL_ID: u64 = 829463308629180447;
 
-pub async fn run<'a>(ctx: &Context, interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
-        None => {
-            response.interaction_response_data(|message| message.content("This command can only be used in a server"));
-            return response;
-        }
+        None => return respond_with_message(ctx, interaction, "This command can only be used in a server").await,
     };
 
     let id = match interaction.data.options[0].resolved.as_ref() {
         Some(CommandDataOptionValue::Integer(id)) => id,
-        _ => {
-            response.interaction_response_data(|message| message.content("Invalid question ID"));
-            return response;
-        }
+        _ => return respond_with_message(ctx, interaction, "Invalid question ID").await,
     };
 
     let answer = match interaction.data.options[1].resolved.as_ref() {
         Some(CommandDataOptionValue::String(answer)) => answer,
-        _ => {
-            response.interaction_response_data(|message| message.content("Invalid answer"));
-            return response;
-        }
+        _ => return respond_with_message(ctx, interaction, "Invalid answer").await,
     };
 
     let question = match update_question_answer(*id as i32, answer).await {
-        Ok(quesiton) => quesiton,
-        Err(_) => {
-            response.interaction_response_data(|message| message.content("Error updating question"));
-            return response;
-        }
+        Ok(question) => question,
+        Err(_) => return respond_with_message(ctx, interaction, "Error updating question").await,
     };
 
     let guild_channels = guild_id.channels(&ctx).await.unwrap();
@@ -52,12 +41,10 @@ pub async fn run<'a>(ctx: &Context, interaction: &ApplicationCommandInteraction,
     }).await;
 
     if msg_result.is_err() {
-        response.interaction_response_data(|message| message.content("Error updating question message"));
-        return response;
+        return respond_with_message(ctx, interaction, "Error updating question").await;
     }
 
-    response.interaction_response_data(|message| message.content("Question updated"));
-    response
+    respond_with_message(ctx, interaction, "Question answered").await
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {

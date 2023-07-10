@@ -170,7 +170,7 @@ pub async fn get_support_answer(server_id: i64, support_id: &str) -> Result<Stri
         .await?;
 
     pool.close().await;
-    Ok(result.answer)
+    Ok(result.answer as String)
 }
 
 pub async fn get_all_support_faq(server_id: i64) -> Result<Vec<SupportFAQ>, Error> {

@@ -1,26 +1,20 @@
-use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
+use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::application_command::ApplicationCommandInteraction;
 use serenity::prelude::Context;
+use crate::utils::respond_with_message;
 
-pub fn run<'a>(ctx: &Context, interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
-        None => {
-            response.interaction_response_data(|message| message.content("This command can only be used in a server"));
-            return response;
-        },
+        None => return respond_with_message(ctx, interaction, "This command can only be used in a server").await,
     };
 
     let guild = match guild_id.to_guild_cached(ctx) {
         Some(guild) => guild,
-        None => {
-            response.interaction_response_data(|message| message.content("Error retrieving guild"));
-            return response;
-        },
+        None => return respond_with_message(ctx, interaction, "Error getting guild").await,
     };
 
-    response.interaction_response_data(|message| message.content(format!("There are **{}** members in this server", guild.member_count)));
-    response
+    respond_with_message(ctx, interaction, &format!("There are **{}** members in this server", guild.member_count)).await
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {

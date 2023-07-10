@@ -1,7 +1,8 @@
-use serenity::builder::{CreateApplicationCommand, CreateInteractionResponse};
-use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOption};
+use serenity::builder::CreateApplicationCommand;
+use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOption, CommandDataOptionValue};
 use serenity::model::prelude::command::CommandOptionType;
 use serenity::prelude::Context;
+use crate::utils::{respond_with_embed, respond_with_message};
 
 #[derive(serde::Deserialize, Debug)]
 struct PatreonMemberAttributes {
@@ -39,57 +40,43 @@ struct PatreonMember {
     patreon_meta: Option<PatreonMeta>,
 }
 
-fn info(mut response: CreateInteractionResponse) -> CreateInteractionResponse {
-    response.interaction_response_data(|message| message.embed(|e| {
+async fn info(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), serenity::Error> {
+    respond_with_embed(ctx, interaction, |e| {
         e.title("Pledge to College Kings")
             .url("https://www.patreon.com/collegekings")
             .description("**Interested In Getting Early Updates, Patron-only behind the scenes/post... and more?\n\nCheck it all out here!**\nhttps://www.patreon.com/collegekings")
             .image("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg")
             .thumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png")
             .footer(|f| f.text("https://www.patreon.com/collegekings"))
-    }));
-    response
+    }).await
 }
 
-async fn check<'a>(subcommand: &CommandDataOption, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
-    response.interaction_response_data(|message| message.content("This command is not yet implemented"));
-    return response;
+async fn check(ctx: &Context, interaction: &ApplicationCommandInteraction, subcommand: &CommandDataOption) -> Result<(), serenity::Error> {
+    let email = match subcommand.options[0].resolved.as_ref() {
+        Some(CommandDataOptionValue::String(email)) => email,
+        _ => return respond_with_message(ctx, interaction, "Invalid email").await,
+    };
 
-    // let email = match subcommand.options[0].resolved.as_ref() {
-    //     Some(CommandDataOptionValue::String(email)) => email,
-    //     _ => {
-    //         response.interaction_response_data(|message| message.content("Invalid email"));
-    //         return response;
-    //     }
-    // };
-    //
-    // let res = match reqwest::get(format!("http://81.100.246.35/api/v1/patreon/users/{}", email)).await {
-    //     Ok(res) => res,
-    //     Err(_) => {
-    //         response.interaction_response_data(|message| message.content("Error connecting to College Kings API"));
-    //         return response;
-    //     },
-    // };
-    //
-    // let patreon_member = res.json::<PatreonMember>().await.unwrap();
-    // println!("{:?}", patreon_member);
-    //
-    // response.interaction_response_data(|message| message.embed(|e| {
-    //     e.title("Patreon Status")
-    //         .description(format!("Lifetime Support (USD): **{}**\nEmail: {}\nPatreon Status: **{}**", patreon_member.data[0].attributes.campaign_lifetime_support_cents / 100, patreon_member.data[0].attributes.email.as_ref().unwrap(), patreon_member.data[0].attributes.patron_status.as_ref().unwrap()))
-    // }));
-    // response
+    let res = match reqwest::get(format!("http://81.100.246.35/api/v1/patreon/users/{}", email)).await {
+        Ok(res) => res,
+        Err(_) => return respond_with_message(ctx, interaction, "Error getting Patreon information").await,
+    };
+
+    let patreon_member = res.json::<PatreonMember>().await.unwrap();
+    println!("{:?}", patreon_member);
+
+    respond_with_embed(ctx, interaction, |e| {
+        e.title("Patreon Status")
+            .description(format!("Lifetime Support (USD): **{}**\nEmail: {}\nPatreon Status: **{}**", patreon_member.data[0].attributes.campaign_lifetime_support_cents / 100, patreon_member.data[0].attributes.email.as_ref().unwrap(), patreon_member.data[0].attributes.patron_status.as_ref().unwrap()))
+    }).await
 }
 
-pub async fn run<'a>(_ctx: &Context, interaction: &ApplicationCommandInteraction, mut response: CreateInteractionResponse<'a>) -> CreateInteractionResponse<'a> {
+pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), serenity::Error> {
     let subcommand = &interaction.data.options[0];
     return match subcommand.name.as_str() {
-        "info" => info(response),
-        "check" => check(subcommand, response).await,
-        _ => {
-            response.interaction_response_data(|message| message.content("Invalid subcommand"));
-            response
-        },
+        "info" => info(ctx, interaction).await,
+        "check" => check(ctx, interaction, subcommand).await,
+        _ => respond_with_message(ctx, interaction, "Invalid subcommand").await,
     }
 }
 
