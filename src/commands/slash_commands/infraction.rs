@@ -2,7 +2,7 @@ use std::cmp;
 use chrono::{Duration, Months, Utc};
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::{Permissions, Timestamp};
-use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOption, CommandDataOptionValue};
+use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOptionValue};
 use serenity::model::prelude::command::CommandOptionType;
 use serenity::model::prelude::{Guild, Member};
 use serenity::prelude::Context;
@@ -19,7 +19,16 @@ async fn warn(ctx: &Context, member: Member, guild: &Guild, moderator: &Member, 
         })
     }).await;
 
-    let result = create_user_infraction(member.user.id.0 as i64, &member.user.name, guild.id.0 as i64, InfractionType::Warn, moderator.user.id.0 as i64, &moderator.user.name, points as i32, reason.as_str()).await;
+    let user_id = member.user.id.0 as i64;
+    let username = member.user.name.as_str();
+    let guild_id = guild.id.0 as i64;
+    let infraction_type = InfractionType::Warn;
+    let moderator_id = moderator.user.id.0 as i64;
+    let moderator_name = moderator.user.name.as_str();
+    let points = points as i32;
+    let reason = reason.as_str();
+
+    let result = create_user_infraction(user_id, username, guild_id, infraction_type, moderator_id, moderator_name, points, reason).await;
 
     if result.is_err() {
         return Err("Failed to create database infraction".to_string());
@@ -45,7 +54,16 @@ async fn mute(ctx: &Context, mut member: Member, guild: &Guild, moderator: &Memb
         })
     }).await;
 
-    let result = create_user_infraction(member.user.id.0 as i64, &member.user.name, guild.id.0 as i64, InfractionType::Mute, moderator.user.id.0 as i64, &moderator.user.name, points as i32, reason.as_str()).await;
+    let user_id = member.user.id.0 as i64;
+    let username = member.user.name.as_str();
+    let guild_id = guild.id.0 as i64;
+    let infraction_type = InfractionType::Mute;
+    let moderator_id = moderator.user.id.0 as i64;
+    let moderator_name = moderator.user.name.as_str();
+    let points = points as i32;
+    let reason = reason.as_str();
+
+    let result = create_user_infraction(user_id, username, guild_id, infraction_type, moderator_id, moderator_name, points, reason).await;
 
     if result.is_err() {
         return Err("Failed to create database infraction".to_string());
@@ -69,7 +87,16 @@ async fn ban(ctx: &Context, member: Member, guild: &Guild, moderator: &Member, p
         })
     }).await;
 
-    let result = create_user_infraction(member.user.id.0 as i64, &member.user.name, guild.id.0 as i64, InfractionType::Ban, moderator.user.id.0 as i64, &moderator.user.name,  points as i32, reason.as_str()).await;
+    let user_id = member.user.id.0 as i64;
+    let username = member.user.name.as_str();
+    let guild_id = guild.id.0 as i64;
+    let infraction_type = InfractionType::Ban;
+    let moderator_id = moderator.user.id.0 as i64;
+    let moderator_name = moderator.user.name.as_str();
+    let points = points as i32;
+    let reason = reason.as_str();
+
+    let result = create_user_infraction(user_id, username, guild_id, infraction_type, moderator_id, moderator_name, points, reason).await;
 
     if result.is_err() {
         return Err("Failed to create database infraction".to_string());

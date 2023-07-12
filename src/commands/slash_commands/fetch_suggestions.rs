@@ -51,7 +51,7 @@ pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> 
     let result = interaction.user.dm(&ctx, |f| {
         f.embed(|e| {
             e.title("Top 10 suggestions");
-            e.description("Here are the top 10 suggestions, sorted by upvotes.");
+            e.description("Here are the top 10 suggestions, sorted by votes.");
 
             for (i, (thread, count)) in thread_reaction_counts[..10].iter().enumerate() {
                 e.field(format!("{}. 👍: {}", i + 1, count), format!("Link: {}", thread), false);

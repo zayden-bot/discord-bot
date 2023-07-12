@@ -42,6 +42,7 @@ pub async fn respond_with_embed<F>(ctx: &Context, interaction: &ApplicationComma
     }).await
 }
 
+#[allow(dead_code)]
 pub async fn edit_response_with_embed(ctx: &Context, interaction: &ApplicationCommandInteraction, embed: CreateEmbed) -> Result<Message, serenity::Error> {
     interaction.edit_original_interaction_response(&ctx, |response| {
         response.add_embed(embed);
