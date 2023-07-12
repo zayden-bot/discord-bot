@@ -32,8 +32,6 @@ impl EventHandler for Handler {
         match command.to_lowercase().as_str() {
             "!create_qr_code" => create_qr_code::run(ctx, msg).await,
             "!ping" => ping::run(ctx, msg).await,
-            "!gm" => gm::run(ctx, msg).await,
-            "!gn" => gn::run(ctx, msg).await,
             _ => {
                 ai_chat::run(&ctx, &msg).await;
                 auto_support::run(&ctx, &msg).await;
