@@ -41,3 +41,17 @@ pub struct ReactionRole {
     pub role_id: i64,
     pub emoji: String,
 }
+
+#[derive(FromRow)]
+pub struct Infraction {
+    pub id: i32,
+    pub user_id: i64,
+    pub username: String,
+    pub guild_id: i64,
+    pub infraction_type: String,
+    pub moderator_id: i64,
+    pub moderator_username: String,
+    pub points: i32,
+    pub reason: String,
+    pub created_at: NaiveDateTime,
+}

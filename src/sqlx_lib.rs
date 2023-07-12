@@ -3,6 +3,7 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::{Error, PgPool};
 use std::env;
 use chrono::Utc;
+use crate::infraction_type::InfractionType;
 
 async fn get_pool() -> PgPool {
     PgPoolOptions::new()
@@ -276,6 +277,28 @@ pub async fn delete_reaction_role(guild_id: i64, channel_id: i64, message_id: &i
     let pool = get_pool().await;
 
     sqlx::query!("DELETE FROM reaction_roles WHERE guild_id = $1 AND channel_id = $2 AND message_id = $3 AND emoji = $4", guild_id, channel_id, message_id, emoji)
+        .execute(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(())
+}
+
+pub async fn get_user_infractions(user_id: i64) -> Result<Vec<Infraction>, Error> {
+    let pool = get_pool().await;
+
+    let results = sqlx::query_as!(Infraction, "SELECT * FROM infractions WHERE user_id = $1", user_id)
+        .fetch_all(&pool)
+        .await?;
+
+    pool.close().await;
+    Ok(results)
+}
+
+pub async fn create_user_infraction(user_id: i64, username: &str, guild_id: i64, infraction_type: InfractionType, moderator_id: i64, moderator_username: &str, points: i32, reason: &str) -> Result<(), Error> {
+    let pool = get_pool().await;
+
+    sqlx::query!("INSERT INTO infractions (user_id, username, guild_id, infraction_type, moderator_id, moderator_username, points, reason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", user_id, username, guild_id, infraction_type.to_string(), moderator_id, moderator_username, points, reason)
         .execute(&pool)
         .await?;
 
