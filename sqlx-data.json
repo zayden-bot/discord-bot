@@ -1,5 +1,24 @@
 {
   "db": "PostgreSQL",
+  "0084a90ad96f1297fc16f492bc7dee79835fed3e2d50df90e7de75db834820fa": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Varchar",
+          "Int8",
+          "Varchar",
+          "Int8",
+          "Varchar",
+          "Int4",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO infractions (user_id, username, guild_id, infraction_type, moderator_id, moderator_username, points, reason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
+  },
   "0346af5d5e6b7955ad2b7e830a80033a768ea8bfbec86aad96f43a831cbc3557": {
     "describe": {
       "columns": [
@@ -46,6 +65,22 @@
       }
     },
     "query": "INSERT INTO support_faq (id, answer, guild_id) VALUES ($1, $2, $3)"
+  },
+  "0e3124d8256176b76f6d4970aaadf6936f7cf088fe327f3855dec21ba517519d": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO reaction_roles (guild_id, channel_id, message_id, role_id, emoji) VALUES ($1, $2, $3, $4, $5)"
   },
   "13327e50e94c709ff67b101b38450cc2b17c19344bab469a271fd74ea7bf34dc": {
     "describe": {
@@ -156,6 +191,80 @@
       }
     },
     "query": "SELECT * FROM support_faq WHERE guild_id = $1"
+  },
+  "50488cef435dbfd363f1b06f75c4779d16fe22ec7ddaf2755cf9ae2172af95c2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "guild_id",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "infraction_type",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "moderator_id",
+          "ordinal": 5,
+          "type_info": "Int8"
+        },
+        {
+          "name": "moderator_username",
+          "ordinal": 6,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "points",
+          "ordinal": 7,
+          "type_info": "Int4"
+        },
+        {
+          "name": "reason",
+          "ordinal": 8,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM infractions WHERE user_id = $1"
   },
   "55fdd4ef1ff0139fcf4b47dfd1058d1746da57b39e9f34ab65c26aaca985be42": {
     "describe": {
@@ -423,6 +532,21 @@
       }
     },
     "query": "INSERT INTO servers (id, support_thread_id) VALUES ($1, $2)"
+  },
+  "dcdecf08a9ab393faf33d3b0f0ca4ce5e81c47a1f56352922b26ea6fe582ab69": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      }
+    },
+    "query": "DELETE FROM reaction_roles WHERE guild_id = $1 AND channel_id = $2 AND message_id = $3 AND emoji = $4"
   },
   "e2a5bbdb24a66a228c1bd359b20de1022ffe19d5dbe0ba88a844d1c5a8090186": {
     "describe": {
