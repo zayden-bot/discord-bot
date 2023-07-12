@@ -109,6 +109,8 @@ impl EventHandler for Handler {
         Command::set_global_application_commands(&ctx, |commands| {
             commands
                 .create_application_command(|command| gold_star::register(command))
+                .create_application_command(|command| infraction::register(command))
+                .create_application_command(|command| logs::register(command))
                 .create_application_command(|command| member_count::register(command))
                 .create_application_command(|command| ping::register(command))
                 .create_application_command(|command| reaction_role::register(command))
@@ -138,6 +140,8 @@ impl EventHandler for Handler {
                 "gold_star" => gold_star::run(&ctx, &command).await,
                 "good_morning" => good_morning::run(&ctx, &command).await,
                 "good_night" => good_night::run(&ctx, &command).await,
+                "infraction" => infraction::run(&ctx, &command).await,
+                "logs" => logs::run(&ctx, &command).await,
                 "member_count" => member_count::run(&ctx, &command).await,
                 "patreon" => patreon::run(&ctx, &command).await,
                 "question" => question::run(&ctx, &command).await,
