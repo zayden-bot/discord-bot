@@ -12,3 +12,4 @@ target/
 # User Files
 .env
 .idea/dataSources.xml
+.sqlx/
