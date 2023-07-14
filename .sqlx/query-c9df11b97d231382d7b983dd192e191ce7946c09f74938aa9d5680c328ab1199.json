@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE gold_stars SET given_stars = given_stars + $2, last_free_star = $3 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4",
+        "Timestamp"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c9df11b97d231382d7b983dd192e191ce7946c09f74938aa9d5680c328ab1199"
+}

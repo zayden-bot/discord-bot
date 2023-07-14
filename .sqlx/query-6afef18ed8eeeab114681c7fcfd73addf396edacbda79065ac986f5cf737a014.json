@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM gold_stars WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "number_of_stars",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "given_stars",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "received_stars",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_free_star",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "6afef18ed8eeeab114681c7fcfd73addf396edacbda79065ac986f5cf737a014"
+}

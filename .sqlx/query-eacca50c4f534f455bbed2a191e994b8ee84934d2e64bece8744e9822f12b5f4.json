@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO gold_stars (id, number_of_stars, given_stars, received_stars, last_free_star) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "number_of_stars",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "given_stars",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "received_stars",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_free_star",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Timestamp"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "eacca50c4f534f455bbed2a191e994b8ee84934d2e64bece8744e9822f12b5f4"
+}
