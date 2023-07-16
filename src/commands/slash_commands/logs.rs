@@ -14,19 +14,14 @@ pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> 
         None => return respond_with_message(ctx, interaction, "This command can only be used in a server").await,
     };
 
-    let guild = match guild_id.to_guild_cached(&ctx) {
-        Some(guild) => guild,
-        None => return respond_with_message(ctx, interaction, "This command can only be used in a server").await,
-    };
-
     let user = match interaction.data.options[0].resolved.as_ref() {
         Some(CommandDataOptionValue::User(user, _member)) => user,
         _ => return respond_with_message(ctx, interaction, "Please provide a valid user").await,
     };
 
-    let member = match guild.members.get(&user.id) {
-        Some(member) => member.to_owned(),
-        None => return respond_with_message(ctx, interaction, "Please provide a valid user").await,
+    let member = match guild_id.member(&ctx, &user.id).await {
+        Ok(member) => member.to_owned(),
+        Err(_) => return respond_with_message(ctx, interaction, "Please provide a valid user").await,
     };
 
     let filter = match interaction.data.options.get(1) {

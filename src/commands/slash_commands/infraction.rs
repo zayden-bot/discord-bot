@@ -4,24 +4,24 @@ use serenity::builder::CreateApplicationCommand;
 use serenity::model::{Permissions, Timestamp};
 use serenity::model::prelude::application_command::{ApplicationCommandInteraction, CommandDataOptionValue};
 use serenity::model::prelude::command::CommandOptionType;
-use serenity::model::prelude::{Guild, Member};
+use serenity::model::prelude::{GuildId, Member};
 use serenity::prelude::Context;
 use crate::infraction_type::InfractionType;
 use crate::sqlx_lib::{create_user_infraction, get_user_infractions};
 use crate::utils::respond_with_message;
 
-async fn warn(ctx: &Context, member: Member, guild: &Guild, moderator: &Member, points: i64, reason: String) -> Result<String, String> {
+async fn warn(ctx: &Context, member: Member, guild_id: &GuildId, moderator: Member, points: i64, reason: String) -> Result<String, String> {
     let _ = member.user.dm(ctx, |message| {
         message.embed(|embed| {
             embed.title("You have been warned");
-            embed.description(format!("You have been warned in {} for the following reason: {}", guild.name, reason));
+            embed.description(format!("You have been warned in {} for the following reason: {}", guild_id.name(&ctx).unwrap(), reason));
             embed
         })
     }).await;
 
     let user_id = member.user.id.0 as i64;
     let username = member.user.name.as_str();
-    let guild_id = guild.id.0 as i64;
+    let guild_id = guild_id.0 as i64;
     let infraction_type = InfractionType::Warn;
     let moderator_id = moderator.user.id.0 as i64;
     let moderator_name = moderator.user.name.as_str();
@@ -37,7 +37,7 @@ async fn warn(ctx: &Context, member: Member, guild: &Guild, moderator: &Member, 
     Ok("User has been warned".to_string())
 }
 
-async fn mute(ctx: &Context, mut member: Member, guild: &Guild, moderator: &Member, duration: Duration, points: i64, reason: String) -> Result<String, String> {
+async fn mute(ctx: &Context, mut member: Member, guild_id: &GuildId, moderator: Member, duration: Duration, points: i64, reason: String) -> Result<String, String> {
     let timestamp = (Utc::now() + duration).timestamp();
 
     let result= member.disable_communication_until_datetime(ctx, Timestamp::from_unix_timestamp(timestamp).unwrap()).await;
@@ -49,14 +49,14 @@ async fn mute(ctx: &Context, mut member: Member, guild: &Guild, moderator: &Memb
     let _ = member.user.dm(ctx, |message| {
         message.embed(|embed| {
             embed.title("You have been muted");
-            embed.description(format!("You have been muted in {} for the following reason: {}", guild.name, reason));
+            embed.description(format!("You have been muted in {} for the following reason: {}", guild_id.name(&ctx).unwrap(), reason));
             embed
         })
     }).await;
 
     let user_id = member.user.id.0 as i64;
     let username = member.user.name.as_str();
-    let guild_id = guild.id.0 as i64;
+    let guild_id = guild_id.0 as i64;
     let infraction_type = InfractionType::Mute;
     let moderator_id = moderator.user.id.0 as i64;
     let moderator_name = moderator.user.name.as_str();
@@ -72,7 +72,7 @@ async fn mute(ctx: &Context, mut member: Member, guild: &Guild, moderator: &Memb
     Ok("User has been muted".to_string())
 }
 
-async fn ban(ctx: &Context, member: Member, guild: &Guild, moderator: &Member, points: i64, reason: String) -> Result<String, String> {
+async fn ban(ctx: &Context, member: Member, guild_id: &GuildId, moderator: Member, points: i64, reason: String) -> Result<String, String> {
     let result = member.ban_with_reason(ctx, 7, &reason).await;
 
     if let Err(_) = result {
@@ -82,14 +82,14 @@ async fn ban(ctx: &Context, member: Member, guild: &Guild, moderator: &Member, p
     let _ = member.user.dm(ctx, |message| {
         message.embed(|embed| {
             embed.title("You have been banned");
-            embed.description(format!("You have been banned from {} for the following reason: {}", guild.name, reason));
+            embed.description(format!("You have been banned from {} for the following reason: {}", guild_id.name(&ctx).unwrap(), reason));
             embed
         })
     }).await;
 
     let user_id = member.user.id.0 as i64;
     let username = member.user.name.as_str();
-    let guild_id = guild.id.0 as i64;
+    let guild_id = guild_id.0 as i64;
     let infraction_type = InfractionType::Ban;
     let moderator_id = moderator.user.id.0 as i64;
     let moderator_name = moderator.user.name.as_str();
@@ -120,24 +120,19 @@ pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> 
         None => return respond_with_message(ctx, interaction, "This command can only be used in a server").await,
     };
 
-    let guild = match guild_id.to_guild_cached(&ctx) {
-        Some(guild) => guild,
-        None => return respond_with_message(ctx, interaction, "This command can only be used in a server").await,
-    };
-
     let user = match interaction.data.options[0].resolved.as_ref() {
         Some(CommandDataOptionValue::User(user, _member)) => user,
         _ => return respond_with_message(ctx, interaction, "Please provide a valid user").await,
     };
 
-    let moderator = match guild.members.get(&author_id) {
-        Some(moderator) => moderator,
-        None => return respond_with_message(ctx, interaction, "Invalid moderator").await,
+    let moderator = match guild_id.member(&ctx, &author_id).await {
+        Ok(moderator) => moderator,
+        Err(_) => return respond_with_message(ctx, interaction, "Invalid moderator").await,
     };
 
-    let member = match guild.members.get(&user.id) {
-        Some(member) => member.to_owned(),
-        None => return respond_with_message(ctx, interaction, "Please provide a valid user").await,
+    let member = match guild_id.member(&ctx, user.id).await {
+        Ok(member) => member,
+        Err(_) => return respond_with_message(ctx, interaction, "User not found in this server").await,
     };
 
     let points = match get_option_by_name(interaction, "points") {
@@ -162,11 +157,11 @@ pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> 
     let infraction_count = cmp::min((infraction_count as i64) + points, 5);
 
     let result = match infraction_count {
-        1 => warn(ctx, member, &guild, moderator, points, reason).await,
-        2 => mute(ctx, member, &guild, moderator, Duration::hours(1), points,reason).await,
-        3 => mute(ctx, member, &guild, moderator, Duration::hours(8), points, reason).await,
-        4 => mute(ctx, member, &guild, moderator, Duration::days(28), points, reason).await,
-        5 => ban(ctx, member, &guild, moderator, points, reason).await,
+        1 => warn(ctx, member, &guild_id, moderator, points, reason).await,
+        2 => mute(ctx, member, &guild_id, moderator, Duration::hours(1), points,reason).await,
+        3 => mute(ctx, member, &guild_id, moderator, Duration::hours(8), points, reason).await,
+        4 => mute(ctx, member, &guild_id, moderator, Duration::days(28), points, reason).await,
+        5 => ban(ctx, member, &guild_id, moderator, points, reason).await,
         _ => return respond_with_message(ctx, interaction, "Invalid amount of infraction points").await,
     };
 
