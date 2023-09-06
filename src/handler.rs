@@ -100,6 +100,7 @@ impl EventHandler for Handler {
                 .create_application_command(|command| reputation::register(command))
                 .create_application_command(|command| saves::register(command))
                 .create_application_command(|command| spoilers::register(command))
+                .create_application_command(|command| update_information_message::register(command))
         }).await.expect("Failed to register slash command");
 
         Command::set_global_application_commands(&ctx, |commands| {
@@ -151,6 +152,7 @@ impl EventHandler for Handler {
                 "spoilers" => spoilers::run(&ctx, &command).await,
                 "stars" => stars::run(&ctx, &command).await,
                 "support" => support::run(&ctx, &command).await,
+                "update_information" => update_information_message::run(&ctx, &command).await,
                 _ => respond_with_message(&ctx, &command, "Command not found").await,
             };
 

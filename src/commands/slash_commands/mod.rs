@@ -20,3 +20,4 @@ pub mod add_artist;
 pub mod reaction_role;
 pub mod infraction;
 pub mod logs;
+pub mod update_information_message;
