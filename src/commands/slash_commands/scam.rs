@@ -13,7 +13,7 @@ pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> 
 
     let user = match interaction.data.options[0].resolved.as_ref() {
         Some(CommandDataOptionValue::User(user, _member)) => user,
-        _ => return respond_with_message(ctx, interaction, "Invalid user").await,
+        _ => return respond_with_message(ctx, interaction, "Cannot get member: Unknown Member").await,
     };
 
     let reason = match interaction.data.options.get(1) {
