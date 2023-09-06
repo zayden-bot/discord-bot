@@ -11,4 +11,4 @@ target/
 
 # User Files
 .env
-.idea/dataSources.xml
+.idea/
