@@ -1,4 +1,7 @@
 use crate::commands::slash_commands::*;
+use crate::models::ReactionRole;
+use crate::sqlx_lib::get_reaction_roles;
+use crate::utils::respond_with_message;
 use serenity::async_trait;
 use serenity::model::channel::{Message, Reaction};
 use serenity::model::gateway::{Activity, Ready};
@@ -6,9 +9,6 @@ use serenity::model::prelude::command::Command;
 use serenity::model::prelude::{GuildId, Interaction, Member};
 use serenity::model::user::OnlineStatus;
 use serenity::prelude::{Context, EventHandler};
-use crate::models::ReactionRole;
-use crate::sqlx_lib::get_reaction_roles;
-use crate::utils::respond_with_message;
 
 const COLLEGE_KINGS_GUILD_ID: u64 = 745662812335898806;
 
@@ -40,18 +40,23 @@ impl EventHandler for Handler {
     }
 
     async fn reaction_add(&self, ctx: Context, reaction: Reaction) {
-        let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
-            Ok(reaction_data) => reaction_data,
-            Err(why) => return println!("{}", why),
-        };
+        let (reaction_roles, reaction_message, mut member) =
+            match get_reaction_data(&ctx, &reaction).await {
+                Ok(reaction_data) => reaction_data,
+                Err(why) => return println!("{}", why),
+            };
 
         for reaction_role in reaction_roles {
-            if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
+            if (reaction_message.id.0 != reaction_role.message_id as u64)
+                || (reaction.emoji.to_string() != reaction_role.emoji)
+            {
                 continue;
             }
 
             match member.add_role(&ctx, reaction_role.role_id as u64).await {
-                Ok(_) => { return; }
+                Ok(_) => {
+                    return;
+                }
                 Err(why) => {
                     println!("Cannot add role: {}", why);
                     return;
@@ -61,18 +66,23 @@ impl EventHandler for Handler {
     }
 
     async fn reaction_remove(&self, ctx: Context, reaction: Reaction) {
-        let (reaction_roles, reaction_message, mut member) = match get_reaction_data(&ctx, &reaction).await {
-            Ok(reaction_data) => reaction_data,
-            Err(why) => return println!("{}", why),
-        };
+        let (reaction_roles, reaction_message, mut member) =
+            match get_reaction_data(&ctx, &reaction).await {
+                Ok(reaction_data) => reaction_data,
+                Err(why) => return println!("{}", why),
+            };
 
         for reaction_role in reaction_roles {
-            if (reaction_message.id.0 != reaction_role.message_id as u64) || (reaction.emoji.to_string() != reaction_role.emoji) {
+            if (reaction_message.id.0 != reaction_role.message_id as u64)
+                || (reaction.emoji.to_string() != reaction_role.emoji)
+            {
                 continue;
             }
 
             match member.remove_role(&ctx, reaction_role.role_id as u64).await {
-                Ok(_) => { return; }
+                Ok(_) => {
+                    return;
+                }
                 Err(why) => {
                     println!("Cannot remove role: {}", why);
                     return;
@@ -92,6 +102,7 @@ impl EventHandler for Handler {
                 .create_application_command(|command| add_artist::register(command))
                 .create_application_command(|command| answer::register(command))
                 .create_application_command(|command| fetch_suggestions::register(command))
+                .create_application_command(|command| fixed::register(command))
                 .create_application_command(|command| get_discord_role::register(command))
                 .create_application_command(|command| patreon::register(command))
                 .create_application_command(|command| good_morning::register(command))
@@ -101,7 +112,9 @@ impl EventHandler for Handler {
                 .create_application_command(|command| saves::register(command))
                 .create_application_command(|command| spoilers::register(command))
                 .create_application_command(|command| update_information_message::register(command))
-        }).await.expect("Failed to register slash command");
+        })
+        .await
+        .expect("Failed to register slash command");
 
         Command::set_global_application_commands(&ctx, |commands| {
             commands
@@ -133,6 +146,7 @@ impl EventHandler for Handler {
                 "add_artist" => add_artist::run(&ctx, &command).await,
                 "answer" => answer::run(&ctx, &command).await,
                 "fetch_suggestions" => fetch_suggestions::run(&ctx, &command).await,
+                "fixed" => fixed::run(&ctx, &command).await,
                 "get_discord_role" => get_discord_role::run(&ctx, &command).await,
                 "gold_star" => gold_star::run(&ctx, &command).await,
                 "good_morning" => good_morning::run(&ctx, &command).await,
@@ -163,7 +177,10 @@ impl EventHandler for Handler {
     }
 }
 
-async fn get_reaction_data(ctx: &Context, reaction: &Reaction) -> Result<(Vec<ReactionRole>, Message, Member), String> {
+async fn get_reaction_data(
+    ctx: &Context,
+    reaction: &Reaction,
+) -> Result<(Vec<ReactionRole>, Message, Member), String> {
     let guild_id = match reaction.guild_id {
         Some(guild_id) => guild_id,
         None => return Err("Cannot get guild id".to_string()),
