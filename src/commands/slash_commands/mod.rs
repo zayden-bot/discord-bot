@@ -1,5 +1,6 @@
 pub mod add_artist;
 pub mod answer;
+pub mod close;
 pub mod fetch_suggestions;
 pub mod fixed;
 pub mod get_discord_role;
@@ -9,6 +10,7 @@ pub mod good_night;
 pub mod infraction;
 pub mod logs;
 pub mod member_count;
+pub mod open;
 pub mod patreon;
 pub mod ping;
 pub mod question;

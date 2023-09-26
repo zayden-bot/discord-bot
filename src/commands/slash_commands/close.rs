@@ -12,12 +12,12 @@ pub async fn run(
     ctx: &Context,
     interaction: &ApplicationCommandInteraction,
 ) -> Result<(), serenity::Error> {
-    let version = match interaction.data.options.get(0) {
+    let message = match interaction.data.options.get(0) {
         Some(value) => value.value.as_ref().unwrap().as_str().unwrap(),
         None => "",
     };
 
-    let is_silent = version.is_empty();
+    let is_silent = message.is_empty();
 
     let current_channel = interaction
         .channel_id
@@ -38,7 +38,7 @@ pub async fn run(
 
     let current_channel_name = current_channel.name;
 
-    let new_channel_name = format!("{} - {}", "[Fixed]", current_channel_name)
+    let new_channel_name = format!("{} - {}", "[Closed]", current_channel_name)
         .chars()
         .take(100)
         .collect::<String>();
@@ -50,15 +50,12 @@ pub async fn run(
         .expect("Failed to edit channel name");
 
     if is_silent {
-        respond_with_ephemeral_message(ctx, interaction, "Ticket marked as fixed").await
+        respond_with_ephemeral_message(ctx, interaction, "Ticket marked as closed").await
     } else {
         respond_with_message(
             ctx,
             interaction,
-            &format!(
-                "Fixed in {}. Check <#{}> for more details",
-                version, CHANGE_LOG_CHANNEL_ID
-            ),
+            &format!("Ticket marked as closed\n\n{}", message),
         )
         .await
     }
@@ -66,13 +63,13 @@ pub async fn run(
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
     command
-        .name("fixed")
-        .description("Mark support ticket as fixed")
+        .name("close")
+        .description("Mark support ticket as closed")
         .default_member_permissions(Permissions::MANAGE_MESSAGES)
         .create_option(|option| {
             option
-                .name("version")
-                .description("The version the issue was fixed in")
+                .name("message")
+                .description("The message to send to the ticket")
                 .kind(CommandOptionType::String)
         })
 }

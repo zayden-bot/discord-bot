@@ -1,7 +1,6 @@
 use crate::utils::{respond_with_ephemeral_message, respond_with_message};
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::application_command::ApplicationCommandInteraction;
-use serenity::model::prelude::command::CommandOptionType;
 use serenity::model::Permissions;
 use serenity::prelude::Context;
 
@@ -12,13 +11,6 @@ pub async fn run(
     ctx: &Context,
     interaction: &ApplicationCommandInteraction,
 ) -> Result<(), serenity::Error> {
-    let version = match interaction.data.options.get(0) {
-        Some(value) => value.value.as_ref().unwrap().as_str().unwrap(),
-        None => "",
-    };
-
-    let is_silent = version.is_empty();
-
     let current_channel = interaction
         .channel_id
         .to_channel(ctx)
@@ -49,30 +41,12 @@ pub async fn run(
         .await
         .expect("Failed to edit channel name");
 
-    if is_silent {
-        respond_with_ephemeral_message(ctx, interaction, "Ticket marked as fixed").await
-    } else {
-        respond_with_message(
-            ctx,
-            interaction,
-            &format!(
-                "Fixed in {}. Check <#{}> for more details",
-                version, CHANGE_LOG_CHANNEL_ID
-            ),
-        )
-        .await
-    }
+    respond_with_ephemeral_message(ctx, interaction, "Ticket reopened").await
 }
 
 pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
     command
-        .name("fixed")
-        .description("Mark support ticket as fixed")
+        .name("open")
+        .description("Reopen a support ticket")
         .default_member_permissions(Permissions::MANAGE_MESSAGES)
-        .create_option(|option| {
-            option
-                .name("version")
-                .description("The version the issue was fixed in")
-                .kind(CommandOptionType::String)
-        })
 }
