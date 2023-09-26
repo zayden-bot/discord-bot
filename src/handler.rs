@@ -24,10 +24,7 @@ impl EventHandler for Handler {
             return;
         }
 
-        let command = match msg.content.split_whitespace().next() {
-            Some(command) => command,
-            None => return,
-        };
+        let command = msg.content.split_whitespace().next().unwrap_or("");
 
         match command.to_lowercase().as_str() {
             "!create_qr_code" => create_qr_code::run(ctx, msg).await,
