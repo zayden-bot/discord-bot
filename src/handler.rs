@@ -98,9 +98,11 @@ impl EventHandler for Handler {
             commands
                 .create_application_command(|command| add_artist::register(command))
                 .create_application_command(|command| answer::register(command))
+                .create_application_command(|command| close::register(command))
                 .create_application_command(|command| fetch_suggestions::register(command))
                 .create_application_command(|command| fixed::register(command))
                 .create_application_command(|command| get_discord_role::register(command))
+                .create_application_command(|command| open::register(command))
                 .create_application_command(|command| patreon::register(command))
                 .create_application_command(|command| good_morning::register(command))
                 .create_application_command(|command| good_night::register(command))
@@ -142,6 +144,7 @@ impl EventHandler for Handler {
             let result = match command.data.name.as_str() {
                 "add_artist" => add_artist::run(&ctx, &command).await,
                 "answer" => answer::run(&ctx, &command).await,
+                "close" => close::run(&ctx, &command).await,
                 "fetch_suggestions" => fetch_suggestions::run(&ctx, &command).await,
                 "fixed" => fixed::run(&ctx, &command).await,
                 "get_discord_role" => get_discord_role::run(&ctx, &command).await,
@@ -151,6 +154,7 @@ impl EventHandler for Handler {
                 "infraction" => infraction::run(&ctx, &command).await,
                 "logs" => logs::run(&ctx, &command).await,
                 "member_count" => member_count::run(&ctx, &command).await,
+                "open" => open::run(&ctx, &command).await,
                 "patreon" => patreon::run(&ctx, &command).await,
                 "question" => question::run(&ctx, &command).await,
                 "reaction_role" => reaction_role::run(&ctx, &command).await,

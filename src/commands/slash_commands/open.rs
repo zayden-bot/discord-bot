@@ -4,7 +4,6 @@ use serenity::model::prelude::application_command::ApplicationCommandInteraction
 use serenity::model::Permissions;
 use serenity::prelude::Context;
 
-const CHANGE_LOG_CHANNEL_ID: u64 = 992599169288122410;
 const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
 
 pub async fn run(
