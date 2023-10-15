@@ -11,4 +11,5 @@ target/
 
 # User Files
 .env
+
 .idea/
