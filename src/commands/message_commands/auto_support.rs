@@ -2,14 +2,13 @@ use std::borrow::Cow;
 
 use crate::sqlx_lib::*;
 use serenity::model::channel::{AttachmentType, Message};
-use serenity::model::prelude::*;
+use serenity::model::prelude::{ChannelType, Role, User};
 use serenity::prelude::Context;
 
 fn get_welcome_message(support_role: &Role, user: &User) -> String {
     format!("{} {} wrote:", support_role, user)
 }
 
-#[allow(unused_qualifications)]
 async fn get_attachments(msg: &Message) -> serenity::Result<Vec<AttachmentType>> {
     let mut attachments = Vec::new();
     for attachment in &msg.attachments {
@@ -31,6 +30,8 @@ pub async fn run(ctx: &Context, msg: &Message) {
     if !support_channel_ids.contains(&(msg.channel_id.0 as i64)) {
         return;
     }
+
+    let guild_roles = ctx.http.get_guild_roles(guild_id.0);
 
     let attachments = get_attachments(msg).await.unwrap();
 
@@ -66,13 +67,15 @@ pub async fn run(ctx: &Context, msg: &Message) {
     let support_role_ids = get_support_role_ids(msg.guild_id.unwrap().0 as i64)
         .await
         .unwrap();
-    let support_role = ctx
-        .cache
-        .role(guild_id, support_role_ids[0] as u64)
+
+    let guild_roles = guild_roles.await.unwrap();
+    let support_role = guild_roles
+        .iter()
+        .find(|role| role.id.0 == support_role_ids[0] as u64)
         .unwrap();
 
     thread
-        .say(&ctx, get_welcome_message(&support_role, &msg.author))
+        .say(&ctx, get_welcome_message(support_role, &msg.author))
         .await
         .unwrap();
 
