@@ -44,13 +44,17 @@ pub async fn run(
         Err(_) => return respond_with_message(ctx, interaction, "Error getting member").await,
     };
 
+    let partial_guild = match guild_id.to_partial_guild(&ctx).await {
+        Ok(partial_guild) => partial_guild,
+        Err(_) => return respond_with_message(ctx, interaction, "Error getting guild").await,
+    };
+
     let _ = user
         .dm(&ctx, |message| {
             message.embed(|e| {
                 e.description(format!(
                     "You have been soft banned from {} for the following reason: {}",
-                    guild_id.name(ctx).unwrap(),
-                    reason
+                    partial_guild.name, reason
                 ))
             })
         })
