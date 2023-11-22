@@ -60,7 +60,7 @@ fn process_referenced_messages(ctx: &Context, msg: &Message) -> Vec<(bool, Strin
 }
 
 pub async fn run(ctx: &Context, msg: &Message) {
-    // Check if message starts with ? and mentions the bot
+    // Check if message doesn't starts with ? and mentions the bot
     if !(msg.content.ends_with('?')
         && msg
             .mentions
@@ -82,16 +82,9 @@ pub async fn run(ctx: &Context, msg: &Message) {
 
     let replies = process_referenced_messages(ctx, msg);
 
-    let response = match chatgpt_lib::chat(&parsed_message, author_name, replies).await
-    {
-        Ok(response) => response,
-        Err(why) => {
-            msg.reply(&ctx, format!("Error: {}", why)).await.unwrap();
-            return;
-        }
-    };
-
-    msg.reply(&ctx, &response.choices[0].message.content)
-        .await
-        .unwrap();
+    if let Ok(response) = chatgpt_lib::chat(&parsed_message, author_name, replies).await {
+        msg.reply(&ctx, &response.choices[0].message.content)
+            .await
+            .unwrap();
+    }
 }
