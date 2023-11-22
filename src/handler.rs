@@ -2,10 +2,10 @@ use crate::commands::slash_commands::*;
 use crate::models::ReactionRole;
 use crate::sqlx_lib::get_reaction_roles;
 use crate::utils::respond_with_message;
+use serenity::all::{ActivityData, Command};
 use serenity::async_trait;
 use serenity::model::channel::{Message, Reaction};
-use serenity::model::gateway::{Activity, Ready};
-use serenity::model::prelude::command::Command;
+use serenity::model::gateway::Ready;
 use serenity::model::prelude::{GuildId, Interaction, Member};
 use serenity::model::user::OnlineStatus;
 use serenity::prelude::{Context, EventHandler};
@@ -27,7 +27,6 @@ impl EventHandler for Handler {
         let command = msg.content.split_whitespace().next().unwrap_or("");
 
         match command.to_lowercase().as_str() {
-            "!create_qr_code" => create_qr_code::run(ctx, msg).await,
             "!ping" => ping::run(ctx, msg).await,
             _ => {
                 ai_chat::run(&ctx, &msg).await;
@@ -44,7 +43,7 @@ impl EventHandler for Handler {
             };
 
         for reaction_role in reaction_roles {
-            if (reaction_message.id.0 != reaction_role.message_id as u64)
+            if (reaction_message.id.get() != (reaction_role.message_id as u64))
                 || (reaction.emoji.to_string() != reaction_role.emoji)
             {
                 continue;
@@ -70,7 +69,7 @@ impl EventHandler for Handler {
             };
 
         for reaction_role in reaction_roles {
-            if (reaction_message.id.0 != reaction_role.message_id as u64)
+            if (reaction_message.id.get() != (reaction_role.message_id as u64))
                 || (reaction.emoji.to_string() != reaction_role.emoji)
             {
                 continue;
@@ -94,51 +93,56 @@ impl EventHandler for Handler {
         // TODO: Load Commands
 
         // Deploy Commands
-        GuildId::set_application_commands(&GuildId(COLLEGE_KINGS_GUILD_ID), &ctx, |commands| {
-            commands
-                .create_application_command(|command| add_artist::register(command))
-                .create_application_command(|command| answer::register(command))
-                .create_application_command(|command| close::register(command))
-                .create_application_command(|command| fetch_suggestions::register(command))
-                .create_application_command(|command| fixed::register(command))
-                .create_application_command(|command| get_discord_role::register(command))
-                .create_application_command(|command| open::register(command))
-                .create_application_command(|command| patreon::register(command))
-                .create_application_command(|command| good_morning::register(command))
-                .create_application_command(|command| good_night::register(command))
-                .create_application_command(|command| question::register(command))
-                .create_application_command(|command| reputation::register(command))
-                .create_application_command(|command| saves::register(command))
-                .create_application_command(|command| spoilers::register(command))
-                .create_application_command(|command| update_information_message::register(command))
-        })
+        GuildId::set_commands(
+            GuildId::new(COLLEGE_KINGS_GUILD_ID),
+            &ctx,
+            vec![
+                add_artist::register(),
+                answer::register(),
+                close::register(),
+                fetch_suggestions::register(),
+                fixed::register(),
+                get_discord_role::register(),
+                open::register(),
+                patreon::register(),
+                good_morning::register(),
+                good_night::register(),
+                question::register(),
+                reputation::register(),
+                saves::register(),
+                spoilers::register(),
+                update_information_message::register(),
+            ],
+        )
         .await
         .expect("Failed to register slash command");
 
-        Command::set_global_application_commands(&ctx, |commands| {
-            commands
-                .create_application_command(|command| gold_star::register(command))
-                .create_application_command(|command| infraction::register(command))
-                .create_application_command(|command| logs::register(command))
-                .create_application_command(|command| member_count::register(command))
-                .create_application_command(|command| ping::register(command))
-                .create_application_command(|command| reaction_role::register(command))
-                .create_application_command(|command| rule::register(command))
-                .create_application_command(|command| scam::register(command))
-                .create_application_command(|command| server_info::register(command))
-                .create_application_command(|command| stars::register(command))
-                .create_application_command(|command| support::register(command))
-        })
+        Command::set_global_commands(
+            &ctx,
+            vec![
+                gold_star::register(),
+                infraction::register(),
+                logs::register(),
+                member_count::register(),
+                ping::register(),
+                reaction_role::register(),
+                rule::register(),
+                scam::register(),
+                server_info::register(),
+                stars::register(),
+                support::register(),
+            ],
+        )
         .await
         .expect("Failed to register slash command");
 
-        let mut activity = Activity::playing("College Kings");
-        activity.url = Some("https://www.patreon.com/collegekings".parse().unwrap());
-        ctx.set_presence(Some(activity), OnlineStatus::Online).await;
+        // let activity = ActivityData::playing("College Kings");
+        let activity = ActivityData::custom("Updating to 0.12");
+        ctx.set_presence(Some(activity), OnlineStatus::Online);
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        if let Interaction::ApplicationCommand(command) = interaction {
+        if let Interaction::Command(command) = interaction {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
             let result = match command.data.name.as_str() {
@@ -202,7 +206,7 @@ async fn get_reaction_data(
         Err(why) => return Err(format!("Cannot get member: {}", why)),
     };
 
-    let reaction_roles = match get_reaction_roles(guild_id.0 as i64).await {
+    let reaction_roles = match get_reaction_roles(guild_id.get() as i64).await {
         Ok(reaction_roles) => reaction_roles,
         Err(why) => return Err(format!("Cannot get reaction roles: {}", why)),
     };

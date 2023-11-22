@@ -1,79 +1,72 @@
-use serenity::builder::CreateEmbed;
-use serenity::model::prelude::application_command::ApplicationCommandInteraction;
-use serenity::model::prelude::{InteractionResponseType, Message};
-use serenity::prelude::Context;
+use serenity::all::{
+    CommandInteraction, Context, CreateEmbed, CreateInteractionResponse,
+    CreateInteractionResponseMessage, EditInteractionResponse, Message,
+};
 
 pub async fn respond_with_message(
     ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
+    interaction: &CommandInteraction,
     content: &str,
 ) -> Result<(), serenity::Error> {
     interaction
-        .create_interaction_response(&ctx, |response| {
-            response.kind(InteractionResponseType::ChannelMessageWithSource);
-            response.interaction_response_data(|message| message.content(content))
-        })
+        .create_response(
+            &ctx,
+            CreateInteractionResponse::Message(
+                CreateInteractionResponseMessage::new().content(content),
+            ),
+        )
         .await
 }
 
 pub async fn respond_with_ephemeral_message(
     ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
+    interaction: &CommandInteraction,
     content: &str,
 ) -> Result<(), serenity::Error> {
     interaction
-        .create_interaction_response(&ctx, |response| {
-            response.kind(InteractionResponseType::ChannelMessageWithSource);
-            response.interaction_response_data(|message| {
-                message.content(content);
-                message.ephemeral(true)
-            })
-        })
+        .create_response(
+            &ctx,
+            CreateInteractionResponse::Message(
+                CreateInteractionResponseMessage::new()
+                    .content(content)
+                    .ephemeral(true),
+            ),
+        )
         .await
 }
 
 pub async fn edit_response_with_message(
     ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
+    interaction: &CommandInteraction,
     content: &str,
 ) -> Result<Message, serenity::Error> {
     interaction
-        .edit_original_interaction_response(&ctx, |response| {
-            response.content(content);
-            response
-        })
+        .edit_response(&ctx, EditInteractionResponse::new().content(content))
         .await
 }
 
-pub async fn respond_with_embed<F>(
+pub async fn respond_with_embed(
     ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
-    embed: F,
-) -> Result<(), serenity::Error>
-where
-    F: FnOnce(&mut CreateEmbed) -> &mut CreateEmbed,
-{
+    interaction: &CommandInteraction,
+    embed: CreateEmbed,
+) -> Result<(), serenity::Error> {
     interaction
-        .create_interaction_response(&ctx, |response| {
-            response.kind(InteractionResponseType::ChannelMessageWithSource);
-            response.interaction_response_data(|message| {
-                message.embed(embed);
-                message
-            })
-        })
+        .create_response(
+            &ctx,
+            CreateInteractionResponse::Message(
+                CreateInteractionResponseMessage::new().add_embed(embed),
+            ),
+        )
         .await
 }
 
 #[allow(dead_code)]
 pub async fn edit_response_with_embed(
     ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
+    interaction: &CommandInteraction,
     embed: CreateEmbed,
 ) -> Result<Message, serenity::Error> {
     interaction
-        .edit_original_interaction_response(&ctx, |response| {
-            response.add_embed(embed);
-            response
-        })
+        .edit_response(&ctx, EditInteractionResponse::new().add_embed(embed))
         .await
 }

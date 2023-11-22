@@ -1,15 +1,9 @@
 use crate::utils::{respond_with_ephemeral_message, respond_with_message};
-use serenity::builder::CreateApplicationCommand;
-use serenity::model::prelude::application_command::ApplicationCommandInteraction;
-use serenity::model::Permissions;
-use serenity::prelude::Context;
+use serenity::all::{CommandInteraction, Context, CreateCommand, EditChannel, Permissions};
 
 const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
 
-pub async fn run(
-    ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
-) -> Result<(), serenity::Error> {
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let current_channel = interaction
         .channel_id
         .to_channel(ctx)
@@ -18,7 +12,7 @@ pub async fn run(
         .guild()
         .unwrap();
 
-    if current_channel.parent_id.unwrap().0 != SUPPORT_CHANNEL_ID {
+    if current_channel.parent_id.unwrap().get() != SUPPORT_CHANNEL_ID {
         return respond_with_message(
             ctx,
             interaction,
@@ -27,25 +21,22 @@ pub async fn run(
         .await;
     }
 
-    let current_channel_name = current_channel.name;
-
-    let new_channel_name = format!("{} - {}", "[Fixed]", current_channel_name)
-        .chars()
-        .take(100)
-        .collect::<String>();
+    let new_channel_name = current_channel
+        .name
+        .replace("[Fixed] - ", "")
+        .replace("[Closed] - ", "");
 
     interaction
         .channel_id
-        .edit(ctx, |c| c.name(new_channel_name))
+        .edit(ctx, EditChannel::new().name(new_channel_name))
         .await
         .expect("Failed to edit channel name");
 
     respond_with_ephemeral_message(ctx, interaction, "Ticket reopened").await
 }
 
-pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-    command
-        .name("open")
+pub fn register() -> CreateCommand {
+    CreateCommand::new("open")
         .description("Reopen a support ticket")
         .default_member_permissions(Permissions::MANAGE_MESSAGES)
 }

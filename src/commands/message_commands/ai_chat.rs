@@ -1,24 +1,9 @@
 use crate::chatgpt_lib;
-use regex::Regex;
-use serenity::model::channel::Message;
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use serenity::all::{parse_user_tag, Context, GuildId, Message, UserId};
 
 async fn get_display_name(ctx: &Context, guild_id: GuildId, user_id: UserId) -> Option<String> {
     if let Ok(member) = guild_id.member(ctx, &user_id).await {
         return Some(member.display_name().to_string());
-    }
-    None
-}
-
-fn parse_author_name(author_name: &str) -> Option<&str> {
-    let regex_pattern = "^[a-zA-Z0-9_-]{1,64}$";
-
-    let re = Regex::new(regex_pattern).unwrap();
-    let matched_text = re.find(author_name);
-
-    if let Some(m) = matched_text {
-        return Some(m.as_str());
     }
     None
 }
@@ -29,7 +14,7 @@ async fn parse_mentions(ctx: &Context, message: &Message) -> String {
     for mention in &message.mentions {
         let mention_tag = format!("<@{}>", mention.id);
 
-        if mention.id == ctx.cache.current_user_id() {
+        if mention.id.get() == (ctx.shard_id.0 as u64) {
             parsed_content = parsed_content.replace(&mention_tag, "");
             continue;
         }
@@ -48,7 +33,7 @@ fn process_referenced_messages(ctx: &Context, msg: &Message) -> Vec<(bool, Strin
 
     if let Some(referenced_message) = &msg.referenced_message {
         contents.push((
-            referenced_message.author.id == ctx.cache.current_user_id(),
+            referenced_message.author.id == (ctx.shard_id.0 as u64),
             referenced_message.content.to_string(),
         ));
 
@@ -65,19 +50,16 @@ pub async fn run(ctx: &Context, msg: &Message) {
         && msg
             .mentions
             .iter()
-            .any(|mention| mention.id == ctx.cache.current_user_id()))
+            .any(|mention| mention.id == (ctx.shard_id.0 as u64)))
     {
         return;
     }
 
     let parsed_message = parse_mentions(ctx, msg).await;
 
-    let author_name = match parse_author_name(&msg.author.name) {
-        Some(name) => name,
-        None => {
-            msg.reply(&ctx, "Error: Invalid author name").await.unwrap();
-            return;
-        }
+    let author_name = match parse_user_tag(&msg.author.name) {
+        Some(name) => name.0,
+        None => &msg.author.name,
     };
 
     let replies = process_referenced_messages(ctx, msg);

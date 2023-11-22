@@ -1,16 +1,10 @@
 use crate::utils::{respond_with_embed, respond_with_message};
-use serenity::builder::CreateApplicationCommand;
-use serenity::model::prelude::application_command::{
-    ApplicationCommandInteraction, CommandDataOptionValue,
+use serenity::all::{
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CreateEmbed, CreateMessage, Permissions,
 };
-use serenity::model::prelude::command::CommandOptionType;
-use serenity::model::Permissions;
-use serenity::prelude::Context;
 
-pub async fn run(
-    ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
-) -> Result<(), serenity::Error> {
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
@@ -23,23 +17,22 @@ pub async fn run(
         }
     };
 
-    let user = match interaction.data.options[0].resolved.as_ref() {
-        Some(CommandDataOptionValue::User(user, _member)) => user,
-        _ => {
+    let user_id = match interaction.data.options[0].value.as_user_id() {
+        Some(user) => user,
+        None => {
             return respond_with_message(ctx, interaction, "Cannot get member: Unknown Member")
                 .await
         }
     };
 
-    let reason = match interaction.data.options.get(1) {
-        Some(reason) => match reason.resolved.as_ref() {
-            Some(CommandDataOptionValue::String(reason)) => reason,
-            _ => return respond_with_message(ctx, interaction, "Invalid reason").await,
-        },
-        _ => "Compromised account: Sending scam links.",
-    };
+    let reason = interaction
+        .data
+        .options
+        .get(1)
+        .and_then(|option| option.value.as_str())
+        .unwrap_or("Compromised account: Sending scam links.");
 
-    let member = match guild_id.member(&ctx, &user.id).await {
+    let member = match guild_id.member(&ctx, &user_id).await {
         Ok(member) => member,
         Err(_) => return respond_with_message(ctx, interaction, "Error getting member").await,
     };
@@ -49,54 +42,52 @@ pub async fn run(
         Err(_) => return respond_with_message(ctx, interaction, "Error getting guild").await,
     };
 
-    let _ = user
-        .dm(&ctx, |message| {
-            message.embed(|e| {
-                e.description(format!(
-                    "You have been soft banned from {} for the following reason: {}",
-                    partial_guild.name, reason
-                ))
-            })
-        })
+    let _ = user_id
+        .create_dm_channel(&ctx)
+        .await
+        .unwrap()
+        .send_message(
+            &ctx,
+            CreateMessage::new().add_embed(CreateEmbed::new().description(format!(
+                "You have been soft banned from {} for the following reason: {}",
+                partial_guild.name, reason
+            ))),
+        )
         .await;
 
     if guild_id
-        .ban_with_reason(&ctx, user.id, 1, reason)
+        .ban_with_reason(&ctx, user_id, 1, reason)
         .await
         .is_err()
     {
         return respond_with_message(ctx, interaction, "Error banning user").await;
     };
 
-    if (guild_id.unban(&ctx, user.id).await).is_err() {
+    if (guild_id.unban(&ctx, user_id).await).is_err() {
         return respond_with_message(ctx, interaction, "Error unbanning user").await;
     }
 
-    respond_with_embed(ctx, interaction, |e| {
-        e.title("Soft Banned").description(format!(
+    respond_with_embed(
+        ctx,
+        interaction,
+        CreateEmbed::new().title("Soft Banned").description(format!(
             "{} has been successfully soft banned for the following reason: {}",
             member.user.name, reason
-        ))
-    })
+        )),
+    )
     .await
 }
 
-pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-    command
-        .name("scam")
+pub fn register() -> CreateCommand {
+    CreateCommand::new("scam")
         .description("Soft ban a compromised account")
         .default_member_permissions(Permissions::KICK_MEMBERS)
-        .create_option(|option| {
-            option
-                .name("member")
-                .description("Member to soft ban")
-                .kind(CommandOptionType::User)
-                .required(true)
-        })
-        .create_option(|option| {
-            option
-                .name("reason")
-                .description("Reason for soft ban")
-                .kind(CommandOptionType::String)
-        })
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::User, "member", "Member to soft ban")
+                .required(true),
+        )
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::String, "reason", "Reason for soft ban")
+                .required(false),
+        )
 }
