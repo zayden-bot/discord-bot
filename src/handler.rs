@@ -136,8 +136,7 @@ impl EventHandler for Handler {
         .await
         .expect("Failed to register slash command");
 
-        // let activity = ActivityData::playing("College Kings");
-        let activity = ActivityData::custom("Updating to 0.12");
+        let activity = ActivityData::playing("College Kings");
         ctx.set_presence(Some(activity), OnlineStatus::Online);
     }
 
