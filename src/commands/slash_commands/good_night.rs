@@ -19,6 +19,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
     };
 
     let image_path = entries.choose(&mut thread_rng()).unwrap();
+    let file_name = image_path.file_name().unwrap().to_str().unwrap();
 
     interaction
         .create_response(
@@ -28,7 +29,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
                     .add_embed(
                         CreateEmbed::new()
                             .title(format!("Good Night, {}!", interaction.user.name))
-                            .attachment("good_night.png"),
+                            .attachment(file_name),
                     )
                     .add_file(CreateAttachment::path(image_path).await.unwrap()),
             ),
