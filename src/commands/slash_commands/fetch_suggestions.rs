@@ -7,14 +7,14 @@ use std::time;
 
 const SUGGESTION_CHANNEL_ID: u64 = 1068790374996377671;
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let start_time = time::Instant::now();
 
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
             return respond_with_message(
-                ctx,
+                &ctx,
                 interaction,
                 "This command can only be used in a server",
             )
@@ -93,7 +93,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 
     if result.is_err() {
         return respond_with_message(
-            ctx,
+            &ctx,
             interaction,
             "I couldn't DM you. Please enable DMs from server members and try again.",
         )
@@ -101,7 +101,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     }
 
     edit_response_with_message(
-        ctx,
+        &ctx,
         interaction,
         &format!(
             "Suggestions fetched. Took {} seconds",

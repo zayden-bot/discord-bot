@@ -5,7 +5,7 @@ use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, CreateEmbed,
 };
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let user_id = match interaction
         .data
         .options
@@ -28,7 +28,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     };
 
     respond_with_embed(
-        ctx,
+        &ctx,
         interaction,
         CreateEmbed::new()
             .title(format!(

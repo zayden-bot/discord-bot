@@ -4,12 +4,12 @@ use serenity::all::{
     CreateEmbed, CreateMessage, Permissions,
 };
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
             return respond_with_message(
-                ctx,
+                &ctx,
                 interaction,
                 "This command can only be used in a server",
             )
@@ -20,7 +20,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     let user_id = match interaction.data.options[0].value.as_user_id() {
         Some(user) => user,
         None => {
-            return respond_with_message(ctx, interaction, "Cannot get member: Unknown Member")
+            return respond_with_message(&ctx, interaction, "Cannot get member: Unknown Member")
                 .await
         }
     };
@@ -34,12 +34,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 
     let member = match guild_id.member(&ctx, &user_id).await {
         Ok(member) => member,
-        Err(_) => return respond_with_message(ctx, interaction, "Error getting member").await,
+        Err(_) => return respond_with_message(&ctx, interaction, "Error getting member").await,
     };
 
     let partial_guild = match guild_id.to_partial_guild(&ctx).await {
         Ok(partial_guild) => partial_guild,
-        Err(_) => return respond_with_message(ctx, interaction, "Error getting guild").await,
+        Err(_) => return respond_with_message(&ctx, interaction, "Error getting guild").await,
     };
 
     let _ = user_id
@@ -60,15 +60,15 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         .await
         .is_err()
     {
-        return respond_with_message(ctx, interaction, "Error banning user").await;
+        return respond_with_message(&ctx, interaction, "Error banning user").await;
     };
 
     if (guild_id.unban(&ctx, user_id).await).is_err() {
-        return respond_with_message(ctx, interaction, "Error unbanning user").await;
+        return respond_with_message(&ctx, interaction, "Error unbanning user").await;
     }
 
     respond_with_embed(
-        ctx,
+        &ctx,
         interaction,
         CreateEmbed::new().title("Soft Banned").description(format!(
             "{} has been successfully soft banned for the following reason: {}",

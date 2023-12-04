@@ -1,11 +1,13 @@
 mod chatgpt_lib;
 mod commands;
 mod handler;
+mod image_cache;
 mod infraction_type;
 mod models;
 mod sqlx_lib;
 mod utils;
 
+use crate::image_cache::ImageCache;
 use dotenvy::dotenv;
 use serenity::prelude::GatewayIntents;
 use serenity::Client;
@@ -20,7 +22,12 @@ async fn main() {
     let mut client = Client::builder(token, GatewayIntents::all())
         .event_handler(handler::Handler)
         .await
-        .expect("Err creating client");
+        .expect("Error creating client");
+
+    {
+        let mut data = client.data.write().await;
+        data.insert::<ImageCache>(ImageCache::new());
+    }
 
     if let Err(why) = client.start().await {
         println!("Client error: {:?}", why);

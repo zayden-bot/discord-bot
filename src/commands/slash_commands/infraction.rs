@@ -193,14 +193,14 @@ fn get_option_by_name(
     }
 }
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let author_id = interaction.user.id;
 
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
             return respond_with_message(
-                ctx,
+                &ctx,
                 interaction,
                 "This command can only be used in a server",
             )
@@ -210,18 +210,20 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 
     let user = match interaction.data.options[0].value.as_user_id() {
         Some(user) => user,
-        None => return respond_with_message(ctx, interaction, "Please provide a valid user").await,
+        None => {
+            return respond_with_message(&ctx, interaction, "Please provide a valid user").await
+        }
     };
 
     let moderator = match guild_id.member(&ctx, &author_id).await {
         Ok(moderator) => moderator,
-        Err(_) => return respond_with_message(ctx, interaction, "Invalid moderator").await,
+        Err(_) => return respond_with_message(&ctx, interaction, "Invalid moderator").await,
     };
 
     let member = match guild_id.member(&ctx, user).await {
         Ok(member) => member,
         Err(_) => {
-            return respond_with_message(ctx, interaction, "User not found in this server").await
+            return respond_with_message(&ctx, interaction, "User not found in this server").await
         }
     };
 
@@ -237,7 +239,9 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 
     let user_infractions = match get_user_infractions(member.user.id.get() as i64).await {
         Ok(user_infractions) => user_infractions,
-        Err(_) => return respond_with_message(ctx, interaction, "Error getting user config").await,
+        Err(_) => {
+            return respond_with_message(&ctx, interaction, "Error getting user config").await
+        }
     };
 
     let six_months_age = Utc::now()
@@ -256,10 +260,10 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     let infraction_count = cmp::min((infraction_count as i64) + points, 5);
 
     let result = match infraction_count {
-        1 => warn(ctx, member, &guild_id, moderator, points, reason).await,
+        1 => warn(&ctx, member, &guild_id, moderator, points, reason).await,
         2 => {
             mute(
-                ctx,
+                &ctx,
                 member,
                 &guild_id,
                 moderator,
@@ -271,7 +275,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         }
         3 => {
             mute(
-                ctx,
+                &ctx,
                 member,
                 &guild_id,
                 moderator,
@@ -283,7 +287,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         }
         4 => {
             mute(
-                ctx,
+                &ctx,
                 member,
                 &guild_id,
                 moderator,
@@ -293,16 +297,16 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
             )
             .await
         }
-        5 => ban(ctx, member, &guild_id, moderator, points, reason).await,
+        5 => ban(&ctx, member, &guild_id, moderator, points, reason).await,
         _ => {
-            return respond_with_message(ctx, interaction, "Invalid amount of infraction points")
+            return respond_with_message(&ctx, interaction, "Invalid amount of infraction points")
                 .await
         }
     };
 
     match result {
-        Ok(message) => respond_with_message(ctx, interaction, message.as_str()).await,
-        Err(message) => respond_with_message(ctx, interaction, message.as_str()).await,
+        Ok(message) => respond_with_message(&ctx, interaction, message.as_str()).await,
+        Err(message) => respond_with_message(&ctx, interaction, message.as_str()).await,
     }
 }
 

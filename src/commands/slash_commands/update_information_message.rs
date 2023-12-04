@@ -7,7 +7,7 @@ use serenity::all::{
 const INFORMATION_MESSAGE_ID: u64 = 830931135780880415;
 const INFORMATION_CHANNEL_ID: u64 = 830927865784565800;
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let embed = CreateEmbed::new()
         .title("College Kings")
         .description(r#"This server is about the game "College Kings". The game is still in active development. Supporting the game on patreon helps us a lot, so if you have the resources, consider joining the patreon.
@@ -63,9 +63,9 @@ Thank you to <@828728276193116181> for the College Kings' stickers"#,
             MessageId::new(INFORMATION_MESSAGE_ID),
         )
         .await?;
-    message.edit(ctx, EditMessage::new().embed(embed)).await?;
+    message.edit(&ctx, EditMessage::new().embed(embed)).await?;
 
-    respond_with_ephemeral_message(ctx, interaction, "Message Updated.").await
+    respond_with_ephemeral_message(&ctx, interaction, "Message Updated.").await
 }
 
 pub fn register() -> CreateCommand {

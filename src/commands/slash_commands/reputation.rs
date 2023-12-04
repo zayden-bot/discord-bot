@@ -1,9 +1,9 @@
 use crate::utils::respond_with_embed;
 use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed};
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     respond_with_embed(
-        ctx,
+        &ctx,
         interaction,
         CreateEmbed::new()
             .field("Popular", "✅ Bro\n✅ Trouble Maker\n❌ Boyfriend", true)

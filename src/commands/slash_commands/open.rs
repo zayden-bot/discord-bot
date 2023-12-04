@@ -3,10 +3,10 @@ use serenity::all::{CommandInteraction, Context, CreateCommand, EditChannel, Per
 
 const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let current_channel = interaction
         .channel_id
-        .to_channel(ctx)
+        .to_channel(&ctx)
         .await
         .unwrap()
         .guild()
@@ -14,7 +14,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 
     if current_channel.parent_id.unwrap().get() != SUPPORT_CHANNEL_ID {
         return respond_with_message(
-            ctx,
+            &ctx,
             interaction,
             "This command can only be used in support channels",
         )
@@ -28,11 +28,11 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 
     interaction
         .channel_id
-        .edit(ctx, EditChannel::new().name(new_channel_name))
+        .edit(&ctx, EditChannel::new().name(new_channel_name))
         .await
         .expect("Failed to edit channel name");
 
-    respond_with_ephemeral_message(ctx, interaction, "Ticket reopened").await
+    respond_with_ephemeral_message(&ctx, interaction, "Ticket reopened").await
 }
 
 pub fn register() -> CreateCommand {

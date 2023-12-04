@@ -36,7 +36,7 @@ impl EventHandler for Handler {
     }
 
     async fn reaction_add(&self, ctx: Context, reaction: Reaction) {
-        let (reaction_roles, reaction_message, mut member) =
+        let (reaction_roles, reaction_message, member) =
             match get_reaction_data(&ctx, &reaction).await {
                 Ok(reaction_data) => reaction_data,
                 Err(why) => return println!("{}", why),
@@ -62,7 +62,7 @@ impl EventHandler for Handler {
     }
 
     async fn reaction_remove(&self, ctx: Context, reaction: Reaction) {
-        let (reaction_roles, reaction_message, mut member) =
+        let (reaction_roles, reaction_message, member) =
             match get_reaction_data(&ctx, &reaction).await {
                 Ok(reaction_data) => reaction_data,
                 Err(why) => return println!("{}", why),
@@ -145,32 +145,32 @@ impl EventHandler for Handler {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
             let result = match command.data.name.as_str() {
-                "add_artist" => add_artist::run(&ctx, &command).await,
-                "answer" => answer::run(&ctx, &command).await,
-                "close" => close::run(&ctx, &command).await,
-                "fetch_suggestions" => fetch_suggestions::run(&ctx, &command).await,
-                "fixed" => fixed::run(&ctx, &command).await,
-                "get_discord_role" => get_discord_role::run(&ctx, &command).await,
-                "gold_star" => gold_star::run(&ctx, &command).await,
-                "good_morning" => good_morning::run(&ctx, &command).await,
-                "good_night" => good_night::run(&ctx, &command).await,
-                "infraction" => infraction::run(&ctx, &command).await,
-                "logs" => logs::run(&ctx, &command).await,
-                "member_count" => member_count::run(&ctx, &command).await,
-                "open" => open::run(&ctx, &command).await,
-                "patreon" => patreon::run(&ctx, &command).await,
-                "question" => question::run(&ctx, &command).await,
-                "reaction_role" => reaction_role::run(&ctx, &command).await,
-                "ping" => ping::run(&ctx, &command).await,
-                "reputation" => reputation::run(&ctx, &command).await,
-                "rule" => rule::run(&ctx, &command).await,
-                "saves" => saves::run(&ctx, &command).await,
-                "scam" => scam::run(&ctx, &command).await,
-                "server_info" => server_info::run(&ctx, &command).await,
-                "spoilers" => spoilers::run(&ctx, &command).await,
-                "stars" => stars::run(&ctx, &command).await,
-                "support" => support::run(&ctx, &command).await,
-                "update_information" => update_information_message::run(&ctx, &command).await,
+                "add_artist" => add_artist::run(ctx, &command).await,
+                "answer" => answer::run(ctx, &command).await,
+                "close" => close::run(ctx, &command).await,
+                "fetch_suggestions" => fetch_suggestions::run(ctx, &command).await,
+                "fixed" => fixed::run(ctx, &command).await,
+                "get_discord_role" => get_discord_role::run(ctx, &command).await,
+                "gold_star" => gold_star::run(ctx, &command).await,
+                "good_morning" => good_morning::run(ctx, &command).await,
+                "good_night" => good_night::run(ctx, &command).await,
+                "infraction" => infraction::run(ctx, &command).await,
+                "logs" => logs::run(ctx, &command).await,
+                "member_count" => member_count::run(ctx, &command).await,
+                "open" => open::run(ctx, &command).await,
+                "patreon" => patreon::run(ctx, &command).await,
+                "question" => question::run(ctx, &command).await,
+                "reaction_role" => reaction_role::run(ctx, &command).await,
+                "ping" => ping::run(ctx, &command).await,
+                "reputation" => reputation::run(ctx, &command).await,
+                "rule" => rule::run(ctx, &command).await,
+                "saves" => saves::run(ctx, &command).await,
+                "scam" => scam::run(ctx, &command).await,
+                "server_info" => server_info::run(ctx, &command).await,
+                "spoilers" => spoilers::run(ctx, &command).await,
+                "stars" => stars::run(ctx, &command).await,
+                "support" => support::run(ctx, &command).await,
+                "update_information" => update_information_message::run(ctx, &command).await,
                 _ => respond_with_message(&ctx, &command, "Command not found").await,
             };
 

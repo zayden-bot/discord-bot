@@ -108,12 +108,12 @@ async fn remove(
     respond_with_message(ctx, interaction, "Support info removed").await
 }
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
             return respond_with_message(
-                ctx,
+                &ctx,
                 interaction,
                 "This command can only be used in a server",
             )
@@ -125,15 +125,15 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 
     let options = match &command.value {
         CommandDataOptionValue::SubCommand(options) => options,
-        _ => return respond_with_message(ctx, interaction, "Invalid subcommand").await,
+        _ => return respond_with_message(&ctx, interaction, "Invalid subcommand").await,
     };
 
     match command.name.as_str() {
-        "get" => get(ctx, interaction, options, guild_id).await,
-        "add" => add(ctx, interaction, options, guild_id).await,
-        "list" => list(ctx, interaction, guild_id).await,
-        "remove" => remove(ctx, interaction, options, guild_id).await,
-        _ => respond_with_message(ctx, interaction, "Invalid subcommand").await,
+        "get" => get(&ctx, interaction, options, guild_id).await,
+        "add" => add(&ctx, interaction, options, guild_id).await,
+        "list" => list(&ctx, interaction, guild_id).await,
+        "remove" => remove(&ctx, interaction, options, guild_id).await,
+        _ => respond_with_message(&ctx, interaction, "Invalid subcommand").await,
     }
 }
 

@@ -7,10 +7,12 @@ use serenity::all::{
     CreateEmbed, Permissions,
 };
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let user_id = match interaction.data.options[0].value.as_user_id() {
         Some(user_id) => user_id,
-        None => return respond_with_message(ctx, interaction, "Please provide a valid user").await,
+        None => {
+            return respond_with_message(&ctx, interaction, "Please provide a valid user").await
+        }
     };
 
     let filter = interaction
@@ -22,7 +24,9 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 
     let mut infractions = match get_user_infractions(user_id.get() as i64).await {
         Ok(user_infractions) => user_infractions,
-        Err(_) => return respond_with_message(ctx, interaction, "Error getting user config").await,
+        Err(_) => {
+            return respond_with_message(&ctx, interaction, "Error getting user config").await
+        }
     };
 
     if filter == "recent" {
@@ -54,7 +58,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         )
     });
 
-    respond_with_embed(ctx, interaction, CreateEmbed::new().fields(fields)).await
+    respond_with_embed(&ctx, interaction, CreateEmbed::new().fields(fields)).await
 }
 
 pub fn register() -> CreateCommand {

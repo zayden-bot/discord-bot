@@ -10,7 +10,7 @@ pub async fn respond_with_message(
 ) -> Result<(), serenity::Error> {
     interaction
         .create_response(
-            &ctx,
+            ctx,
             CreateInteractionResponse::Message(
                 CreateInteractionResponseMessage::new().content(content),
             ),
@@ -25,7 +25,7 @@ pub async fn respond_with_ephemeral_message(
 ) -> Result<(), serenity::Error> {
     interaction
         .create_response(
-            &ctx,
+            ctx,
             CreateInteractionResponse::Message(
                 CreateInteractionResponseMessage::new()
                     .content(content)
@@ -41,7 +41,7 @@ pub async fn edit_response_with_message(
     content: &str,
 ) -> Result<Message, serenity::Error> {
     interaction
-        .edit_response(&ctx, EditInteractionResponse::new().content(content))
+        .edit_response(ctx, EditInteractionResponse::new().content(content))
         .await
 }
 
@@ -52,7 +52,7 @@ pub async fn respond_with_embed(
 ) -> Result<(), serenity::Error> {
     interaction
         .create_response(
-            &ctx,
+            ctx,
             CreateInteractionResponse::Message(
                 CreateInteractionResponseMessage::new().add_embed(embed),
             ),
@@ -67,6 +67,6 @@ pub async fn edit_response_with_embed(
     embed: CreateEmbed,
 ) -> Result<Message, serenity::Error> {
     interaction
-        .edit_response(&ctx, EditInteractionResponse::new().add_embed(embed))
+        .edit_response(ctx, EditInteractionResponse::new().add_embed(embed))
         .await
 }

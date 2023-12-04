@@ -99,14 +99,14 @@ async fn check(
     .await
 }
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let command = &interaction.data.options[0];
     println!("{:?}", interaction.data.options);
 
     return match command.name.as_str() {
-        "info" => info(ctx, interaction).await,
-        "check" => check(ctx, interaction, &command.value).await,
-        _ => respond_with_message(ctx, interaction, "Invalid subcommand").await,
+        "info" => info(&ctx, interaction).await,
+        "check" => check(&ctx, interaction, &command.value).await,
+        _ => respond_with_message(&ctx, interaction, "Invalid subcommand").await,
     };
 }
 

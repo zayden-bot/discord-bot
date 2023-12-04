@@ -14,26 +14,6 @@ async fn get_pool() -> PgPool {
         .expect("Failed to connect to database")
 }
 
-async fn fetch_images(query: &str) -> Vec<Image> {
-    let pool = get_pool().await;
-
-    let results = sqlx::query_as::<_, Image>(query)
-        .fetch_all(&pool)
-        .await
-        .expect("Failed to fetch images");
-
-    pool.close().await;
-    results
-}
-
-pub async fn get_good_morning_images() -> Vec<Image> {
-    fetch_images("SELECT * FROM good_morning_images").await
-}
-
-pub async fn get_good_night_images() -> Vec<Image> {
-    fetch_images("SELECT * FROM good_night_images").await
-}
-
 pub async fn get_support_thead_id(server_id: i64) -> Result<i32, Error> {
     let pool = get_pool().await;
 

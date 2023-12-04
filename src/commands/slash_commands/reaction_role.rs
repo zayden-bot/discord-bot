@@ -83,12 +83,12 @@ async fn remove(
     }
 }
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
             return respond_with_message(
-                ctx,
+                &ctx,
                 interaction,
                 "This command can only be used in a server",
             )
@@ -100,12 +100,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 
     let options = match &command.value {
         CommandDataOptionValue::SubCommand(options) => options,
-        _ => return respond_with_message(ctx, interaction, "Invalid subcommand").await,
+        _ => return respond_with_message(&ctx, interaction, "Invalid subcommand").await,
     };
 
     let channel_id = match options[0].value.as_channel_id() {
         Some(channel) => channel,
-        _ => return respond_with_message(ctx, interaction, "Please provide a valid channel").await,
+        _ => {
+            return respond_with_message(&ctx, interaction, "Please provide a valid channel").await
+        }
     };
 
     let message_id = match options[1]
@@ -115,20 +117,20 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     {
         Some(message_id) => MessageId::new(message_id),
         _ => {
-            return respond_with_message(ctx, interaction, "Please provide a valid message id")
+            return respond_with_message(&ctx, interaction, "Please provide a valid message id")
                 .await
         }
     };
 
     let emoji = match options[2].value.as_str() {
         Some(emoji) => emoji,
-        _ => return respond_with_message(ctx, interaction, "Please provide a valid emoji").await,
+        _ => return respond_with_message(&ctx, interaction, "Please provide a valid emoji").await,
     };
 
     match command.name.as_str() {
         "add" => {
             add(
-                ctx,
+                &ctx,
                 interaction,
                 options,
                 guild_id,
@@ -138,8 +140,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
             )
             .await
         }
-        "remove" => remove(ctx, interaction, channel_id, guild_id, message_id, emoji).await,
-        _ => respond_with_message(ctx, interaction, "Invalid subcommand").await,
+        "remove" => remove(&ctx, interaction, channel_id, guild_id, message_id, emoji).await,
+        _ => respond_with_message(&ctx, interaction, "Invalid subcommand").await,
     }
 }
 

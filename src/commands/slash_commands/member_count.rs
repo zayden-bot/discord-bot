@@ -1,12 +1,12 @@
 use crate::utils::respond_with_message;
 use serenity::all::{CommandInteraction, Context, CreateCommand};
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
             return respond_with_message(
-                ctx,
+                &ctx,
                 interaction,
                 "This command can only be used in a server",
             )
@@ -17,7 +17,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     let partial_guild = ctx.http.get_guild_with_counts(guild_id).await?;
 
     respond_with_message(
-        ctx,
+        &ctx,
         interaction,
         &format!(
             "There are **{}** members in this server",

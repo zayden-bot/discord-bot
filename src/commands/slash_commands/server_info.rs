@@ -3,12 +3,12 @@ use serenity::all::{
     ChannelType, CommandInteraction, Context, CreateCommand, CreateEmbed, CreateEmbedAuthor,
 };
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
             return respond_with_message(
-                ctx,
+                &ctx,
                 interaction,
                 "This command can only be used in a server",
             )
@@ -23,7 +23,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     let mut voice_channel_count = 0;
 
     guild_id
-        .channels(ctx)
+        .channels(&ctx)
         .await?
         .values()
         .for_each(|channel| match channel.kind {
@@ -34,7 +34,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         });
 
     respond_with_embed(
-        ctx,
+        &ctx,
         interaction,
         CreateEmbed::new()
             .author(

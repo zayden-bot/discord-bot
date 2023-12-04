@@ -7,22 +7,22 @@ use serenity::all::{
 
 const QUESTION_CHANNEL_ID: u64 = 829463308629180447;
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
     let question = match interaction.data.options[0].value.as_str() {
         Some(question) => question,
-        None => return respond_with_message(ctx, interaction, "Invalid question").await,
+        None => return respond_with_message(&ctx, interaction, "Invalid question").await,
     };
 
     let question_channel = ChannelId::new(QUESTION_CHANNEL_ID);
 
     let question = match create_question(question, interaction.user.id.get() as i64).await {
         Ok(question) => question,
-        Err(_) => return respond_with_message(ctx, interaction, "Error creating question").await,
+        Err(_) => return respond_with_message(&ctx, interaction, "Error creating question").await,
     };
 
     let msg = question_channel
         .send_message(
-            ctx,
+            &ctx,
             CreateMessage::new().add_embed(CreateEmbed::new().field(
                 format!("Question ID: {}", question.id),
                 question.question,
@@ -36,10 +36,10 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         .await
         .is_err()
     {
-        return respond_with_message(ctx, interaction, "Error updating question").await;
+        return respond_with_message(&ctx, interaction, "Error updating question").await;
     }
 
-    respond_with_ephemeral_message(ctx, interaction, "Question asked").await
+    respond_with_ephemeral_message(&ctx, interaction, "Question asked").await
 }
 
 pub fn register() -> CreateCommand {
