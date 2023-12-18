@@ -4,7 +4,7 @@ use std::fs;
 use std::path::PathBuf;
 
 const GOOD_MORNING_DIR: &str = r"C:\Users\viridian\Documents\zayden\good_morning";
-const GOOD_NIGHT_DIR: &str = r"C:\Users\viridian\Documents\zayden\good_morning";
+const GOOD_NIGHT_DIR: &str = r"C:\Users\viridian\Documents\zayden\good_night";
 
 fn get_images(dir: &str) -> Vec<PathBuf> {
     fs::read_dir(dir)
