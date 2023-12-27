@@ -35,7 +35,23 @@ pub async fn run(ctx: &Context, msg: &Message) {
         return;
     }
 
-    let guild_roles = ctx.http.get_guild_roles(guild_id);
+    let guild_roles = ctx.http.get_guild_roles(guild_id).await.unwrap();
+
+    let support_role_ids = get_support_role_ids(guild_id.get() as i64).await.unwrap();
+    let support_role = guild_roles
+        .into_iter()
+        .find(|role| role.id.get() == (support_role_ids[0] as u64))
+        .unwrap();
+
+    if msg
+        .member(&ctx)
+        .await
+        .unwrap()
+        .roles
+        .contains(&support_role.id)
+    {
+        return;
+    }
 
     let attachments = get_attachments(msg).await.unwrap();
 
@@ -70,16 +86,8 @@ pub async fn run(ctx: &Context, msg: &Message) {
         .await
         .unwrap();
 
-    let support_role_ids = get_support_role_ids(guild_id.get() as i64).await.unwrap();
-
-    let guild_roles = guild_roles.await.unwrap();
-    let support_role = guild_roles
-        .iter()
-        .find(|role| role.id.get() == (support_role_ids[0] as u64))
-        .unwrap();
-
     thread
-        .say(&ctx, get_welcome_message(support_role, &msg.author))
+        .say(&ctx, get_welcome_message(&support_role, &msg.author))
         .await
         .unwrap();
 
@@ -92,7 +100,7 @@ pub async fn run(ctx: &Context, msg: &Message) {
         .await
         .unwrap();
 
-    if (msg.delete(&ctx).await).is_err() {
+    if msg.delete(&ctx).await.is_err() {
         println!("Failed to delete message");
     }
 }
