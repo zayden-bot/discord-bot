@@ -1,5 +1,4 @@
 pub mod add_artist;
-pub mod answer;
 pub mod close;
 pub mod fetch_suggestions;
 pub mod fixed;

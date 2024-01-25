@@ -242,53 +242,6 @@ pub async fn delete_support_faq(server_id: i64, support_id: &str) -> Result<(), 
     Ok(())
 }
 
-pub async fn create_question(question: &str, user_id: i64) -> Result<Question, Error> {
-    let pool = get_pool().await;
-
-    let result = sqlx::query_as!(
-        Question,
-        "INSERT INTO questions (question, user_id) VALUES ($1, $2) RETURNING *",
-        question,
-        user_id
-    )
-    .fetch_one(&pool)
-    .await?;
-
-    pool.close().await;
-    Ok(result)
-}
-
-pub async fn update_question_message_id(question_id: i32, message_id: i64) -> Result<(), Error> {
-    let pool = get_pool().await;
-
-    sqlx::query!(
-        "UPDATE questions SET message_id = $1 WHERE id = $2",
-        message_id,
-        question_id
-    )
-    .execute(&pool)
-    .await?;
-
-    pool.close().await;
-    Ok(())
-}
-
-pub async fn update_question_answer(question_id: i32, answer: &str) -> Result<Question, Error> {
-    let pool = get_pool().await;
-
-    let result = sqlx::query_as!(
-        Question,
-        "UPDATE questions SET answer = $1 WHERE id = $2 RETURNING *",
-        answer,
-        question_id
-    )
-    .fetch_one(&pool)
-    .await?;
-
-    pool.close().await;
-    Ok(result)
-}
-
 pub async fn get_rule(rule_id: &str, guild_id: i64) -> Result<String, Error> {
     let pool = get_pool().await;
 

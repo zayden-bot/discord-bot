@@ -98,7 +98,6 @@ impl EventHandler for Handler {
             &ctx,
             vec![
                 add_artist::register(),
-                answer::register(),
                 close::register(),
                 fetch_suggestions::register(),
                 fixed::register(),
@@ -146,7 +145,6 @@ impl EventHandler for Handler {
 
             let result = match command.data.name.as_str() {
                 "add_artist" => add_artist::run(ctx, &command).await,
-                "answer" => answer::run(ctx, &command).await,
                 "close" => close::run(ctx, &command).await,
                 "fetch_suggestions" => fetch_suggestions::run(ctx, &command).await,
                 "fixed" => fixed::run(ctx, &command).await,

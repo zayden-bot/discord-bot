@@ -1,22 +1,19 @@
-use crate::utils::respond_with_ephemeral_message;
-use serenity::builder::CreateApplicationCommand;
-use serenity::model::prelude::application_command::ApplicationCommandInteraction;
-use serenity::prelude::Context;
+use serenity::{all::CommandInteraction, builder::CreateCommand, client::Context};
 
-const QUESTION_CHANNEL_ID: u64 = 829463308629180447;
+use crate::utils::respond_with_ephemeral_message;
 
 pub async fn run(
-    ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
+    ctx: Context,
+    interaction: &CommandInteraction,
 ) -> Result<(), serenity::Error> {
     respond_with_ephemeral_message(
-        ctx,
+        &ctx,
         interaction,
         "This command is deprecated. Please use <#1196200376404291654> to post questions.",
     )
     .await
 }
 
-pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-    command.name("question").description("Ask a question")
+pub fn register() -> CreateCommand {
+    CreateCommand::new("question").description("Ask a question")
 }
