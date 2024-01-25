@@ -10,7 +10,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
     let message = interaction
         .data
         .options
-        .get(0)
+        .first()
         .map_or("", |option| option.value.as_str().unwrap_or(""));
 
     let is_silent = message.is_empty();

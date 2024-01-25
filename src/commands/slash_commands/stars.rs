@@ -9,7 +9,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
     let user_id = match interaction
         .data
         .options
-        .get(0)
+        .first()
         .and_then(|option| option.value.as_user_id())
     {
         Some(user_id) => user_id,

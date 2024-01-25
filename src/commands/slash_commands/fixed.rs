@@ -11,7 +11,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
     let version = interaction
         .data
         .options
-        .get(0)
+        .first()
         .map_or("", |option| option.value.as_str().unwrap_or(""));
 
     let is_silent = version.is_empty();
