@@ -1,37 +1,34 @@
 use crate::utils::{respond_with_ephemeral_message, respond_with_message};
-use serenity::builder::CreateApplicationCommand;
-use serenity::model::prelude::application_command::ApplicationCommandInteraction;
-use serenity::model::prelude::command::CommandOptionType;
-use serenity::model::Permissions;
-use serenity::prelude::Context;
+use serenity::all::{
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    EditChannel, Permissions,
+};
 
 const CHANGE_LOG_CHANNEL_ID: u64 = 992599169288122410;
 const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
 
-pub async fn run(
-    ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
-) -> Result<(), serenity::Error> {
-    let version = match interaction.data.options.get(0) {
-        Some(value) => value.value.as_ref().unwrap().as_str().unwrap(),
-        None => "",
-    };
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+    let version = interaction
+        .data
+        .options
+        .first()
+        .map_or("", |option| option.value.as_str().unwrap_or(""));
 
     let is_silent = version.is_empty();
 
     let current_channel = interaction
         .channel_id
-        .to_channel(ctx)
+        .to_channel(&ctx)
         .await
         .unwrap()
         .guild()
         .unwrap();
 
-    if current_channel.parent_id.unwrap().0 != SUPPORT_CHANNEL_ID {
+    if current_channel.parent_id.unwrap().get() != SUPPORT_CHANNEL_ID {
         return respond_with_message(
-            ctx,
+            &ctx,
             interaction,
-            "This command can only be used in support channels",
+            "This command can only be used in support threads",
         )
         .await;
     }
@@ -45,15 +42,15 @@ pub async fn run(
 
     interaction
         .channel_id
-        .edit(ctx, |c| c.name(new_channel_name))
+        .edit(&ctx, EditChannel::new().name(new_channel_name))
         .await
         .expect("Failed to edit channel name");
 
     if is_silent {
-        respond_with_ephemeral_message(ctx, interaction, "Ticket marked as fixed").await
+        respond_with_ephemeral_message(&ctx, interaction, "Ticket marked as fixed").await
     } else {
         respond_with_message(
-            ctx,
+            &ctx,
             interaction,
             &format!(
                 "Fixed in {}. Check <#{}> for more details",
@@ -64,15 +61,13 @@ pub async fn run(
     }
 }
 
-pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-    command
-        .name("fixed")
+pub fn register() -> CreateCommand {
+    CreateCommand::new("fixed")
         .description("Mark support ticket as fixed")
         .default_member_permissions(Permissions::MANAGE_MESSAGES)
-        .create_option(|option| {
-            option
-                .name("version")
-                .description("The version the issue was fixed in")
-                .kind(CommandOptionType::String)
-        })
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::String,
+            "version",
+            "The version the issue was fixed in",
+        ))
 }

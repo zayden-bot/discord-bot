@@ -1,70 +1,70 @@
 #![allow(dead_code)]
 
 use crate::utils::{respond_with_embed, respond_with_message};
-use serenity::builder::CreateApplicationCommand;
-use serenity::model::prelude::application_command::{
-    ApplicationCommandInteraction, CommandDataOption, CommandDataOptionValue,
+use serde::Deserialize;
+use serenity::all::{
+    CommandDataOptionValue, CommandInteraction, CommandOptionType, Context, CreateCommand,
+    CreateCommandOption, CreateEmbed, CreateEmbedFooter,
 };
-use serenity::model::prelude::command::CommandOptionType;
-use serenity::prelude::Context;
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(Debug, Deserialize)]
 struct PatreonMemberAttributes {
     campaign_lifetime_support_cents: i32,
     email: Option<String>,
     patron_status: Option<String>,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(Debug, Deserialize)]
 struct PatreonMemberData {
     attributes: PatreonMemberAttributes,
     id: Option<String>,
     r#type: Option<String>,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(Debug, Deserialize)]
 struct PatreonLinks {
     next: Option<String>,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(Debug, Deserialize)]
 struct PatreonPagination {
     total: i32,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(Debug, Deserialize)]
 struct PatreonMeta {
     pagination: Option<PatreonPagination>,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(Debug, Deserialize)]
 struct PatreonMember {
     data: Vec<PatreonMemberData>,
     patreon_links: Option<PatreonLinks>,
     patreon_meta: Option<PatreonMeta>,
 }
 
-async fn info(
-    ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
-) -> Result<(), serenity::Error> {
-    respond_with_embed(ctx, interaction, |e| {
-        e.title("Pledge to College Kings")
+async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+    respond_with_embed(ctx, interaction, CreateEmbed::new().title("Pledge to College Kings")
             .url("https://www.patreon.com/collegekings")
             .description("**Interested In Getting Early Updates, Patron-only behind the scenes/post... and more?\n\nCheck it all out here!**\nhttps://www.patreon.com/collegekings")
             .image("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg")
             .thumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png")
-            .footer(|f| f.text("https://www.patreon.com/collegekings"))
-    }).await
+            .footer(CreateEmbedFooter::new("https://www.patreon.com/collegekings"))
+    ).await
 }
 
 async fn check(
     ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
-    subcommand: &CommandDataOption,
+    interaction: &CommandInteraction,
+    subcommand: &CommandDataOptionValue,
 ) -> Result<(), serenity::Error> {
-    let email = match subcommand.options[0].resolved.as_ref() {
-        Some(CommandDataOptionValue::String(email)) => email,
+    let subcommand = match subcommand {
+        CommandDataOptionValue::SubCommand(subcommand) => subcommand,
+        _ => return respond_with_message(ctx, interaction, "Invalid subcommand").await,
+    };
+
+    let email = match subcommand[0].value.as_str() {
+        Some(email) => email,
         _ => return respond_with_message(ctx, interaction, "Invalid email").await,
     };
 
@@ -82,59 +82,51 @@ async fn check(
     };
 
     let patreon_member = res.json::<PatreonMember>().await.unwrap();
-    println!("{:?}", patreon_member);
+    let patreon_attributes = &patreon_member.data[0].attributes;
 
-    respond_with_embed(ctx, interaction, |e| {
-        e.title("Patreon Status").description(format!(
-            "Lifetime Support (USD): **{}**\nEmail: {}\nPatreon Status: **{}**",
-            patreon_member.data[0]
-                .attributes
-                .campaign_lifetime_support_cents
-                / 100,
-            patreon_member.data[0].attributes.email.as_ref().unwrap(),
-            patreon_member.data[0]
-                .attributes
-                .patron_status
-                .as_ref()
-                .unwrap()
-        ))
-    })
+    respond_with_embed(
+        ctx,
+        interaction,
+        CreateEmbed::new()
+            .title("Patreon Status")
+            .description(format!(
+                "Lifetime Support (USD): **{}**\nEmail: {}\nPatreon Status: **{}**",
+                patreon_attributes.campaign_lifetime_support_cents / 100,
+                patreon_attributes.email.as_ref().unwrap(),
+                patreon_attributes.patron_status.as_ref().unwrap()
+            )),
+    )
     .await
 }
 
-pub async fn run(
-    ctx: &Context,
-    interaction: &ApplicationCommandInteraction,
-) -> Result<(), serenity::Error> {
-    let subcommand = &interaction.data.options[0];
-    return match subcommand.name.as_str() {
-        "info" => info(ctx, interaction).await,
-        "check" => check(ctx, interaction, subcommand).await,
-        _ => respond_with_message(ctx, interaction, "Invalid subcommand").await,
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+    let command = &interaction.data.options[0];
+    println!("{:?}", interaction.data.options);
+
+    return match command.name.as_str() {
+        "info" => info(&ctx, interaction).await,
+        "check" => check(&ctx, interaction, &command.value).await,
+        _ => respond_with_message(&ctx, interaction, "Invalid subcommand").await,
     };
 }
 
-pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-    command
-        .name("patreon")
+pub fn register() -> CreateCommand {
+    CreateCommand::new("patreon")
         .description("Patreon information")
-        .create_option(|option| {
-            option
-                .name("info")
-                .description("Patreon information")
-                .kind(CommandOptionType::SubCommand)
-        })
-        .create_option(|option| {
-            option
-                .name("check")
-                .description("Check if you're a patron")
-                .kind(CommandOptionType::SubCommand)
-                .create_sub_option(|sub_option| {
-                    sub_option
-                        .name("email")
-                        .description("Your Patreon email")
-                        .kind(CommandOptionType::String)
-                        .required(true)
-                })
-        })
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::SubCommand,
+            "info",
+            "Patreon information",
+        ))
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::SubCommand,
+                "check",
+                "Check if you're a patron",
+            )
+            .add_sub_option(
+                CreateCommandOption::new(CommandOptionType::String, "email", "Your Patreon email")
+                    .required(true),
+            ),
+        )
 }

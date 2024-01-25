@@ -1,26 +1,42 @@
+use crate::ImageCache;
+use chrono::{Duration, Local};
 use rand::seq::SliceRandom;
-use serenity::builder::CreateApplicationCommand;
-use serenity::model::prelude::application_command::{ApplicationCommandInteraction};
-use serenity::prelude::Context;
-use crate::sqlx_lib::get_good_morning_images;
-use crate::utils::{respond_with_embed, respond_with_message};
+use rand::thread_rng;
+use serenity::all::{
+    CommandInteraction, Context, CreateAttachment, CreateCommand, CreateEmbed,
+    CreateInteractionResponse, CreateInteractionResponseMessage,
+};
 
-pub async fn run(ctx: &Context, interaction: &ApplicationCommandInteraction) -> Result<(), serenity::Error> {
-    let good_morning_options = get_good_morning_images().await;
+pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+    let mut data = ctx.data.write().await;
+    let image_cache = data.get_mut::<ImageCache>().unwrap();
 
-    let good_morning_option = good_morning_options.choose(&mut rand::thread_rng());
-
-    let good_morning_image = match good_morning_option {
-        Some(message) => &message.image_url,
-        None => return respond_with_message(ctx, interaction, "Error getting good morning image").await,
+    let entries = if Local::now().naive_utc() < image_cache.last_update + Duration::hours(1) {
+        image_cache.good_morning_images.clone()
+    } else {
+        image_cache.update().await;
+        image_cache.good_morning_images.clone()
     };
 
-    respond_with_embed(ctx, interaction, |e| {
-        e.title(format!("Good Morning, {}!", interaction.user.name))
-            .image(good_morning_image)
-    }).await
+    let image_path = entries.choose(&mut thread_rng()).unwrap();
+    let file_name = image_path.file_name().unwrap().to_str().unwrap();
+
+    interaction
+        .create_response(
+            &ctx,
+            CreateInteractionResponse::Message(
+                CreateInteractionResponseMessage::new()
+                    .add_embed(
+                        CreateEmbed::new()
+                            .title(format!("Good Morning, {}!", interaction.user.name))
+                            .attachment(file_name),
+                    )
+                    .add_file(CreateAttachment::path(image_path).await.unwrap()),
+            ),
+        )
+        .await
 }
 
-pub fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-    command.name("good_morning").description("Have a CK girl bless your morning")
+pub fn register() -> CreateCommand {
+    CreateCommand::new("good_morning").description("Have a CK girl bless your morning")
 }

@@ -1,5 +1,4 @@
-use serenity::model::channel::Message;
-use serenity::prelude::Context;
+use serenity::all::{Context, Message};
 
 pub async fn run(ctx: Context, msg: Message) {
     msg.channel_id

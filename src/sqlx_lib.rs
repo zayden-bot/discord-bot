@@ -1,6 +1,7 @@
 use crate::infraction_type::InfractionType;
 use crate::models::*;
 use chrono::Utc;
+use serenity::all::User;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Error, PgPool};
 use std::env;
@@ -11,26 +12,6 @@ async fn get_pool() -> PgPool {
         .connect(&env::var("DATABASE_URL").expect("Expected a database url in the environment"))
         .await
         .expect("Failed to connect to database")
-}
-
-async fn fetch_images(query: &str) -> Vec<Image> {
-    let pool = get_pool().await;
-
-    let results = sqlx::query_as::<_, Image>(query)
-        .fetch_all(&pool)
-        .await
-        .expect("Failed to fetch images");
-
-    pool.close().await;
-    results
-}
-
-pub async fn get_good_morning_images() -> Vec<Image> {
-    fetch_images("SELECT * FROM good_morning_images").await
-}
-
-pub async fn get_good_night_images() -> Vec<Image> {
-    fetch_images("SELECT * FROM good_night_images").await
 }
 
 pub async fn get_support_thead_id(server_id: i64) -> Result<i32, Error> {
@@ -341,7 +322,7 @@ pub async fn get_reaction_roles(guild_id: i64) -> Result<Vec<ReactionRole>, Erro
 pub async fn create_reaction_role(
     guild_id: i64,
     channel_id: i64,
-    message_id: &i64,
+    message_id: i64,
     role_id: i64,
     emoji: &str,
 ) -> Result<(), Error> {
@@ -358,7 +339,7 @@ pub async fn create_reaction_role(
 pub async fn delete_reaction_role(
     guild_id: i64,
     channel_id: i64,
-    message_id: &i64,
+    message_id: i64,
     emoji: &str,
 ) -> Result<(), Error> {
     let pool = get_pool().await;
@@ -391,14 +372,16 @@ pub async fn create_user_infraction(
     username: &str,
     guild_id: i64,
     infraction_type: InfractionType,
-    moderator_id: i64,
-    moderator_username: &str,
+    moderator: User,
     points: i32,
     reason: &str,
 ) -> Result<(), Error> {
     let pool = get_pool().await;
 
-    sqlx::query!("INSERT INTO infractions (user_id, username, guild_id, infraction_type, moderator_id, moderator_username, points, reason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", user_id, username, guild_id, infraction_type.to_string(), moderator_id, moderator_username, points, reason)
+    let moderator_id = moderator.id.get() as i64;
+    let moderator_name = moderator.name;
+
+    sqlx::query!("INSERT INTO infractions (user_id, username, guild_id, infraction_type, moderator_id, moderator_username, points, reason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", user_id, username, guild_id, infraction_type.to_string(), moderator_id, moderator_name, points, reason)
         .execute(&pool)
         .await?;
 
