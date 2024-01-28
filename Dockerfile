@@ -14,8 +14,6 @@ COPY good_night /usr/local/bin/good_night
 
 RUN apt-get update && apt-get install -y openssl && apt clean && rm -rf /var/lib/apt/lists/*
 
-EXPOSE 80
-
 WORKDIR /usr/local/bin
 
 CMD ["zayden"]
