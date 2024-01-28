@@ -3,9 +3,6 @@ use serenity::prelude::TypeMapKey;
 use std::fs;
 use std::path::PathBuf;
 
-const GOOD_MORNING_DIR: &str = r"C:\Users\viridian\Documents\zayden\good_morning";
-const GOOD_NIGHT_DIR: &str = r"C:\Users\viridian\Documents\zayden\good_night";
-
 fn get_images(dir: &str) -> Vec<PathBuf> {
     fs::read_dir(dir)
         .unwrap()
@@ -23,15 +20,15 @@ impl ImageCache {
     pub fn new() -> Self {
         Self {
             last_update: Local::now().naive_utc(),
-            good_morning_images: get_images(GOOD_MORNING_DIR),
-            good_night_images: get_images(GOOD_NIGHT_DIR),
+            good_morning_images: get_images("good_morning"),
+            good_night_images: get_images("good_night"),
         }
     }
 
     pub async fn update(&mut self) {
         self.last_update = Local::now().naive_utc();
-        self.good_morning_images = get_images(GOOD_MORNING_DIR);
-        self.good_night_images = get_images(GOOD_NIGHT_DIR);
+        self.good_morning_images = get_images("good_morning");
+        self.good_night_images = get_images("good_night");
     }
 }
 
