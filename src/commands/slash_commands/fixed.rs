@@ -1,13 +1,16 @@
-use crate::utils::{respond_with_ephemeral_message, respond_with_message};
+use crate::utils::{message_response, send_message};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    EditChannel, Permissions,
+    EditChannel, Message, Permissions,
 };
 
 const CHANGE_LOG_CHANNEL_ID: u64 = 992599169288122410;
 const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let version = interaction
         .data
         .options
@@ -25,7 +28,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         .unwrap();
 
     if current_channel.parent_id.unwrap().get() != SUPPORT_CHANNEL_ID {
-        return respond_with_message(
+        return message_response(
             &ctx,
             interaction,
             "This command can only be used in support threads",
@@ -47,9 +50,9 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         .expect("Failed to edit channel name");
 
     if is_silent {
-        respond_with_ephemeral_message(&ctx, interaction, "Ticket marked as fixed").await
+        message_response(&ctx, interaction, "Ticket marked as fixed").await
     } else {
-        respond_with_message(
+        send_message(
             &ctx,
             interaction,
             &format!(

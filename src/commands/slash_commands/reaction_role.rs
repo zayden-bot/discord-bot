@@ -1,8 +1,9 @@
 use crate::sqlx_lib::{create_reaction_role, delete_reaction_role};
-use crate::utils::respond_with_message;
+use crate::utils::message_response;
 use serenity::all::{
     ChannelId, CommandDataOption, CommandDataOptionValue, CommandInteraction, CommandOptionType,
-    Context, CreateCommand, CreateCommandOption, GuildId, MessageId, Permissions, ReactionType,
+    Context, CreateCommand, CreateCommandOption, GuildId, Message, MessageId, Permissions,
+    ReactionType,
 };
 
 async fn add(
@@ -13,17 +14,16 @@ async fn add(
     channel_id: ChannelId,
     message_id: MessageId,
     emoji: &str,
-) -> Result<(), serenity::Error> {
+) -> Result<Message, serenity::Error> {
     let role_id = match options[3].value.as_role_id() {
         Some(role_id) => role_id,
-        _ => return respond_with_message(ctx, interaction, "Please provide a valid role").await,
+        _ => return message_response(ctx, interaction, "Please provide a valid role").await,
     };
 
     let message = match channel_id.message(ctx, message_id).await {
         Ok(message) => message,
         Err(_) => {
-            return respond_with_message(ctx, interaction, "Please provide a valid message id")
-                .await
+            return message_response(ctx, interaction, "Please provide a valid message id").await
         }
     };
 
@@ -37,13 +37,13 @@ async fn add(
     .await
     .is_err()
     {
-        return respond_with_message(ctx, interaction, "Error adding reaction role").await;
+        return message_response(ctx, interaction, "Error adding reaction role").await;
     }
 
     message
         .react(ctx, ReactionType::Unicode(emoji.to_string()))
         .await?;
-    respond_with_message(ctx, interaction, "Reaction role added").await
+    message_response(ctx, interaction, "Reaction role added").await
 }
 
 async fn remove(
@@ -53,12 +53,11 @@ async fn remove(
     guild_id: GuildId,
     message_id: MessageId,
     emoji: &str,
-) -> Result<(), serenity::Error> {
+) -> Result<Message, serenity::Error> {
     let message = match channel_id.message(ctx, message_id).await {
         Ok(message) => message,
         Err(_) => {
-            return respond_with_message(ctx, interaction, "Please provide a valid message id")
-                .await
+            return message_response(ctx, interaction, "Please provide a valid message id").await
         }
     };
 
@@ -71,23 +70,26 @@ async fn remove(
     .await
     .is_err()
     {
-        return respond_with_message(ctx, interaction, "Error deleting reaction role").await;
+        return message_response(ctx, interaction, "Error deleting reaction role").await;
     }
 
     match message
         .delete_reaction_emoji(ctx, ReactionType::Unicode(emoji.to_string()))
         .await
     {
-        Ok(_) => respond_with_message(ctx, interaction, "Reaction Role removed").await,
-        Err(_) => respond_with_message(ctx, interaction, "Error deleting reaction").await,
+        Ok(_) => message_response(ctx, interaction, "Reaction Role removed").await,
+        Err(_) => message_response(ctx, interaction, "Error deleting reaction").await,
     }
 }
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
-            return respond_with_message(
+            return message_response(
                 &ctx,
                 interaction,
                 "This command can only be used in a server",
@@ -100,14 +102,12 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
 
     let options = match &command.value {
         CommandDataOptionValue::SubCommand(options) => options,
-        _ => return respond_with_message(&ctx, interaction, "Invalid subcommand").await,
+        _ => return message_response(&ctx, interaction, "Invalid subcommand").await,
     };
 
     let channel_id = match options[0].value.as_channel_id() {
         Some(channel) => channel,
-        _ => {
-            return respond_with_message(&ctx, interaction, "Please provide a valid channel").await
-        }
+        _ => return message_response(&ctx, interaction, "Please provide a valid channel").await,
     };
 
     let message_id = match options[1]
@@ -116,15 +116,12 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         .and_then(|message_id| message_id.parse::<u64>().ok())
     {
         Some(message_id) => MessageId::new(message_id),
-        _ => {
-            return respond_with_message(&ctx, interaction, "Please provide a valid message id")
-                .await
-        }
+        _ => return message_response(&ctx, interaction, "Please provide a valid message id").await,
     };
 
     let emoji = match options[2].value.as_str() {
         Some(emoji) => emoji,
-        _ => return respond_with_message(&ctx, interaction, "Please provide a valid emoji").await,
+        _ => return message_response(&ctx, interaction, "Please provide a valid emoji").await,
     };
 
     match command.name.as_str() {
@@ -141,7 +138,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
             .await
         }
         "remove" => remove(&ctx, interaction, channel_id, guild_id, message_id, emoji).await,
-        _ => respond_with_message(&ctx, interaction, "Invalid subcommand").await,
+        _ => message_response(&ctx, interaction, "Invalid subcommand").await,
     }
 }
 

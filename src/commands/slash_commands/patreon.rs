@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 
-use crate::utils::{respond_with_embed, respond_with_message};
+use crate::utils::{embed_response, message_response};
 use serde::Deserialize;
 use serenity::all::{
     CommandDataOptionValue, CommandInteraction, CommandOptionType, Context, CreateCommand,
-    CreateCommandOption, CreateEmbed, CreateEmbedFooter,
+    CreateCommandOption, CreateEmbed, CreateEmbedFooter, Message,
 };
 
 #[derive(Debug, Deserialize)]
@@ -43,8 +43,8 @@ struct PatreonMember {
     patreon_meta: Option<PatreonMeta>,
 }
 
-async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
-    respond_with_embed(ctx, interaction, CreateEmbed::new().title("Pledge to College Kings")
+async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<Message, serenity::Error> {
+    embed_response(ctx, interaction, CreateEmbed::new().title("Pledge to College Kings")
             .url("https://www.patreon.com/collegekings")
             .description("**Interested In Getting Early Updates, Patron-only behind the scenes/post... and more?\n\nCheck it all out here!**\nhttps://www.patreon.com/collegekings")
             .image("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg")
@@ -57,15 +57,15 @@ async fn check(
     ctx: &Context,
     interaction: &CommandInteraction,
     subcommand: &CommandDataOptionValue,
-) -> Result<(), serenity::Error> {
+) -> Result<Message, serenity::Error> {
     let subcommand = match subcommand {
         CommandDataOptionValue::SubCommand(subcommand) => subcommand,
-        _ => return respond_with_message(ctx, interaction, "Invalid subcommand").await,
+        _ => return message_response(ctx, interaction, "Invalid subcommand").await,
     };
 
     let email = match subcommand[0].value.as_str() {
         Some(email) => email,
-        _ => return respond_with_message(ctx, interaction, "Invalid email").await,
+        _ => return message_response(ctx, interaction, "Invalid email").await,
     };
 
     let res = match reqwest::get(format!(
@@ -76,15 +76,14 @@ async fn check(
     {
         Ok(res) => res,
         Err(_) => {
-            return respond_with_message(ctx, interaction, "Error getting Patreon information")
-                .await
+            return message_response(ctx, interaction, "Error getting Patreon information").await
         }
     };
 
     let patreon_member = res.json::<PatreonMember>().await.unwrap();
     let patreon_attributes = &patreon_member.data[0].attributes;
 
-    respond_with_embed(
+    embed_response(
         ctx,
         interaction,
         CreateEmbed::new()
@@ -99,14 +98,17 @@ async fn check(
     .await
 }
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let command = &interaction.data.options[0];
     println!("{:?}", interaction.data.options);
 
     return match command.name.as_str() {
         "info" => info(&ctx, interaction).await,
         "check" => check(&ctx, interaction, &command.value).await,
-        _ => respond_with_message(&ctx, interaction, "Invalid subcommand").await,
+        _ => message_response(&ctx, interaction, "Invalid subcommand").await,
     };
 }
 

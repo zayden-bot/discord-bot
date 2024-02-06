@@ -1,7 +1,7 @@
 use crate::commands::slash_commands::*;
 use crate::models::ReactionRole;
 use crate::sqlx_lib::get_reaction_roles;
-use crate::utils::respond_with_message;
+use crate::utils::message_response;
 use serenity::all::{ActivityData, Command};
 use serenity::async_trait;
 use serenity::model::channel::{Message, Reaction};
@@ -143,6 +143,8 @@ impl EventHandler for Handler {
         if let Interaction::Command(command) = interaction {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
+            command.defer_ephemeral(&ctx).await.expect("Cannot defer");
+
             let result = match command.data.name.as_str() {
                 "add_artist" => add_artist::run(ctx, &command).await,
                 "close" => close::run(ctx, &command).await,
@@ -169,7 +171,7 @@ impl EventHandler for Handler {
                 "stars" => stars::run(ctx, &command).await,
                 "support" => support::run(ctx, &command).await,
                 "update_information" => update_information_message::run(ctx, &command).await,
-                _ => respond_with_message(&ctx, &command, "Command not found").await,
+                _ => message_response(&ctx, &command, "Command not found").await,
             };
 
             if let Err(why) = result {

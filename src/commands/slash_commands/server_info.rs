@@ -1,13 +1,17 @@
-use crate::utils::{respond_with_embed, respond_with_message};
+use crate::utils::{message_response, send_embed};
 use serenity::all::{
     ChannelType, CommandInteraction, Context, CreateCommand, CreateEmbed, CreateEmbedAuthor,
+    CreateMessage, Message,
 };
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
-            return respond_with_message(
+            return message_response(
                 &ctx,
                 interaction,
                 "This command can only be used in a server",
@@ -33,31 +37,33 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
             _ => (),
         });
 
-    respond_with_embed(
+    send_embed(
         &ctx,
         interaction,
-        CreateEmbed::new()
-            .author(
-                CreateEmbedAuthor::new(&partial_guild.name)
-                    .icon_url(partial_guild.icon_url().unwrap_or_default()),
-            )
-            .field("Owner", format!("<@{}>", partial_guild.owner_id), true)
-            .field(
-                "Channel Categories",
-                category_channel_count.to_string(),
-                true,
-            )
-            .field("Text Channels", text_channel_count.to_string(), true)
-            .field("Voice Channels", voice_channel_count.to_string(), true)
-            .field(
-                "Members",
-                partial_guild
-                    .approximate_member_count
-                    .unwrap_or_default()
-                    .to_string(),
-                true,
-            )
-            .field("Roles", partial_guild.roles.len().to_string(), true),
+        CreateMessage::new().embed(
+            CreateEmbed::new()
+                .author(
+                    CreateEmbedAuthor::new(&partial_guild.name)
+                        .icon_url(partial_guild.icon_url().unwrap_or_default()),
+                )
+                .field("Owner", format!("<@{}>", partial_guild.owner_id), true)
+                .field(
+                    "Channel Categories",
+                    category_channel_count.to_string(),
+                    true,
+                )
+                .field("Text Channels", text_channel_count.to_string(), true)
+                .field("Voice Channels", voice_channel_count.to_string(), true)
+                .field(
+                    "Members",
+                    partial_guild
+                        .approximate_member_count
+                        .unwrap_or_default()
+                        .to_string(),
+                    true,
+                )
+                .field("Roles", partial_guild.roles.len().to_string(), true),
+        ),
     )
     .await
 }

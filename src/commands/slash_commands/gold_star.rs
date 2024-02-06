@@ -1,8 +1,9 @@
 use crate::models::GoldStar;
 use crate::sqlx_lib::{add_star_to_user, create_user, get_gold_stars, remove_star_from_author};
-use crate::utils::{respond_with_embed, respond_with_message};
+use crate::utils::{embed_response, message_response};
 use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, CreateEmbed,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CreateEmbed, Message,
 };
 
 const STARS_TO_GIVE: i32 = 1;
@@ -18,28 +19,31 @@ async fn get_user_stars(user_id: u64) -> Result<GoldStar, String> {
     }
 }
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let author = &interaction.user;
 
     let user_id = match interaction.data.options[0].value.as_user_id() {
         Some(user) => user,
-        _ => return respond_with_message(&ctx, interaction, "Please provide a valid user").await,
+        _ => return message_response(&ctx, interaction, "Please provide a valid user").await,
     };
 
     if author.id == user_id {
-        return respond_with_message(&ctx, interaction, "You can't give yourself a star").await;
+        return message_response(&ctx, interaction, "You can't give yourself a star").await;
     }
 
     let author_stars = match get_user_stars(author.id.get()).await {
         Ok(stars) => stars,
         Err(_) => {
-            return respond_with_message(&ctx, interaction, "Error retrieving author stars").await
+            return message_response(&ctx, interaction, "Error retrieving author stars").await
         }
     };
     let member_stars = match get_user_stars(user_id.get()).await {
         Ok(stars) => stars,
         Err(_) => {
-            return respond_with_message(&ctx, interaction, "Error retrieving member stars").await
+            return message_response(&ctx, interaction, "Error retrieving member stars").await
         }
     };
 
@@ -49,17 +53,16 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         .unwrap_or(true);
 
     if author_stars.number_of_stars < STARS_TO_GIVE && !has_free_star {
-        return respond_with_message(&ctx, interaction, "You don't have enough stars to give")
-            .await;
+        return message_response(&ctx, interaction, "You don't have enough stars to give").await;
     }
 
     if (remove_star_from_author(author.id.get() as i64, STARS_TO_GIVE, has_free_star).await)
         .is_err()
     {
-        return respond_with_message(&ctx, interaction, "Error removing star from author").await;
+        return message_response(&ctx, interaction, "Error removing star from author").await;
     }
     if (add_star_to_user(user_id.get() as i64, STARS_TO_GIVE).await).is_err() {
-        return respond_with_message(&ctx, interaction, "Error adding star to member").await;
+        return message_response(&ctx, interaction, "Error adding star to member").await;
     }
 
     let mut description = format!(
@@ -78,7 +81,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         description += &format!("\nReason: {}", reason)
     }
 
-    respond_with_embed(
+    embed_response(
         &ctx,
         interaction,
         CreateEmbed::new()

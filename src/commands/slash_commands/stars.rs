@@ -1,11 +1,15 @@
 use crate::models::GoldStar;
 use crate::sqlx_lib::get_gold_stars;
-use crate::utils::respond_with_embed;
+use crate::utils::send_embed;
 use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, CreateEmbed,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CreateEmbed, CreateMessage, Message,
 };
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let user_id = match interaction
         .data
         .options
@@ -16,28 +20,29 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         None => interaction.user.id,
     };
 
-    let stars = match get_gold_stars(user_id.get() as i64).await {
-        Ok(stars) => stars,
-        Err(_) => GoldStar {
+    let stars = get_gold_stars(user_id.get() as i64)
+        .await
+        .unwrap_or(GoldStar {
             id: 0,
             number_of_stars: 0,
             given_stars: 0,
             received_stars: 0,
             last_free_star: None,
-        },
-    };
+        });
 
-    respond_with_embed(
+    send_embed(
         &ctx,
         interaction,
-        CreateEmbed::new()
-            .title(format!(
-                "{}'s Stars",
-                user_id.to_user(&ctx).await.unwrap().name
-            ))
-            .field("Number of Stars", stars.number_of_stars.to_string(), true)
-            .field("Given Stars", stars.given_stars.to_string(), true)
-            .field("Received Stars", stars.received_stars.to_string(), true),
+        CreateMessage::new().embed(
+            CreateEmbed::new()
+                .title(format!(
+                    "{}'s Stars",
+                    user_id.to_user(&ctx).await.unwrap().name
+                ))
+                .field("Number of Stars", stars.number_of_stars.to_string(), true)
+                .field("Given Stars", stars.given_stars.to_string(), true)
+                .field("Received Stars", stars.received_stars.to_string(), true),
+        ),
     )
     .await
 }

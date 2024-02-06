@@ -1,18 +1,19 @@
 use crate::models::Infraction;
 use crate::sqlx_lib::get_user_infractions;
-use crate::utils::{respond_with_embed, respond_with_message};
+use crate::utils::{message_response, send_embed};
 use chrono::{Months, Utc};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, Permissions,
+    CreateEmbed, CreateMessage, Message, Permissions,
 };
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let user_id = match interaction.data.options[0].value.as_user_id() {
         Some(user_id) => user_id,
-        None => {
-            return respond_with_message(&ctx, interaction, "Please provide a valid user").await
-        }
+        None => return message_response(&ctx, interaction, "Please provide a valid user").await,
     };
 
     let filter = interaction
@@ -24,9 +25,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
 
     let mut infractions = match get_user_infractions(user_id.get() as i64).await {
         Ok(user_infractions) => user_infractions,
-        Err(_) => {
-            return respond_with_message(&ctx, interaction, "Error getting user config").await
-        }
+        Err(_) => return message_response(&ctx, interaction, "Error getting user config").await,
     };
 
     if filter == "recent" {
@@ -58,7 +57,12 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         )
     });
 
-    respond_with_embed(&ctx, interaction, CreateEmbed::new().fields(fields)).await
+    send_embed(
+        &ctx,
+        interaction,
+        CreateMessage::new().embed(CreateEmbed::new().fields(fields)),
+    )
+    .await
 }
 
 pub fn register() -> CreateCommand {

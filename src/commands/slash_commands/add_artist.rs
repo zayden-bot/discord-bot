@@ -1,14 +1,19 @@
-use crate::utils::respond_with_message;
+use crate::utils::{message_response, send_message};
 use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, Permissions,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, Message,
+    Permissions,
 };
+
 const ARTIST_ROLE_ID: u64 = 1043987303556726854;
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> serenity::Result<()> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
-            return respond_with_message(
+            return message_response(
                 &ctx,
                 interaction,
                 "This command can only be used in a server",
@@ -19,26 +24,24 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> serenity::Re
 
     let user_id = match interaction.data.options[0].value.as_user_id() {
         Some(user) => user,
-        None => {
-            return respond_with_message(&ctx, interaction, "Please provide a valid user").await
-        }
+        None => return message_response(&ctx, interaction, "Please provide a valid user").await,
     };
 
     let member = match guild_id.member(&ctx, user_id).await {
         Ok(member) => member,
-        Err(_) => return respond_with_message(&ctx, interaction, "Error retrieving member").await,
+        Err(_) => return message_response(&ctx, interaction, "Error retrieving member").await,
     };
 
     match member.add_role(&ctx, ARTIST_ROLE_ID).await {
         Ok(_) => {
-            respond_with_message(
+            send_message(
                 &ctx,
                 interaction,
                 &format!("Added {} as an artist", member.display_name()),
             )
             .await
         }
-        Err(_) => respond_with_message(&ctx, interaction, "Error adding role to member").await,
+        Err(_) => message_response(&ctx, interaction, "Error adding role to member").await,
     }
 }
 

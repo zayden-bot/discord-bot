@@ -1,14 +1,17 @@
-use crate::utils::{respond_with_embed, respond_with_message};
+use crate::utils::{message_response, send_embed};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, Permissions,
+    CreateEmbed, CreateMessage, Message, Permissions,
 };
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
-            return respond_with_message(
+            return message_response(
                 &ctx,
                 interaction,
                 "This command can only be used in a server",
@@ -20,8 +23,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
     let user_id = match interaction.data.options[0].value.as_user_id() {
         Some(user) => user,
         None => {
-            return respond_with_message(&ctx, interaction, "Cannot get member: Unknown Member")
-                .await
+            return message_response(&ctx, interaction, "Cannot get member: Unknown Member").await
         }
     };
 
@@ -34,12 +36,12 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
 
     let member = match guild_id.member(&ctx, &user_id).await {
         Ok(member) => member,
-        Err(_) => return respond_with_message(&ctx, interaction, "Error getting member").await,
+        Err(_) => return message_response(&ctx, interaction, "Error getting member").await,
     };
 
     let partial_guild = match guild_id.to_partial_guild(&ctx).await {
         Ok(partial_guild) => partial_guild,
-        Err(_) => return respond_with_message(&ctx, interaction, "Error getting guild").await,
+        Err(_) => return message_response(&ctx, interaction, "Error getting guild").await,
     };
 
     let _ = user_id
@@ -60,20 +62,20 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         .await
         .is_err()
     {
-        return respond_with_message(&ctx, interaction, "Error banning user").await;
+        return message_response(&ctx, interaction, "Error banning user").await;
     };
 
-    if (guild_id.unban(&ctx, user_id).await).is_err() {
-        return respond_with_message(&ctx, interaction, "Error unbanning user").await;
+    if guild_id.unban(&ctx, user_id).await.is_err() {
+        return message_response(&ctx, interaction, "Error unbanning user").await;
     }
 
-    respond_with_embed(
+    send_embed(
         &ctx,
         interaction,
-        CreateEmbed::new().title("Soft Banned").description(format!(
+        CreateMessage::new().embed(CreateEmbed::new().title("Soft Banned").description(format!(
             "{} has been successfully soft banned for the following reason: {}",
             member.user.name, reason
-        )),
+        ))),
     )
     .await
 }

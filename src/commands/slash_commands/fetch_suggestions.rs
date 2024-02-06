@@ -1,19 +1,22 @@
-use crate::utils::{edit_response_with_message, respond_with_message};
+use crate::utils::message_response;
 use serenity::all::{
     ChannelId, CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage,
-    GuildChannel, ReactionType,
+    GuildChannel, Message, ReactionType,
 };
 use std::time;
 
 const SUGGESTION_CHANNEL_ID: u64 = 1068790374996377671;
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let start_time = time::Instant::now();
 
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
-            return respond_with_message(
+            return message_response(
                 &ctx,
                 interaction,
                 "This command can only be used in a server",
@@ -23,8 +26,6 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
     };
 
     let suggestion_channel = ChannelId::new(SUGGESTION_CHANNEL_ID);
-
-    interaction.defer(&ctx).await?;
 
     let active_guild_threads = guild_id.get_active_threads(&ctx).await?;
     let mut threads: Vec<GuildChannel> = Vec::new();
@@ -91,26 +92,28 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         )
         .await;
 
-    if result.is_err() {
-        return respond_with_message(
-            &ctx,
-            interaction,
-            "I couldn't DM you. Please enable DMs from server members and try again.",
-        )
-        .await;
-    }
+    match result {
+        Ok(_) => {
+            message_response(
+                &ctx,
+                interaction,
+                &format!(
+                    "Suggestions fetched. Took {} seconds",
+                    elapsed_time.as_secs()
+                ),
+            )
+            .await
+        }
 
-    edit_response_with_message(
-        &ctx,
-        interaction,
-        &format!(
-            "Suggestions fetched. Took {} seconds",
-            elapsed_time.as_secs()
-        ),
-    )
-    .await
-    .expect("Error editing response");
-    Ok(())
+        Err(_) => {
+            message_response(
+                &ctx,
+                interaction,
+                "I couldn't DM you. Please enable DMs from server members and try again.",
+            )
+            .await
+        }
+    }
 }
 
 pub fn register() -> CreateCommand {

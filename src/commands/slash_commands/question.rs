@@ -1,12 +1,13 @@
+use serenity::all::Message;
 use serenity::{all::CommandInteraction, builder::CreateCommand, client::Context};
 
-use crate::utils::respond_with_ephemeral_message;
+use crate::utils::send_message;
 
 pub async fn run(
     ctx: Context,
     interaction: &CommandInteraction,
-) -> Result<(), serenity::Error> {
-    respond_with_ephemeral_message(
+) -> Result<Message, serenity::Error> {
+    send_message(
         &ctx,
         interaction,
         "This command is deprecated. Please use <#1196200376404291654> to post questions.",

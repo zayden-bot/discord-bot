@@ -1,13 +1,16 @@
-use crate::utils::respond_with_ephemeral_message;
+use crate::utils::message_response;
 use serenity::all::{
-    ChannelId, CommandInteraction, Context, CreateCommand, CreateEmbed, EditMessage, MessageId,
-    Permissions,
+    ChannelId, CommandInteraction, Context, CreateCommand, CreateEmbed, EditMessage, Message,
+    MessageId, Permissions,
 };
 
 const INFORMATION_MESSAGE_ID: u64 = 830931135780880415;
 const INFORMATION_CHANNEL_ID: u64 = 830927865784565800;
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let embed = CreateEmbed::new()
         .title("College Kings")
         .description(r#"This server is about the game "College Kings". The game is still in active development. Supporting the game on patreon helps us a lot, so if you have the resources, consider joining the patreon.
@@ -63,7 +66,7 @@ Fan/Activity Roles:
         .await?;
     message.edit(&ctx, EditMessage::new().embed(embed)).await?;
 
-    respond_with_ephemeral_message(&ctx, interaction, "Message Updated.").await
+    message_response(&ctx, interaction, "Message Updated.").await
 }
 
 pub fn register() -> CreateCommand {

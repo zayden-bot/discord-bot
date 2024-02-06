@@ -1,8 +1,10 @@
 use crate::infraction_type::InfractionType;
 use crate::sqlx_lib::{create_user_infraction, get_user_infractions};
-use crate::utils::respond_with_message;
+use crate::utils::{message_response, send_message};
 use chrono::{Duration, Months, Utc};
-use serenity::all::{CommandDataOptionValue, CommandInteraction, CommandOptionType, CreateEmbed};
+use serenity::all::{
+    CommandDataOptionValue, CommandInteraction, CommandOptionType, CreateEmbed, Message,
+};
 use serenity::builder::{CreateCommand, CreateCommandOption, CreateMessage};
 use serenity::model::prelude::{GuildId, Member};
 use serenity::model::{Permissions, Timestamp};
@@ -193,13 +195,16 @@ fn get_option_by_name(
     }
 }
 
-pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: Context,
+    interaction: &CommandInteraction,
+) -> Result<Message, serenity::Error> {
     let author_id = interaction.user.id;
 
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
-            return respond_with_message(
+            return message_response(
                 &ctx,
                 interaction,
                 "This command can only be used in a server",
@@ -210,20 +215,18 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
 
     let user = match interaction.data.options[0].value.as_user_id() {
         Some(user) => user,
-        None => {
-            return respond_with_message(&ctx, interaction, "Please provide a valid user").await
-        }
+        None => return message_response(&ctx, interaction, "Please provide a valid user").await,
     };
 
     let moderator = match guild_id.member(&ctx, &author_id).await {
         Ok(moderator) => moderator,
-        Err(_) => return respond_with_message(&ctx, interaction, "Invalid moderator").await,
+        Err(_) => return message_response(&ctx, interaction, "Invalid moderator").await,
     };
 
     let member = match guild_id.member(&ctx, user).await {
         Ok(member) => member,
         Err(_) => {
-            return respond_with_message(&ctx, interaction, "User not found in this server").await
+            return message_response(&ctx, interaction, "User not found in this server").await
         }
     };
 
@@ -239,9 +242,7 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
 
     let user_infractions = match get_user_infractions(member.user.id.get() as i64).await {
         Ok(user_infractions) => user_infractions,
-        Err(_) => {
-            return respond_with_message(&ctx, interaction, "Error getting user config").await
-        }
+        Err(_) => return message_response(&ctx, interaction, "Error getting user config").await,
     };
 
     let six_months_age = Utc::now()
@@ -299,14 +300,13 @@ pub async fn run(ctx: Context, interaction: &CommandInteraction) -> Result<(), s
         }
         5 => ban(&ctx, member, &guild_id, moderator, points, reason).await,
         _ => {
-            return respond_with_message(&ctx, interaction, "Invalid amount of infraction points")
-                .await
+            return message_response(&ctx, interaction, "Invalid amount of infraction points").await
         }
     };
 
     match result {
-        Ok(message) => respond_with_message(&ctx, interaction, message.as_str()).await,
-        Err(message) => respond_with_message(&ctx, interaction, message.as_str()).await,
+        Ok(message) => send_message(&ctx, interaction, message.as_str()).await,
+        Err(message) => message_response(&ctx, interaction, message.as_str()).await,
     }
 }
 
