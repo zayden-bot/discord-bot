@@ -143,7 +143,9 @@ impl EventHandler for Handler {
         if let Interaction::Command(command) = interaction {
             println!("{} ran command: {}", command.user.tag(), command.data.name);
 
-            command.defer_ephemeral(&ctx).await.expect("Cannot defer");
+            if let Err(why) = command.defer_ephemeral(&ctx).await {
+                println!("Cannot defer: {}", why);
+            };
 
             let result = match command.data.name.as_str() {
                 "add_artist" => add_artist::run(ctx, &command).await,
