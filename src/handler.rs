@@ -30,7 +30,7 @@ impl EventHandler for Handler {
             "!ping" => ping::run(ctx, msg).await,
             _ => {
                 ai_chat::run(&ctx, &msg).await;
-                auto_support::run(&ctx, &msg).await;
+                let _ = auto_support::run(&ctx, &msg).await;
             }
         }
     }
