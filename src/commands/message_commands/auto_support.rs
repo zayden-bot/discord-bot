@@ -1,3 +1,4 @@
+use crate::error;
 use crate::sqlx_lib::{
     get_support_channel_ids, get_support_role_ids, get_support_thead_id, post_support_thread_id,
     update_support_thread_id,
@@ -22,17 +23,17 @@ async fn get_attachments(msg: &Message) -> serenity::Result<Vec<CreateAttachment
     Ok(attachments)
 }
 
-pub async fn run(ctx: &Context, msg: &Message) {
+pub async fn run(ctx: &Context, msg: &Message) -> error::Result<()> {
     let guild_id = match msg.guild_id {
         Some(id) => id,
-        None => return,
+        None => return Ok(()),
     };
 
     let support_channel_ids = get_support_channel_ids(guild_id.get() as i64)
         .await
         .unwrap();
     if !support_channel_ids.contains(&(msg.channel_id.get() as i64)) {
-        return;
+        return Ok(());
     }
 
     let guild_roles = ctx.http.get_guild_roles(guild_id).await.unwrap();
@@ -50,22 +51,18 @@ pub async fn run(ctx: &Context, msg: &Message) {
         .roles
         .contains(&support_role.id)
     {
-        return;
+        return Ok(());
     }
 
     let attachments = get_attachments(msg).await.unwrap();
 
     let thread_id = match get_support_thead_id(guild_id.get() as i64).await {
         Ok(id) => {
-            update_support_thread_id(guild_id.get() as i64, id + 1)
-                .await
-                .unwrap();
+            update_support_thread_id(guild_id.get() as i64, id + 1).await?;
             id + 1
         }
         Err(_) => {
-            post_support_thread_id(guild_id.get() as i64, 1)
-                .await
-                .unwrap();
+            post_support_thread_id(guild_id.get() as i64, 1).await?;
             1
         }
     };
@@ -83,24 +80,33 @@ pub async fn run(ctx: &Context, msg: &Message) {
                 .kind(ChannelType::PrivateThread)
                 .auto_archive_duration(AutoArchiveDuration::OneWeek),
         )
-        .await
-        .unwrap();
+        .await?;
 
     thread
         .say(&ctx, get_welcome_message(&support_role, &msg.author))
-        .await
-        .unwrap();
+        .await?;
+
+    let chunks: Vec<String> = msg
+        .content
+        .chars()
+        .collect::<Vec<char>>()
+        .chunks(2000)
+        .map(|c| c.iter().collect())
+        .collect();
+
+    for chunk in chunks {
+        thread.say(&ctx, chunk).await?;
+    }
 
     thread
         .send_files(
             &ctx,
             attachments,
-            CreateMessage::new().content(&msg.content),
+            CreateMessage::new().content(String::new()),
         )
-        .await
-        .unwrap();
+        .await?;
 
-    if msg.delete(&ctx).await.is_err() {
-        println!("Failed to delete message");
-    }
+    msg.delete(&ctx).await?;
+
+    Ok(())
 }
