@@ -14,10 +14,8 @@ use serenity::prelude::GatewayIntents;
 use serenity::Client;
 use std::env;
 
-pub use crate::error::Result;
-
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> error::Result<()> {
     dotenv()?;
 
     let token = &env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
