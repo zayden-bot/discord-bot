@@ -30,7 +30,9 @@ impl EventHandler for Handler {
             "!ping" => ping::run(ctx, msg).await,
             _ => {
                 ai_chat::run(&ctx, &msg).await;
-                let _ = auto_support::run(&ctx, &msg).await;
+                if let Err(why) = auto_support::run(&ctx, &msg).await {
+                    println!("Did not complete auto_support: {}", why);
+                };
             }
         }
     }
@@ -141,13 +143,18 @@ impl EventHandler for Handler {
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::Command(command) = interaction {
-            println!("{} ran command: {}", command.user.tag(), command.data.name);
+            let command_name = &command.data.name;
 
-            if let Err(why) = command.defer_ephemeral(&ctx).await {
-                println!("Cannot defer: {}", why);
-            };
+            println!("{} ran command: {}", command.user.tag(), command_name);
 
-            let result = match command.data.name.as_str() {
+            if command_name != "good_morning" && command_name != "good_night" {
+                command
+                    .defer_ephemeral(&ctx)
+                    .await
+                    .expect("Failed to defer ephemeral");
+            }
+
+            let result = match command_name.as_str() {
                 "add_artist" => add_artist::run(ctx, &command).await,
                 "close" => close::run(ctx, &command).await,
                 "fetch_suggestions" => fetch_suggestions::run(ctx, &command).await,
