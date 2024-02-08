@@ -1,3 +1,4 @@
+use std::fmt;
 use std::result::Result as StdResult;
 
 pub type Result<T, E = Error> = StdResult<T, E>;
@@ -8,6 +9,17 @@ pub enum Error {
     Serenity(serenity::Error),
     Sqlx(sqlx::Error),
     Other(String),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Error::Dotenvy(e) => write!(f, "Dotenvy error: {}", e),
+            Error::Serenity(e) => write!(f, "Serenity error: {}", e),
+            Error::Sqlx(e) => write!(f, "Sqlx error: {}", e),
+            Error::Other(e) => write!(f, "Other error: {}", e),
+        }
+    }
 }
 
 impl From<dotenvy::Error> for Error {
