@@ -94,17 +94,16 @@ pub async fn run(ctx: &Context, msg: &Message) -> error::Result<()> {
         .map(|c| c.iter().collect())
         .collect();
 
-    for chunk in chunks {
+    for (index, chunk) in chunks.iter().enumerate() {
+        if index == chunks.len() - 1 {
+            thread
+                .send_files(&ctx, attachments, CreateMessage::new().content(chunk))
+                .await?;
+            break;
+        }
+
         thread.say(&ctx, chunk).await?;
     }
-
-    thread
-        .send_files(
-            &ctx,
-            attachments,
-            CreateMessage::new().content(String::new()),
-        )
-        .await?;
 
     msg.delete(&ctx).await?;
 
