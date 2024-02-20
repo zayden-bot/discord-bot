@@ -147,7 +147,7 @@ impl EventHandler for Handler {
 
             println!("{} ran command: {}", command.user.tag(), command_name);
 
-            if command_name != "good_morning" && command_name != "good_night" {
+            if command_name != "good_morning" && command_name != "good_night" && command_name != "scam" {
                 command
                     .defer_ephemeral(&ctx)
                     .await

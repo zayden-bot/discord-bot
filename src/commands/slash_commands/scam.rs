@@ -1,4 +1,4 @@
-use crate::utils::{message_response, send_embed};
+use crate::utils::{embed_response, message_response};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, CreateMessage, Message, Permissions,
@@ -8,6 +8,8 @@ pub async fn run(
     ctx: Context,
     interaction: &CommandInteraction,
 ) -> Result<Message, serenity::Error> {
+    interaction.defer(&ctx).await.expect("Failed to defer");
+
     let guild_id = match interaction.guild_id {
         Some(guild_id) => guild_id,
         None => {
@@ -69,13 +71,13 @@ pub async fn run(
         return message_response(&ctx, interaction, "Error unbanning user").await;
     }
 
-    send_embed(
+    embed_response(
         &ctx,
         interaction,
-        CreateMessage::new().embed(CreateEmbed::new().title("Soft Banned").description(format!(
+        CreateEmbed::new().title("Soft Banned").description(format!(
             "{} has been successfully soft banned for the following reason: {}",
             member.user.name, reason
-        ))),
+        )),
     )
     .await
 }
