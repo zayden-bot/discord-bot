@@ -14,6 +14,8 @@ use serenity::prelude::GatewayIntents;
 use serenity::Client;
 use std::env;
 
+pub const SERVER_IP: &str = "82.9.123.190";
+
 #[tokio::main]
 async fn main() -> error::Result<()> {
     dotenv()?;
