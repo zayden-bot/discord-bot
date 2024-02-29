@@ -108,6 +108,7 @@ impl EventHandler for Handler {
                 patreon::register(),
                 good_morning::register(),
                 good_night::register(),
+                link::register(),
                 question::register(),
                 reputation::register(),
                 saves::register(),
@@ -151,6 +152,7 @@ impl EventHandler for Handler {
                 && command_name != "good_night"
                 && command_name != "scam"
                 && command_name != "patreon"
+                && command_name != "link"
             {
                 command
                     .defer_ephemeral(&ctx)
@@ -168,6 +170,7 @@ impl EventHandler for Handler {
                 "good_morning" => good_morning::run(ctx, &command).await,
                 "good_night" => good_night::run(ctx, &command).await,
                 "infraction" => infraction::run(ctx, &command).await,
+                "link" => link::run(ctx, &command).await,
                 "logs" => logs::run(ctx, &command).await,
                 "member_count" => member_count::run(ctx, &command).await,
                 "open" => open::run(ctx, &command).await,
