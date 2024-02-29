@@ -81,7 +81,6 @@ pub async fn run(
     interaction: &CommandInteraction,
 ) -> Result<Message, serenity::Error> {
     let command = &interaction.data.options[0];
-    println!("{:?}", interaction.data.options);
 
     return match command.name.as_str() {
         "info" => info(&ctx, interaction).await,
