@@ -2,8 +2,9 @@
 
 use serenity::all::{
     CommandInteraction, Context, CreateEmbed, CreateInteractionResponseFollowup, CreateMessage,
-    EditInteractionResponse, Message, MessageFlags,
+    EditInteractionResponse, Message, MessageFlags, ResolvedOption, ResolvedValue,
 };
+use std::collections::HashMap;
 
 async fn cancel_defer(ctx: &Context, interaction: &CommandInteraction) {
     if interaction
@@ -21,7 +22,7 @@ async fn cancel_defer(ctx: &Context, interaction: &CommandInteraction) {
 pub async fn message_response(
     ctx: &Context,
     interaction: &CommandInteraction,
-    content: &str,
+    content: impl Into<String>,
 ) -> Result<Message, serenity::Error> {
     interaction
         .edit_response(ctx, EditInteractionResponse::new().content(content))
@@ -41,7 +42,7 @@ pub async fn embed_response(
 pub async fn send_message(
     ctx: &Context,
     interaction: &CommandInteraction,
-    content: &str,
+    content: impl Into<String>,
 ) -> Result<Message, serenity::Error> {
     let channel_id = interaction
         .channel
@@ -77,7 +78,7 @@ pub async fn send_embed(
 pub async fn message_follow_up(
     ctx: &Context,
     interaction: &CommandInteraction,
-    content: &str,
+    content: impl Into<String>,
 ) -> Result<Message, serenity::Error> {
     interaction
         .create_followup(
@@ -98,4 +99,22 @@ pub async fn embed_follow_up(
             CreateInteractionResponseFollowup::new().add_embed(embed),
         )
         .await
+}
+
+pub fn parse_options<'a>(
+    options: &'a Vec<ResolvedOption<'_>>,
+) -> HashMap<&'a str, &'a ResolvedValue<'a>> {
+    let mut parsed_options = HashMap::new();
+
+    for option in options {
+        parsed_options.insert(option.name, &option.value);
+
+        // if let ResolvedValue::SubCommand(subcommand) = option.value {
+        //     for subcommand_option in subcommand {
+        //         parsed_options.insert(subcommand_option.name, subcommand_option.value);
+        //     }
+        // }
+    }
+
+    parsed_options
 }
