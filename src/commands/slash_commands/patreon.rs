@@ -1,49 +1,25 @@
-#![allow(dead_code)]
-
-use crate::utils::{embed_response, message_response};
+use crate::{
+    utils::{embed_response, message_response},
+    SERVER_IP,
+};
+use reqwest::Client;
 use serde::Deserialize;
+use serde_json::json;
 use serenity::all::{
     CommandDataOptionValue, CommandInteraction, CommandOptionType, Context, CreateCommand,
     CreateCommandOption, CreateEmbed, CreateEmbedFooter, Message,
 };
 
-#[derive(Debug, Deserialize)]
-struct PatreonMemberAttributes {
-    campaign_lifetime_support_cents: i32,
-    email: Option<String>,
-    patron_status: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct PatreonMemberData {
-    attributes: PatreonMemberAttributes,
-    id: Option<String>,
-    r#type: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct PatreonLinks {
-    next: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct PatreonPagination {
-    total: i32,
-}
-
-#[derive(Debug, Deserialize)]
-struct PatreonMeta {
-    pagination: Option<PatreonPagination>,
-}
-
-#[derive(Debug, Deserialize)]
-struct PatreonMember {
-    data: Vec<PatreonMemberData>,
-    patreon_links: Option<PatreonLinks>,
-    patreon_meta: Option<PatreonMeta>,
+#[derive(Deserialize, Debug)]
+pub struct MemberAttributes {
+    pub currently_entitled_amount_cents: Option<i32>,
+    pub email: Option<String>,
+    pub lifetime_support_cents: Option<i32>,
 }
 
 async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<Message, serenity::Error> {
+    interaction.defer(ctx).await?;
+
     embed_response(ctx, interaction, CreateEmbed::new().title("Pledge to College Kings")
             .url("https://www.patreon.com/collegekings")
             .description("**Interested In Getting Early Updates, Patron-only behind the scenes/post... and more?\n\nCheck it all out here!**\nhttps://www.patreon.com/collegekings")
@@ -58,6 +34,8 @@ async fn check(
     interaction: &CommandInteraction,
     subcommand: &CommandDataOptionValue,
 ) -> Result<Message, serenity::Error> {
+    interaction.defer_ephemeral(ctx).await?;
+
     let subcommand = match subcommand {
         CommandDataOptionValue::SubCommand(subcommand) => subcommand,
         _ => return message_response(ctx, interaction, "Invalid subcommand").await,
@@ -68,20 +46,20 @@ async fn check(
         _ => return message_response(ctx, interaction, "Invalid email").await,
     };
 
-    let res = match reqwest::get(format!(
-        "http://81.100.246.35/api/v1/patreon/users/{}",
-        email
-    ))
-    .await
+    let res = match Client::new()
+        .post(&format!("http://{}/api/v1/patreon/get_user", SERVER_IP))
+        .json(&json!({ "email": email }))
+        .send()
+        .await
     {
         Ok(res) => res,
-        Err(_) => {
-            return message_response(ctx, interaction, "Error getting Patreon information").await
-        }
+        Err(_) => return message_response(ctx, interaction, "Error checking Patreon status").await,
     };
 
-    let patreon_member = res.json::<PatreonMember>().await.unwrap();
-    let patreon_attributes = &patreon_member.data[0].attributes;
+    let attributes: MemberAttributes = match res.json().await {
+        Ok(attributes) => attributes,
+        Err(_) => return message_response(ctx, interaction, "Error checking Patreon status").await,
+    };
 
     embed_response(
         ctx,
@@ -89,10 +67,10 @@ async fn check(
         CreateEmbed::new()
             .title("Patreon Status")
             .description(format!(
-                "Lifetime Support (USD): **{}**\nEmail: {}\nPatreon Status: **{}**",
-                patreon_attributes.campaign_lifetime_support_cents / 100,
-                patreon_attributes.email.as_ref().unwrap(),
-                patreon_attributes.patron_status.as_ref().unwrap()
+                "Email: {}\n Lifetime Support: **${}**\nCurrent Tier: **${}**",
+                attributes.email.unwrap(),
+                attributes.lifetime_support_cents.unwrap() / 100,
+                attributes.currently_entitled_amount_cents.unwrap() / 100
             )),
     )
     .await
