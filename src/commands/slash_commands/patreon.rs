@@ -53,12 +53,14 @@ async fn check(
         .await
     {
         Ok(res) => res,
-        Err(_) => return message_response(ctx, interaction, "Error checking Patreon status").await,
+        Err(_) => {
+            return message_response(ctx, interaction, "Patreon not found").await;
+        }
     };
 
     let attributes: MemberAttributes = match res.json().await {
         Ok(attributes) => attributes,
-        Err(_) => return message_response(ctx, interaction, "Error checking Patreon status").await,
+        Err(_) => return message_response(ctx, interaction, "Failed to parse patreon data").await,
     };
 
     embed_response(
