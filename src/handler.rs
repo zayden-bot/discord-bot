@@ -108,6 +108,7 @@ impl EventHandler for Handler {
                 patreon::register(),
                 good_morning::register(),
                 good_night::register(),
+                image::register(),
                 link::register(),
                 question::register(),
                 reputation::register(),
@@ -150,6 +151,7 @@ impl EventHandler for Handler {
 
             if command_name != "good_morning"
                 && command_name != "good_night"
+                && command_name != "image"
                 && command_name != "scam"
                 && command_name != "patreon"
                 && command_name != "link"
@@ -169,6 +171,7 @@ impl EventHandler for Handler {
                 "gold_star" => gold_star::run(ctx, &command).await,
                 "good_morning" => good_morning::run(ctx, &command).await,
                 "good_night" => good_night::run(ctx, &command).await,
+                "image" => image::run(ctx, &command).await,
                 "infraction" => infraction::run(ctx, &command).await,
                 "link" => link::run(ctx, &command).await,
                 "logs" => logs::run(ctx, &command).await,

@@ -6,6 +6,7 @@ pub mod get_discord_role;
 pub mod gold_star;
 pub mod good_morning;
 pub mod good_night;
+pub mod image;
 pub mod infraction;
 pub mod link;
 pub mod logs;
