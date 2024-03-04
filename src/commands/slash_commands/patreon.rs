@@ -1,13 +1,13 @@
 use crate::{
-    utils::{embed_response, message_response},
+    utils::{embed_response, message_response, parse_options},
     SERVER_IP,
 };
 use reqwest::Client;
 use serde::Deserialize;
 use serde_json::json;
 use serenity::all::{
-    CommandDataOptionValue, CommandInteraction, CommandOptionType, Context, CreateCommand,
-    CreateCommandOption, CreateEmbed, CreateEmbedFooter, Message,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CreateEmbed, CreateEmbedFooter, Message, ResolvedValue,
 };
 
 #[derive(Deserialize, Debug)]
@@ -32,35 +32,47 @@ async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<Message
 async fn check(
     ctx: &Context,
     interaction: &CommandInteraction,
-    subcommand: &CommandDataOptionValue,
+    subcommand: &ResolvedValue<'_>,
 ) -> Result<Message, serenity::Error> {
     interaction.defer_ephemeral(ctx).await?;
 
     let subcommand = match subcommand {
-        CommandDataOptionValue::SubCommand(subcommand) => subcommand,
+        ResolvedValue::SubCommand(subcommand) => subcommand,
         _ => return message_response(ctx, interaction, "Invalid subcommand").await,
     };
 
-    let email = match subcommand[0].value.as_str() {
-        Some(email) => email,
+    let options = parse_options(subcommand);
+
+    let email = match options.get("email") {
+        Some(ResolvedValue::String(email)) => email,
         _ => return message_response(ctx, interaction, "Invalid email").await,
+    };
+
+    let force = match options.get("force") {
+        Some(ResolvedValue::Boolean(force)) => *force,
+        _ => false,
     };
 
     let res = match Client::new()
         .post(&format!("http://{}/api/v1/patreon/get_user", SERVER_IP))
-        .json(&json!({ "email": email }))
+        .json(&json!({ "email": email, "force": force}))
         .send()
         .await
     {
         Ok(res) => res,
         Err(_) => {
-            return message_response(ctx, interaction, "Patreon not found").await;
+            return message_response(ctx, interaction, "Failed to fetch patreon data").await;
         }
     };
 
-    let attributes: MemberAttributes = match res.json().await {
+    let res_text = res.text().await?;
+
+    let attributes: MemberAttributes = match serde_json::from_str(&res_text) {
         Ok(attributes) => attributes,
-        Err(_) => return message_response(ctx, interaction, "Failed to parse patreon data").await,
+        Err(_) => {
+            eprint!("Failed to parse patreon data: {}", res_text);
+            return message_response(ctx, interaction, "Failed to parse patreon data").await;
+        }
     };
 
     embed_response(
@@ -82,13 +94,14 @@ pub async fn run(
     ctx: Context,
     interaction: &CommandInteraction,
 ) -> Result<Message, serenity::Error> {
-    let command = &interaction.data.options[0];
+    let options = interaction.data.options();
+    let command = &options[0];
 
-    return match command.name.as_str() {
+    match command.name {
         "info" => info(&ctx, interaction).await,
         "check" => check(&ctx, interaction, &command.value).await,
         _ => message_response(&ctx, interaction, "Invalid subcommand").await,
-    };
+    }
 }
 
 pub fn register() -> CreateCommand {
@@ -108,6 +121,11 @@ pub fn register() -> CreateCommand {
             .add_sub_option(
                 CreateCommandOption::new(CommandOptionType::String, "email", "Your Patreon email")
                     .required(true),
-            ),
+            )
+            .add_sub_option(CreateCommandOption::new(
+                CommandOptionType::Boolean,
+                "force",
+                "Check via the Patreon API instead of the cache",
+            )),
         )
 }
