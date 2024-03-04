@@ -10,6 +10,7 @@ mod utils;
 
 use crate::image_cache::ImageCache;
 use dotenvy::dotenv;
+pub use error::{Error, Result};
 use serenity::prelude::GatewayIntents;
 use serenity::Client;
 use std::env;
@@ -28,7 +29,7 @@ async fn main() -> error::Result<()> {
 
     {
         let mut data = client.data.write().await;
-        data.insert::<ImageCache>(ImageCache::new());
+        data.insert::<ImageCache>(ImageCache::new()?);
     }
 
     client.start().await?;
