@@ -6,7 +6,7 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::{Error, PgPool};
 use std::env;
 
-async fn get_pool() -> PgPool {
+pub async fn get_pool() -> PgPool {
     PgPoolOptions::new()
         .max_connections(5)
         .connect(&env::var("DATABASE_URL").expect("Expected a database url in the environment"))
