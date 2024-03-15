@@ -29,10 +29,14 @@ impl EventHandler for Handler {
         match command.to_lowercase().as_str() {
             "!ping" => ping::run(ctx, msg).await,
             _ => {
-                ai_chat::run(&ctx, &msg).await;
-                if let Err(why) = auto_support::run(&ctx, &msg).await {
-                    println!("Did not complete auto_support: {}", why);
-                };
+                let (_, auto_support_result, _) = tokio::join!(
+                    ai_chat::run(&ctx, &msg),
+                    auto_support::run(&ctx, &msg),
+                    levels::run(&ctx, &msg)
+                );
+                if let Err(why) = auto_support_result {
+                    println!("Cannot run auto support: {}", why);
+                }
             }
         }
     }
