@@ -1,5 +1,5 @@
 -- Add up migration script here
-CREATE TABLE questions (
+CREATE TABLE IF NOT EXISTS questions (
     id SERIAL PRIMARY KEY,
     question TEXT NOT NULL,
     answer TEXT,

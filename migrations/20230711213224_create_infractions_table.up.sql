@@ -1,5 +1,5 @@
 -- Add up migration script here
-CREATE TABLE infractions (
+CREATE TABLE IF NOT EXISTS infractions (
     id SERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     username VARCHAR(255) NOT NULL,

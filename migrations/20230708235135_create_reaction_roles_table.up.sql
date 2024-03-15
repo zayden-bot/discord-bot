@@ -1,5 +1,5 @@
 -- Add up migration script here
-CREATE TABLE reaction_roles (
+CREATE TABLE IF NOT EXISTS reaction_roles (
     id SERIAL PRIMARY KEY,
     guild_id BIGINT NOT NULL,
     channel_id BIGINT NOT NULL,

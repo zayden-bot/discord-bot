@@ -1,5 +1,5 @@
 -- Add up migration script here
-CREATE TABLE channels (
+CREATE TABLE IF NOT EXISTS channels (
     id BIGINT PRIMARY KEY,
     category VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
