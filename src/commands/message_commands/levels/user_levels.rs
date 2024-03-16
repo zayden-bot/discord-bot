@@ -57,3 +57,21 @@ pub async fn update_user_level_data(
     .execute(&pool)
     .await
 }
+
+pub async fn get_user_rank<T: TryInto<i64>>(user_id: T) -> Result<Option<i64>, sqlx::Error> {
+    let pool = sqlx_lib::get_pool().await;
+
+    let user_id: i64 = match user_id.try_into() {
+        Ok(id) => id,
+        Err(_) => return Err(sqlx::Error::RowNotFound),
+    };
+
+    let rank = sqlx::query!(
+        "SELECT rank FROM (SELECT id, RANK() OVER (ORDER BY total_xp DESC) FROM levels) AS ranked WHERE id = $1",
+        user_id
+    )
+    .fetch_one(&pool)
+    .await?;
+
+    Ok(rank.rank)
+}
