@@ -15,6 +15,7 @@ pub mod open;
 pub mod patreon;
 pub mod ping;
 pub mod question;
+pub mod rank;
 pub mod reaction_role;
 pub mod reputation;
 pub mod rule;
