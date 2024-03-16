@@ -157,9 +157,10 @@ impl EventHandler for Handler {
             if command_name != "good_morning"
                 && command_name != "good_night"
                 && command_name != "image"
-                && command_name != "scam"
-                && command_name != "patreon"
                 && command_name != "link"
+                && command_name != "patreon"
+                && command_name != "scam"
+                && command_name != "start_migration"
                 && command_name != "xp"
             {
                 command
