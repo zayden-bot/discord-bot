@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::image_cache::ImageCache;
-use chrono::{Duration, Local};
+use chrono::{Local, TimeDelta};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::all::{
@@ -18,7 +18,7 @@ pub async fn run(
     let mut data = ctx.data.write().await;
     let image_cache = data.get_mut::<ImageCache>().unwrap();
 
-    if Local::now().naive_utc() > image_cache.last_update + Duration::hours(1) {
+    if Local::now().naive_utc() > image_cache.last_update + TimeDelta::try_hours(1).unwrap() {
         image_cache.update().await;
     };
 

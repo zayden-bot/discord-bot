@@ -1,7 +1,7 @@
 use crate::infraction_type::InfractionType;
 use crate::sqlx_lib::{create_user_infraction, get_user_infractions};
 use crate::utils::{message_response, send_message};
-use chrono::{Duration, Months, Utc};
+use chrono::{Duration, Months, TimeDelta, Utc};
 use serenity::all::{
     CommandDataOptionValue, CommandInteraction, CommandOptionType, CreateEmbed, Message,
 };
@@ -268,7 +268,7 @@ pub async fn run(
                 member,
                 &guild_id,
                 moderator,
-                Duration::hours(1),
+                TimeDelta::try_hours(1).unwrap(),
                 points,
                 reason,
             )
@@ -280,7 +280,7 @@ pub async fn run(
                 member,
                 &guild_id,
                 moderator,
-                Duration::hours(8),
+                TimeDelta::try_hours(8).unwrap(),
                 points,
                 reason,
             )
@@ -292,7 +292,7 @@ pub async fn run(
                 member,
                 &guild_id,
                 moderator,
-                Duration::days(28),
+                TimeDelta::try_days(28).unwrap(),
                 points,
                 reason,
             )

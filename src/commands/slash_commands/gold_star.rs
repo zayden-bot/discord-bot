@@ -49,7 +49,7 @@ pub async fn run(
 
     let has_free_star = author_stars
         .last_free_star
-        .map(|star| star.timestamp() >= 86400)
+        .map(|star| star.and_utc().timestamp() >= 86400)
         .unwrap_or(true);
 
     if author_stars.number_of_stars < STARS_TO_GIVE && !has_free_star {
