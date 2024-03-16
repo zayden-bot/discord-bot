@@ -8,6 +8,7 @@ pub struct UserLevelData {
     pub xp: i32,
     pub level: i32,
     pub total_xp: i32,
+    pub message_count: i32,
     pub last_xp: NaiveDateTime,
 }
 
@@ -47,7 +48,7 @@ pub async fn update_user_level_data(
     let pool = sqlx_lib::get_pool().await;
 
     sqlx::query!(
-        "UPDATE levels SET xp = $1, total_xp = $2, level = $3, last_xp = now() WHERE id = $4",
+        "UPDATE levels SET xp = $1, total_xp = $2, level = $3, message_count = message_count + 1, last_xp = now() WHERE id = $4",
         xp,
         total_xp,
         level,
