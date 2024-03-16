@@ -28,6 +28,7 @@ impl EventHandler for Handler {
 
         match command.to_lowercase().as_str() {
             "!ping" => ping::run(ctx, msg).await,
+            "!rank" => rank::run(ctx, msg).await,
             _ => {
                 let (_, auto_support_result, _) = tokio::join!(
                     ai_chat::run(&ctx, &msg),
@@ -132,6 +133,7 @@ impl EventHandler for Handler {
                 logs::register(),
                 member_count::register(),
                 ping::register(),
+                rank::register(),
                 reaction_role::register(),
                 rule::register(),
                 scam::register(),
@@ -159,8 +161,8 @@ impl EventHandler for Handler {
                 && command_name != "image"
                 && command_name != "link"
                 && command_name != "patreon"
+                && command_name != "rank"
                 && command_name != "scam"
-                && command_name != "start_migration"
                 && command_name != "xp"
             {
                 command
@@ -186,6 +188,7 @@ impl EventHandler for Handler {
                 "open" => open::run(ctx, &command).await,
                 "patreon" => patreon::run(ctx, &command).await,
                 "question" => question::run(ctx, &command).await,
+                "rank" => rank::run(ctx, &command).await,
                 "reaction_role" => reaction_role::run(ctx, &command).await,
                 "ping" => ping::run(ctx, &command).await,
                 "reputation" => reputation::run(ctx, &command).await,
