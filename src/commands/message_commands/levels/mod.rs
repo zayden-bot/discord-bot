@@ -1,17 +1,29 @@
-mod user_level_data;
+pub mod user_levels;
 
-use chrono::{Duration, Utc};
+use chrono::{TimeDelta, Utc};
+use lazy_static::lazy_static;
 use rand::Rng;
-use serenity::all::{Context, Message};
-use sqlx::postgres::PgQueryResult;
+use serenity::all::{Context, Member, Message};
+use std::collections::HashMap;
 
-use crate::sqlx_lib;
-
-use user_level_data::UserLevelData;
+use user_levels::{get_user_level_data, update_user_level_data};
 
 const BLOCKED_CHANNEL_IDS: [u64; 1] = [776139754408247326];
 
-pub async fn run(_ctx: &Context, msg: &Message) {
+lazy_static! {
+    static ref LEVEL_ROLES: HashMap<i32, u64> = {
+        let mut map = HashMap::new();
+        map.insert(5, 787443819024220210); // New Fan | Level 5
+        map.insert(10, 787445571539304510); // Active Fan | Level 10
+        map.insert(20, 787445900992577556); // Big Fan | Level 20
+        map.insert(40, 787446715057831976); // Super Fan | Level 40
+        map.insert(60, 787447090728796191); // Mega Fan | Level 60
+        map.insert(80, 787447252783202326); // Ultra Fan | Level 80
+        map
+    };
+}
+
+pub async fn run(ctx: &Context, msg: &Message) {
     if msg.guild_id.is_none() {
         return;
     }
@@ -30,54 +42,42 @@ pub async fn run(_ctx: &Context, msg: &Message) {
         }
     };
 
-    if level_data.last_xp >= (Utc::now().naive_utc() - Duration::minutes(1)) {
+    if level_data.last_xp >= (Utc::now().naive_utc() - TimeDelta::try_minutes(1).unwrap()) {
         return;
     }
 
-    let xp_to_add = rand::thread_rng().gen_range(15..25);
+    let mut level = 0;
+    let rand_xp = rand::thread_rng().gen_range(15..25);
+    let total_xp = level_data.total_xp + rand_xp;
 
-    if let Err(why) = update_user_level_data(level_data.id, xp_to_add).await {
+    let mut xp_for_next_level = 100;
+    let mut current_total_xp = 0;
+    while total_xp >= current_total_xp + xp_for_next_level {
+        current_total_xp += xp_for_next_level;
+        level += 1;
+        xp_for_next_level = 5 * (level * level) + 50 * level + 100;
+    }
+
+    let xp = total_xp - current_total_xp;
+
+    if let Err(why) = update_user_level_data(level_data.id, xp, total_xp, level).await {
         println!("Cannot update user level data: {}", why);
     }
-}
 
-async fn get_user_level_data<T: TryInto<i64>>(user_id: T) -> Result<UserLevelData, sqlx::Error> {
-    let pool = sqlx_lib::get_pool().await;
+    if let Some(role_id) = LEVEL_ROLES.get(&level) {
+        let partial_member = msg.member.as_ref().unwrap();
+        let member = Member::from(*partial_member.clone());
 
-    let user_id: i64 = match user_id.try_into() {
-        Ok(id) => id,
-        Err(_) => return Err(sqlx::Error::RowNotFound),
-    };
+        if let Err(why) = member.add_role(&ctx, *role_id).await {
+            println!("Cannot add role: {}", why);
+        }
 
-    match sqlx::query_as!(UserLevelData, "SELECT * FROM levels WHERE id = $1", user_id)
-        .fetch_optional(&pool)
-        .await?
-    {
-        Some(data) => Ok(data),
-        None => {
-            sqlx::query_as!(
-                UserLevelData,
-                "INSERT INTO levels (id) VALUES ($1) RETURNING *",
-                user_id,
-            )
-            .fetch_one(&pool)
-            .await
+        for (role_level, role_id) in LEVEL_ROLES.iter() {
+            if *role_level < level {
+                if let Err(why) = member.remove_role(&ctx, *role_id).await {
+                    println!("Cannot remove role: {}", why);
+                }
+            }
         }
     }
 }
-
-async fn update_user_level_data(
-    user_id: i64,
-    xp_to_add: i32,
-) -> Result<PgQueryResult, sqlx::Error> {
-    let pool = sqlx_lib::get_pool().await;
-
-    sqlx::query!(
-        "UPDATE levels SET total_xp = total_xp + $1, last_xp = now() WHERE id = $2",
-        xp_to_add,
-        user_id
-    )
-    .execute(&pool)
-    .await
-}
-// XP for next level=5×(level)2+50×(level)+100
