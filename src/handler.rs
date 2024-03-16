@@ -138,6 +138,7 @@ impl EventHandler for Handler {
                 server_info::register(),
                 stars::register(),
                 support::register(),
+                xp::register(),
             ],
         )
         .await
@@ -159,6 +160,7 @@ impl EventHandler for Handler {
                 && command_name != "scam"
                 && command_name != "patreon"
                 && command_name != "link"
+                && command_name != "xp"
             {
                 command
                     .defer_ephemeral(&ctx)
@@ -194,6 +196,7 @@ impl EventHandler for Handler {
                 "stars" => stars::run(ctx, &command).await,
                 "support" => support::run(ctx, &command).await,
                 "update_information" => update_information_message::run(ctx, &command).await,
+                "xp" => xp::run(ctx, &command).await,
                 _ => message_response(&ctx, &command, "Command not found").await,
             };
 

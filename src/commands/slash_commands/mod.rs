@@ -25,3 +25,4 @@ pub mod spoilers;
 pub mod stars;
 pub mod support;
 pub mod update_information_message;
+pub mod xp;
