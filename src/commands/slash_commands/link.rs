@@ -1,4 +1,7 @@
-use crate::utils::{message_response, parse_options};
+use crate::{
+    utils::{message_response, parse_options},
+    SERVER_URL,
+};
 use serde::Deserialize;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, Message,
@@ -41,19 +44,19 @@ async fn download(
         _ => return message_response(ctx, interaction, "Invalid platform").await,
     };
 
-    let version = match options.get("version") {
-        Some(ResolvedValue::Integer(version)) => version
-            .to_string()
-            .chars()
-            .map(|c| c.to_string())
-            .collect::<Vec<_>>()
-            .join("."),
-        _ => return message_response(ctx, interaction, "Invalid version").await,
-    };
+    let response = reqwest::get(format!(
+        "{}/api/v1/bunny/latest/{}/{}",
+        SERVER_URL, game_folder, platform
+    ))
+    .await;
 
-    let link = format!("https://collegekings.b-cdn.net/__bcdn_perma_cache__/pullzone__collegekings__22373407/wp-content/uploads/secured/{}/{}-{}-{}.zip", game_folder, game.replace('_', ""), version, platform);
-
-    message_response(ctx, interaction, link).await
+    match response {
+        Ok(response) => {
+            let link = response.text().await.unwrap();
+            message_response(ctx, interaction, link).await
+        }
+        Err(_) => message_response(ctx, interaction, "Error getting download link").await,
+    }
 }
 
 pub async fn run(
@@ -94,14 +97,6 @@ pub fn register() -> CreateCommand {
                 .add_string_choice("Windows", "pc")
                 .add_string_choice("Mac", "mac")
                 .add_string_choice("Linux", "pc")
-                .required(true),
-            )
-            .add_sub_option(
-                CreateCommandOption::new(
-                    CommandOptionType::Integer,
-                    "version",
-                    "The version to get the download link for",
-                )
                 .required(true),
             ),
         )
