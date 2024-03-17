@@ -8,6 +8,7 @@ pub mod good_morning;
 pub mod good_night;
 pub mod image;
 pub mod infraction;
+pub mod levels;
 pub mod link;
 pub mod logs;
 pub mod member_count;
