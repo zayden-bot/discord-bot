@@ -3,6 +3,8 @@ use sqlx::postgres::PgQueryResult;
 
 use crate::sqlx_lib;
 
+pub const LIMIT: i64 = 10;
+
 pub struct UserLevelData {
     pub id: i64,
     pub xp: i32,
@@ -74,4 +76,39 @@ pub async fn get_user_rank<T: TryInto<i64>>(user_id: T) -> Result<Option<i64>, s
     .await?;
 
     Ok(rank.rank)
+}
+
+pub async fn get_user_row_number<T: TryInto<i64>>(user_id: T) -> Result<Option<i64>, sqlx::Error> {
+    let pool = sqlx_lib::get_pool().await;
+
+    let user_id: i64 = match user_id.try_into() {
+        Ok(id) => id,
+        Err(_) => return Err(sqlx::Error::RowNotFound),
+    };
+
+    let row_number = sqlx::query!(
+        "SELECT row_number FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY total_xp DESC) FROM levels) AS ranked WHERE id = $1",
+        user_id
+    )
+    .fetch_one(&pool)
+    .await?;
+
+    Ok(row_number.row_number)
+}
+
+pub async fn get_users<T: Into<i64>>(page: T) -> Result<Vec<UserLevelData>, sqlx::Error> {
+    let pool = sqlx_lib::get_pool().await;
+
+    let page: i64 = page.into();
+
+    let offset = (page - 1) * LIMIT;
+
+    sqlx::query_as!(
+        UserLevelData,
+        "SELECT * FROM levels ORDER BY total_xp DESC LIMIT $1 OFFSET $2",
+        LIMIT,
+        offset
+    )
+    .fetch_all(&pool)
+    .await
 }
