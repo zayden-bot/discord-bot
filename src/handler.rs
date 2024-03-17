@@ -1,4 +1,5 @@
 use crate::commands::slash_commands::*;
+use crate::cron::start_cron_jobs;
 use crate::models::ReactionRole;
 use crate::sqlx_lib::get_reaction_roles;
 use crate::utils::message_response;
@@ -130,6 +131,7 @@ impl EventHandler for Handler {
             vec![
                 gold_star::register(),
                 infraction::register(),
+                levels::register(),
                 logs::register(),
                 member_count::register(),
                 ping::register(),
@@ -148,6 +150,10 @@ impl EventHandler for Handler {
 
         let activity = ActivityData::playing("College Kings");
         ctx.set_presence(Some(activity), OnlineStatus::Online);
+
+        tokio::spawn(async move {
+            start_cron_jobs().await;
+        });
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
@@ -159,6 +165,7 @@ impl EventHandler for Handler {
             if command_name != "good_morning"
                 && command_name != "good_night"
                 && command_name != "image"
+                && command_name != "levels"
                 && command_name != "link"
                 && command_name != "patreon"
                 && command_name != "rank"
@@ -182,6 +189,7 @@ impl EventHandler for Handler {
                 "good_night" => good_night::run(ctx, &command).await,
                 "image" => image::run(ctx, &command).await,
                 "infraction" => infraction::run(ctx, &command).await,
+                "levels" => levels::run(ctx, &command).await,
                 "link" => link::run(ctx, &command).await,
                 "logs" => logs::run(ctx, &command).await,
                 "member_count" => member_count::run(ctx, &command).await,
@@ -205,7 +213,10 @@ impl EventHandler for Handler {
             };
 
             if let Err(why) = result {
-                println!("Cannot respond to slash command: {}", why);
+                println!(
+                    "Cannot respond to slash command: {} - {}",
+                    command_name, why
+                );
             }
         }
     }
