@@ -1,6 +1,6 @@
 use crate::{
     utils::{embed_response, message_response, parse_options},
-    SERVER_IP,
+    SERVER_URL,
 };
 use reqwest::Client;
 use serde::Deserialize;
@@ -54,7 +54,7 @@ async fn check(
     };
 
     let res = match Client::new()
-        .post(&format!("http://{}/api/v1/patreon/get_user", SERVER_IP))
+        .post(&format!("{}/api/v1/patreon/get_user", SERVER_URL))
         .json(&json!({ "email": email, "force": force}))
         .send()
         .await
