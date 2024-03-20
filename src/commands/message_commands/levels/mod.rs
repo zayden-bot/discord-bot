@@ -3,7 +3,7 @@ pub mod user_levels;
 use chrono::{TimeDelta, Utc};
 use lazy_static::lazy_static;
 use rand::Rng;
-use serenity::all::{Context, Message};
+use serenity::all::{Context, Message, RoleId};
 use std::collections::HashMap;
 
 use user_levels::{get_user_level_data, update_user_level_data};
@@ -64,18 +64,41 @@ pub async fn run(ctx: &Context, msg: &Message) {
         println!("Cannot update user level data: {}", why);
     }
 
-    if let Some(role_id) = LEVEL_ROLES.get(&level) {
-        let member = msg.member(&ctx).await.unwrap();
+    update_member_roles(msg, ctx, level).await;
+}
 
-        if let Err(why) = member.add_role(&ctx, *role_id).await {
+async fn update_member_roles(msg: &Message, ctx: &Context, level: i32) {
+    let member = match msg.member(&ctx).await {
+        Ok(member) => member,
+        Err(why) => {
+            println!("Cannot retrieve member: {}", why);
+            return;
+        }
+    };
+
+    let highest_qualifying_role_id = LEVEL_ROLES
+        .iter()
+        .filter(|(role_level, _)| **role_level <= level)
+        .max_by_key(|(role_level, _)| *role_level)
+        .map(|(_, &id)| id);
+
+    if let Some(highest_role_id) = highest_qualifying_role_id {
+        if let Err(why) = member.add_role(&ctx, highest_role_id).await {
             println!("Cannot add role: {}", why);
         }
 
-        for (role_level, role_id) in LEVEL_ROLES.iter() {
-            if *role_level < level {
-                if let Err(why) = member.remove_role(&ctx, *role_id).await {
-                    println!("Cannot remove role: {}", why);
-                }
+        let roles_to_remove: Vec<&RoleId> = member
+            .roles
+            .iter()
+            .filter(|role| {
+                let role_id = role.get();
+                role_id != highest_role_id && LEVEL_ROLES.iter().any(|(_, &id)| id == role_id)
+            })
+            .collect();
+
+        for role in roles_to_remove {
+            if let Err(why) = member.remove_role(&ctx, *role).await {
+                println!("Cannot remove role: {}", why);
             }
         }
     }
