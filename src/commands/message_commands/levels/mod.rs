@@ -3,7 +3,7 @@ pub mod user_levels;
 use chrono::{TimeDelta, Utc};
 use lazy_static::lazy_static;
 use rand::Rng;
-use serenity::all::{Context, Member, Message};
+use serenity::all::{Context, Message};
 use std::collections::HashMap;
 
 use user_levels::{get_user_level_data, update_user_level_data};
