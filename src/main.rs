@@ -23,7 +23,7 @@ pub const SERVER_URL: &str = "http://82.9.123.190";
 async fn main() -> error::Result<()> {
     dotenv()?;
 
-    let token = &env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let token = &env::var("DISCORD_TOKEN").expect("env var DISCORD_TOKEN not found");
 
     let mut client = Client::builder(token, GatewayIntents::all())
         .event_handler(handler::Handler)

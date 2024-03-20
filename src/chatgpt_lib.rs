@@ -90,7 +90,10 @@ pub async fn chat(
         .post(endpoint)
         .header(
             "Authorization",
-            format!("Bearer {}", env::var("OPENAI_API_KEY").unwrap()),
+            format!(
+                "Bearer {}",
+                env::var("OPENAI_API_KEY").expect("env var OPENAI_API_KEY not found")
+            ),
         )
         .json(&params)
         .send()

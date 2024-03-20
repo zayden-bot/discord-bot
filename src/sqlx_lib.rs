@@ -9,7 +9,7 @@ use std::env;
 pub async fn get_pool() -> PgPool {
     PgPoolOptions::new()
         .max_connections(5)
-        .connect(&env::var("DATABASE_URL").expect("Expected a database url in the environment"))
+        .connect(&env::var("DATABASE_URL").expect("env var DATABASE_URL not found"))
         .await
         .expect("Failed to connect to database")
 }
