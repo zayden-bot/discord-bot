@@ -70,7 +70,7 @@ async fn check(
     let attributes: MemberAttributes = match serde_json::from_str(&res_text) {
         Ok(attributes) => attributes,
         Err(_) => {
-            eprint!("Failed to parse patreon data: {}", res_text);
+            eprintln!("Failed to parse patreon data: {}", res_text);
             return message_response(ctx, interaction, "Failed to parse patreon data").await;
         }
     };
