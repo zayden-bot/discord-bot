@@ -65,8 +65,7 @@ pub async fn run(ctx: &Context, msg: &Message) {
     }
 
     if let Some(role_id) = LEVEL_ROLES.get(&level) {
-        let partial_member = msg.member.as_ref().unwrap();
-        let member = Member::from(*partial_member.clone());
+        let member = msg.member(&ctx).await.unwrap();
 
         if let Err(why) = member.add_role(&ctx, *role_id).await {
             println!("Cannot add role: {}", why);
