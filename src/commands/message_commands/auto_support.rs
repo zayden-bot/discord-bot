@@ -94,15 +94,19 @@ pub async fn run(ctx: &Context, msg: &Message) -> error::Result<()> {
         .map(|c| c.iter().collect())
         .collect();
 
-    for (index, chunk) in chunks.iter().enumerate() {
-        if index == chunks.len() - 1 {
-            thread
-                .send_files(&ctx, attachments, CreateMessage::new().content(chunk))
-                .await?;
-            break;
+    if chunks.is_empty() {
+        thread
+            .send_files(&ctx, attachments, CreateMessage::default())
+            .await?;
+    } else {
+        for chunk in &chunks[..chunks.len() - 1] {
+            thread.say(&ctx, chunk).await?;
         }
 
-        thread.say(&ctx, chunk).await?;
+        let last_chunk = chunks.last().unwrap();
+        thread
+            .send_files(&ctx, attachments, CreateMessage::new().content(last_chunk))
+            .await?;
     }
 
     msg.delete(&ctx).await?;
