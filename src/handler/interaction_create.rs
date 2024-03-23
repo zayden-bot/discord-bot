@@ -1,9 +1,6 @@
-use serenity::all::{
-    CommandInteraction, ComponentInteraction, Context, CreateActionRow, CreateInputText,
-    CreateInteractionResponse, CreateModal, InputTextStyle, ModalInteraction,
-};
+use serenity::all::{CommandInteraction, ComponentInteraction, Context, ModalInteraction};
 
-use crate::{commands::slash_commands::*, modals, Result};
+use crate::{commands::slash_commands::*, components, modals, Result};
 
 pub async fn interaction_command(ctx: &Context, command: CommandInteraction) -> Result<()> {
     let command_name = &command.data.name;
@@ -46,36 +43,9 @@ pub async fn interaction_command(ctx: &Context, command: CommandInteraction) -> 
 }
 
 pub async fn interaction_component(ctx: &Context, component: ComponentInteraction) -> Result<()> {
-    match component.data.custom_id.as_str() {
-        "support_ticket" => {}
-        _ => unimplemented!("Component not implemented: {}", component.data.custom_id),
+    if component.data.custom_id == "support_ticket" {
+        components::support_ticket(ctx, &component).await?;
     }
-
-    let version_input = CreateInputText::new(InputTextStyle::Short, "Game Version", "version")
-        .required(true)
-        .placeholder("1.0.0");
-
-    let issue_input = CreateInputText::new(InputTextStyle::Paragraph, "Issue", "issue")
-        .required(true)
-        .placeholder("Describe the issue you're experiencing");
-
-    let additional_input = CreateInputText::new(
-        InputTextStyle::Paragraph,
-        "Additional Information",
-        "additional",
-    )
-    .required(false)
-    .placeholder("Please send a save file that replicates the issue once the ticket is created.");
-
-    let modal = CreateModal::new("support_ticket", "Support Ticket").components(vec![
-        CreateActionRow::InputText(version_input),
-        CreateActionRow::InputText(issue_input),
-        CreateActionRow::InputText(additional_input),
-    ]);
-
-    component
-        .create_response(&ctx, CreateInteractionResponse::Modal(modal))
-        .await?;
 
     Ok(())
 }

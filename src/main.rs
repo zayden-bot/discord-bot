@@ -1,5 +1,6 @@
 mod chatgpt_lib;
 mod commands;
+pub mod components;
 pub mod cron;
 mod error;
 mod handler;

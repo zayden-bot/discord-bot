@@ -62,7 +62,7 @@ pub async fn ready(ctx: Context, ready: Ready) -> Result<()> {
 
     update_messages(&ctx).await?;
 
-    tokio::spawn(async move { start_cron_jobs().await });
+    tokio::spawn(async move { start_cron_jobs(&ctx).await });
 
     Ok(())
 }
