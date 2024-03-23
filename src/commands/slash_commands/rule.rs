@@ -1,40 +1,28 @@
 use crate::sqlx_lib::get_rule;
-use crate::utils::{message_response, send_embed};
+use crate::utils::{parse_options, send_embed};
+use crate::{Error, Result};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, Message,
+    CreateEmbed, CreateMessage, ResolvedValue,
 };
 
 const RULE_CHANNEL: u64 = 747430712617074718;
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let guild_id = match interaction.guild_id {
-        Some(guild_id) => guild_id,
-        None => {
-            return message_response(
-                &ctx,
-                interaction,
-                "This command can only be used in a server",
-            )
-            .await
-        }
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+
+    let options = interaction.data.options();
+    let options = parse_options(&options);
+
+    let rule_id = match options.get("rule") {
+        Some(ResolvedValue::String(id)) => *id,
+        _ => unreachable!("Rule ID is required"),
     };
 
-    let rule_id = match interaction.data.options[0].value.as_str() {
-        Some(id) => id,
-        _ => return message_response(&ctx, interaction, "Invalid rule ID").await,
-    };
-
-    let rule = match get_rule(rule_id, guild_id.get() as i64).await {
-        Ok(rule) => rule,
-        Err(_) => return message_response(&ctx, interaction, "Error getting rule").await,
-    };
+    let rule = get_rule(rule_id, guild_id.get() as i64).await?;
 
     send_embed(
-        &ctx,
+        ctx,
         interaction,
         CreateMessage::new().embed(
             CreateEmbed::new()
@@ -45,7 +33,9 @@ pub async fn run(
                 )),
         ),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

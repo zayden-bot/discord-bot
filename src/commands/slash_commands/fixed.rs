@@ -1,67 +1,76 @@
-use crate::utils::{message_response, send_message};
+use crate::{
+    utils::{message_response, parse_options},
+    Error, Result,
+};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    EditChannel, Message, Permissions,
+    EditChannel, Permissions, ResolvedValue,
 };
 
 const CHANGE_LOG_CHANNEL_ID: u64 = 992599169288122410;
 const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let version = interaction
-        .data
-        .options
-        .first()
-        .map_or("", |option| option.value.as_str().unwrap_or(""));
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let options = interaction.data.options();
+    let options = parse_options(&options);
 
-    let is_silent = version.is_empty();
+    let version = match options.get("version") {
+        Some(ResolvedValue::String(message)) => *message,
+        _ => "",
+    };
+
+    match version.is_empty() {
+        true => interaction.defer_ephemeral(&ctx).await?,
+        false => interaction.defer(&ctx).await?,
+    };
 
     let current_channel = interaction
         .channel_id
         .to_channel(&ctx)
-        .await
-        .unwrap()
+        .await?
         .guild()
-        .unwrap();
+        .ok_or_else(|| Error::NoGuild)?;
 
-    if current_channel.parent_id.unwrap().get() != SUPPORT_CHANNEL_ID {
-        return message_response(
-            &ctx,
+    if current_channel
+        .parent_id
+        .ok_or_else(|| Error::NoParent)?
+        .get()
+        != SUPPORT_CHANNEL_ID
+    {
+        message_response(
+            ctx,
             interaction,
-            "This command can only be used in support threads",
+            "This command can only be used in support channels",
         )
-        .await;
+        .await?;
+        return Ok(());
     }
 
-    let current_channel_name = current_channel.name;
-
-    let new_channel_name = format!("{} - {}", "[Fixed]", current_channel_name)
+    let new_channel_name = format!("{} - {}", "[Fixed]", current_channel.name)
         .chars()
         .take(100)
         .collect::<String>();
 
     interaction
         .channel_id
-        .edit(&ctx, EditChannel::new().name(new_channel_name))
-        .await
-        .expect("Failed to edit channel name");
+        .edit(ctx, EditChannel::new().name(new_channel_name))
+        .await?;
 
-    if is_silent {
-        message_response(&ctx, interaction, "Ticket marked as fixed").await
+    if version.is_empty() {
+        message_response(ctx, interaction, "Ticket marked as fixed").await?;
     } else {
-        send_message(
-            &ctx,
+        message_response(
+            ctx,
             interaction,
-            &format!(
+            format!(
                 "Fixed in {}. Check <#{}> for more details",
                 version, CHANGE_LOG_CHANNEL_ID
             ),
         )
-        .await
+        .await?;
     }
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

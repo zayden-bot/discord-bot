@@ -1,16 +1,11 @@
-use crate::utils::message_response;
-use serenity::all::{
-    ChannelId, CommandInteraction, Context, CreateCommand, CreateEmbed, EditMessage, Message,
-    MessageId, Permissions,
-};
+use crate::Result;
+use serenity::all::{Context, CreateEmbed};
 
-const INFORMATION_MESSAGE_ID: u64 = 830931135780880415;
+use super::utils::send_or_update_message;
+
 const INFORMATION_CHANNEL_ID: u64 = 830927865784565800;
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
+pub async fn run(ctx: &Context) -> Result<()> {
     let embed = CreateEmbed::new()
         .title("College Kings")
         .description(r#"This server is about the game "College Kings". The game is still in active development. Supporting the game on patreon helps us a lot, so if you have the resources, consider joining the patreon.
@@ -57,20 +52,7 @@ Fan/Activity Roles:
         false,
     );
 
-    let mut message = ctx
-        .http
-        .get_message(
-            ChannelId::new(INFORMATION_CHANNEL_ID),
-            MessageId::new(INFORMATION_MESSAGE_ID),
-        )
-        .await?;
-    message.edit(&ctx, EditMessage::new().embed(embed)).await?;
+    send_or_update_message(ctx, INFORMATION_CHANNEL_ID, embed).await?;
 
-    message_response(&ctx, interaction, "Message Updated.").await
-}
-
-pub fn register() -> CreateCommand {
-    CreateCommand::new("update_information")
-        .description("Update the information message")
-        .default_member_permissions(Permissions::ADMINISTRATOR)
+    Ok(())
 }

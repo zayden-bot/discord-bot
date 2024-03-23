@@ -1,31 +1,29 @@
-use crate::ImageCache;
-use chrono::{Local, TimeDelta};
+use crate::{Error, ImageCache, Result};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::all::{
     CommandInteraction, Context, CreateAttachment, CreateCommand, CreateEmbed, EditAttachments,
-    EditInteractionResponse, Message,
+    EditInteractionResponse,
 };
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    interaction.defer(&ctx).await.expect("Failed to defer");
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    interaction.defer(&ctx).await?;
 
-    let mut data = ctx.data.write().await;
-    let image_cache = data.get_mut::<ImageCache>().unwrap();
+    let data = ctx.data.read().await;
+    let image_cache = data
+        .get::<ImageCache>()
+        .ok_or_else(|| Error::DataNotFound)?;
 
-    let entries =
-        if Local::now().naive_utc() < image_cache.last_update + TimeDelta::try_hours(1).unwrap() {
-            image_cache.good_morning_images.clone()
-        } else {
-            image_cache.update().await;
-            image_cache.good_morning_images.clone()
-        };
+    let entries = &image_cache.good_morning_images;
 
-    let image_path = entries.choose(&mut thread_rng()).unwrap();
-    let file_name = image_path.file_name().unwrap().to_str().unwrap();
+    let image_path = entries
+        .choose(&mut thread_rng())
+        .ok_or_else(|| Error::NoImage)?;
+    let file_name = image_path
+        .file_name()
+        .ok_or_else(|| Error::NoFileName)?
+        .to_str()
+        .ok_or_else(|| Error::NoFileName)?;
 
     interaction
         .edit_response(
@@ -36,11 +34,11 @@ pub async fn run(
                         .title(format!("Good Morning, {}!", interaction.user.name))
                         .attachment(file_name),
                 )
-                .attachments(
-                    EditAttachments::new().add(CreateAttachment::path(image_path).await.unwrap()),
-                ),
+                .attachments(EditAttachments::new().add(CreateAttachment::path(image_path).await?)),
         )
-        .await
+        .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

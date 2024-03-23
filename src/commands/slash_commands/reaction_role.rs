@@ -1,145 +1,105 @@
 use crate::sqlx_lib::{create_reaction_role, delete_reaction_role};
-use crate::utils::message_response;
+use crate::utils::{message_response, parse_options};
+use crate::{Error, Result};
 use serenity::all::{
-    ChannelId, CommandDataOption, CommandDataOptionValue, CommandInteraction, CommandOptionType,
-    Context, CreateCommand, CreateCommandOption, GuildId, Message, MessageId, Permissions,
-    ReactionType,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, GuildId,
+    MessageId, PartialChannel, Permissions, ReactionType, ResolvedValue, Role,
 };
 
 async fn add(
     ctx: &Context,
     interaction: &CommandInteraction,
-    options: &[CommandDataOption],
     guild_id: GuildId,
-    channel_id: ChannelId,
+    channel: &PartialChannel,
     message_id: MessageId,
     emoji: &str,
-) -> Result<Message, serenity::Error> {
-    let role_id = match options[3].value.as_role_id() {
-        Some(role_id) => role_id,
-        _ => return message_response(ctx, interaction, "Please provide a valid role").await,
-    };
+    role: &Role,
+) -> Result<()> {
+    let message = channel.id.message(ctx, message_id).await?;
 
-    let message = match channel_id.message(ctx, message_id).await {
-        Ok(message) => message,
-        Err(_) => {
-            return message_response(ctx, interaction, "Please provide a valid message id").await
-        }
-    };
-
-    if create_reaction_role(
+    create_reaction_role(
         guild_id.get() as i64,
-        channel_id.get() as i64,
+        channel.id.get() as i64,
         message_id.get() as i64,
-        role_id.get() as i64,
+        role.id.get() as i64,
         emoji,
     )
-    .await
-    .is_err()
-    {
-        return message_response(ctx, interaction, "Error adding reaction role").await;
-    }
+    .await?;
 
     message
         .react(ctx, ReactionType::Unicode(emoji.to_string()))
         .await?;
-    message_response(ctx, interaction, "Reaction role added").await
+    message_response(ctx, interaction, "Reaction role added").await?;
+
+    Ok(())
 }
 
 async fn remove(
     ctx: &Context,
     interaction: &CommandInteraction,
-    channel_id: ChannelId,
+    channel: &PartialChannel,
     guild_id: GuildId,
     message_id: MessageId,
     emoji: &str,
-) -> Result<Message, serenity::Error> {
-    let message = match channel_id.message(ctx, message_id).await {
-        Ok(message) => message,
-        Err(_) => {
-            return message_response(ctx, interaction, "Please provide a valid message id").await
-        }
-    };
+) -> Result<()> {
+    let message = channel.id.message(ctx, message_id).await?;
 
-    if delete_reaction_role(
+    delete_reaction_role(
         guild_id.get() as i64,
-        channel_id.get() as i64,
+        channel.id.get() as i64,
         message_id.get() as i64,
         emoji,
     )
-    .await
-    .is_err()
-    {
-        return message_response(ctx, interaction, "Error deleting reaction role").await;
-    }
+    .await?;
 
-    match message
+    message
         .delete_reaction_emoji(ctx, ReactionType::Unicode(emoji.to_string()))
-        .await
-    {
-        Ok(_) => message_response(ctx, interaction, "Reaction Role removed").await,
-        Err(_) => message_response(ctx, interaction, "Error deleting reaction").await,
-    }
+        .await?;
+    message_response(ctx, interaction, "Reaction Role removed").await?;
+
+    Ok(())
 }
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let guild_id = match interaction.guild_id {
-        Some(guild_id) => guild_id,
-        None => {
-            return message_response(
-                &ctx,
-                interaction,
-                "This command can only be used in a server",
-            )
-            .await
-        }
-    };
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let command = &interaction.data.options[0];
+    let command = &interaction.data.options()[0];
 
     let options = match &command.value {
-        CommandDataOptionValue::SubCommand(options) => options,
-        _ => return message_response(&ctx, interaction, "Invalid subcommand").await,
+        ResolvedValue::SubCommand(options) => options,
+        _ => unreachable!("Subcommand is required"),
+    };
+    let options = parse_options(options);
+
+    let channel = match options.get("channel") {
+        Some(ResolvedValue::Channel(channel)) => *channel,
+        _ => unreachable!("Channel is required"),
     };
 
-    let channel_id = match options[0].value.as_channel_id() {
-        Some(channel) => channel,
-        _ => return message_response(&ctx, interaction, "Please provide a valid channel").await,
+    let message_id = match options.get("message_id") {
+        Some(ResolvedValue::String(message_id)) => MessageId::new(message_id.parse()?),
+        _ => unreachable!("Message id is required"),
     };
 
-    let message_id = match options[1]
-        .value
-        .as_str()
-        .and_then(|message_id| message_id.parse::<u64>().ok())
-    {
-        Some(message_id) => MessageId::new(message_id),
-        _ => return message_response(&ctx, interaction, "Please provide a valid message id").await,
+    let emoji = match options.get("emoji") {
+        Some(ResolvedValue::String(emoji)) => emoji,
+        _ => unreachable!("Emoji is required"),
     };
 
-    let emoji = match options[2].value.as_str() {
-        Some(emoji) => emoji,
-        _ => return message_response(&ctx, interaction, "Please provide a valid emoji").await,
-    };
-
-    match command.name.as_str() {
+    match command.name {
         "add" => {
-            add(
-                &ctx,
-                interaction,
-                options,
-                guild_id,
-                channel_id,
-                message_id,
-                emoji,
-            )
-            .await
+            let role = match options.get("role") {
+                Some(ResolvedValue::Role(role)) => *role,
+                _ => unreachable!("Role is required"),
+            };
+
+            add(ctx, interaction, guild_id, channel, message_id, emoji, role).await?;
         }
-        "remove" => remove(&ctx, interaction, channel_id, guild_id, message_id, emoji).await,
-        _ => message_response(&ctx, interaction, "Invalid subcommand").await,
-    }
+        "remove" => remove(ctx, interaction, channel, guild_id, message_id, emoji).await?,
+        _ => unreachable!("Invalid subcommand name"),
+    };
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

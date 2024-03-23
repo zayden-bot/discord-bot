@@ -1,14 +1,10 @@
+use serenity::all::{Context, Message};
+
 use crate::chatgpt_lib;
-use serenity::all::{parse_user_tag, Context, GuildId, Message, UserId};
+use crate::Error;
+use crate::Result;
 
-async fn get_display_name(ctx: &Context, guild_id: GuildId, user_id: UserId) -> Option<String> {
-    if let Ok(member) = guild_id.member(ctx, &user_id).await {
-        return Some(member.display_name().to_string());
-    }
-    None
-}
-
-async fn parse_mentions(ctx: &Context, message: &Message) -> String {
+async fn parse_mentions(ctx: &Context, message: &Message) -> Result<String> {
     let mut parsed_content = message.content.clone();
 
     for mention in &message.mentions {
@@ -19,13 +15,13 @@ async fn parse_mentions(ctx: &Context, message: &Message) -> String {
             continue;
         }
 
-        let guild_id = message.guild_id.unwrap();
-        if let Some(name) = get_display_name(ctx, guild_id, mention.id).await {
-            parsed_content = parsed_content.replace(&mention_tag, &name);
-        }
+        let guild_id = message.guild_id.ok_or_else(|| Error::NoGuild)?;
+        let member = guild_id.member(&ctx, mention.id).await?;
+
+        parsed_content = parsed_content.replace(&mention_tag, member.display_name());
     }
 
-    parsed_content
+    Ok(parsed_content)
 }
 
 fn process_referenced_messages(ctx: &Context, msg: &Message) -> Vec<(bool, String)> {
@@ -44,7 +40,7 @@ fn process_referenced_messages(ctx: &Context, msg: &Message) -> Vec<(bool, Strin
     contents
 }
 
-pub async fn run(ctx: &Context, msg: &Message) {
+pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     // Check if message doesn't start with ? and mentions the bot
     if !(msg.content.ends_with('?')
         && msg
@@ -52,21 +48,15 @@ pub async fn run(ctx: &Context, msg: &Message) {
             .iter()
             .any(|mention| mention.id == (ctx.shard_id.0 as u64)))
     {
-        return;
+        return Ok(());
     }
 
-    let parsed_message = parse_mentions(ctx, msg).await;
-
-    let author_name = match parse_user_tag(&msg.author.name) {
-        Some(name) => name.0,
-        None => &msg.author.name,
-    };
-
+    let parsed_message = parse_mentions(ctx, msg).await?;
     let replies = process_referenced_messages(ctx, msg);
 
-    if let Ok(response) = chatgpt_lib::chat(&parsed_message, author_name, replies).await {
-        msg.reply(&ctx, &response.choices[0].message.content)
-            .await
-            .unwrap();
-    }
+    let response = chatgpt_lib::chat(&parsed_message, &msg.author.name, replies).await?;
+    msg.reply(&ctx, &response.choices[0].message.content)
+        .await?;
+
+    Ok(())
 }

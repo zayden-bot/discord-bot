@@ -1,11 +1,11 @@
 use crate::utils::message_response;
-use serenity::all::{CommandInteraction, Context, CreateCommand, Message};
+use crate::Result;
+use serenity::all::{CommandInteraction, Context, CreateCommand};
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    message_response(&ctx, interaction, "Pong!").await
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    message_response(ctx, interaction, "Pong!").await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

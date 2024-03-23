@@ -1,28 +1,25 @@
-use std::time::Duration;
-
 use crate::commands::message_commands::levels::user_levels::{
     get_user_row_number, get_users, UserLevelData, LIMIT,
 };
+use crate::{Error, Result};
 use serenity::{
     all::{
         CommandInteraction, ComponentInteractionCollector, Context, CreateActionRow, CreateButton,
         CreateCommand, CreateEmbed, CreateInteractionResponse, CreateInteractionResponseMessage,
-        EditInteractionResponse, Message, UserId,
+        EditInteractionResponse, UserId,
     },
     futures::StreamExt,
 };
+use std::time::Duration;
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
 
     let mut page_number = 1;
-    let mut users = get_users(page_number).await.unwrap();
+    let mut users = get_users(page_number).await?;
 
     let mut embed = CreateEmbed::default().title("Leaderboard");
-    embed = add_user_to_embed(&ctx, embed, &users).await;
+    embed = add_user_to_embed(ctx, embed, &users).await?;
 
     let response = interaction
         .edit_response(
@@ -36,7 +33,7 @@ pub async fn run(
         )
         .await?;
 
-    let mut collector = ComponentInteractionCollector::new(&ctx)
+    let mut collector = ComponentInteractionCollector::new(ctx)
         .message_id(response.id)
         .timeout(Duration::from_secs(3600))
         .stream();
@@ -48,21 +45,23 @@ pub async fn run(
             "previous" => {
                 page_number -= 1;
 
-                users = get_users(page_number).await.unwrap();
-                embed = add_user_to_embed(&ctx, embed, &users).await;
+                users = get_users(page_number).await?;
+                embed = add_user_to_embed(ctx, embed, &users).await?;
             }
             "user" => {
-                let row_number = get_user_row_number(c.user.id.get()).await.unwrap().unwrap();
+                let row_number = get_user_row_number(c.user.id.get())
+                    .await?
+                    .ok_or_else(|| Error::UserNotFound)?;
                 let page_number = row_number / LIMIT + 1;
 
-                users = get_users(page_number).await.unwrap();
-                embed = add_user_to_embed(&ctx, embed, &users).await;
+                users = get_users(page_number).await?;
+                embed = add_user_to_embed(ctx, embed, &users).await?;
             }
             "next" => {
                 page_number += 1;
 
-                users = get_users(page_number).await.unwrap();
-                embed = add_user_to_embed(&ctx, embed, &users).await;
+                users = get_users(page_number).await?;
+                embed = add_user_to_embed(ctx, embed, &users).await?;
             }
             _ => unreachable!(),
         };
@@ -81,7 +80,7 @@ pub async fn run(
         .await?;
     }
 
-    Ok(Message::default())
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {
@@ -116,13 +115,9 @@ async fn add_user_to_embed(
     ctx: &Context,
     mut embed: CreateEmbed,
     users: &Vec<UserLevelData>,
-) -> CreateEmbed {
+) -> Result<CreateEmbed> {
     for level_user in users {
-        let user = ctx
-            .http
-            .get_user(UserId::new(level_user.id as u64))
-            .await
-            .unwrap();
+        let user = ctx.http.get_user(UserId::new(level_user.id as u64)).await?;
         embed = embed.field(
             user.name,
             format!(
@@ -132,5 +127,5 @@ async fn add_user_to_embed(
             false,
         );
     }
-    embed
+    Ok(embed)
 }

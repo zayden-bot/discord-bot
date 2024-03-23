@@ -1,29 +1,30 @@
 use crate::utils::{message_response, send_message};
-use serenity::all::{
-    CommandInteraction, Context, CreateCommand, EditChannel, Message, Permissions,
-};
+use crate::{Error, Result};
+use serenity::all::{CommandInteraction, Context, CreateCommand, EditChannel, Permissions};
 
 const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let current_channel = interaction
         .channel_id
         .to_channel(&ctx)
-        .await
-        .unwrap()
+        .await?
         .guild()
-        .unwrap();
+        .ok_or_else(|| Error::NoGuild)?;
 
-    if current_channel.parent_id.unwrap().get() != SUPPORT_CHANNEL_ID {
-        return message_response(
-            &ctx,
+    if current_channel
+        .parent_id
+        .ok_or_else(|| Error::NoParent)?
+        .get()
+        != SUPPORT_CHANNEL_ID
+    {
+        message_response(
+            ctx,
             interaction,
             "This command can only be used in support channels",
         )
-        .await;
+        .await?;
+        return Ok(());
     }
 
     let new_channel_name = current_channel
@@ -34,10 +35,11 @@ pub async fn run(
     interaction
         .channel_id
         .edit(&ctx, EditChannel::new().name(new_channel_name))
-        .await
-        .expect("Failed to edit channel name");
+        .await?;
 
-    send_message(&ctx, interaction, "Ticket reopened").await
+    send_message(ctx, interaction, "Ticket reopened").await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

@@ -1,26 +1,22 @@
-use crate::models::GoldStar;
 use crate::sqlx_lib::get_gold_stars;
 use crate::utils::send_embed;
+use crate::Result;
+use crate::{models::GoldStar, utils::parse_options};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, Message,
+    CreateEmbed, CreateMessage, ResolvedValue,
 };
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let user_id = match interaction
-        .data
-        .options
-        .first()
-        .and_then(|option| option.value.as_user_id())
-    {
-        Some(user_id) => user_id,
-        None => interaction.user.id,
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let options = interaction.data.options();
+    let options = parse_options(&options);
+
+    let user = match options.get("user") {
+        Some(ResolvedValue::User(user, _)) => *user,
+        _ => &interaction.user,
     };
 
-    let stars = get_gold_stars(user_id.get() as i64)
+    let stars = get_gold_stars(user.id.get() as i64)
         .await
         .unwrap_or(GoldStar {
             id: 0,
@@ -31,20 +27,19 @@ pub async fn run(
         });
 
     send_embed(
-        &ctx,
+        ctx,
         interaction,
         CreateMessage::new().embed(
             CreateEmbed::new()
-                .title(format!(
-                    "{}'s Stars",
-                    user_id.to_user(&ctx).await.unwrap().name
-                ))
+                .title(format!("{}'s Stars", user.name))
                 .field("Number of Stars", stars.number_of_stars.to_string(), true)
                 .field("Given Stars", stars.given_stars.to_string(), true)
                 .field("Received Stars", stars.received_stars.to_string(), true),
         ),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

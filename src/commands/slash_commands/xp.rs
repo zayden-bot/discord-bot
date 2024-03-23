@@ -1,43 +1,33 @@
-use crate::utils::{embed_response, message_response, parse_options};
+use crate::commands::message_commands::levels::user_levels::get_user_level_data;
+use crate::utils::{embed_response, parse_options};
+use crate::Result;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, Message, ResolvedValue,
+    CreateEmbed, ResolvedValue,
 };
 
-use crate::commands::message_commands::levels::user_levels::get_user_level_data;
-
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
     let options = parse_options(&options);
 
     match options.get("ephemeral") {
-        Some(ResolvedValue::Boolean(ephemeral)) => {
-            if *ephemeral {
-                interaction.defer_ephemeral(&ctx).await?;
-            }
-        }
+        Some(ResolvedValue::Boolean(true)) => interaction.defer_ephemeral(&ctx).await?,
         _ => interaction.defer(&ctx).await?,
     }
 
-    let level_data = match get_user_level_data(interaction.user.id.get()).await {
-        Ok(data) => data,
-        Err(_) => {
-            return message_response(&ctx, interaction, "Cannot get user level data").await;
-        }
-    };
+    let level_data = get_user_level_data(interaction.user.id.get()).await?;
 
     embed_response(
-        &ctx,
+        ctx,
         interaction,
         CreateEmbed::default().title("XP").description(format!(
             "Current XP: {}\nLevel: {}\nTotal XP: {}",
             level_data.xp, level_data.level, level_data.total_xp
         )),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

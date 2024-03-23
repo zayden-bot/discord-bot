@@ -1,16 +1,11 @@
-use crate::error;
 use crate::sqlx_lib::{
-    get_support_channel_ids, get_support_role_ids, get_support_thead_id, post_support_thread_id,
-    update_support_thread_id,
+    get_support_channel_ids, get_support_role_ids, get_support_thead_id, update_support_thread_id,
 };
+use crate::{Error, Result};
 use serenity::all::{
     AutoArchiveDuration, ChannelType, Context, CreateAttachment, CreateMessage, CreateThread,
-    Message, Role, User,
+    Message,
 };
-
-fn get_welcome_message(support_role: &Role, user: &User) -> String {
-    format!("{} {} wrote:", support_role, user)
-}
 
 async fn get_attachments(msg: &Message) -> serenity::Result<Vec<CreateAttachment>> {
     let mut attachments: Vec<CreateAttachment> = Vec::new();
@@ -23,49 +18,37 @@ async fn get_attachments(msg: &Message) -> serenity::Result<Vec<CreateAttachment
     Ok(attachments)
 }
 
-pub async fn run(ctx: &Context, msg: &Message) -> error::Result<()> {
+pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     let guild_id = match msg.guild_id {
         Some(id) => id,
         None => return Ok(()),
     };
 
-    let support_channel_ids = get_support_channel_ids(guild_id.get() as i64)
-        .await
-        .unwrap();
+    let support_channel_ids = get_support_channel_ids(guild_id.get() as i64).await?;
     if !support_channel_ids.contains(&(msg.channel_id.get() as i64)) {
         return Ok(());
     }
 
-    let guild_roles = ctx.http.get_guild_roles(guild_id).await.unwrap();
+    let guild_roles = guild_id.roles(&ctx).await?;
 
-    let support_role_ids = get_support_role_ids(guild_id.get() as i64).await.unwrap();
+    let support_role_ids = get_support_role_ids(guild_id.get() as i64).await?;
     let support_role = guild_roles
         .into_iter()
-        .find(|role| role.id.get() == (support_role_ids[0] as u64))
-        .unwrap();
+        .find(|(role_id, _)| role_id.get() == (support_role_ids[0] as u64))
+        .ok_or_else(|| Error::NoRole)?
+        .1;
 
-    if msg
-        .member(&ctx)
-        .await
-        .unwrap()
-        .roles
-        .contains(&support_role.id)
-    {
+    if msg.member(&ctx).await?.roles.contains(&support_role.id) {
         return Ok(());
     }
 
-    let attachments = get_attachments(msg).await.unwrap();
+    let attachments = get_attachments(msg).await?;
 
-    let thread_id = match get_support_thead_id(guild_id.get() as i64).await {
-        Ok(id) => {
-            update_support_thread_id(guild_id.get() as i64, id + 1).await?;
-            id + 1
-        }
-        Err(_) => {
-            post_support_thread_id(guild_id.get() as i64, 1).await?;
-            1
-        }
-    };
+    let thread_id = get_support_thead_id(guild_id.get() as i64)
+        .await
+        .unwrap_or(0)
+        + 1;
+    update_support_thread_id(guild_id.get() as i64, thread_id).await?;
 
     let thread_name = format!("{} - {}", thread_id, msg.content)
         .chars()
@@ -83,7 +66,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> error::Result<()> {
         .await?;
 
     thread
-        .say(&ctx, get_welcome_message(&support_role, &msg.author))
+        .say(&ctx, format!("{} {} wrote:", support_role, msg.author))
         .await?;
 
     let chunks: Vec<String> = msg
@@ -103,7 +86,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> error::Result<()> {
             thread.say(&ctx, chunk).await?;
         }
 
-        let last_chunk = chunks.last().unwrap();
+        let last_chunk = chunks.last().expect("Chunks is not empty");
         thread
             .send_files(&ctx, attachments, CreateMessage::new().content(last_chunk))
             .await?;

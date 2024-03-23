@@ -1,8 +1,9 @@
 use serenity::all::{Context, Message};
 
-pub async fn run(ctx: Context, msg: Message) {
-    msg.channel_id
-        .say(&ctx, "Pong!")
-        .await
-        .expect("Error sending message");
+use crate::Result;
+
+pub async fn run(ctx: Context, msg: Message) -> Result<()> {
+    msg.channel_id.say(&ctx, "Pong!").await?;
+
+    Ok(())
 }

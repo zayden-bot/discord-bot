@@ -1,14 +1,10 @@
 use crate::utils::send_embed;
-use serenity::all::{
-    CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage, Message,
-};
+use crate::Result;
+use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage};
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     send_embed(
-        &ctx,
+        ctx,
         interaction,
         CreateMessage::new().embed(
             CreateEmbed::new()
@@ -17,7 +13,9 @@ pub async fn run(
                 .field("Confident", "✅ Boyfriend\n✅ Trouble Maker\n❌ Bro", true),
         ),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

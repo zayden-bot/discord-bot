@@ -1,33 +1,23 @@
-use crate::utils::{message_response, send_message};
-use serenity::all::{CommandInteraction, Context, CreateCommand, Message};
+use crate::utils::send_message;
+use crate::{Error, Result};
+use serenity::all::{CommandInteraction, Context, CreateCommand};
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let guild_id = match interaction.guild_id {
-        Some(guild_id) => guild_id,
-        None => {
-            return message_response(
-                &ctx,
-                interaction,
-                "This command can only be used in a server",
-            )
-            .await
-        }
-    };
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let partial_guild = ctx.http.get_guild_with_counts(guild_id).await?;
+    let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await?;
 
     send_message(
-        &ctx,
+        ctx,
         interaction,
         &format!(
             "There are **{}** members in this server",
             partial_guild.approximate_member_count.unwrap_or_default()
         ),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

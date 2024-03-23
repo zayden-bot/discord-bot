@@ -4,8 +4,6 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
-use crate::Result;
-
 fn get_images() -> Vec<PathBuf> {
     WalkDir::new("images")
         .into_iter()
@@ -42,10 +40,10 @@ pub struct ImageCache {
 }
 
 impl ImageCache {
-    pub fn new() -> Result<Self> {
+    pub fn new() -> Self {
         let images = get_images();
 
-        Ok(Self {
+        Self {
             last_update: Local::now().naive_utc(),
             good_morning_images: images
                 .iter()
@@ -58,24 +56,7 @@ impl ImageCache {
                 .cloned()
                 .collect(),
             character_map: create_character_map(images),
-        })
-    }
-
-    pub async fn update(&mut self) {
-        let images = get_images();
-
-        self.last_update = Local::now().naive_utc();
-        self.good_morning_images = images
-            .iter()
-            .filter(|p| p.iter().nth(1).and_then(|s| s.to_str()) == Some("good_morning"))
-            .cloned()
-            .collect();
-        self.good_night_images = images
-            .iter()
-            .filter(|p| p.iter().nth(1).and_then(|s| s.to_str()) == Some("good_night"))
-            .cloned()
-            .collect();
-        self.character_map = create_character_map(images);
+        }
     }
 }
 

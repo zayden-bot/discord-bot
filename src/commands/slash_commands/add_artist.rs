@@ -1,48 +1,36 @@
-use crate::utils::{message_response, send_message};
+use crate::utils::{message_response, parse_options};
 use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, Message,
-    Permissions,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    Permissions, ResolvedValue,
 };
+
+use crate::{Error, Result};
 
 const ARTIST_ROLE_ID: u64 = 1043987303556726854;
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let guild_id = match interaction.guild_id {
-        Some(guild_id) => guild_id,
-        None => {
-            return message_response(
-                &ctx,
-                interaction,
-                "This command can only be used in a server",
-            )
-            .await
-        }
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let options = interaction.data.options();
+    let options = parse_options(&options);
+
+    let user = match options.get("user") {
+        Some(ResolvedValue::User(user, _)) => *user,
+        _ => unreachable!("User option is required"),
     };
 
-    let user_id = match interaction.data.options[0].value.as_user_id() {
-        Some(user) => user,
-        None => return message_response(&ctx, interaction, "Please provide a valid user").await,
-    };
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let member = match guild_id.member(&ctx, user_id).await {
-        Ok(member) => member,
-        Err(_) => return message_response(&ctx, interaction, "Error retrieving member").await,
-    };
+    let member = guild_id.member(&ctx, user).await?;
 
-    match member.add_role(&ctx, ARTIST_ROLE_ID).await {
-        Ok(_) => {
-            send_message(
-                &ctx,
-                interaction,
-                &format!("Added {} as an artist", member.display_name()),
-            )
-            .await
-        }
-        Err(_) => message_response(&ctx, interaction, "Error adding role to member").await,
-    }
+    member.add_role(&ctx, ARTIST_ROLE_ID).await?;
+
+    message_response(
+        ctx,
+        interaction,
+        &format!("Added {} as an artist", member.display_name()),
+    )
+    .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

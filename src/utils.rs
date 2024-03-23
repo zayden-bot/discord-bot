@@ -2,103 +2,115 @@
 
 use serenity::all::{
     CommandInteraction, Context, CreateEmbed, CreateInteractionResponseFollowup, CreateMessage,
-    EditInteractionResponse, Message, MessageFlags, ResolvedOption, ResolvedValue,
+    EditInteractionResponse, GuildChannel, Mentionable, Message, MessageFlags, ResolvedOption,
+    ResolvedValue, Role, User,
 };
 use std::collections::HashMap;
 
-async fn cancel_defer(ctx: &Context, interaction: &CommandInteraction) {
-    if interaction
-        .get_response(&ctx)
-        .await
-        .expect("Failed to get response")
-        .flags
-        .expect("Failed to get flags")
-        .contains(MessageFlags::LOADING)
-    {
-        let _ = message_response(ctx, interaction, "Success").await;
+use crate::{Error, Result};
+
+async fn cancel_defer(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    if let Some(flags) = interaction.get_response(&ctx).await?.flags {
+        if flags.contains(MessageFlags::LOADING) {
+            message_response(ctx, interaction, "Success").await?;
+        }
     }
+
+    Ok(())
 }
 
 pub async fn message_response(
     ctx: &Context,
     interaction: &CommandInteraction,
     content: impl Into<String>,
-) -> Result<Message, serenity::Error> {
-    interaction
+) -> Result<Message> {
+    let message = interaction
         .edit_response(ctx, EditInteractionResponse::new().content(content))
-        .await
+        .await?;
+
+    Ok(message)
 }
 
 pub async fn embed_response(
     ctx: &Context,
     interaction: &CommandInteraction,
     embed: CreateEmbed,
-) -> Result<Message, serenity::Error> {
-    interaction
+) -> Result<Message> {
+    let message = interaction
         .edit_response(ctx, EditInteractionResponse::new().add_embed(embed))
-        .await
+        .await?;
+
+    Ok(message)
 }
 
 pub async fn send_message(
     ctx: &Context,
     interaction: &CommandInteraction,
     content: impl Into<String>,
-) -> Result<Message, serenity::Error> {
+) -> Result<Message> {
     let channel_id = interaction
         .channel
         .as_ref()
-        .expect("Only guild commands are supported")
+        .ok_or_else(|| Error::NoGuild)?
         .id;
 
-    tokio::join!(
+    let message = tokio::join!(
         cancel_defer(ctx, interaction),
         channel_id.send_message(ctx, CreateMessage::new().content(content))
     )
-    .1
+    .1?;
+
+    Ok(message)
 }
 
 pub async fn send_embed(
     ctx: &Context,
     interaction: &CommandInteraction,
     message_builder: CreateMessage,
-) -> Result<Message, serenity::Error> {
+) -> Result<Message> {
     let channel_id = interaction
         .channel
         .as_ref()
-        .expect("Only guild commands are supported")
+        .ok_or_else(|| Error::NoGuild)?
         .id;
 
-    tokio::join!(
+    let message = tokio::join!(
         cancel_defer(ctx, interaction),
         channel_id.send_message(ctx, message_builder)
     )
-    .1
+    .1?;
+
+    Ok(message)
 }
 
 pub async fn message_follow_up(
     ctx: &Context,
     interaction: &CommandInteraction,
     content: impl Into<String>,
-) -> Result<Message, serenity::Error> {
-    interaction
+) -> Result<Message> {
+    let message = interaction
         .create_followup(
             ctx,
             CreateInteractionResponseFollowup::new().content(content),
         )
-        .await
+        .await?;
+
+    Ok(message)
 }
 
 pub async fn embed_follow_up(
     ctx: &Context,
     interaction: &CommandInteraction,
     embed: CreateEmbed,
-) -> Result<Message, serenity::Error> {
-    interaction
+) -> Result<Message> {
+    let message = interaction
         .create_followup(
             ctx,
             CreateInteractionResponseFollowup::new().add_embed(embed),
         )
-        .await
+        .await?;
+
+    Ok(message)
 }
 
 pub fn parse_options<'a>(
@@ -117,4 +129,26 @@ pub fn parse_options<'a>(
     }
 
     parsed_options
+}
+
+pub async fn send_support_message(
+    ctx: &Context,
+    thread: &GuildChannel,
+    support_roles: &[&Role],
+    author: &User,
+    messages: Vec<CreateMessage>,
+) -> Result<()> {
+    let mentions: String = support_roles
+        .iter()
+        .map(|role| role.mention().to_string())
+        .chain([author.mention().to_string()])
+        .collect();
+
+    thread.say(ctx, mentions).await?;
+
+    for message in messages {
+        thread.send_message(ctx, message).await?;
+    }
+
+    Ok(())
 }

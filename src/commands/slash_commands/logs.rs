@@ -1,46 +1,28 @@
-use crate::models::Infraction;
 use crate::sqlx_lib::get_user_infractions;
-use crate::utils::{message_response, send_embed};
-use chrono::{Months, Utc};
+use crate::utils::{embed_response, parse_options};
+use crate::Result;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, Message, Permissions,
+    CreateEmbed, Permissions, ResolvedValue,
 };
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let user_id = match interaction.data.options[0].value.as_user_id() {
-        Some(user_id) => user_id,
-        None => return message_response(&ctx, interaction, "Please provide a valid user").await,
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let options = interaction.data.options();
+    let options = parse_options(&options);
+
+    let user = match options.get("user") {
+        Some(ResolvedValue::User(user, _)) => user,
+        _ => unreachable!("User option is required"),
     };
 
-    let filter = interaction
-        .data
-        .options
-        .get(1)
-        .and_then(|option| option.value.as_str())
-        .unwrap_or("recent");
-
-    let mut infractions = match get_user_infractions(user_id.get() as i64).await {
-        Ok(user_infractions) => user_infractions,
-        Err(_) => return message_response(&ctx, interaction, "Error getting user config").await,
+    let filter = match options.get("filter") {
+        Some(ResolvedValue::String(filter)) => filter,
+        _ => "recent",
     };
 
-    if filter == "recent" {
-        let six_months_age = Utc::now()
-            .checked_sub_months(Months::new(6))
-            .unwrap()
-            .naive_utc();
+    let infractions = get_user_infractions(user.id.get() as i64, filter == "recent").await?;
 
-        infractions = infractions
-            .into_iter()
-            .filter(|infraction| infraction.created_at >= six_months_age)
-            .collect::<Vec<Infraction>>();
-    }
-
-    let fields = infractions.iter().map(|infraction| {
+    let fields = infractions.into_iter().map(|infraction| {
         (
             format!("Case #{}", infraction.id),
             format!("**Type:** {}\n", infraction.infraction_type)
@@ -57,12 +39,9 @@ pub async fn run(
         )
     });
 
-    send_embed(
-        &ctx,
-        interaction,
-        CreateMessage::new().embed(CreateEmbed::new().fields(fields)),
-    )
-    .await
+    embed_response(ctx, interaction, CreateEmbed::new().fields(fields)).await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

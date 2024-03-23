@@ -1,27 +1,20 @@
+use crate::commands::message_commands::levels::user_levels::get_user_level_data;
 use crate::{
     commands::message_commands::levels::user_levels::get_user_rank,
-    utils::{embed_response, message_response, parse_options},
+    utils::{embed_response, parse_options},
 };
+use crate::{Error, Result};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, Message, ResolvedValue,
+    CreateEmbed, ResolvedValue,
 };
 
-use crate::commands::message_commands::levels::user_levels::get_user_level_data;
-
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
     let options = parse_options(&options);
 
     match options.get("ephemeral") {
-        Some(ResolvedValue::Boolean(ephemeral)) => {
-            if *ephemeral {
-                interaction.defer_ephemeral(&ctx).await?;
-            }
-        }
+        Some(ResolvedValue::Boolean(true)) => interaction.defer_ephemeral(&ctx).await?,
         _ => interaction.defer(&ctx).await?,
     }
 
@@ -30,32 +23,31 @@ pub async fn run(
         _ => &interaction.user,
     };
 
-    let level_data = match get_user_level_data(user.id.get()).await {
-        Ok(data) => data,
-        Err(_) => {
-            return message_response(&ctx, interaction, "Cannot get user level data").await;
-        }
-    };
+    let level_data = get_user_level_data(user.id.get()).await?;
 
     let level = level_data.level;
     let xp_for_next_level = 5 * (level * level) + 50 * level + 100;
-    let user_rank = get_user_rank(user.id.get()).await.unwrap_or(None);
+    let user_rank = get_user_rank(user.id.get())
+        .await?
+        .ok_or_else(|| Error::UserNotFound)?;
 
     embed_response(
-        &ctx,
+        ctx,
         interaction,
         CreateEmbed::default()
             .title(format!("XP stats for {}", user.name))
             .description(format!(
                 "Rank: #{}\nLevel: {}\nXP: {}/{} ({}%)",
-                user_rank.unwrap_or(-1),
+                user_rank,
                 level,
                 level_data.xp,
                 xp_for_next_level,
                 (level_data.xp as f32 / xp_for_next_level as f32 * 100.0).round()
             )),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

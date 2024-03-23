@@ -1,77 +1,54 @@
 use crate::sqlx_lib::{
     create_support_faq, delete_support_faq, get_all_support_faq, get_support_answer,
 };
-use crate::utils::{message_response, send_embed};
+use crate::utils::{message_response, parse_options, send_embed};
+use crate::{Error, Result};
 use serenity::all::{
-    CommandDataOption, CommandDataOptionValue, CommandInteraction, CommandOptionType, Context,
-    CreateCommand, CreateCommandOption, CreateEmbed, CreateMessage, GuildId, Message, Permissions,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CreateEmbed, CreateMessage, GuildId, Permissions, ResolvedValue,
 };
 
 async fn get(
     ctx: &Context,
     interaction: &CommandInteraction,
-    options: &[CommandDataOption],
     guild_id: GuildId,
-) -> Result<Message, serenity::Error> {
-    let support_id = match options[0].value.as_str() {
-        Some(support_id) => support_id,
-        None => return message_response(ctx, interaction, "Invalid support ID").await,
-    };
-
-    let answer = match get_support_answer(guild_id.get() as i64, &support_id.to_lowercase()).await {
-        Ok(answer) => answer,
-        Err(_) => return message_response(ctx, interaction, "Error getting support info").await,
-    };
+    support_id: &str,
+) -> Result<()> {
+    let answer = get_support_answer(guild_id.get() as i64, &support_id.to_lowercase()).await?;
 
     send_embed(
         ctx,
         interaction,
         CreateMessage::new().embed(CreateEmbed::new().title(support_id).description(answer)),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 async fn add(
     ctx: &Context,
     interaction: &CommandInteraction,
-    options: &[CommandDataOption],
     guild_id: GuildId,
-) -> Result<Message, serenity::Error> {
-    let support_id = match options[0].value.as_str() {
-        Some(support_id) => support_id,
-        None => return message_response(ctx, interaction, "Invalid support ID").await,
-    };
+    support_id: &str,
+    answer: &str,
+) -> Result<()> {
+    create_support_faq(guild_id.get() as i64, &support_id.to_lowercase(), answer).await?;
 
-    let answer = match options[1].value.as_str() {
-        Some(answer) => answer,
-        None => return message_response(ctx, interaction, "Invalid answer").await,
-    };
+    message_response(ctx, interaction, "Support info added").await?;
 
-    if create_support_faq(guild_id.get() as i64, &support_id.to_lowercase(), answer)
-        .await
-        .is_err()
-    {
-        return message_response(ctx, interaction, "Error adding support info").await;
-    }
-
-    message_response(ctx, interaction, "Support info added").await
+    Ok(())
 }
 
-async fn list(
-    ctx: &Context,
-    interaction: &CommandInteraction,
-    guild_id: GuildId,
-) -> Result<Message, serenity::Error> {
-    let faqs = match get_all_support_faq(guild_id.get() as i64).await {
-        Ok(faqs) => faqs,
-        Err(_) => return message_response(ctx, interaction, "Error getting support info").await,
-    };
+async fn list(ctx: &Context, interaction: &CommandInteraction, guild_id: GuildId) -> Result<()> {
+    let faqs = get_all_support_faq(guild_id.get() as i64).await?;
 
     if faqs.is_empty() {
-        return message_response(ctx, interaction, "No support for this server").await;
+        message_response(ctx, interaction, "No support for this server").await?;
+        return Ok(());
     }
 
-    let ids = faqs.into_iter().map(|faq| faq.id).collect::<Vec<String>>();
+    let ids: Vec<String> = faqs.into_iter().map(|faq| faq.id).collect();
 
     send_embed(
         ctx,
@@ -82,60 +59,60 @@ async fn list(
                 .description(ids.join("\n")),
         ),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 async fn remove(
     ctx: &Context,
     interaction: &CommandInteraction,
-    options: &[CommandDataOption],
     guild_id: GuildId,
-) -> Result<Message, serenity::Error> {
-    let support_id = match options[0].value.as_str() {
-        Some(support_id) => support_id,
-        None => return message_response(ctx, interaction, "Invalid support ID").await,
-    };
+    support_id: &str,
+) -> Result<()> {
+    delete_support_faq(guild_id.get() as i64, &support_id.to_lowercase()).await?;
 
-    if delete_support_faq(guild_id.get() as i64, &support_id.to_lowercase())
-        .await
-        .is_err()
-    {
-        return message_response(ctx, interaction, "Error removing support info").await;
-    }
+    message_response(ctx, interaction, "Support info removed").await?;
 
-    message_response(ctx, interaction, "Support info removed").await
+    Ok(())
 }
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let guild_id = match interaction.guild_id {
-        Some(guild_id) => guild_id,
-        None => {
-            return message_response(
-                &ctx,
-                interaction,
-                "This command can only be used in a server",
-            )
-            .await
-        }
-    };
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let command = &interaction.data.options[0];
+    let command = &interaction.data.options()[0];
 
     let options = match &command.value {
-        CommandDataOptionValue::SubCommand(options) => options,
-        _ => return message_response(&ctx, interaction, "Invalid subcommand").await,
+        ResolvedValue::SubCommand(options) => options,
+        _ => unreachable!("Subcommand is required"),
+    };
+    let options = parse_options(options);
+
+    if command.name == "list" {
+        list(ctx, interaction, guild_id).await?;
+        return Ok(());
+    }
+
+    let id = match options.get("id") {
+        Some(ResolvedValue::String(id)) => *id,
+        _ => unreachable!("ID is required"),
     };
 
-    match command.name.as_str() {
-        "get" => get(&ctx, interaction, options, guild_id).await,
-        "add" => add(&ctx, interaction, options, guild_id).await,
-        "list" => list(&ctx, interaction, guild_id).await,
-        "remove" => remove(&ctx, interaction, options, guild_id).await,
-        _ => message_response(&ctx, interaction, "Invalid subcommand").await,
-    }
+    match command.name {
+        "get" => get(ctx, interaction, guild_id, id).await?,
+        "add" => {
+            let answer = match options.get("answer") {
+                Some(ResolvedValue::String(answer)) => *answer,
+                _ => unreachable!("Answer is required"),
+            };
+
+            add(ctx, interaction, guild_id, id, answer).await?
+        }
+        "remove" => remove(ctx, interaction, guild_id, id).await?,
+        _ => unreachable!("Invalid subcommand"),
+    };
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

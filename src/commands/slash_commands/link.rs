@@ -4,9 +4,11 @@ use crate::{
 };
 use serde::Deserialize;
 use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, Message,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     Permissions, ResolvedValue,
 };
+
+use crate::Result;
 
 #[derive(Deserialize, Debug)]
 pub struct MemberAttributes {
@@ -19,54 +21,49 @@ async fn download(
     ctx: &Context,
     interaction: &CommandInteraction,
     subcommand: &ResolvedValue<'_>,
-) -> Result<Message, serenity::Error> {
+) -> Result<()> {
     interaction.defer(ctx).await?;
 
     let subcommand = match subcommand {
         ResolvedValue::SubCommand(subcommand) => subcommand,
-        _ => return message_response(ctx, interaction, "Invalid subcommand").await,
+        _ => unreachable!("Subcommand is required"),
     };
 
     let options = parse_options(subcommand);
 
     let game = match options.get("game") {
         Some(ResolvedValue::String(game)) => game,
-        _ => return message_response(ctx, interaction, "Invalid game").await,
+        _ => unreachable!("Game option is required"),
     };
 
     let mut game_folder = game.to_lowercase();
     if game_folder == "college_kings" {
-        game_folder = "college_kings_1".into();
+        game_folder = "college_kings_1".to_string();
     }
 
     let platform = match options.get("platform") {
         Some(ResolvedValue::String(platform)) => platform,
-        _ => return message_response(ctx, interaction, "Invalid platform").await,
+        _ => unreachable!("Platform option is required"),
     };
 
     let response = reqwest::get(format!(
         "{}/api/v1/bunny/latest/{}/{}",
         SERVER_URL, game_folder, platform
     ))
-    .await;
+    .await?;
 
-    match response {
-        Ok(response) => {
-            let link = response.text().await.unwrap();
-            message_response(ctx, interaction, link).await
-        }
-        Err(_) => message_response(ctx, interaction, "Error getting download link").await,
-    }
+    let link = response.text().await?;
+    message_response(ctx, interaction, link).await?;
+
+    Ok(())
 }
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let options = interaction.data.options();
-    let command = &options[0];
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let command = &interaction.data.options()[0];
 
-    download(&ctx, interaction, &command.value).await
+    download(ctx, interaction, &command.value).await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

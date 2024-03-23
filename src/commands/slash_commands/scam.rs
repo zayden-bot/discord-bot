@@ -1,85 +1,55 @@
-use crate::utils::{embed_response, message_response};
+use crate::utils::{embed_response, parse_options};
+use crate::{Error, Result};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, Message, Permissions,
+    CreateEmbed, CreateMessage, Permissions, ResolvedValue,
 };
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    interaction.defer(&ctx).await.expect("Failed to defer");
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    interaction.defer(&ctx).await?;
 
-    let guild_id = match interaction.guild_id {
-        Some(guild_id) => guild_id,
-        None => {
-            return message_response(
-                &ctx,
-                interaction,
-                "This command can only be used in a server",
-            )
-            .await
-        }
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+
+    let options = interaction.data.options();
+    let options = parse_options(&options);
+
+    let user = match options.get("member") {
+        Some(ResolvedValue::User(user, _)) => *user,
+        _ => unreachable!("Expected user"),
+    };
+    let reason = match options.get("reason") {
+        Some(ResolvedValue::String(reason)) => reason,
+        _ => "Compromised account: Sending scam links.",
     };
 
-    let user_id = match interaction.data.options[0].value.as_user_id() {
-        Some(user) => user,
-        None => {
-            return message_response(&ctx, interaction, "Cannot get member: Unknown Member").await
-        }
-    };
+    let member = guild_id.member(&ctx, user).await?;
+    let guild = guild_id.to_partial_guild(&ctx).await?;
 
-    let reason = interaction
-        .data
-        .options
-        .get(1)
-        .and_then(|option| option.value.as_str())
-        .unwrap_or("Compromised account: Sending scam links.");
-
-    let member = match guild_id.member(&ctx, &user_id).await {
-        Ok(member) => member,
-        Err(_) => return message_response(&ctx, interaction, "Error getting member").await,
-    };
-
-    let partial_guild = match guild_id.to_partial_guild(&ctx).await {
-        Ok(partial_guild) => partial_guild,
-        Err(_) => return message_response(&ctx, interaction, "Error getting guild").await,
-    };
-
-    let _ = user_id
-        .create_dm_channel(&ctx)
-        .await
-        .unwrap()
+    user.create_dm_channel(&ctx)
+        .await?
         .send_message(
             &ctx,
             CreateMessage::new().add_embed(CreateEmbed::new().description(format!(
                 "You have been soft banned from {} for the following reason: {}",
-                partial_guild.name, reason
+                guild.name, reason
             ))),
         )
-        .await;
+        .await?;
 
-    if guild_id
-        .ban_with_reason(&ctx, user_id, 1, reason)
-        .await
-        .is_err()
-    {
-        return message_response(&ctx, interaction, "Error banning user").await;
-    };
-
-    if guild_id.unban(&ctx, user_id).await.is_err() {
-        return message_response(&ctx, interaction, "Error unbanning user").await;
-    }
+    guild_id.ban_with_reason(&ctx, user, 1, reason).await?;
+    guild_id.unban(&ctx, user).await?;
 
     embed_response(
-        &ctx,
+        ctx,
         interaction,
         CreateEmbed::new().title("Soft Banned").description(format!(
             "{} has been successfully soft banned for the following reason: {}",
             member.user.name, reason
         )),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {

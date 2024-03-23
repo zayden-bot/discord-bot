@@ -1,26 +1,13 @@
-use crate::utils::{message_response, send_embed};
+use crate::utils::send_embed;
+use crate::{Error, Result};
 use serenity::all::{
     ChannelType, CommandInteraction, Context, CreateCommand, CreateEmbed, CreateEmbedAuthor,
-    CreateMessage, Message,
+    CreateMessage,
 };
 
-pub async fn run(
-    ctx: Context,
-    interaction: &CommandInteraction,
-) -> Result<Message, serenity::Error> {
-    let guild_id = match interaction.guild_id {
-        Some(guild_id) => guild_id,
-        None => {
-            return message_response(
-                &ctx,
-                interaction,
-                "This command can only be used in a server",
-            )
-            .await
-        }
-    };
-
-    let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await.unwrap();
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await?;
 
     let mut category_channel_count = 0;
     let mut text_channel_count = 0;
@@ -38,7 +25,7 @@ pub async fn run(
         });
 
     send_embed(
-        &ctx,
+        ctx,
         interaction,
         CreateMessage::new().embed(
             CreateEmbed::new()
@@ -65,7 +52,9 @@ pub async fn run(
                 .field("Roles", partial_guild.roles.len().to_string(), true),
         ),
     )
-    .await
+    .await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {
