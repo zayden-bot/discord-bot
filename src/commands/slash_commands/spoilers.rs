@@ -18,9 +18,11 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .first()
         .ok_or_else(|| Error::NoSpoilerThread)?;
 
-    message_response(ctx, interaction, &format!("Spoilers are defined as any content that has not been released on all supported platforms for at least 2 weeks.
-    Please keep all conversations about spoilers to <#{}>
-    If you have any bugs or questions please post them in <#{}>", spoiler_thread_id, support_thread_id)).await?;
+    message_response(ctx, interaction, &format!(
+"Spoilers are defined as any content that has not been released on all supported platforms for at least 2 weeks.
+Please keep all conversations about spoilers to <#{}>
+If you have any bugs or questions please post them in <#{}>",
+spoiler_thread_id, support_thread_id)).await?;
 
     Ok(())
 }
