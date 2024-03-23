@@ -1,9 +1,10 @@
 #![allow(dead_code)]
 
+pub mod support;
+
 use serenity::all::{
     CommandInteraction, Context, CreateEmbed, CreateInteractionResponseFollowup, CreateMessage,
-    EditInteractionResponse, GuildChannel, Mentionable, Message, MessageFlags, ResolvedOption,
-    ResolvedValue, Role, User,
+    EditInteractionResponse, Message, MessageFlags, ResolvedOption, ResolvedValue,
 };
 use std::collections::HashMap;
 
@@ -129,26 +130,4 @@ pub fn parse_options<'a>(
     }
 
     parsed_options
-}
-
-pub async fn send_support_message(
-    ctx: &Context,
-    thread: &GuildChannel,
-    support_roles: &[&Role],
-    author: &User,
-    messages: Vec<CreateMessage>,
-) -> Result<()> {
-    let mentions: String = support_roles
-        .iter()
-        .map(|role| role.mention().to_string())
-        .chain([author.mention().to_string()])
-        .collect();
-
-    thread.say(ctx, mentions).await?;
-
-    for message in messages {
-        thread.send_message(ctx, message).await?;
-    }
-
-    Ok(())
 }

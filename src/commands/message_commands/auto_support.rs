@@ -1,6 +1,7 @@
 use crate::sqlx_lib::{
     get_support_channel_ids, get_support_role_ids, get_support_thead_id, update_support_thread_id,
 };
+use crate::utils::support::get_thread_name;
 use crate::{Error, Result};
 use serenity::all::{
     AutoArchiveDuration, ChannelType, Context, CreateAttachment, CreateMessage, CreateThread,
@@ -50,10 +51,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
         + 1;
     update_support_thread_id(guild_id.get() as i64, thread_id).await?;
 
-    let thread_name = format!("{} - {}", thread_id, msg.content)
-        .chars()
-        .take(100)
-        .collect::<String>();
+    let thread_name = get_thread_name(thread_id, &msg.author.name, &msg.content);
 
     let thread = msg
         .channel_id

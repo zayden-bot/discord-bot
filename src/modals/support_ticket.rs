@@ -11,7 +11,7 @@ use crate::{
         get_support_channel_ids, get_support_role_ids, get_support_thead_id,
         update_support_thread_id,
     },
-    utils::send_support_message,
+    utils::support::{get_thread_name, send_support_message},
     Error, Result,
 };
 
@@ -44,10 +44,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         _ => unreachable!("Issue input is required"),
     };
 
-    let thread_name: String = format!("{} - {}", thread_id, content)
-        .chars()
-        .take(100)
-        .collect();
+    let thread_name = get_thread_name(thread_id, &modal.user.name, content);
 
     let version = match data.get("version") {
         Some(InputText {
