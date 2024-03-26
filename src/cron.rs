@@ -1,25 +1,27 @@
 use cron::Schedule;
 use serenity::all::{
     ButtonStyle, ChannelId, Context, CreateButton, CreateEmbed, CreateInteractionResponse,
-    CreateInteractionResponseMessage, CreateMessage, Mentionable, UserId,
+    CreateInteractionResponseMessage, CreateMessage, Mentionable, RoleId, UserId,
 };
 use serenity::futures::StreamExt;
 use std::str::FromStr;
-use std::time::{Duration, Instant};
-use tokio::time::sleep_until;
+use std::time::Duration;
+use tokio::time::{sleep_until, Instant};
 
 use crate::Result;
 
 const CHANNEL_ID: u64 = 846021706203136030;
+const ROLE_ID: u64 = 836275726352646176;
 
 pub async fn start_cron_jobs(ctx: Context) -> Result<()> {
-    let _result = tokio::spawn(async move { run_at_2pm_mon_thurs(ctx).await });
+    let result = tokio::spawn(async move { run_at_2pm_mon_thurs(ctx).await });
+    println!("Cron jobs started: {:?}", result.await);
+
     Ok(())
 }
 
 async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
     let schedule = Schedule::from_str("0 0 14 * * Mon,Thu")?;
-    let mut next = Instant::now();
     let tolerance = Duration::from_secs(1);
 
     loop {
@@ -29,8 +31,9 @@ async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
                 let ctx = ctx.clone();
                 tokio::spawn(async move { send_availability_check(ctx).await });
 
-                next += Duration::from_secs(60);
-                sleep_until(next.into()).await;
+                let delta = when - now;
+                let duration = Duration::from_secs(delta.num_seconds() as u64);
+                sleep_until(Instant::now() + duration).await;
             }
         }
     }
@@ -45,6 +48,7 @@ pub async fn send_availability_check(ctx: Context) -> Result<()> {
         .send_message(
             &ctx,
             CreateMessage::default()
+                .content(RoleId::new(ROLE_ID).mention().to_string())
                 .embed(
                     CreateEmbed::default()
                         .title("Are you available for tomorrow's meeting?")
