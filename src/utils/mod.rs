@@ -1,14 +1,15 @@
 #![allow(dead_code)]
 
-pub mod support;
-
 use serenity::all::{
-    CommandInteraction, Context, CreateEmbed, CreateInteractionResponseFollowup, CreateMessage,
+    CommandInteraction, Context, CreateEmbed, CreateInteractionResponse,
+    CreateInteractionResponseFollowup, CreateInteractionResponseMessage, CreateMessage,
     EditInteractionResponse, Message, MessageFlags, ResolvedOption, ResolvedValue,
 };
 use std::collections::HashMap;
 
 use crate::{Error, Result};
+
+pub mod support;
 
 async fn cancel_defer(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     if let Some(flags) = interaction.get_response(&ctx).await?.flags {
@@ -24,12 +25,25 @@ pub async fn message_response(
     ctx: &Context,
     interaction: &CommandInteraction,
     content: impl Into<String>,
-) -> Result<Message> {
-    let message = interaction
-        .edit_response(ctx, EditInteractionResponse::new().content(content))
+) -> Result<()> {
+    if interaction.get_response(&ctx).await.is_ok() {
+        interaction
+            .edit_response(ctx, EditInteractionResponse::new().content(content))
+            .await?;
+
+        return Ok(());
+    }
+
+    interaction
+        .create_response(
+            ctx,
+            CreateInteractionResponse::Message(
+                CreateInteractionResponseMessage::default().content(content),
+            ),
+        )
         .await?;
 
-    Ok(message)
+    Ok(())
 }
 
 pub async fn embed_response(
