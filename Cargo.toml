@@ -16,11 +16,12 @@ reqwest = { version = "*", features = ["json"] }
 serde = "*"
 serde_json = "*"
 sqlx = { version = "*", features = [
-    "runtime-async-std",
+    "runtime-tokio",
     "tls-native-tls",
     "postgres",
     "macros",
     "chrono",
+    "uuid",
 ] }
 tokio = { version = "*", features = ["macros", "rt-multi-thread"] }
 walkdir = "*"
@@ -38,8 +39,8 @@ features = [
     "rustls_backend",
 ]
 
-[profile.release]
-lto = true
-codegen-units = 1
-panic = "abort"
-strip = "symbols"
+# [profile.release]
+# lto = true
+# codegen-units = 1
+# panic = "abort"
+# strip = "symbols"
