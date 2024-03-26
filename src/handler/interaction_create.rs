@@ -36,6 +36,7 @@ pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) ->
         "spoilers" => spoilers::run(ctx, command).await?,
         "stars" => stars::run(ctx, command).await?,
         "support" => support::run(ctx, command).await?,
+        "test" => test::run(ctx, command).await?,
         "xp" => xp::run(ctx, command).await?,
         _ => Err(Error::CommandNotFound(command.data.name.clone()))?,
     };
@@ -44,8 +45,12 @@ pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) ->
 }
 
 pub async fn interaction_component(ctx: &Context, component: &ComponentInteraction) -> Result<()> {
-    if component.data.custom_id == "support_ticket" {
-        components::support_ticket(ctx, component).await?;
+    match component.data.custom_id.as_str() {
+        "support_ticket" => components::support_ticket(ctx, component).await?,
+        "cron_available" | "cron_unavailable" => {
+            components::availability_check(ctx, component).await?
+        }
+        _ => unimplemented!("Component not implemented: {}", component.data.custom_id),
     }
 
     Ok(())
