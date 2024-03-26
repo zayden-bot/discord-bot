@@ -1,8 +1,9 @@
 mod chatgpt_lib;
-mod commands;
 pub mod components;
 pub mod cron;
 mod error;
+mod global_commands;
+mod guild_commands;
 mod handler;
 mod image_cache;
 mod infraction_type;

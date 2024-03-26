@@ -1,8 +1,8 @@
 use serenity::all::Context;
 use serenity::all::Message;
 
-use crate::commands::message_commands::*;
-use crate::commands::prefix_commands::*;
+use crate::global_commands::message_commands::*;
+use crate::global_commands::prefix_commands::*;
 use crate::Result;
 
 pub async fn message(ctx: Context, msg: Message) -> Result<()> {
