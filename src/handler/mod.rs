@@ -38,7 +38,7 @@ impl EventHandler for Handler {
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        let result = match interaction {
+        let result = match &interaction {
             Interaction::Command(command) => {
                 interaction_create::interaction_command(&ctx, command).await
             }
@@ -50,7 +50,10 @@ impl EventHandler for Handler {
         };
 
         if let Err(e) = result {
-            println!("Error handling interaction create: {:?}", e);
+            println!(
+                "Error handling interaction create: {:?} | {:?}",
+                e, interaction
+            );
         };
     }
 }

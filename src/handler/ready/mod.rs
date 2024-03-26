@@ -18,7 +18,7 @@ pub async fn ready(ctx: Context, ready: Ready) -> Result<()> {
 
     ctx.set_presence(None, OnlineStatus::Online);
 
-    // update_messages(&ctx).await?;
+    update_messages(&ctx).await?;
 
     tokio::spawn(async move { start_cron_jobs(ctx.clone()).await });
 

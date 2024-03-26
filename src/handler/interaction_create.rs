@@ -5,58 +5,58 @@ use crate::{
     Error, Result,
 };
 
-pub async fn interaction_command(ctx: &Context, command: CommandInteraction) -> Result<()> {
+pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) -> Result<()> {
     println!("{} ran command: {}", command.user.tag(), command.data.name);
 
     match command.data.name.as_str() {
-        "add_artist" => add_artist::run(ctx, &command).await?,
-        "close" => close::run(ctx, &command).await?,
-        "fetch_suggestions" => fetch_suggestions::run(ctx, &command).await?,
-        "fixed" => fixed::run(ctx, &command).await?,
-        "get_discord_role" => get_discord_role::run(ctx, &command).await?,
-        "gold_star" => gold_star::run(ctx, &command).await?,
-        "good_morning" => good_morning::run(ctx, &command).await?,
-        "good_night" => good_night::run(ctx, &command).await?,
-        "image" => image::run(ctx, &command).await?,
-        "infraction" => infraction::run(ctx, &command).await?,
-        "levels" => levels::run(ctx, &command).await?,
-        "link" => link::run(ctx, &command).await?,
-        "logs" => logs::run(ctx, &command).await?,
-        "member_count" => member_count::run(ctx, &command).await?,
-        "open" => open::run(ctx, &command).await?,
-        "patreon" => patreon::run(ctx, &command).await?,
-        "rank" => rank::run(ctx, &command).await?,
-        "reaction_role" => reaction_role::run(ctx, &command).await?,
-        "ping" => ping::run(ctx, &command).await?,
-        "reputation" => reputation::run(ctx, &command).await?,
-        "rule" => rule::run(ctx, &command).await?,
-        "saves" => saves::run(ctx, &command).await?,
-        "scam" => scam::run(ctx, &command).await?,
-        "server_info" => server_info::run(ctx, &command).await?,
-        "spoilers" => spoilers::run(ctx, &command).await?,
-        "stars" => stars::run(ctx, &command).await?,
-        "support" => support::run(ctx, &command).await?,
-        "xp" => xp::run(ctx, &command).await?,
-        _ => Err(Error::CommandNotFound(command.data.name))?,
+        "add_artist" => add_artist::run(ctx, command).await?,
+        "close" => close::run(ctx, command).await?,
+        "fetch_suggestions" => fetch_suggestions::run(ctx, command).await?,
+        "fixed" => fixed::run(ctx, command).await?,
+        "get_discord_role" => get_discord_role::run(ctx, command).await?,
+        "gold_star" => gold_star::run(ctx, command).await?,
+        "good_morning" => good_morning::run(ctx, command).await?,
+        "good_night" => good_night::run(ctx, command).await?,
+        "image" => image::run(ctx, command).await?,
+        "infraction" => infraction::run(ctx, command).await?,
+        "levels" => levels::run(ctx, command).await?,
+        "link" => link::run(ctx, command).await?,
+        "logs" => logs::run(ctx, command).await?,
+        "member_count" => member_count::run(ctx, command).await?,
+        "open" => open::run(ctx, command).await?,
+        "patreon" => patreon::run(ctx, command).await?,
+        "rank" => rank::run(ctx, command).await?,
+        "reaction_role" => reaction_role::run(ctx, command).await?,
+        "ping" => ping::run(ctx, command).await?,
+        "reputation" => reputation::run(ctx, command).await?,
+        "rule" => rule::run(ctx, command).await?,
+        "saves" => saves::run(ctx, command).await?,
+        "scam" => scam::run(ctx, command).await?,
+        "server_info" => server_info::run(ctx, command).await?,
+        "spoilers" => spoilers::run(ctx, command).await?,
+        "stars" => stars::run(ctx, command).await?,
+        "support" => support::run(ctx, command).await?,
+        "xp" => xp::run(ctx, command).await?,
+        _ => Err(Error::CommandNotFound(command.data.name.clone()))?,
     };
 
     Ok(())
 }
 
-pub async fn interaction_component(ctx: &Context, component: ComponentInteraction) -> Result<()> {
+pub async fn interaction_component(ctx: &Context, component: &ComponentInteraction) -> Result<()> {
     if component.data.custom_id == "support_ticket" {
-        components::support_ticket(ctx, &component).await?;
+        components::support_ticket(ctx, component).await?;
     }
 
     Ok(())
 }
 
-pub async fn interaction_modal(ctx: &Context, modal: ModalInteraction) -> Result<()> {
+pub async fn interaction_modal(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     println!("{} ran modal: {}", modal.user.tag(), modal.data.custom_id);
 
     match modal.data.custom_id.as_str() {
         "support_ticket" => {
-            modals::support_ticket::run(ctx, &modal).await?;
+            modals::support_ticket::run(ctx, modal).await?;
         }
         _ => unimplemented!("Modal not implemented: {}", modal.data.custom_id),
     }
