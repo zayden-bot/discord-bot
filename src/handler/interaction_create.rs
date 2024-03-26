@@ -47,7 +47,7 @@ pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) ->
 pub async fn interaction_component(ctx: &Context, component: &ComponentInteraction) -> Result<()> {
     match component.data.custom_id.as_str() {
         "support_ticket" => components::support_ticket(ctx, component).await?,
-        "cron_available" | "cron_unavailable" => {
+        "cron_available" | "cron_unavailable" | "available" | "unavailable" => {
             components::availability_check(ctx, component).await?
         }
         _ => unimplemented!("Component not implemented: {}", component.data.custom_id),

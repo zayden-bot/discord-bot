@@ -1,5 +1,5 @@
 use serenity::all::{
-    ComponentInteraction, Context, CreateEmbed, CreateInteractionResponse,
+    parse_user_mention, ComponentInteraction, Context, CreateEmbed, CreateInteractionResponse,
     CreateInteractionResponseMessage, Mentionable, UserId,
 };
 
@@ -12,22 +12,23 @@ pub async fn availability_check(ctx: &Context, interaction: &ComponentInteractio
     let mut available: Vec<UserId> = fields[0]
         .value
         .split('\n')
-        .filter_map(|v| v.parse().ok().map(UserId::new))
+        .filter_map(parse_user_mention)
         .collect();
+
     let mut unavailable: Vec<UserId> = fields[1]
         .value
         .split('\n')
-        .filter_map(|v| v.parse().ok().map(UserId::new))
+        .filter_map(parse_user_mention)
         .collect();
 
     match interaction.data.custom_id.as_str() {
-        "cron_available" => {
+        "cron_available" | "available" => {
             if !available.contains(&user_id) {
                 available.push(user_id);
             }
             unavailable.retain(|&x| x != user_id);
         }
-        "cron_unavailable" => {
+        "cron_unavailable" | "unavailable" => {
             if !unavailable.contains(&user_id) {
                 unavailable.push(user_id);
             }
