@@ -16,6 +16,7 @@ pub mod patreon;
 pub mod reputation;
 pub mod saves;
 pub mod spoilers;
+pub mod test;
 
 pub async fn register(ctx: &Context) -> Result<()> {
     add_artist::register(ctx).await?;
@@ -32,6 +33,7 @@ pub async fn register(ctx: &Context) -> Result<()> {
     reputation::register(ctx).await?;
     saves::register(ctx).await?;
     spoilers::register(ctx).await?;
+    test::register(ctx).await?;
 
     Ok(())
 }
