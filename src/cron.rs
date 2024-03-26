@@ -12,20 +12,22 @@ use crate::Result;
 
 const CHANNEL_ID: u64 = 846021706203136030;
 
-pub async fn start_cron_jobs(ctx: &Context) -> Result<()> {
-    tokio::spawn(run_at_2pm_mon_thurs(ctx.clone()));
+pub async fn start_cron_jobs(ctx: Context) -> Result<()> {
+    let _result = tokio::spawn(async move { run_at_2pm_mon_thurs(ctx).await });
     Ok(())
 }
 
 async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
-    let schedule = Schedule::from_str("0 14 * * 1,4")?;
+    let schedule = Schedule::from_str("0 0 14 * * Mon,Thu")?;
     let mut next = Instant::now();
+    let tolerance = Duration::from_secs(1);
 
     loop {
         if let Some(when) = schedule.upcoming(chrono::Utc).next() {
             let now = chrono::Utc::now();
-            if now >= when {
-                send_availability_check(&ctx).await?;
+            if now + tolerance >= when {
+                let ctx = ctx.clone();
+                tokio::spawn(async move { send_availability_check(ctx).await });
 
                 next += Duration::from_secs(60);
                 sleep_until(next.into()).await;
@@ -34,7 +36,9 @@ async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
     }
 }
 
-async fn send_availability_check(ctx: &Context) -> Result<()> {
+pub async fn send_availability_check(ctx: Context) -> Result<()> {
+    println!("Sending availability check");
+
     let channel_id = ChannelId::new(CHANNEL_ID);
 
     let message = channel_id
@@ -61,7 +65,7 @@ async fn send_availability_check(ctx: &Context) -> Result<()> {
         .await?;
 
     let mut collector = message
-        .await_component_interactions(ctx)
+        .await_component_interactions(&ctx)
         .timeout(Duration::from_secs(86400))
         .stream();
 
@@ -89,7 +93,7 @@ async fn send_availability_check(ctx: &Context) -> Result<()> {
 
         interaction
             .create_response(
-                ctx,
+                &ctx,
                 CreateInteractionResponse::UpdateMessage(
                     CreateInteractionResponseMessage::default().embed(
                         CreateEmbed::default()
