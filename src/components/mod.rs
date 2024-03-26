@@ -1,3 +1,6 @@
+pub mod availability_check;
+
+pub use availability_check::availability_check;
 use serenity::all::{
     ComponentInteraction, Context, CreateActionRow, CreateInputText, CreateInteractionResponse,
     CreateModal, InputTextStyle,
@@ -5,7 +8,7 @@ use serenity::all::{
 
 use crate::Result;
 
-pub async fn support_ticket(ctx: &Context, component: &ComponentInteraction) -> Result<()> {
+pub async fn support_ticket(ctx: &Context, interaction: &ComponentInteraction) -> Result<()> {
     let version_input = CreateInputText::new(InputTextStyle::Short, "Game Version", "version")
         .required(true)
         .placeholder("1.0.0");
@@ -28,7 +31,7 @@ pub async fn support_ticket(ctx: &Context, component: &ComponentInteraction) -> 
         CreateActionRow::InputText(additional_input),
     ]);
 
-    component
+    interaction
         .create_response(&ctx, CreateInteractionResponse::Modal(modal))
         .await?;
 
