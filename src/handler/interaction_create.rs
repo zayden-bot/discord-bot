@@ -1,13 +1,14 @@
 use serenity::all::{CommandInteraction, ComponentInteraction, Context, ModalInteraction};
 
-use crate::{commands::slash_commands::*, components, modals, Result};
+use crate::{
+    components, global_commands::slash_commands::*, guild_commands::slash_commands::*, modals,
+    Error, Result,
+};
 
 pub async fn interaction_command(ctx: &Context, command: CommandInteraction) -> Result<()> {
-    let command_name = &command.data.name;
+    println!("{} ran command: {}", command.user.tag(), command.data.name);
 
-    println!("{} ran command: {}", command.user.tag(), command_name);
-
-    match command_name.as_str() {
+    match command.data.name.as_str() {
         "add_artist" => add_artist::run(ctx, &command).await?,
         "close" => close::run(ctx, &command).await?,
         "fetch_suggestions" => fetch_suggestions::run(ctx, &command).await?,
@@ -36,7 +37,7 @@ pub async fn interaction_command(ctx: &Context, command: CommandInteraction) -> 
         "stars" => stars::run(ctx, &command).await?,
         "support" => support::run(ctx, &command).await?,
         "xp" => xp::run(ctx, &command).await?,
-        _ => unimplemented!("Command not implemented: {}", command_name),
+        _ => Err(Error::CommandNotFound(command.data.name))?,
     };
 
     Ok(())
