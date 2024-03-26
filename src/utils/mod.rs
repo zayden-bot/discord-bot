@@ -1,9 +1,8 @@
 #![allow(dead_code)]
 
 use serenity::all::{
-    CommandInteraction, Context, CreateEmbed, CreateInteractionResponse,
-    CreateInteractionResponseFollowup, CreateInteractionResponseMessage, CreateMessage,
-    EditInteractionResponse, Message, MessageFlags, ResolvedOption, ResolvedValue,
+    CommandInteraction, Context, CreateEmbed, CreateInteractionResponseFollowup, CreateMessage,
+    EditInteractionResponse, Message, ResolvedOption, ResolvedValue,
 };
 use std::collections::HashMap;
 
@@ -11,36 +10,15 @@ use crate::{Error, Result};
 
 pub mod support;
 
-async fn cancel_defer(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    if let Some(flags) = interaction.get_response(&ctx).await?.flags {
-        if flags.contains(MessageFlags::LOADING) {
-            message_response(ctx, interaction, "Success").await?;
-        }
-    }
-
-    Ok(())
-}
-
 pub async fn message_response(
     ctx: &Context,
     interaction: &CommandInteraction,
     content: impl Into<String>,
 ) -> Result<()> {
-    if interaction.get_response(&ctx).await.is_ok() {
-        interaction
-            .edit_response(ctx, EditInteractionResponse::new().content(content))
-            .await?;
-
-        return Ok(());
-    }
+    let _ = interaction.defer(ctx).await;
 
     interaction
-        .create_response(
-            ctx,
-            CreateInteractionResponse::Message(
-                CreateInteractionResponseMessage::default().content(content),
-            ),
-        )
+        .edit_response(ctx, EditInteractionResponse::new().content(content))
         .await?;
 
     Ok(())
@@ -51,6 +29,8 @@ pub async fn embed_response(
     interaction: &CommandInteraction,
     embed: CreateEmbed,
 ) -> Result<Message> {
+    let _ = interaction.defer(ctx).await;
+
     let message = interaction
         .edit_response(ctx, EditInteractionResponse::new().add_embed(embed))
         .await?;
@@ -69,11 +49,15 @@ pub async fn send_message(
         .ok_or_else(|| Error::NoGuild)?
         .id;
 
-    let message = tokio::join!(
-        cancel_defer(ctx, interaction),
-        channel_id.send_message(ctx, CreateMessage::new().content(content))
-    )
-    .1?;
+    let _ = interaction.defer_ephemeral(ctx).await;
+
+    interaction
+        .edit_response(ctx, EditInteractionResponse::new().content("Success"))
+        .await?;
+
+    let message = channel_id
+        .send_message(ctx, CreateMessage::new().content(content))
+        .await?;
 
     Ok(message)
 }
@@ -89,11 +73,13 @@ pub async fn send_embed(
         .ok_or_else(|| Error::NoGuild)?
         .id;
 
-    let message = tokio::join!(
-        cancel_defer(ctx, interaction),
-        channel_id.send_message(ctx, message_builder)
-    )
-    .1?;
+    let _ = interaction.defer_ephemeral(ctx).await;
+
+    interaction
+        .edit_response(ctx, EditInteractionResponse::new().content("Success"))
+        .await?;
+
+    let message = channel_id.send_message(ctx, message_builder).await?;
 
     Ok(message)
 }
