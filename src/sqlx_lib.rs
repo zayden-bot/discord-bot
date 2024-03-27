@@ -244,12 +244,17 @@ pub async fn get_rule(rule_id: &str, guild_id: i64) -> Result<String> {
 }
 
 pub async fn create_reaction_role(
-    guild_id: i64,
-    channel_id: i64,
-    message_id: i64,
-    role_id: i64,
+    guild_id: impl TryInto<i64>,
+    channel_id: impl TryInto<i64>,
+    message_id: impl TryInto<i64>,
+    role_id: impl TryInto<i64>,
     emoji: &str,
 ) -> Result<()> {
+    let guild_id: i64 = guild_id.try_into().map_err(|_| Error::ConversionError)?;
+    let channel_id: i64 = channel_id.try_into().map_err(|_| Error::ConversionError)?;
+    let message_id: i64 = message_id.try_into().map_err(|_| Error::ConversionError)?;
+    let role_id: i64 = role_id.try_into().map_err(|_| Error::ConversionError)?;
+
     let pool = get_pool().await?;
 
     sqlx::query!("INSERT INTO reaction_roles (guild_id, channel_id, message_id, role_id, emoji) VALUES ($1, $2, $3, $4, $5)", guild_id, channel_id, message_id, role_id, emoji)
@@ -261,11 +266,15 @@ pub async fn create_reaction_role(
 }
 
 pub async fn delete_reaction_role(
-    guild_id: i64,
-    channel_id: i64,
-    message_id: i64,
+    guild_id: impl TryInto<i64>,
+    channel_id: impl TryInto<i64>,
+    message_id: impl TryInto<i64>,
     emoji: &str,
 ) -> Result<()> {
+    let guild_id: i64 = guild_id.try_into().map_err(|_| Error::ConversionError)?;
+    let channel_id: i64 = channel_id.try_into().map_err(|_| Error::ConversionError)?;
+    let message_id: i64 = message_id.try_into().map_err(|_| Error::ConversionError)?;
+
     let pool = get_pool().await?;
 
     sqlx::query!("DELETE FROM reaction_roles WHERE guild_id = $1 AND channel_id = $2 AND message_id = $3 AND emoji = $4", guild_id, channel_id, message_id, emoji)
