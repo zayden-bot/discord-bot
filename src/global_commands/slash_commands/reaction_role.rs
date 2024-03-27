@@ -2,9 +2,9 @@ use crate::sqlx_lib::{create_reaction_role, delete_reaction_role};
 use crate::utils::{message_response, parse_options};
 use crate::{Error, Result};
 use serenity::all::{
-    parse_emoji, Command, CommandInteraction, CommandOptionType, Context, CreateCommand,
-    CreateCommandOption, CreateEmbed, CreateMessage, EmojiIdentifier, GuildId, MessageId,
-    PartialChannel, Permissions, ResolvedValue, Role,
+    Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CreateEmbed, CreateMessage, GuildId, Mentionable, MessageId, PartialChannel, Permissions,
+    ReactionType, ResolvedValue, Role,
 };
 
 async fn add(
@@ -13,7 +13,7 @@ async fn add(
     guild_id: GuildId,
     channel: &PartialChannel,
     message_id: Option<MessageId>,
-    emoji: EmojiIdentifier,
+    emoji: ReactionType,
     role: &Role,
 ) -> Result<()> {
     let message = match message_id {
@@ -23,11 +23,16 @@ async fn add(
                 .id
                 .send_message(
                     ctx,
-                    CreateMessage::default().embed(CreateEmbed::default().description("Test")),
+                    CreateMessage::default().embed(CreateEmbed::default().description(format!(
+                        "{} | {}",
+                        emoji,
+                        role.mention()
+                    ))),
                 )
                 .await?
         }
     };
+
     create_reaction_role(
         guild_id.get(),
         channel.id.get(),
@@ -49,7 +54,7 @@ async fn remove(
     channel: &PartialChannel,
     guild_id: GuildId,
     message_id: MessageId,
-    emoji: EmojiIdentifier,
+    emoji: ReactionType,
 ) -> Result<()> {
     let message = channel.id.message(ctx, message_id).await?;
 
@@ -83,10 +88,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => unreachable!("Channel is required"),
     };
 
-    let emoji = match options.get("emoji") {
-        Some(ResolvedValue::String(emoji)) => {
-            parse_emoji(emoji).ok_or_else(|| Error::InvalidEmoji(emoji.to_string()))?
-        }
+    let reaction = match options.get("emoji") {
+        Some(ResolvedValue::String(emoji)) => ReactionType::try_from(*emoji)?,
         _ => unreachable!("Emoji is required"),
     };
 
@@ -104,7 +107,16 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 _ => None,
             };
 
-            add(ctx, interaction, guild_id, channel, message_id, emoji, role).await?;
+            add(
+                ctx,
+                interaction,
+                guild_id,
+                channel,
+                message_id,
+                reaction,
+                role,
+            )
+            .await?;
         }
         "remove" => {
             let message_id = match options.get("message_id") {
@@ -112,7 +124,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 _ => unreachable!("Message ID is required"),
             };
 
-            remove(ctx, interaction, channel, guild_id, message_id, emoji).await?;
+            remove(ctx, interaction, channel, guild_id, message_id, reaction).await?;
         }
         _ => unreachable!("Invalid subcommand name"),
     };
@@ -156,14 +168,11 @@ pub async fn register(ctx: &Context) -> Result<()> {
                     )
                     .required(true),
                 )
-                .add_sub_option(
-                    CreateCommandOption::new(
-                        CommandOptionType::String,
-                        "message_id",
-                        "The message id of the reaction role message",
-                    )
-                    .required(false),
-                ),
+                .add_sub_option(CreateCommandOption::new(
+                    CommandOptionType::String,
+                    "message_id",
+                    "The message id of the reaction role message",
+                )),
             )
             .add_option(
                 CreateCommandOption::new(

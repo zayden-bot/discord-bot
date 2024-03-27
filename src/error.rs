@@ -10,6 +10,7 @@ pub enum Error {
     Reqwest(reqwest::Error),
     Cron(cron::error::Error),
     ParseIntError(std::num::ParseIntError),
+    ReactionConversionError(serenity::all::ReactionConversionError),
     ChronoError,
     ConversionError,
     CommandNotFound(String),
@@ -21,7 +22,6 @@ pub enum Error {
     NoGuild,
     NoRole,
     RoleNotFound(u64),
-    InvalidEmoji(String),
     NoMember,
     NoChannel,
     NoParent,
@@ -41,6 +41,7 @@ impl std::fmt::Display for Error {
             Error::Reqwest(e) => write!(f, "{}", e),
             Error::Cron(e) => write!(f, "{}", e),
             Error::ParseIntError(e) => write!(f, "{}", e),
+            Error::ReactionConversionError(e) => write!(f, "{}", e),
             Error::ChronoError => write!(f, "Chrono error"),
             Error::ConversionError => write!(f, "Conversion error"),
             Error::CommandNotFound(name) => write!(f, "Command not found: {}", name),
@@ -52,7 +53,6 @@ impl std::fmt::Display for Error {
             Error::NoGuild => write!(f, "No guild found"),
             Error::NoRole => write!(f, "No role found"),
             Error::RoleNotFound(id) => write!(f, "Role not found: {}", id),
-            Error::InvalidEmoji(emoji) => write!(f, "Invalid emoji: {}", emoji),
             Error::NoMember => write!(f, "No member found"),
             Error::NoChannel => write!(f, "No channel found"),
             Error::NoParent => write!(f, "No parent channel found"),
@@ -108,5 +108,11 @@ impl From<serenity::model::timestamp::InvalidTimestamp> for Error {
 impl From<std::num::ParseIntError> for Error {
     fn from(e: std::num::ParseIntError) -> Self {
         Error::ParseIntError(e)
+    }
+}
+
+impl From<serenity::all::ReactionConversionError> for Error {
+    fn from(e: serenity::all::ReactionConversionError) -> Self {
+        Error::ReactionConversionError(e)
     }
 }
