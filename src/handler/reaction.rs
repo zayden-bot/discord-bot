@@ -1,8 +1,8 @@
 use serenity::all::{Context, Member, Message, Reaction};
-// use serenity::utils::parse_emoji
 
 use crate::{models::ReactionRole, sqlx_lib, Error, Result};
 
+// Verify reaction.emoji.to_string() is a valid emoji with the new parser
 pub async fn reaction_add(ctx: Context, reaction: Reaction) -> Result<()> {
     let (reaction_roles, reaction_message, member) = get_reaction_data(&ctx, &reaction).await?;
 
