@@ -46,10 +46,11 @@ pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) ->
 
 pub async fn interaction_component(ctx: &Context, component: &ComponentInteraction) -> Result<()> {
     match component.data.custom_id.as_str() {
-        "support_ticket" => components::support_ticket(ctx, component).await?,
         "cron_available" | "cron_unavailable" | "available" | "unavailable" => {
             components::availability_check(ctx, component).await?
         }
+        "production_request" => components::production_request(ctx, component).await?,
+        "support_ticket" => components::support_ticket(ctx, component).await?,
         _ => unimplemented!("Component not implemented: {}", component.data.custom_id),
     }
 
@@ -60,6 +61,9 @@ pub async fn interaction_modal(ctx: &Context, modal: &ModalInteraction) -> Resul
     println!("{} ran modal: {}", modal.user.tag(), modal.data.custom_id);
 
     match modal.data.custom_id.as_str() {
+        "production_request" => {
+            modals::production_request::run(ctx, modal).await?;
+        }
         "support_ticket" => {
             modals::support_ticket::run(ctx, modal).await?;
         }
