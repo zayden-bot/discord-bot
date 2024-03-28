@@ -6,7 +6,7 @@ use crate::{
 };
 
 pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) -> Result<()> {
-    println!("{} ran command: {}", command.user.tag(), command.data.name);
+    println!("{} ran command: {}", command.user.name, command.data.name);
 
     match command.data.name.as_str() {
         "add_artist" => add_artist::run(ctx, command).await?,
@@ -46,8 +46,13 @@ pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) ->
 }
 
 pub async fn interaction_component(ctx: &Context, component: &ComponentInteraction) -> Result<()> {
+    println!(
+        "{} ran component: {}",
+        component.user.name, component.data.custom_id
+    );
+
     match component.data.custom_id.as_str() {
-        "cron_available" | "cron_unavailable" | "available" | "unavailable" => {
+        "cron_available" | "cron_unavailable" => {
             components::availability_check(ctx, component).await?
         }
         "faq" | "faq_ephemeral" => components::faq(ctx, component).await?,
@@ -60,7 +65,7 @@ pub async fn interaction_component(ctx: &Context, component: &ComponentInteracti
 }
 
 pub async fn interaction_modal(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
-    println!("{} ran modal: {}", modal.user.tag(), modal.data.custom_id);
+    println!("{} ran modal: {}", modal.user.name, modal.data.custom_id);
 
     match modal.data.custom_id.as_str() {
         "production_request" => {
