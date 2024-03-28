@@ -11,6 +11,7 @@ pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) ->
     match command.data.name.as_str() {
         "add_artist" => add_artist::run(ctx, command).await?,
         "close" => close::run(ctx, command).await?,
+        "faq" => faq::run(ctx, command).await?,
         "fetch_suggestions" => fetch_suggestions::run(ctx, command).await?,
         "fixed" => fixed::run(ctx, command).await?,
         "get_discord_role" => get_discord_role::run(ctx, command).await?,
@@ -49,6 +50,7 @@ pub async fn interaction_component(ctx: &Context, component: &ComponentInteracti
         "cron_available" | "cron_unavailable" | "available" | "unavailable" => {
             components::availability_check(ctx, component).await?
         }
+        "faq" | "faq_ephemeral" => components::faq(ctx, component).await?,
         "production_request" => components::production_request(ctx, component).await?,
         "support_ticket" => components::support_ticket(ctx, component).await?,
         _ => unimplemented!("Component not implemented: {}", component.data.custom_id),

@@ -28,6 +28,7 @@ pub enum Error {
     NoFileName,
     NoSupportThread,
     NoSpoilerThread,
+    FaqMessageNotFound(String),
 }
 
 impl std::fmt::Display for Error {
@@ -59,6 +60,7 @@ impl std::fmt::Display for Error {
             Error::NoFileName => write!(f, "No file name found"),
             Error::NoSupportThread => write!(f, "No support thread found"),
             Error::NoSpoilerThread => write!(f, "No spoiler thread found"),
+            Error::FaqMessageNotFound(content) => write!(f, "FAQ message not found: {}", content),
         }
     }
 }
