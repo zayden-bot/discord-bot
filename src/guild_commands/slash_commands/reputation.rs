@@ -1,8 +1,6 @@
 use crate::Result;
 use crate::{utils::send_embed, COLLEGE_KINGS_GUILD_ID};
-use serenity::all::{
-    CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage, GuildId,
-};
+use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     send_embed(
@@ -21,7 +19,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    GuildId::new(COLLEGE_KINGS_GUILD_ID)
+    COLLEGE_KINGS_GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("reputation")

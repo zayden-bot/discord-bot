@@ -2,11 +2,11 @@ use crate::sqlx_lib::get_rule;
 use crate::utils::{parse_options, send_embed};
 use crate::{Error, Result};
 use serenity::all::{
-    Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, ResolvedValue,
+    ChannelId, Command, CommandInteraction, CommandOptionType, Context, CreateCommand,
+    CreateCommandOption, CreateEmbed, CreateMessage, Mentionable, ResolvedValue,
 };
 
-const RULE_CHANNEL: u64 = 747430712617074718;
+const CHANNEL_ID: ChannelId = ChannelId::new(747430712617074718);
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
@@ -28,8 +28,10 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             CreateEmbed::new()
                 .title(format!("Rule: {}", rule_id))
                 .description(format!(
-                    "**{}.** {}\n\n**Please read the rest of the rules in <#{}>!**",
-                    rule_id, rule, RULE_CHANNEL
+                    "**{}.** {}\n\n**Please read the rest of the rules in {}!**",
+                    rule_id,
+                    rule,
+                    CHANNEL_ID.mention()
                 )),
         ),
     )

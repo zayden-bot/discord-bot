@@ -4,10 +4,10 @@ use serenity::{
     futures::StreamExt,
 };
 
-const CHANNEL_ID: u64 = 919950775134847016;
+const CHANNEL_ID: ChannelId = ChannelId::new(919950775134847016);
 
 pub async fn run(ctx: &Context) -> Result<()> {
-    let message = ChannelId::new(CHANNEL_ID)
+    let message = CHANNEL_ID
         .messages_iter(ctx)
         .filter_map(|m| async move {
             match m {
@@ -34,7 +34,7 @@ pub async fn run(ctx: &Context) -> Result<()> {
         message.delete(ctx).await?;
     }
 
-    ChannelId::new(CHANNEL_ID)
+    CHANNEL_ID
         .send_message(
             ctx,
             CreateMessage::default()

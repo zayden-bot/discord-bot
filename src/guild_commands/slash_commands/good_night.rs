@@ -4,7 +4,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::all::{
     CommandInteraction, Context, CreateAttachment, CreateCommand, CreateEmbed, EditAttachments,
-    EditInteractionResponse, GuildId,
+    EditInteractionResponse,
 };
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -43,7 +43,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    GuildId::new(COLLEGE_KINGS_GUILD_ID)
+    COLLEGE_KINGS_GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("good_night").description("Have a CK girl wish you good night"),

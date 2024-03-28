@@ -3,13 +3,13 @@ use crate::{
     COLLEGE_KINGS_GUILD_ID,
 };
 use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, GuildId,
-    Permissions, ResolvedValue,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    Permissions, ResolvedValue, RoleId,
 };
 
 use crate::{Error, Result};
 
-const ARTIST_ROLE_ID: u64 = 1043987303556726854;
+const ROLE_ID: RoleId = RoleId::new(1043987303556726854);
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
@@ -24,7 +24,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let member = guild_id.member(&ctx, user).await?;
 
-    member.add_role(&ctx, ARTIST_ROLE_ID).await?;
+    member.add_role(&ctx, ROLE_ID).await?;
 
     message_response(
         ctx,
@@ -37,7 +37,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    GuildId::new(COLLEGE_KINGS_GUILD_ID)
+    COLLEGE_KINGS_GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("add_artist")

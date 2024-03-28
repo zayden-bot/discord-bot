@@ -7,21 +7,17 @@ use crate::Result;
 
 pub async fn send_or_update_message(
     ctx: &Context,
-    channel_id: u64,
+    channel_id: ChannelId,
     embed: CreateEmbed,
 ) -> Result<()> {
-    let message = ChannelId::new(channel_id)
-        .messages_iter(ctx)
-        .boxed()
-        .next()
-        .await;
+    let message = channel_id.messages_iter(ctx).boxed().next().await;
 
     match message {
         Some(message) => {
             message?.edit(&ctx, EditMessage::new().embed(embed)).await?;
         }
         None => {
-            ChannelId::new(channel_id)
+            channel_id
                 .send_message(ctx, CreateMessage::new().embed(embed))
                 .await?;
         }

@@ -1,7 +1,7 @@
 use crate::sqlx_lib::get_support_channel_ids;
 use crate::utils::send_message;
 use crate::{Error, Result, COLLEGE_KINGS_GUILD_ID};
-use serenity::all::{CommandInteraction, Context, CreateCommand, GuildId};
+use serenity::all::{CommandInteraction, Context, CreateCommand};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
@@ -17,7 +17,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    GuildId::new(COLLEGE_KINGS_GUILD_ID)
+    COLLEGE_KINGS_GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("saves").description("Get saves disclaimer"),

@@ -14,11 +14,13 @@ mod utils;
 
 use crate::image_cache::ImageCache;
 pub use error::{Error, Result};
-use serenity::prelude::GatewayIntents;
-use serenity::Client;
+use serenity::{
+    all::{GatewayIntents, GuildId},
+    Client,
+};
 use std::env;
 
-pub const COLLEGE_KINGS_GUILD_ID: u64 = 745662812335898806;
+pub const COLLEGE_KINGS_GUILD_ID: GuildId = GuildId::new(745662812335898806);
 
 pub const SERVER_IP: &str = "82.9.123.190";
 pub const SERVER_URL: &str = "http://82.9.123.190";

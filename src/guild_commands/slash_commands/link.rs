@@ -4,7 +4,7 @@ use crate::{
 };
 use serde::Deserialize;
 use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, GuildId,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     Permissions, ResolvedValue,
 };
 
@@ -67,7 +67,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    GuildId::new(COLLEGE_KINGS_GUILD_ID)
+    COLLEGE_KINGS_GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("link")

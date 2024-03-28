@@ -8,8 +8,8 @@ use tokio::time::{sleep_until, Instant};
 
 use crate::Result;
 
-const CHANNEL_ID: u64 = 846021706203136030;
-const ROLE_ID: u64 = 836275726352646176;
+const CHANNEL_ID: ChannelId = ChannelId::new(846021706203136030);
+const ROLE_ID: RoleId = RoleId::new(836275726352646176);
 
 pub async fn start_cron_jobs(ctx: Context) -> Result<()> {
     let result = tokio::spawn(async move { run_at_2pm_mon_thurs(ctx).await });
@@ -40,13 +40,11 @@ async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
 async fn send_availability_check(ctx: Context) -> Result<()> {
     println!("Sending availability check");
 
-    let channel_id = ChannelId::new(CHANNEL_ID);
-
-    channel_id
+    CHANNEL_ID
         .send_message(
             &ctx,
             CreateMessage::default()
-                .content(RoleId::new(ROLE_ID).mention().to_string())
+                .content(ROLE_ID.mention().to_string())
                 .embed(
                     CreateEmbed::default()
                         .title("Are you available for tomorrow's meeting?")

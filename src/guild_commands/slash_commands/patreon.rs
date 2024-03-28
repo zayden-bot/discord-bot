@@ -8,7 +8,7 @@ use serde::Deserialize;
 use serde_json::json;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateEmbedFooter, GuildId, ResolvedValue,
+    CreateEmbed, CreateEmbedFooter, ResolvedValue,
 };
 
 #[derive(Deserialize, Debug)]
@@ -98,7 +98,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    GuildId::new(COLLEGE_KINGS_GUILD_ID)
+    COLLEGE_KINGS_GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("patreon")

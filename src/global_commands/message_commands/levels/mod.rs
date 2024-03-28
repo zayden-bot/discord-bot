@@ -3,24 +3,24 @@ pub mod user_levels;
 use chrono::{TimeDelta, Utc};
 use lazy_static::lazy_static;
 use rand::Rng;
-use serenity::all::{Context, Message, RoleId};
+use serenity::all::{ChannelId, Context, Message, RoleId};
 use std::collections::HashMap;
 
 use user_levels::{get_user_level_data, update_user_level_data};
 
 use crate::{Error, Result};
 
-const BLOCKED_CHANNEL_IDS: [u64; 1] = [776139754408247326];
+const BLOCKED_CHANNEL_IDS: [ChannelId; 1] = [ChannelId::new(776139754408247326)];
 
 lazy_static! {
-    static ref LEVEL_ROLES: HashMap<i32, u64> = {
+    static ref LEVEL_ROLES: HashMap<i32, RoleId> = {
         let mut map = HashMap::new();
-        map.insert(5, 787443819024220210); // New Fan | Level 5
-        map.insert(10, 787445571539304510); // Active Fan | Level 10
-        map.insert(20, 787445900992577556); // Big Fan | Level 20
-        map.insert(40, 787446715057831976); // Super Fan | Level 40
-        map.insert(60, 787447090728796191); // Mega Fan | Level 60
-        map.insert(80, 787447252783202326); // Ultra Fan | Level 80
+        map.insert(5, RoleId::new(787443819024220210)); // New Fan | Level 5
+        map.insert(10, RoleId::new(787445571539304510)); // Active Fan | Level 10
+        map.insert(20, RoleId::new(787445900992577556)); // Big Fan | Level 20
+        map.insert(40, RoleId::new(787446715057831976)); // Super Fan | Level 40
+        map.insert(60, RoleId::new(787447090728796191)); // Mega Fan | Level 60
+        map.insert(80, RoleId::new(787447252783202326)); // Ultra Fan | Level 80
         map
     };
 }
@@ -30,7 +30,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<Option<()>> {
         return Ok(None);
     }
 
-    if BLOCKED_CHANNEL_IDS.contains(&msg.channel_id.get()) {
+    if BLOCKED_CHANNEL_IDS.contains(&msg.channel_id) {
         return Ok(None);
     }
 
@@ -81,9 +81,8 @@ async fn update_member_roles(msg: &Message, ctx: &Context, level: i32) -> Result
     let roles_to_remove: Vec<&RoleId> = member
         .roles
         .iter()
-        .filter(|role| {
-            let role_id = role.get();
-            role_id != highest_role_id && LEVEL_ROLES.iter().any(|(_, &id)| id == role_id)
+        .filter(|&role_id| {
+            *role_id != highest_role_id && LEVEL_ROLES.iter().any(|(_, &id)| id == *role_id)
         })
         .collect();
 

@@ -3,12 +3,12 @@ use crate::{
     Error, Result, COLLEGE_KINGS_GUILD_ID,
 };
 use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    EditChannel, GuildId, Permissions, ResolvedValue,
+    ChannelId, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    EditChannel, Permissions, ResolvedValue,
 };
 
-const CHANGE_LOG_CHANNEL_ID: u64 = 992599169288122410;
-const SUPPORT_CHANNEL_ID: u64 = 919950775134847016;
+const CHANGE_LOG_CHANNEL_ID: ChannelId = ChannelId::new(992599169288122410);
+const SUPPORT_CHANNEL_ID: ChannelId = ChannelId::new(919950775134847016);
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
@@ -31,12 +31,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .guild()
         .ok_or_else(|| Error::NoGuild)?;
 
-    if current_channel
-        .parent_id
-        .ok_or_else(|| Error::NoParent)?
-        .get()
-        != SUPPORT_CHANNEL_ID
-    {
+    if current_channel.parent_id.ok_or_else(|| Error::NoParent)? != SUPPORT_CHANNEL_ID {
         message_response(
             ctx,
             interaction,
@@ -74,7 +69,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    GuildId::new(COLLEGE_KINGS_GUILD_ID)
+    COLLEGE_KINGS_GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("fixed")

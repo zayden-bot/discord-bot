@@ -4,6 +4,7 @@ use crate::Result;
 
 pub mod add_artist;
 pub mod close;
+pub mod faq;
 pub mod fetch_suggestions;
 pub mod fixed;
 pub mod get_discord_role;
@@ -21,6 +22,7 @@ pub mod test;
 pub async fn register(ctx: &Context) -> Result<()> {
     add_artist::register(ctx).await?;
     close::register(ctx).await?;
+    faq::register(ctx).await?;
     fetch_suggestions::register(ctx).await?;
     fixed::register(ctx).await?;
     get_discord_role::register(ctx).await?;
