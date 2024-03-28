@@ -4,7 +4,7 @@ use serenity::all::{
 };
 use std::str::FromStr;
 use std::time::Duration;
-use tokio::time::{sleep_until, Instant};
+use tokio::time::sleep;
 
 use crate::Result;
 
@@ -20,19 +20,17 @@ pub async fn start_cron_jobs(ctx: Context) -> Result<()> {
 
 async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
     let schedule = Schedule::from_str("0 0 14 * * Mon,Thu")?;
-    let tolerance = Duration::from_secs(1);
 
     loop {
         if let Some(when) = schedule.upcoming(chrono::Utc).next() {
             let now = chrono::Utc::now();
-            if now + tolerance >= when {
-                let ctx = ctx.clone();
-                tokio::spawn(async move { send_availability_check(ctx).await });
+            let delta = when - now;
+            let duration = Duration::from_secs(delta.num_seconds() as u64);
+            sleep(duration).await;
 
-                let delta = when - now;
-                let duration = Duration::from_secs(delta.num_seconds() as u64);
-                sleep_until(Instant::now() + duration).await;
-            }
+            let ctx = ctx.clone();
+            tokio::spawn(async move { send_availability_check(ctx).await });
+            sleep(Duration::from_secs(60)).await;
         }
     }
 }
