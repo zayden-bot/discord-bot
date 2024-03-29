@@ -14,7 +14,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     let options = interaction.data.options();
     let options = parse_options(&options);
 
-    let rule_id = match options.get("rule") {
+    let rule_id = match options.get("id") {
         Some(ResolvedValue::String(id)) => *id,
         _ => unreachable!("Rule ID is required"),
     };
@@ -46,12 +46,8 @@ pub async fn register(ctx: &Context) -> Result<()> {
         CreateCommand::new("rule")
             .description("Get a rule")
             .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::String,
-                    "rule_id",
-                    "The ID of the rule",
-                )
-                .required(true),
+                CreateCommandOption::new(CommandOptionType::String, "id", "The ID of the rule")
+                    .required(true),
             ),
     )
     .await?;
