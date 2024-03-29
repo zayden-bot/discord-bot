@@ -125,29 +125,25 @@ pub async fn run(ctx: &Context, interaction: &ModalInteraction) -> Result<()> {
 }
 
 async fn resend_button_message(ctx: &Context, interaction: &ModalInteraction) -> Result<()> {
-    let message = interaction
+    let mut message = None;
+    while let Some(Ok(msg)) = interaction
         .channel_id
         .messages_iter(ctx)
-        .filter_map(|m| async move {
-            match m {
-                Ok(m) => {
-                    if let Some(ActionRowComponent::Button(b)) =
-                        m.components.first().and_then(|c| c.components.first())
-                    {
-                        if let ButtonKind::NonLink { custom_id, .. } = &b.data {
-                            if custom_id == "production_request" {
-                                return Some(m);
-                            }
-                        }
-                    }
-                    None
-                }
-                _ => None,
-            }
-        })
         .boxed()
         .next()
-        .await;
+        .await
+    {
+        if let Some(ActionRowComponent::Button(b)) =
+            msg.components.first().and_then(|c| c.components.first())
+        {
+            if let ButtonKind::NonLink { custom_id, .. } = &b.data {
+                if custom_id == "production_request" {
+                    message = Some(msg);
+                    break;
+                }
+            }
+        }
+    }
 
     if let Some(message) = message {
         message.delete(ctx).await?;
