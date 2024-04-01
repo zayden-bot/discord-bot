@@ -12,8 +12,7 @@ const CHANNEL_ID: ChannelId = ChannelId::new(846021706203136030);
 const ROLE_ID: RoleId = RoleId::new(836275726352646176);
 
 pub async fn start_cron_jobs(ctx: Context) -> Result<()> {
-    let result = tokio::spawn(async move { run_at_2pm_mon_thurs(ctx).await });
-    println!("Cron jobs started: {:?}", result.await);
+    tokio::spawn(async move { run_at_2pm_mon_thurs(ctx).await }).await??;
 
     Ok(())
 }
@@ -26,11 +25,11 @@ async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
             let now = chrono::Utc::now();
             let delta = when - now;
             let duration = Duration::from_secs(delta.num_seconds() as u64);
+            println!("run_at_2pm_mon_thurs: {:?}", when);
             sleep(duration).await;
 
-            let ctx = ctx.clone();
-            tokio::spawn(async move { send_availability_check(ctx).await });
-            sleep(Duration::from_secs(60)).await;
+            let ctx_clone = ctx.clone();
+            tokio::spawn(async move { send_availability_check(ctx_clone).await }).await??;
         }
     }
 }
