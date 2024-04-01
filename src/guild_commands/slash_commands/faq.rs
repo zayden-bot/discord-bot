@@ -46,7 +46,10 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 CreateSelectMenuKind::String {
                     options: ids
                         .into_iter()
-                        .map(|id| CreateSelectMenuOption::new(&id[2..id.len() - 2], &id))
+                        .enumerate()
+                        .map(|(index, id)| {
+                            CreateSelectMenuOption::new(&id[2..id.len() - 2], index.to_string())
+                        })
                         .collect(),
                 },
             )),

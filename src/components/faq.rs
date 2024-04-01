@@ -11,7 +11,7 @@ use crate::{guild_commands::slash_commands::faq::FAQ_CHANNEL_ID, Error, Result};
 pub async fn faq(ctx: &Context, interaction: &ComponentInteraction) -> Result<()> {
     let ephemeral = interaction.data.custom_id.ends_with("_ephemeral");
 
-    let content =
+    let index =
         if let ComponentInteractionDataKind::StringSelect { values } = &interaction.data.kind {
             &values[0]
         } else {
@@ -20,20 +20,17 @@ pub async fn faq(ctx: &Context, interaction: &ComponentInteraction) -> Result<()
 
     let message = FAQ_CHANNEL_ID
         .messages_iter(ctx)
+        .skip(index.parse::<usize>()?)
         .filter_map(|msg| async { msg.ok() })
-        .filter(|msg| {
-            let content = msg.content.clone();
-            async move { content.starts_with("**") }
-        })
         .boxed()
         .next()
         .await
-        .ok_or_else(|| Error::FaqMessageNotFound(content.to_string()))?;
+        .ok_or_else(|| Error::FaqMessageNotFound(index.to_string()))?;
 
     let mut parts: Vec<&str> = message.content.split("**").collect();
     let description = parts
         .pop()
-        .ok_or_else(|| Error::FaqMessageNotFound(content.to_string()))?;
+        .ok_or_else(|| Error::FaqMessageNotFound(index.to_string()))?;
     let title = parts.join("");
 
     interaction
