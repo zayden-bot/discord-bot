@@ -11,6 +11,7 @@ pub enum Error {
     Cron(cron::error::Error),
     ParseIntError(std::num::ParseIntError),
     ReactionConversionError(serenity::all::ReactionConversionError),
+    JoinError(tokio::task::JoinError),
     ChronoError,
     ConversionError,
     CommandNotFound(String),
@@ -43,6 +44,7 @@ impl std::fmt::Display for Error {
             Error::Cron(e) => write!(f, "{}", e),
             Error::ParseIntError(e) => write!(f, "{}", e),
             Error::ReactionConversionError(e) => write!(f, "{}", e),
+            Error::JoinError(e) => write!(f, "{}", e),
             Error::ChronoError => write!(f, "Chrono error"),
             Error::ConversionError => write!(f, "Conversion error"),
             Error::CommandNotFound(name) => write!(f, "Command not found: {}", name),
@@ -116,5 +118,11 @@ impl From<std::num::ParseIntError> for Error {
 impl From<serenity::all::ReactionConversionError> for Error {
     fn from(e: serenity::all::ReactionConversionError) -> Self {
         Error::ReactionConversionError(e)
+    }
+}
+
+impl From<tokio::task::JoinError> for Error {
+    fn from(e: tokio::task::JoinError) -> Self {
+        Error::JoinError(e)
     }
 }
