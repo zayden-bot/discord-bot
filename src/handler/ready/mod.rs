@@ -10,17 +10,24 @@ use crate::{global_commands, guild_commands, Result};
 pub async fn ready(ctx: Context, ready: Ready) -> Result<()> {
     println!("{} is connected!", ready.user.name);
 
-    // TODO: Load Commands
-
-    // Deploy Commands
-    guild_commands::register(&ctx).await?;
-    global_commands::register(&ctx).await?;
-
     ctx.set_presence(None, OnlineStatus::Online);
 
-    update_messages(&ctx).await?;
+    // TODO: Load Commands
 
-    tokio::spawn(async move { start_cron_jobs(ctx.clone()).await });
+    let ctx_clone = ctx.clone();
+    let cron_task = tokio::spawn(async move { start_cron_jobs(ctx_clone).await });
+
+    let tasks = tokio::join!(
+        guild_commands::register(&ctx),
+        global_commands::register(&ctx),
+        update_messages(&ctx),
+        cron_task
+    );
+
+    tasks.0?;
+    tasks.1?;
+    tasks.2?;
+    tasks.3??;
 
     Ok(())
 }
