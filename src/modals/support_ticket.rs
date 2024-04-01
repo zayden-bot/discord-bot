@@ -64,10 +64,12 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         value: Some(value), ..
     }) = data.get("additional")
     {
-        let additional = CreateEmbed::default()
-            .title("Additional Information")
-            .description(value);
-        messages.push(CreateMessage::new().embed(additional));
+        if !value.is_empty() {
+            let additional = CreateEmbed::default()
+                .title("Additional Information")
+                .description(value);
+            messages.push(CreateMessage::new().embed(additional));
+        }
     }
 
     for channel_id in support_channel_ids {
