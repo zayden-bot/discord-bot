@@ -39,7 +39,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         )
     });
 
-    embed_response(ctx, interaction, CreateEmbed::new().fields(fields)).await?;
+    embed_response(
+        ctx,
+        interaction,
+        CreateEmbed::new()
+            .title(format!("Logs for {}", user.name))
+            .fields(fields),
+    )
+    .await?;
 
     Ok(())
 }
