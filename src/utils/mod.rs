@@ -14,14 +14,14 @@ pub async fn message_response(
     ctx: &Context,
     interaction: &CommandInteraction,
     content: impl Into<String>,
-) -> Result<()> {
+) -> Result<Message> {
     let _ = interaction.defer(ctx).await;
 
-    interaction
+    let message = interaction
         .edit_response(ctx, EditInteractionResponse::new().content(content))
         .await?;
 
-    Ok(())
+    Ok(message)
 }
 
 pub async fn embed_response(
