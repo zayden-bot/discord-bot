@@ -12,27 +12,51 @@ const CHANNEL_ID: ChannelId = ChannelId::new(846021706203136030);
 const ROLE_ID: RoleId = RoleId::new(836275726352646176);
 
 pub async fn start_cron_jobs(ctx: Context) -> Result<()> {
-    tokio::spawn(async move { run_at_2pm_mon_thurs(ctx).await }).await??;
+    let mut jobs: Vec<(Schedule, _)> = vec![(
+        Schedule::from_str("0 0 14 * * Mon,Thu")?,
+        send_availability_check,
+    )];
 
-    Ok(())
-}
-
-async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
-    let schedule = Schedule::from_str("0 0 14 * * Mon,Thu")?;
+    jobs.sort_by(|(a, _), (b, _)| {
+        let a = a.upcoming(chrono::Utc).next().unwrap_or_default();
+        let b = b.upcoming(chrono::Utc).next().unwrap_or_default();
+        a.cmp(&b)
+    });
 
     loop {
+        let (schedule, action) = jobs.remove(0);
+
         if let Some(when) = schedule.upcoming(chrono::Utc).next() {
             let now = chrono::Utc::now();
             let delta = when - now;
             let duration = Duration::from_secs(delta.num_seconds() as u64);
-            println!("run_at_2pm_mon_thurs: {:?}", when);
+            println!("Next job: {:?}", when);
             sleep(duration).await;
 
             let ctx_clone = ctx.clone();
-            tokio::spawn(async move { send_availability_check(ctx_clone).await }).await??;
+            tokio::spawn(async move { action(ctx_clone).await }).await??;
         }
+
+        jobs.push((schedule, action));
     }
 }
+
+// async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
+//     let schedule = Schedule::from_str("0 0 14 * * Mon,Thu")?;
+
+//     loop {
+//         if let Some(when) = schedule.upcoming(chrono::Utc).next() {
+//             let now = chrono::Utc::now();
+//             let delta = when - now;
+//             let duration = Duration::from_secs(delta.num_seconds() as u64);
+//             println!("run_at_2pm_mon_thurs: {:?}", when);
+//             sleep(duration).await;
+
+//             let ctx_clone = ctx.clone();
+//             tokio::spawn(async move { send_availability_check(ctx_clone).await }).await??;
+//         }
+//     }
+// }
 
 async fn send_availability_check(ctx: Context) -> Result<()> {
     println!("Sending availability check");
