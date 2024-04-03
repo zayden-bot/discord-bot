@@ -14,7 +14,6 @@ pub mod rule;
 pub mod scam;
 pub mod server_info;
 pub mod stars;
-pub mod support;
 pub mod xp;
 
 pub async fn register(ctx: &Context) -> Result<()> {
@@ -30,7 +29,6 @@ pub async fn register(ctx: &Context) -> Result<()> {
     scam::register(ctx).await?;
     server_info::register(ctx).await?;
     stars::register(ctx).await?;
-    support::register(ctx).await?;
     xp::register(ctx).await?;
 
     Ok(())

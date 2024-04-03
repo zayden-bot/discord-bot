@@ -17,6 +17,7 @@ pub mod patreon;
 pub mod reputation;
 pub mod saves;
 pub mod spoilers;
+pub mod support;
 pub mod test;
 
 pub async fn register(ctx: &Context) -> Result<()> {
