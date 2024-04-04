@@ -36,6 +36,7 @@ pub async fn register(ctx: &Context) -> Result<()> {
     reputation::register(ctx).await?;
     saves::register(ctx).await?;
     spoilers::register(ctx).await?;
+    support::register(ctx).await?;
     test::register(ctx).await?;
 
     Ok(())
