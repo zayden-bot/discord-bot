@@ -24,8 +24,8 @@ lazy_static! {
     };
 }
 
-pub async fn run(ctx: &Context, interaction: &ModalInteraction) -> Result<()> {
-    let data = parse_modal_data(&interaction.data.components);
+pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
+    let data = parse_modal_data(&modal.data.components);
     let app_name = match data.get("app_name") {
         Some(InputText {
             value: Some(value), ..
@@ -71,7 +71,7 @@ pub async fn run(ctx: &Context, interaction: &ModalInteraction) -> Result<()> {
         })
         .collect();
 
-    let message = interaction
+    let message = modal
         .channel_id
         .send_message(
             ctx,
@@ -89,15 +89,15 @@ pub async fn run(ctx: &Context, interaction: &ModalInteraction) -> Result<()> {
         .title(format!("{} - {} - {}", app_name, episode, scene))
         .description(request)
         .field("Affected Teams", teams.join(" "), true)
-        .author(CreateEmbedAuthor::new(&interaction.user.name));
+        .author(CreateEmbedAuthor::new(&modal.user.name));
 
-    let channels = interaction
+    let channels = modal
         .guild_id
         .ok_or_else(|| Error::NoGuild)?
         .channels(ctx)
         .await?;
     let channel = channels
-        .get(&interaction.channel_id)
+        .get(&modal.channel_id)
         .ok_or_else(|| Error::NoChannel)?;
 
     let thread = channel
@@ -115,11 +115,11 @@ pub async fn run(ctx: &Context, interaction: &ModalInteraction) -> Result<()> {
         .send_message(ctx, CreateMessage::default().embed(embed))
         .await?;
 
-    interaction
+    modal
         .create_response(ctx, CreateInteractionResponse::Acknowledge)
         .await?;
 
-    resend_button_message(ctx, interaction).await?;
+    resend_button_message(ctx, modal).await?;
 
     Ok(())
 }
