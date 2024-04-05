@@ -13,7 +13,7 @@ pub async fn suggestions(
     accepted: bool,
 ) -> Result<()> {
     if let Some(member) = &interaction.member {
-        if member
+        if !member
             .roles
             .iter()
             .any(|role_id| role_id == &TEAM_LEADERS_ROLE_ID)
@@ -28,6 +28,7 @@ pub async fn suggestions(
                     ),
                 )
                 .await?;
+            return Ok(());
         }
     }
 

@@ -38,7 +38,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
                         .embed(create_embed(
                             &channel,
                             &message,
-                            Some(&msg.embeds[0].fields[0]),
+                            &msg.embeds[0].fields,
                             positive_count,
                             negative_count,
                         ))
@@ -56,7 +56,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
                     .embed(create_embed(
                         &channel,
                         &message,
-                        None,
+                        &Vec::new(),
                         positive_count,
                         negative_count,
                     ))
@@ -80,7 +80,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
 fn create_embed(
     channel: &GuildChannel,
     message: &Message,
-    team_response: Option<&EmbedField>,
+    embed_fields: &[EmbedField],
     positive_count: i32,
     negative_count: i32,
 ) -> CreateEmbed {
@@ -94,7 +94,7 @@ fn create_embed(
             POSITIVE_REACTION, positive_count, NEGATIVE_REACTION, negative_count
         )));
 
-    if let Some(team_response) = team_response {
+    if let Some(team_response) = embed_fields.first() {
         embed = embed.field(
             &team_response.name,
             &team_response.value,
@@ -113,5 +113,8 @@ fn create_components() -> Vec<CreateActionRow> {
         CreateButton::new("suggestions_reject")
             .label("Reject")
             .style(ButtonStyle::Danger),
+        CreateButton::new("suggestions_added")
+            .label("Already Added")
+            .style(ButtonStyle::Primary),
     ])]
 }

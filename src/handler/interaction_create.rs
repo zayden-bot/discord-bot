@@ -59,6 +59,7 @@ pub async fn interaction_component(ctx: &Context, component: &ComponentInteracti
         "production_request" => components::production_request(ctx, component).await?,
         "suggestions_accept" | "accept" => components::suggestions(ctx, component, true).await?,
         "suggestions_reject" | "reject" => components::suggestions(ctx, component, false).await?,
+        "suggestions_added" => components::suggestions(ctx, component, true).await?,
         "support_ticket" => components::support_ticket(ctx, component).await?,
         _ => unimplemented!("Component not implemented: {}", component.data.custom_id),
     }
