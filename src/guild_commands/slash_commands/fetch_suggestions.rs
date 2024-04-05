@@ -1,13 +1,14 @@
-use crate::{utils::message_response, COLLEGE_KINGS_GUILD_ID};
+use crate::{
+    college_kings::{GUILD_ID, SUGGESTION_CATEGORY_ID},
+    utils::message_response,
+};
 use serenity::all::{
-    ChannelId, CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage,
-    GuildChannel, ReactionType,
+    CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage, GuildChannel,
+    ReactionType,
 };
 use std::time;
 
 use crate::{Error, Result};
-
-const CHANNEL_ID: ChannelId = ChannelId::new(1068790374996377671);
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let start_time = time::Instant::now();
@@ -19,12 +20,16 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .threads
         .into_iter()
         .chain(
-            CHANNEL_ID
+            SUGGESTION_CATEGORY_ID
                 .get_archived_public_threads(&ctx, None, None)
                 .await?
                 .threads,
         )
-        .filter(|thread| thread.parent_id.is_some_and(|id| id == CHANNEL_ID))
+        .filter(|thread| {
+            thread
+                .parent_id
+                .is_some_and(|id| id == SUGGESTION_CATEGORY_ID)
+        })
         .collect();
 
     let mut thread_reaction_counts = Vec::with_capacity(threads.len());
@@ -77,7 +82,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    COLLEGE_KINGS_GUILD_ID
+    GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("fetch_suggestions")

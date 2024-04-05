@@ -4,6 +4,7 @@ pub mod cron;
 mod error;
 mod global_commands;
 mod guild_commands;
+pub mod guilds;
 mod handler;
 mod image_cache;
 mod infraction_type;
@@ -12,15 +13,12 @@ mod models;
 mod sqlx_lib;
 mod utils;
 
-use crate::image_cache::ImageCache;
-pub use error::{Error, Result};
-use serenity::{
-    all::{GatewayIntents, GuildId},
-    Client,
-};
+use serenity::{all::GatewayIntents, Client};
 use std::env;
 
-pub const COLLEGE_KINGS_GUILD_ID: GuildId = GuildId::new(745662812335898806);
+use crate::image_cache::ImageCache;
+pub use error::{Error, Result};
+pub use guilds::college_kings;
 
 pub const SERVER_IP: &str = "82.9.123.190";
 pub const SERVER_URL: &str = "http://82.9.123.190";

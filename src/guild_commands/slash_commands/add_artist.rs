@@ -1,6 +1,6 @@
 use crate::{
+    college_kings::GUILD_ID,
     utils::{message_response, parse_options},
-    COLLEGE_KINGS_GUILD_ID,
 };
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
@@ -37,7 +37,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    COLLEGE_KINGS_GUILD_ID
+    GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("add_artist")

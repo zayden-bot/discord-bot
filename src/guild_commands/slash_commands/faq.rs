@@ -1,4 +1,4 @@
-use crate::COLLEGE_KINGS_GUILD_ID;
+use crate::college_kings::GUILD_ID;
 
 use serenity::{
     all::{
@@ -60,7 +60,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    COLLEGE_KINGS_GUILD_ID
+    GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("faq")

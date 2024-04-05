@@ -1,5 +1,5 @@
 use crate::utils::{message_response, send_message};
-use crate::{Error, Result, COLLEGE_KINGS_GUILD_ID};
+use crate::{college_kings::GUILD_ID, Error, Result};
 use serenity::all::{
     ChannelId, CommandInteraction, Context, CreateCommand, EditChannel, Permissions,
 };
@@ -40,7 +40,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    COLLEGE_KINGS_GUILD_ID
+    GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("open")

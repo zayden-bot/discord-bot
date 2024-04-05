@@ -1,8 +1,8 @@
+use crate::{college_kings::GUILD_ID, Result};
 use crate::{
     utils::{embed_response, parse_options},
     SERVER_URL,
 };
-use crate::{Result, COLLEGE_KINGS_GUILD_ID};
 use reqwest::Client;
 use serde::Deserialize;
 use serde_json::json;
@@ -98,7 +98,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    COLLEGE_KINGS_GUILD_ID
+    GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("patreon")

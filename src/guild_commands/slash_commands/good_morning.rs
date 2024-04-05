@@ -1,4 +1,4 @@
-use crate::{Error, ImageCache, Result, COLLEGE_KINGS_GUILD_ID};
+use crate::{college_kings::GUILD_ID, Error, ImageCache, Result};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::all::{
@@ -42,7 +42,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    COLLEGE_KINGS_GUILD_ID
+    GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("good_morning").description("Have a CK girl bless your morning"),

@@ -1,6 +1,6 @@
 use crate::sqlx_lib::{get_spoiler_channel_ids, get_support_channel_ids};
 use crate::utils::message_response;
-use crate::{Error, Result, COLLEGE_KINGS_GUILD_ID};
+use crate::{college_kings::GUILD_ID, Error, Result};
 use serenity::all::{CommandInteraction, Context, CreateCommand};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -28,7 +28,7 @@ spoiler_thread_id, support_thread_id)).await?;
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    COLLEGE_KINGS_GUILD_ID
+    GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("spoilers").description("Disclaimer about spoilers"),

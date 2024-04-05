@@ -1,4 +1,4 @@
-use crate::{utils::send_message, COLLEGE_KINGS_GUILD_ID};
+use crate::{college_kings::GUILD_ID, utils::send_message};
 use serenity::all::{CommandInteraction, Context, CreateCommand};
 
 use crate::Result;
@@ -17,7 +17,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    COLLEGE_KINGS_GUILD_ID
+    GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("get_discord_role").description("How do I get my Discord role"),

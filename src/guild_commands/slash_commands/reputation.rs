@@ -1,5 +1,5 @@
 use crate::Result;
-use crate::{utils::send_embed, COLLEGE_KINGS_GUILD_ID};
+use crate::{college_kings::GUILD_ID, utils::send_embed};
 use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -19,7 +19,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 }
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    COLLEGE_KINGS_GUILD_ID
+    GUILD_ID
         .create_command(
             ctx,
             CreateCommand::new("reputation")
