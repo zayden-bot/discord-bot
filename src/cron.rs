@@ -35,28 +35,12 @@ pub async fn start_cron_jobs(ctx: Context) -> Result<()> {
 
             let ctx_clone = ctx.clone();
             tokio::spawn(async move { action(ctx_clone).await }).await??;
+            sleep(Duration::from_secs(60)).await;
         }
 
         jobs.push((schedule, action));
     }
 }
-
-// async fn run_at_2pm_mon_thurs(ctx: Context) -> Result<()> {
-//     let schedule = Schedule::from_str("0 0 14 * * Mon,Thu")?;
-
-//     loop {
-//         if let Some(when) = schedule.upcoming(chrono::Utc).next() {
-//             let now = chrono::Utc::now();
-//             let delta = when - now;
-//             let duration = Duration::from_secs(delta.num_seconds() as u64);
-//             println!("run_at_2pm_mon_thurs: {:?}", when);
-//             sleep(duration).await;
-
-//             let ctx_clone = ctx.clone();
-//             tokio::spawn(async move { send_availability_check(ctx_clone).await }).await??;
-//         }
-//     }
-// }
 
 async fn send_availability_check(ctx: Context) -> Result<()> {
     println!("Sending availability check");
