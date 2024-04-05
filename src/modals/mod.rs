@@ -1,4 +1,5 @@
 pub mod production_request;
+pub mod suggestions;
 pub mod support_ticket;
 
 use serenity::all::{ActionRow, ActionRowComponent, InputText};

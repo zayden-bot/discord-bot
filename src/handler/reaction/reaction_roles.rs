@@ -1,13 +1,12 @@
-use serenity::all::{Context, Member, Message, Reaction};
+use serenity::all::{Context, Member, Reaction};
 
 use crate::{models::ReactionRole, sqlx_lib, Error, Result};
 
-// Verify reaction.emoji.to_string() is a valid emoji with the new parser
-pub async fn reaction_add(ctx: Context, reaction: Reaction) -> Result<()> {
-    let (reaction_roles, reaction_message, member) = get_reaction_data(&ctx, &reaction).await?;
+pub async fn reaction_add(ctx: &Context, reaction: &Reaction) -> Result<()> {
+    let (reaction_roles, member) = get_reaction_data(ctx, reaction).await?;
 
     for reaction_role in reaction_roles {
-        if (reaction_message.id.get() == (reaction_role.message_id as u64))
+        if (reaction.message_id.get() == (reaction_role.message_id as u64))
             && (reaction.emoji.to_string() == reaction_role.emoji)
         {
             member.add_role(&ctx, reaction_role.role_id as u64).await?;
@@ -17,11 +16,11 @@ pub async fn reaction_add(ctx: Context, reaction: Reaction) -> Result<()> {
     Ok(())
 }
 
-pub async fn reaction_remove(ctx: Context, reaction: Reaction) -> Result<()> {
-    let (reaction_roles, reaction_message, member) = get_reaction_data(&ctx, &reaction).await?;
+pub async fn reaction_remove(ctx: &Context, reaction: &Reaction) -> Result<()> {
+    let (reaction_roles, member) = get_reaction_data(ctx, reaction).await?;
 
     for reaction_role in reaction_roles {
-        if (reaction_message.id.get() == (reaction_role.message_id as u64))
+        if (reaction.message_id.get() == (reaction_role.message_id as u64))
             && (reaction.emoji.to_string() == reaction_role.emoji)
         {
             member
@@ -36,15 +35,14 @@ pub async fn reaction_remove(ctx: Context, reaction: Reaction) -> Result<()> {
 pub async fn get_reaction_data(
     ctx: &Context,
     reaction: &Reaction,
-) -> Result<(Vec<ReactionRole>, Message, Member)> {
+) -> Result<(Vec<ReactionRole>, Member)> {
     let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
-    let reaction_message = reaction.message(&ctx).await?;
     let user_id = reaction.user_id.ok_or_else(|| Error::NoUser)?;
 
     let member = guild_id.member(&ctx, user_id).await?;
     let reaction_roles = get_reaction_roles(guild_id.get() as i64).await?;
 
-    Ok((reaction_roles, reaction_message, member))
+    Ok((reaction_roles, member))
 }
 
 pub async fn get_reaction_roles(guild_id: i64) -> Result<Vec<ReactionRole>> {
