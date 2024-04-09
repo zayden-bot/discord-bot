@@ -45,7 +45,7 @@ pub async fn register(ctx: &Context) -> Result<()> {
     GUILD_ID
         .create_command(
             ctx,
-            CreateCommand::new("good_morning").description("Have a CK girl bless your morning"),
+            CreateCommand::new("goodmorning").description("Have a CK girl bless your morning"),
         )
         .await?;
 
