@@ -28,6 +28,7 @@ pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) ->
         "patreon" => patreon::run(ctx, command).await?,
         "rank" => rank::run(ctx, command).await?,
         "reaction_role" => reaction_role::run(ctx, command).await?,
+        "review" => review::run(ctx, command).await?,
         "ping" => ping::run(ctx, command).await?,
         "reputation" => reputation::run(ctx, command).await?,
         "rule" => rule::run(ctx, command).await?,

@@ -15,29 +15,33 @@ pub mod link;
 pub mod open;
 pub mod patreon;
 pub mod reputation;
+pub mod review;
 pub mod saves;
 pub mod spoilers;
 pub mod support;
 pub mod test;
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    add_artist::register(ctx).await?;
-    close::register(ctx).await?;
-    faq::register(ctx).await?;
-    fetch_suggestions::register(ctx).await?;
-    fixed::register(ctx).await?;
-    get_discord_role::register(ctx).await?;
-    goodmorning::register(ctx).await?;
-    goodnight::register(ctx).await?;
-    image::register(ctx).await?;
-    link::register(ctx).await?;
-    open::register(ctx).await?;
-    patreon::register(ctx).await?;
-    reputation::register(ctx).await?;
-    saves::register(ctx).await?;
-    spoilers::register(ctx).await?;
-    support::register(ctx).await?;
-    test::register(ctx).await?;
+    let _ = tokio::try_join!(
+        add_artist::register(ctx),
+        close::register(ctx),
+        faq::register(ctx),
+        fetch_suggestions::register(ctx),
+        fixed::register(ctx),
+        get_discord_role::register(ctx),
+        goodmorning::register(ctx),
+        goodnight::register(ctx),
+        image::register(ctx),
+        link::register(ctx),
+        open::register(ctx),
+        patreon::register(ctx),
+        reputation::register(ctx),
+        review::register(ctx),
+        saves::register(ctx),
+        spoilers::register(ctx),
+        support::register(ctx),
+        test::register(ctx),
+    )?;
 
     Ok(())
 }
