@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use serenity::all::{
     parse_user_mention, ComponentInteraction, Context, CreateEmbed, CreateInteractionResponse,
     CreateInteractionResponseMessage, Mentionable, UserId,
@@ -5,36 +7,32 @@ use serenity::all::{
 
 use crate::Result;
 
-pub async fn availability_check(ctx: &Context, interaction: &ComponentInteraction) -> Result<()> {
+pub async fn availability_check(
+    ctx: &Context,
+    interaction: &ComponentInteraction,
+    is_available: bool,
+) -> Result<()> {
     let user_id = interaction.user.id;
 
     let fields = &interaction.message.embeds[0].fields;
-    let mut available: Vec<UserId> = fields[0]
+    let mut available: HashSet<UserId> = fields[0]
         .value
         .split('\n')
         .filter_map(parse_user_mention)
         .collect();
 
-    let mut unavailable: Vec<UserId> = fields[1]
+    let mut unavailable: HashSet<UserId> = fields[1]
         .value
         .split('\n')
         .filter_map(parse_user_mention)
         .collect();
 
-    match interaction.data.custom_id.as_str() {
-        "cron_available" | "available" => {
-            if !available.contains(&user_id) {
-                available.push(user_id);
-            }
-            unavailable.retain(|&x| x != user_id);
-        }
-        "cron_unavailable" | "unavailable" => {
-            if !unavailable.contains(&user_id) {
-                unavailable.push(user_id);
-            }
-            available.retain(|&x| x != user_id);
-        }
-        _ => unreachable!("Invalid custom_id"),
+    if is_available {
+        available.insert(user_id);
+        unavailable.remove(&user_id);
+    } else {
+        unavailable.insert(user_id);
+        available.remove(&user_id);
     }
 
     interaction

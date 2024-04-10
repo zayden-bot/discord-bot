@@ -53,14 +53,14 @@ pub async fn interaction_component(ctx: &Context, component: &ComponentInteracti
     );
 
     match component.data.custom_id.as_str() {
-        "cron_available" | "cron_unavailable" => {
-            components::availability_check(ctx, component).await?
-        }
+        "cron_available" => components::availability_check(ctx, component, true).await?,
+        "cron_unavailable" => components::availability_check(ctx, component, false).await?,
         "faq" | "faq_ephemeral" => components::faq(ctx, component).await?,
         "production_request" => components::production_request(ctx, component).await?,
         "suggestions_accept" | "accept" => components::suggestions(ctx, component, true).await?,
         "suggestions_reject" | "reject" => components::suggestions(ctx, component, false).await?,
         "suggestions_added" => components::suggestions(ctx, component, true).await?,
+        "support_close" => components::support_close(ctx, component).await?,
         "support_ticket" => components::support_ticket(ctx, component).await?,
         _ => unimplemented!("Component not implemented: {}", component.data.custom_id),
     }
