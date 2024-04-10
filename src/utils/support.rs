@@ -1,4 +1,7 @@
-use serenity::all::{Context, CreateMessage, GuildChannel, Mentionable, Role, User};
+use serenity::all::{
+    ButtonStyle, Context, CreateButton, CreateMessage, EditMessage, GuildChannel, Mentionable,
+    Role, User,
+};
 
 use crate::Result;
 
@@ -15,11 +18,21 @@ pub async fn send_support_message(
         .chain([author.mention().to_string()])
         .collect();
 
-    thread.say(ctx, mentions).await?;
+    let mut msg = thread.say(ctx, mentions).await?;
 
     for message in messages {
-        thread.send_message(ctx, message).await?;
+        msg = thread.send_message(ctx, message).await?;
     }
+
+    msg.edit(
+        ctx,
+        EditMessage::new().button(
+            CreateButton::new("support_close")
+                .label("Close")
+                .style(ButtonStyle::Primary),
+        ),
+    )
+    .await?;
 
     Ok(())
 }
