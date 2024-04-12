@@ -1,14 +1,16 @@
-pub mod user_levels;
-
 use chrono::{TimeDelta, Utc};
 use lazy_static::lazy_static;
 use rand::Rng;
 use serenity::all::{ChannelId, Context, Message, RoleId};
 use std::collections::HashMap;
 
-use user_levels::{get_user_level_data, update_user_level_data};
-
-use crate::{Error, Result};
+use crate::{
+    sqlx_lib::{
+        user_levels::{get_user_level_data, update_user_level_data},
+        PostgresPool,
+    },
+    Error, Result,
+};
 
 const BLOCKED_CHANNEL_IDS: [ChannelId; 1] = [ChannelId::new(776139754408247326)];
 
@@ -25,21 +27,25 @@ lazy_static! {
     };
 }
 
-pub async fn run(ctx: &Context, msg: &Message) -> Result<Option<()>> {
+pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     if msg.guild_id.is_none() {
-        return Ok(None);
+        return Ok(());
     }
 
     if BLOCKED_CHANNEL_IDS.contains(&msg.channel_id) {
-        return Ok(None);
+        return Ok(());
     }
 
-    let level_data = get_user_level_data(msg.author.id.get()).await?;
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+    let level_data = get_user_level_data(pool, msg.author.id.get()).await?;
 
     if level_data.last_xp
         >= (Utc::now().naive_utc() - TimeDelta::try_minutes(1).ok_or_else(|| Error::TimeDelta)?)
     {
-        return Ok(None);
+        return Ok(());
     }
 
     let mut level = 0;
@@ -56,13 +62,13 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<Option<()>> {
 
     let xp = total_xp - current_total_xp;
 
-    update_user_level_data(level_data.id, xp, total_xp, level).await?;
+    update_user_level_data(pool, level_data.id, xp, total_xp, level).await?;
     update_member_roles(msg, ctx, level).await?;
 
-    Ok(Some(()))
+    Ok(())
 }
 
-async fn update_member_roles(msg: &Message, ctx: &Context, level: i32) -> Result<Option<()>> {
+async fn update_member_roles(msg: &Message, ctx: &Context, level: i32) -> Result<()> {
     let member = msg.member(&ctx).await?;
 
     let highest_qualifying_role_id = LEVEL_ROLES
@@ -73,7 +79,7 @@ async fn update_member_roles(msg: &Message, ctx: &Context, level: i32) -> Result
 
     let highest_role_id = match highest_qualifying_role_id {
         Some(id) => id,
-        None => return Ok(None),
+        None => return Ok(()),
     };
 
     member.add_role(&ctx, highest_role_id).await?;
@@ -90,5 +96,5 @@ async fn update_member_roles(msg: &Message, ctx: &Context, level: i32) -> Result
         member.remove_role(&ctx, *role).await?
     }
 
-    Ok(Some(()))
+    Ok(())
 }
