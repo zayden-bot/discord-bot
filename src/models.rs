@@ -1,5 +1,8 @@
 use chrono::NaiveDateTime;
+use serenity::all::Member;
 use sqlx::FromRow;
+
+use crate::{infraction_type::InfractionType, Error, Result};
 
 #[derive(FromRow)]
 pub struct Image {
@@ -7,7 +10,7 @@ pub struct Image {
     pub image_url: String,
 }
 
-#[derive(FromRow)]
+#[derive(Default, FromRow)]
 pub struct GoldStar {
     pub id: i64,
     pub number_of_stars: i32,
@@ -54,4 +57,34 @@ pub struct Infraction {
     pub points: i32,
     pub reason: String,
     pub created_at: NaiveDateTime,
+}
+
+impl Infraction {
+    pub fn new(
+        user_id: impl TryInto<i64>,
+        username: impl Into<String>,
+        guild_id: impl TryInto<i64>,
+        infraction_type: InfractionType,
+        moderator: Member,
+        points: i32,
+        reason: impl Into<String>,
+    ) -> Result<Self> {
+        Ok(Self {
+            id: 0,
+            user_id: user_id.try_into().map_err(|_| Error::ConversionError)?,
+            username: username.into(),
+            guild_id: guild_id.try_into().map_err(|_| Error::ConversionError)?,
+            infraction_type: infraction_type.to_string(),
+            moderator_id: moderator
+                .user
+                .id
+                .get()
+                .try_into()
+                .map_err(|_| Error::ConversionError)?,
+            moderator_username: moderator.user.name,
+            points,
+            reason: reason.into(),
+            created_at: chrono::Utc::now().naive_utc(),
+        })
+    }
 }
