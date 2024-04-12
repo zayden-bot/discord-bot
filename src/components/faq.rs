@@ -8,9 +8,7 @@ use serenity::{
 
 use crate::{guild_commands::slash_commands::faq::FAQ_CHANNEL_ID, Error, Result};
 
-pub async fn faq(ctx: &Context, interaction: &ComponentInteraction) -> Result<()> {
-    let ephemeral = interaction.data.custom_id.ends_with("_ephemeral");
-
+pub async fn faq(ctx: &Context, interaction: &ComponentInteraction, ephemeral: bool) -> Result<()> {
     let index =
         if let ComponentInteractionDataKind::StringSelect { values } = &interaction.data.kind {
             &values[0]
