@@ -13,15 +13,18 @@ mod models;
 mod sqlx_lib;
 mod utils;
 
-use serenity::{all::GatewayIntents, Client};
+use serenity::{
+    all::{GatewayIntents, UserId},
+    Client,
+};
 use std::env;
 
 use crate::image_cache::ImageCache;
 pub use error::{Error, Result};
-pub use guilds::college_kings;
 
 pub const SERVER_IP: &str = "82.9.123.190";
 pub const SERVER_URL: &str = "http://82.9.123.190";
+pub const OSCAR_SIX_ID: UserId = UserId::new(211486447369322506);
 
 #[tokio::main]
 async fn main() -> Result<()> {
