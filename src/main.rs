@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
     let token = &env::var("DISCORD_TOKEN")?;
 
     let mut client = Client::builder(token, GatewayIntents::all())
-        .event_handler(handler::Handler)
+        .raw_event_handler(handler::Handler)
         .await?;
 
     let mut data = client.data.write().await;
