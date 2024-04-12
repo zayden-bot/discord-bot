@@ -1,12 +1,12 @@
 #![allow(dead_code)]
 
 use serenity::all::{
-    CommandInteraction, Context, CreateEmbed, CreateInteractionResponseFollowup, CreateMessage,
+    CommandInteraction, Context, CreateEmbed, CreateInteractionResponseFollowup,
     EditInteractionResponse, Message, ResolvedOption, ResolvedValue,
 };
 use std::collections::HashMap;
 
-use crate::{Error, Result};
+use crate::Result;
 
 pub mod support;
 
@@ -34,52 +34,6 @@ pub async fn embed_response(
     let message = interaction
         .edit_response(ctx, EditInteractionResponse::new().add_embed(embed))
         .await?;
-
-    Ok(message)
-}
-
-pub async fn send_message(
-    ctx: &Context,
-    interaction: &CommandInteraction,
-    content: impl Into<String>,
-) -> Result<Message> {
-    let channel_id = interaction
-        .channel
-        .as_ref()
-        .ok_or_else(|| Error::NoGuild)?
-        .id;
-
-    let _ = interaction.defer_ephemeral(ctx).await;
-
-    interaction
-        .edit_response(ctx, EditInteractionResponse::new().content("Success"))
-        .await?;
-
-    let message = channel_id
-        .send_message(ctx, CreateMessage::new().content(content))
-        .await?;
-
-    Ok(message)
-}
-
-pub async fn send_embed(
-    ctx: &Context,
-    interaction: &CommandInteraction,
-    message_builder: CreateMessage,
-) -> Result<Message> {
-    let channel_id = interaction
-        .channel
-        .as_ref()
-        .ok_or_else(|| Error::NoGuild)?
-        .id;
-
-    let _ = interaction.defer_ephemeral(ctx).await;
-
-    interaction
-        .edit_response(ctx, EditInteractionResponse::new().content("Success"))
-        .await?;
-
-    let message = channel_id.send_message(ctx, message_builder).await?;
 
     Ok(message)
 }
