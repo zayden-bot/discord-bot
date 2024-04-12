@@ -17,6 +17,7 @@ use serenity::{
     all::{GatewayIntents, UserId},
     Client,
 };
+use sqlx_lib::create_pool;
 use std::env;
 
 use crate::image_cache::ImageCache;
@@ -36,10 +37,9 @@ async fn main() -> Result<()> {
         .event_handler(handler::Handler)
         .await?;
 
-    {
-        let mut data = client.data.write().await;
-        data.insert::<ImageCache>(ImageCache::new());
-    }
+    let mut data = client.data.write().await;
+    data.insert::<ImageCache>(ImageCache::new());
+    create_pool(data).await?;
 
     client.start().await?;
 
