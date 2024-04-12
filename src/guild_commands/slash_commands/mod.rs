@@ -3,6 +3,7 @@ use serenity::all::Context;
 use crate::Result;
 
 pub mod add_artist;
+pub mod availability_check;
 pub mod close;
 pub mod faq;
 pub mod fetch_suggestions;
@@ -22,8 +23,9 @@ pub mod support;
 pub mod test;
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    let _ = tokio::try_join!(
+    tokio::try_join!(
         add_artist::register(ctx),
+        availability_check::register(ctx),
         close::register(ctx),
         faq::register(ctx),
         fetch_suggestions::register(ctx),

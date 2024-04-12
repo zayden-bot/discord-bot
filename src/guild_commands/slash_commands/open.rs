@@ -1,5 +1,5 @@
-use crate::utils::{message_response, send_message};
-use crate::{college_kings::GUILD_ID, Error, Result};
+use crate::utils::message_response;
+use crate::{guilds::college_kings::GUILD_ID, Error, Result};
 use serenity::all::{
     ChannelId, CommandInteraction, Context, CreateCommand, EditChannel, Permissions,
 };
@@ -34,7 +34,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .edit(&ctx, EditChannel::new().name(new_channel_name))
         .await?;
 
-    send_message(ctx, interaction, "Ticket reopened").await?;
+    message_response(ctx, interaction, "Ticket reopened").await?;
 
     Ok(())
 }

@@ -1,6 +1,6 @@
-use crate::sqlx_lib::{get_spoiler_channel_ids, get_support_channel_ids};
+use crate::sqlx_lib::{get_spoiler_channel_ids, get_support_channel_ids, PostgresPool};
 use crate::utils::message_response;
-use crate::{college_kings::GUILD_ID, Error, Result};
+use crate::{guilds::college_kings::GUILD_ID, Error, Result};
 use serenity::all::{CommandInteraction, Context, CreateCommand};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -8,12 +8,17 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let support_thread_ids = get_support_channel_ids(guild_id.get() as i64).await?;
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
+    let support_thread_ids = get_support_channel_ids(pool, guild_id.get()).await?;
     let support_thread_id = support_thread_ids
         .first()
         .ok_or_else(|| Error::NoSupportThread)?;
 
-    let spoiler_thread_ids = get_spoiler_channel_ids(guild_id.get() as i64).await?;
+    let spoiler_thread_ids = get_spoiler_channel_ids(pool, guild_id.get()).await?;
     let spoiler_thread_id = spoiler_thread_ids
         .first()
         .ok_or_else(|| Error::NoSpoilerThread)?;

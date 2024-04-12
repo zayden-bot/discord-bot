@@ -1,5 +1,5 @@
 use crate::{
-    college_kings::GUILD_ID,
+    guilds::college_kings::GUILD_ID,
     utils::{message_response, parse_options},
     Error, Result,
 };

@@ -1,5 +1,5 @@
 use crate::{
-    college_kings::{GUILD_ID, SUGGESTION_CATEGORY_ID},
+    guilds::college_kings::{GUILD_ID, SUGGESTION_CATEGORY_ID},
     utils::message_response,
 };
 use serenity::all::{

@@ -1,10 +1,10 @@
-use crate::sqlx_lib::get_gold_stars;
-use crate::utils::send_embed;
+use crate::sqlx_lib::{get_gold_stars, PostgresPool};
+use crate::utils::embed_response;
+use crate::utils::parse_options;
 use crate::Result;
-use crate::{models::GoldStar, utils::parse_options};
 use serenity::all::{
     Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, ResolvedValue,
+    CreateEmbed, ResolvedValue,
 };
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -16,26 +16,23 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => &interaction.user,
     };
 
-    let stars = get_gold_stars(user.id.get() as i64)
-        .await
-        .unwrap_or(GoldStar {
-            id: 0,
-            number_of_stars: 0,
-            given_stars: 0,
-            received_stars: 0,
-            last_free_star: None,
-        });
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
 
-    send_embed(
+    let stars = get_gold_stars(pool, user.id.get())
+        .await
+        .unwrap_or_default();
+
+    embed_response(
         ctx,
         interaction,
-        CreateMessage::new().embed(
-            CreateEmbed::new()
-                .title(format!("{}'s Stars", user.name))
-                .field("Number of Stars", stars.number_of_stars.to_string(), true)
-                .field("Given Stars", stars.given_stars.to_string(), true)
-                .field("Received Stars", stars.received_stars.to_string(), true),
-        ),
+        CreateEmbed::new()
+            .title(format!("{}'s Stars", user.name))
+            .field("Number of Stars", stars.number_of_stars.to_string(), true)
+            .field("Given Stars", stars.given_stars.to_string(), true)
+            .field("Received Stars", stars.received_stars.to_string(), true),
     )
     .await?;
 

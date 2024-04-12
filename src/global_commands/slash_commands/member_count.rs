@@ -1,5 +1,4 @@
-use crate::utils::send_message;
-use crate::{Error, Result};
+use crate::{utils::message_response, Error, Result};
 use serenity::all::{Command, CommandInteraction, Context, CreateCommand};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -7,7 +6,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await?;
 
-    send_message(
+    message_response(
         ctx,
         interaction,
         &format!(

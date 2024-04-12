@@ -1,4 +1,4 @@
-use crate::{college_kings::GUILD_ID, utils::send_message};
+use crate::{guilds::college_kings::GUILD_ID, utils::message_response};
 use serenity::all::{CommandInteraction, Context, CreateCommand};
 
 use crate::Result;
@@ -11,7 +11,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         + "4. Now that your Patreon and Discord accounts are communicating, our integration will assign you the role tied to your Tier!\n"
         + "5. If you're still having trouble, please visit this website: <https://support.patreon.com/hc/en-us/articles/212052266-Get-my-Discord-role>";
 
-    send_message(ctx, interaction, &content).await?;
+    message_response(ctx, interaction, content).await?;
 
     Ok(())
 }

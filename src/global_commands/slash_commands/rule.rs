@@ -1,9 +1,9 @@
-use crate::sqlx_lib::get_rule;
-use crate::utils::{parse_options, send_embed};
+use crate::sqlx_lib::{get_rule, PostgresPool};
+use crate::utils::{embed_response, parse_options};
 use crate::{Error, Result};
 use serenity::all::{
     ChannelId, Command, CommandInteraction, CommandOptionType, Context, CreateCommand,
-    CreateCommandOption, CreateEmbed, CreateMessage, Mentionable, ResolvedValue,
+    CreateCommandOption, CreateEmbed, Mentionable, ResolvedValue,
 };
 
 const CHANNEL_ID: ChannelId = ChannelId::new(747430712617074718);
@@ -19,21 +19,24 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => unreachable!("Rule ID is required"),
     };
 
-    let rule = get_rule(rule_id, guild_id.get() as i64).await?;
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
 
-    send_embed(
+    let rule = get_rule(pool, rule_id, guild_id.get()).await?;
+
+    embed_response(
         ctx,
         interaction,
-        CreateMessage::new().embed(
-            CreateEmbed::new()
-                .title(format!("Rule: {}", rule_id))
-                .description(format!(
-                    "**{}.** {}\n\n**Please read the rest of the rules in {}!**",
-                    rule_id,
-                    rule,
-                    CHANNEL_ID.mention()
-                )),
-        ),
+        CreateEmbed::new()
+            .title(format!("Rule: {}", rule_id))
+            .description(format!(
+                "**{}.** {}\n\n**Please read the rest of the rules in {}!**",
+                rule_id,
+                rule,
+                CHANNEL_ID.mention()
+            )),
     )
     .await?;
 

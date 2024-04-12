@@ -1,4 +1,4 @@
-use crate::college_kings::GUILD_ID;
+use crate::guilds::college_kings::GUILD_ID;
 
 use serenity::{
     all::{

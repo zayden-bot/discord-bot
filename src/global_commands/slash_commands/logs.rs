@@ -1,4 +1,4 @@
-use crate::sqlx_lib::get_user_infractions;
+use crate::sqlx_lib::{get_user_infractions, PostgresPool};
 use crate::utils::{embed_response, parse_options};
 use crate::Result;
 use serenity::all::{
@@ -11,7 +11,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     let options = parse_options(&options);
 
     let user = match options.get("user") {
-        Some(ResolvedValue::User(user, _)) => user,
+        Some(ResolvedValue::User(user, _)) => *user,
         _ => unreachable!("User option is required"),
     };
 
@@ -20,7 +20,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => "recent",
     };
 
-    let infractions = get_user_infractions(user.id.get() as i64, filter == "recent").await?;
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
+    let infractions = get_user_infractions(pool, user.id.get(), filter == "recent").await?;
 
     let fields = infractions.into_iter().map(|infraction| {
         (

@@ -1,8 +1,7 @@
-use crate::utils::send_embed;
-use crate::{Error, Result};
+use crate::{utils::embed_response, Error, Result};
 use serenity::all::{
     ChannelType, Command, CommandInteraction, Context, CreateCommand, CreateEmbed,
-    CreateEmbedAuthor, CreateMessage,
+    CreateEmbedAuthor,
 };
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -24,33 +23,31 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             _ => (),
         });
 
-    send_embed(
+    embed_response(
         ctx,
         interaction,
-        CreateMessage::new().embed(
-            CreateEmbed::new()
-                .author(
-                    CreateEmbedAuthor::new(&partial_guild.name)
-                        .icon_url(partial_guild.icon_url().unwrap_or_default()),
-                )
-                .field("Owner", format!("<@{}>", partial_guild.owner_id), true)
-                .field(
-                    "Channel Categories",
-                    category_channel_count.to_string(),
-                    true,
-                )
-                .field("Text Channels", text_channel_count.to_string(), true)
-                .field("Voice Channels", voice_channel_count.to_string(), true)
-                .field(
-                    "Members",
-                    partial_guild
-                        .approximate_member_count
-                        .unwrap_or_default()
-                        .to_string(),
-                    true,
-                )
-                .field("Roles", partial_guild.roles.len().to_string(), true),
-        ),
+        CreateEmbed::new()
+            .author(
+                CreateEmbedAuthor::new(&partial_guild.name)
+                    .icon_url(partial_guild.icon_url().unwrap_or_default()),
+            )
+            .field("Owner", format!("<@{}>", partial_guild.owner_id), true)
+            .field(
+                "Channel Categories",
+                category_channel_count.to_string(),
+                true,
+            )
+            .field("Text Channels", text_channel_count.to_string(), true)
+            .field("Voice Channels", voice_channel_count.to_string(), true)
+            .field(
+                "Members",
+                partial_guild
+                    .approximate_member_count
+                    .unwrap_or_default()
+                    .to_string(),
+                true,
+            )
+            .field("Roles", partial_guild.roles.len().to_string(), true),
     )
     .await?;
 

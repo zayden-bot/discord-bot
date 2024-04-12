@@ -1,4 +1,4 @@
-use crate::sqlx_lib::{create_reaction_role, delete_reaction_role};
+use crate::sqlx_lib::{create_reaction_role, delete_reaction_role, PostgresPool};
 use crate::utils::{message_response, parse_options};
 use crate::{Error, Result};
 use serenity::all::{
@@ -6,16 +6,19 @@ use serenity::all::{
     CreateEmbed, CreateMessage, GuildId, Mentionable, MessageId, PartialChannel, Permissions,
     ReactionType, ResolvedValue, Role,
 };
+use sqlx::{Pool, Postgres};
 
 async fn add(
     ctx: &Context,
     interaction: &CommandInteraction,
-    guild_id: GuildId,
+    pool: &Pool<Postgres>,
     channel: &PartialChannel,
     message_id: Option<MessageId>,
     emoji: ReactionType,
     role: &Role,
 ) -> Result<()> {
+    let guild_id = role.guild_id;
+
     let message = match message_id {
         Some(message_id) => channel.id.message(ctx, message_id).await?,
         None => {
@@ -34,6 +37,7 @@ async fn add(
     };
 
     create_reaction_role(
+        pool,
         guild_id.get(),
         channel.id.get(),
         message.id.get(),
@@ -51,6 +55,7 @@ async fn add(
 async fn remove(
     ctx: &Context,
     interaction: &CommandInteraction,
+    pool: &Pool<Postgres>,
     channel: &PartialChannel,
     guild_id: GuildId,
     message_id: MessageId,
@@ -59,6 +64,7 @@ async fn remove(
     let message = channel.id.message(ctx, message_id).await?;
 
     delete_reaction_role(
+        pool,
         guild_id.get(),
         channel.id.get(),
         message_id.get(),
@@ -93,6 +99,11 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => unreachable!("Emoji is required"),
     };
 
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
     match command.name {
         "add" => {
             let role = match options.get("role") {
@@ -107,16 +118,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 _ => None,
             };
 
-            add(
-                ctx,
-                interaction,
-                guild_id,
-                channel,
-                message_id,
-                reaction,
-                role,
-            )
-            .await?;
+            add(ctx, interaction, pool, channel, message_id, reaction, role).await?;
         }
         "remove" => {
             let message_id = match options.get("message_id") {
@@ -124,7 +126,16 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 _ => unreachable!("Message ID is required"),
             };
 
-            remove(ctx, interaction, channel, guild_id, message_id, reaction).await?;
+            remove(
+                ctx,
+                interaction,
+                pool,
+                channel,
+                guild_id,
+                message_id,
+                reaction,
+            )
+            .await?;
         }
         _ => unreachable!("Invalid subcommand name"),
     };

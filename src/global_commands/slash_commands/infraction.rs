@@ -1,5 +1,6 @@
 use crate::infraction_type::InfractionType;
-use crate::sqlx_lib::{create_user_infraction, get_user_infractions};
+use crate::models::Infraction;
+use crate::sqlx_lib::{create_user_infraction, get_user_infractions, PostgresPool};
 use crate::utils::{message_response, parse_options};
 use chrono::{Duration, Months, TimeDelta, Utc};
 use serenity::all::{Command, CommandInteraction, CommandOptionType, CreateEmbed, ResolvedValue};
@@ -7,16 +8,18 @@ use serenity::builder::{CreateCommand, CreateCommandOption, CreateMessage};
 use serenity::model::prelude::{GuildId, Member};
 use serenity::model::{Permissions, Timestamp};
 use serenity::prelude::Context;
+use sqlx::{Pool, Postgres};
 use std::cmp;
 
 use crate::{Error, Result};
 
 async fn warn<'a>(
     ctx: &Context,
+    pool: &Pool<Postgres>,
     member: Member,
     guild_id: &GuildId,
     moderator: Member,
-    points: i64,
+    points: i32,
     reason: &str,
 ) -> Result<&'a str> {
     member
@@ -35,20 +38,17 @@ async fn warn<'a>(
         )
         .await?;
 
-    let user_id = member.user.id.get() as i64;
-    let username = member.user.name.as_str();
-    let guild_id = guild_id.get() as i64;
-    let infraction_type = InfractionType::Warn;
-    let points = points as i32;
-
     create_user_infraction(
-        user_id,
-        username,
-        guild_id,
-        infraction_type,
-        moderator.user,
-        points,
-        reason,
+        pool,
+        Infraction::new(
+            member.user.id.get(),
+            &member.user.name,
+            guild_id.get(),
+            InfractionType::Ban,
+            moderator,
+            points,
+            reason,
+        )?,
     )
     .await?;
 
@@ -57,13 +57,14 @@ async fn warn<'a>(
 
 async fn mute<'a>(
     ctx: &Context,
+    pool: &Pool<Postgres>,
     mut member: Member,
-    guild_id: &GuildId,
     moderator: Member,
     duration: Duration,
-    points: i64,
+    points: i32,
     reason: &str,
 ) -> Result<&'a str> {
+    let guild_id = member.guild_id;
     let timestamp = (Utc::now() + duration).timestamp();
 
     member
@@ -86,20 +87,17 @@ async fn mute<'a>(
         )
         .await?;
 
-    let user_id = member.user.id.get() as i64;
-    let username = member.user.name.as_str();
-    let guild_id = guild_id.get() as i64;
-    let infraction_type = InfractionType::Mute;
-    let points = points as i32;
-
     create_user_infraction(
-        user_id,
-        username,
-        guild_id,
-        infraction_type,
-        moderator.user,
-        points,
-        reason,
+        pool,
+        Infraction::new(
+            member.user.id.get(),
+            &member.user.name,
+            guild_id.get(),
+            InfractionType::Ban,
+            moderator,
+            points,
+            reason,
+        )?,
     )
     .await?;
 
@@ -108,10 +106,11 @@ async fn mute<'a>(
 
 async fn ban<'a>(
     ctx: &Context,
+    pool: &Pool<Postgres>,
     member: Member,
     guild_id: &GuildId,
     moderator: Member,
-    points: i64,
+    points: i32,
     reason: &str,
 ) -> Result<&'a str> {
     member.ban_with_reason(ctx, 7, &reason).await?;
@@ -132,20 +131,17 @@ async fn ban<'a>(
         )
         .await?;
 
-    let user_id = member.user.id.get() as i64;
-    let username = member.user.name.as_str();
-    let guild_id = guild_id.get() as i64;
-    let infraction_type = InfractionType::Ban;
-    let points = points as i32;
-
     create_user_infraction(
-        user_id,
-        username,
-        guild_id,
-        infraction_type,
-        moderator.user,
-        points,
-        reason,
+        pool,
+        Infraction::new(
+            member.user.id.get(),
+            &member.user.name,
+            guild_id.get(),
+            InfractionType::Ban,
+            moderator,
+            points,
+            reason,
+        )?,
     )
     .await?;
 
@@ -163,10 +159,10 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => unreachable!("User option is required"),
     };
 
-    let moderator = guild_id.member(&ctx, interaction.user.id).await?;
+    let moderator = guild_id.member(ctx, interaction.user.id).await?;
 
     let points = match options.get("points") {
-        Some(ResolvedValue::Integer(points)) => *points,
+        Some(ResolvedValue::Integer(points)) => *points as i32,
         _ => 1,
     };
 
@@ -175,32 +171,37 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => "No reason provided",
     };
 
-    let user_infractions = get_user_infractions(user.id.get() as i64, false).await?;
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
+    let user_infractions = get_user_infractions(pool, user.id.get(), false).await?;
 
     let six_months_age = Utc::now()
         .checked_sub_months(Months::new(6))
         .ok_or_else(|| Error::TimeDelta)?
         .naive_utc();
 
-    let infractions = user_infractions
+    let infractions: Vec<_> = user_infractions
         .iter()
         .filter(|infraction| infraction.created_at >= six_months_age)
-        .collect::<Vec<_>>();
-    let infraction_count = infractions
+        .collect();
+    let infraction_count: i32 = infractions
         .into_iter()
         .map(|infraction| infraction.points)
-        .sum::<i32>();
-    let infraction_count = cmp::min((infraction_count as i64) + points, 5);
+        .sum();
+    let infraction_count = cmp::min(infraction_count + points, 5);
 
     let member = guild_id.member(&ctx, user).await?;
 
     let message = match infraction_count {
-        n if n <= 1 => warn(ctx, member, &guild_id, moderator, points, reason).await?,
+        1 => warn(ctx, pool, member, &guild_id, moderator, points, reason).await?,
         2 => {
             mute(
                 ctx,
+                pool,
                 member,
-                &guild_id,
                 moderator,
                 TimeDelta::try_hours(1).ok_or_else(|| Error::TimeDelta)?,
                 points,
@@ -211,8 +212,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         3 => {
             mute(
                 ctx,
+                pool,
                 member,
-                &guild_id,
                 moderator,
                 TimeDelta::try_hours(8).ok_or_else(|| Error::TimeDelta)?,
                 points,
@@ -223,8 +224,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         4 => {
             mute(
                 ctx,
+                pool,
                 member,
-                &guild_id,
                 moderator,
                 TimeDelta::try_days(28).ok_or_else(|| Error::TimeDelta)?,
                 points,
@@ -232,7 +233,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             )
             .await?
         }
-        n if n >= 5 => ban(ctx, member, &guild_id, moderator, points, reason).await?,
+        5 => ban(ctx, pool, member, &guild_id, moderator, points, reason).await?,
         _ => unreachable!("Invalid infraction count"),
     };
 

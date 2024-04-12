@@ -1,13 +1,12 @@
-use crate::global_commands::message_commands::levels::user_levels::get_user_level_data;
-use crate::{
-    global_commands::message_commands::levels::user_levels::get_user_rank,
-    utils::{embed_response, parse_options},
-};
-use crate::{Error, Result};
 use serenity::all::{
     Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, ResolvedValue,
 };
+
+use crate::sqlx_lib::user_levels::{get_user_level_data, get_user_rank};
+use crate::sqlx_lib::PostgresPool;
+use crate::utils::{embed_response, parse_options};
+use crate::{Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
@@ -23,11 +22,16 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => &interaction.user,
     };
 
-    let level_data = get_user_level_data(user.id.get()).await?;
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
+    let level_data = get_user_level_data(pool, user.id.get()).await?;
 
     let level = level_data.level;
     let xp_for_next_level = 5 * (level * level) + 50 * level + 100;
-    let user_rank = get_user_rank(user.id.get())
+    let user_rank = get_user_rank(pool, user.id.get())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
 

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::image_cache::ImageCache;
-use crate::{college_kings::GUILD_ID, Error, Result};
+use crate::{guilds::college_kings::GUILD_ID, Error, Result};
 use rand::seq::{IteratorRandom, SliceRandom};
 use rand::thread_rng;
 use serenity::all::{

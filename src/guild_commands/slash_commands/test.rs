@@ -2,7 +2,7 @@ use serenity::all::{
     ChannelId, CommandInteraction, Context, CreateButton, CreateCommand, CreateMessage, Permissions,
 };
 
-use crate::{college_kings::GUILD_ID, utils::message_response, Result};
+use crate::{guilds::college_kings::GUILD_ID, utils::message_response, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     ChannelId::new(1164928484838227968)

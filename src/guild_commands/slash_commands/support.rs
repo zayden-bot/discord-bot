@@ -1,25 +1,27 @@
 use crate::sqlx_lib::{
-    create_support_faq, delete_support_faq, get_all_support_faq, get_support_answer,
+    create_support_faq, delete_support_faq, get_all_support_faq, get_support_answer, PostgresPool,
 };
-use crate::utils::{message_response, parse_options, send_embed};
+use crate::utils::{embed_response, message_response, parse_options};
 use crate::{Error, Result};
 use serenity::all::{
     Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, GuildId, Permissions, ResolvedValue,
+    CreateEmbed, GuildId, Permissions, ResolvedValue,
 };
+use sqlx::{Pool, Postgres};
 
 async fn get(
     ctx: &Context,
     interaction: &CommandInteraction,
+    pool: &Pool<Postgres>,
     guild_id: GuildId,
     support_id: &str,
 ) -> Result<()> {
-    let answer = get_support_answer(guild_id.get() as i64, &support_id.to_lowercase()).await?;
+    let answer = get_support_answer(pool, guild_id.get(), &support_id.to_lowercase()).await?;
 
-    send_embed(
+    embed_response(
         ctx,
         interaction,
-        CreateMessage::new().embed(CreateEmbed::new().title(support_id).description(answer)),
+        CreateEmbed::new().title(support_id).description(answer),
     )
     .await?;
 
@@ -29,19 +31,25 @@ async fn get(
 async fn add(
     ctx: &Context,
     interaction: &CommandInteraction,
+    pool: &Pool<Postgres>,
     guild_id: GuildId,
     support_id: &str,
     answer: &str,
 ) -> Result<()> {
-    create_support_faq(guild_id.get() as i64, &support_id.to_lowercase(), answer).await?;
+    create_support_faq(pool, guild_id.get(), &support_id.to_lowercase(), answer).await?;
 
     message_response(ctx, interaction, "Support info added").await?;
 
     Ok(())
 }
 
-async fn list(ctx: &Context, interaction: &CommandInteraction, guild_id: GuildId) -> Result<()> {
-    let faqs = get_all_support_faq(guild_id.get() as i64).await?;
+async fn list(
+    ctx: &Context,
+    interaction: &CommandInteraction,
+    pool: &Pool<Postgres>,
+    guild_id: GuildId,
+) -> Result<()> {
+    let faqs = get_all_support_faq(pool, guild_id.get()).await?;
 
     if faqs.is_empty() {
         message_response(ctx, interaction, "No support for this server").await?;
@@ -50,14 +58,12 @@ async fn list(ctx: &Context, interaction: &CommandInteraction, guild_id: GuildId
 
     let ids: Vec<String> = faqs.into_iter().map(|faq| faq.id).collect();
 
-    send_embed(
+    embed_response(
         ctx,
         interaction,
-        CreateMessage::new().embed(
-            CreateEmbed::new()
-                .title("Support IDs")
-                .description(ids.join("\n")),
-        ),
+        CreateEmbed::new()
+            .title("Support IDs")
+            .description(ids.join("\n")),
     )
     .await?;
 
@@ -67,10 +73,11 @@ async fn list(ctx: &Context, interaction: &CommandInteraction, guild_id: GuildId
 async fn remove(
     ctx: &Context,
     interaction: &CommandInteraction,
+    pool: &Pool<Postgres>,
     guild_id: GuildId,
     support_id: &str,
 ) -> Result<()> {
-    delete_support_faq(guild_id.get() as i64, &support_id.to_lowercase()).await?;
+    delete_support_faq(pool, guild_id.get(), &support_id.to_lowercase()).await?;
 
     message_response(ctx, interaction, "Support info removed").await?;
 
@@ -88,8 +95,13 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     };
     let options = parse_options(options);
 
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
     if command.name == "list" {
-        list(ctx, interaction, guild_id).await?;
+        list(ctx, interaction, pool, guild_id).await?;
         return Ok(());
     }
 
@@ -99,16 +111,16 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     };
 
     match command.name {
-        "get" => get(ctx, interaction, guild_id, id).await?,
+        "get" => get(ctx, interaction, pool, guild_id, id).await?,
         "add" => {
             let answer = match options.get("answer") {
                 Some(ResolvedValue::String(answer)) => *answer,
                 _ => unreachable!("Answer is required"),
             };
 
-            add(ctx, interaction, guild_id, id, answer).await?
+            add(ctx, interaction, pool, guild_id, id, answer).await?
         }
-        "remove" => remove(ctx, interaction, guild_id, id).await?,
+        "remove" => remove(ctx, interaction, pool, guild_id, id).await?,
         _ => unreachable!("Invalid subcommand"),
     };
 
@@ -120,7 +132,8 @@ pub async fn register(ctx: &Context) -> Result<()> {
         CommandOptionType::String,
         "id",
         "The ID of the support info",
-    );
+    )
+    .required(true);
 
     Command::create_global_command(
         ctx,
@@ -133,7 +146,7 @@ pub async fn register(ctx: &Context) -> Result<()> {
                     "get",
                     "Get a support info",
                 )
-                .add_sub_option(id_option.clone().required(true)),
+                .add_sub_option(id_option.clone()),
             )
             .add_option(
                 CreateCommandOption::new(
@@ -141,7 +154,7 @@ pub async fn register(ctx: &Context) -> Result<()> {
                     "add",
                     "Add a support info",
                 )
-                .add_sub_option(id_option.clone().required(true))
+                .add_sub_option(id_option.clone())
                 .add_sub_option(
                     CreateCommandOption::new(
                         CommandOptionType::String,
@@ -162,7 +175,7 @@ pub async fn register(ctx: &Context) -> Result<()> {
                     "remove",
                     "Remove an existing support ID",
                 )
-                .add_sub_option(id_option.required(true)),
+                .add_sub_option(id_option),
             ),
     )
     .await?;

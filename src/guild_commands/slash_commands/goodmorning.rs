@@ -1,4 +1,4 @@
-use crate::{college_kings::GUILD_ID, Error, ImageCache, Result};
+use crate::{guilds::college_kings::GUILD_ID, Error, ImageCache, Result};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::all::{

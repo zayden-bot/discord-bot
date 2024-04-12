@@ -1,4 +1,4 @@
-use crate::{college_kings::GUILD_ID, Result};
+use crate::{guilds::college_kings::GUILD_ID, Result};
 use crate::{
     utils::{embed_response, parse_options},
     SERVER_URL,

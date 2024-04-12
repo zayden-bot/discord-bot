@@ -1,17 +1,15 @@
 use crate::Result;
-use crate::{college_kings::GUILD_ID, utils::send_embed};
-use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage};
+use crate::{guilds::college_kings::GUILD_ID, utils::embed_response};
+use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    send_embed(
+    embed_response(
         ctx,
         interaction,
-        CreateMessage::new().embed(
-            CreateEmbed::new()
-                .field("Popular", "✅ Bro\n✅ Trouble Maker\n❌ Boyfriend", true)
-                .field("Loyal", "✅ Bro\n✅ Boyfriend\n❌ Trouble Maker", true)
-                .field("Confident", "✅ Boyfriend\n✅ Trouble Maker\n❌ Bro", true),
-        ),
+        CreateEmbed::new()
+            .field("Popular", "✅ Bro\n✅ Trouble Maker\n❌ Boyfriend", true)
+            .field("Loyal", "✅ Bro\n✅ Boyfriend\n❌ Trouble Maker", true)
+            .field("Confident", "✅ Boyfriend\n✅ Trouble Maker\n❌ Bro", true),
     )
     .await?;
 
