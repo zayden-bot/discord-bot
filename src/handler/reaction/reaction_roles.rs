@@ -1,9 +1,18 @@
-use serenity::all::{Context, Member, Reaction};
+use serenity::all::{Context, Reaction};
+use sqlx::{Pool, Postgres};
 
-use crate::{models::ReactionRole, sqlx_lib, Error, Result};
+use crate::{models::ReactionRole, sqlx_lib::PostgresPool, Error, Result};
 
 pub async fn reaction_add(ctx: &Context, reaction: &Reaction) -> Result<()> {
-    let (reaction_roles, member) = get_reaction_data(ctx, reaction).await?;
+    let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
+    let reaction_roles = get_reaction_roles(pool, guild_id).await?;
+    let member = reaction.member.as_ref().ok_or_else(|| Error::NoMember)?;
 
     for reaction_role in reaction_roles {
         if (reaction.message_id.get() == (reaction_role.message_id as u64))
@@ -17,7 +26,15 @@ pub async fn reaction_add(ctx: &Context, reaction: &Reaction) -> Result<()> {
 }
 
 pub async fn reaction_remove(ctx: &Context, reaction: &Reaction) -> Result<()> {
-    let (reaction_roles, member) = get_reaction_data(ctx, reaction).await?;
+    let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
+    let reaction_roles = get_reaction_roles(pool, guild_id).await?;
+    let member = reaction.member.as_ref().ok_or_else(|| Error::NoMember)?;
 
     for reaction_role in reaction_roles {
         if (reaction.message_id.get() == (reaction_role.message_id as u64))
@@ -32,30 +49,17 @@ pub async fn reaction_remove(ctx: &Context, reaction: &Reaction) -> Result<()> {
     Ok(())
 }
 
-pub async fn get_reaction_data(
-    ctx: &Context,
-    reaction: &Reaction,
-) -> Result<(Vec<ReactionRole>, Member)> {
-    let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
-    let user_id = reaction.user_id.ok_or_else(|| Error::NoUser)?;
-
-    let member = guild_id.member(&ctx, user_id).await?;
-    let reaction_roles = get_reaction_roles(guild_id.get() as i64).await?;
-
-    Ok((reaction_roles, member))
-}
-
-pub async fn get_reaction_roles(guild_id: i64) -> Result<Vec<ReactionRole>> {
-    let pool = sqlx_lib::get_pool().await?;
-
-    let results = sqlx::query_as!(
+pub async fn get_reaction_roles(
+    pool: &Pool<Postgres>,
+    guild_id: impl TryInto<i64>,
+) -> Result<Vec<ReactionRole>> {
+    let reaction_roles = sqlx::query_as!(
         ReactionRole,
         "SELECT * FROM reaction_roles WHERE guild_id = $1",
-        guild_id
+        guild_id.try_into().map_err(|_| Error::ConversionError)?
     )
-    .fetch_all(&pool)
+    .fetch_all(pool)
     .await?;
 
-    pool.close().await;
-    Ok(results)
+    Ok(reaction_roles)
 }
