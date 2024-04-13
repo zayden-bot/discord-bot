@@ -1,5 +1,6 @@
 use crate::sqlx_lib::{
     get_support_channel_ids, get_support_role_ids, get_support_thead_id, update_support_thread_id,
+    PostgresPool,
 };
 use crate::utils::support::get_thread_name;
 use crate::{Error, Result};
@@ -25,14 +26,19 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
         None => return Ok(()),
     };
 
-    let support_channel_ids = get_support_channel_ids(guild_id.get() as i64).await?;
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
+    let support_channel_ids = get_support_channel_ids(pool, guild_id.get()).await?;
     if !support_channel_ids.contains(&(msg.channel_id.get() as i64)) {
         return Ok(());
     }
 
     let guild_roles = guild_id.roles(&ctx).await?;
 
-    let support_role_ids = get_support_role_ids(guild_id.get() as i64).await?;
+    let support_role_ids = get_support_role_ids(pool, guild_id.get()).await?;
     let support_role = guild_roles
         .into_iter()
         .find(|(role_id, _)| role_id.get() == (support_role_ids[0] as u64))
@@ -45,11 +51,11 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
 
     let attachments = get_attachments(msg).await?;
 
-    let thread_id = get_support_thead_id(guild_id.get() as i64)
+    let thread_id = get_support_thead_id(pool, guild_id.get())
         .await
         .unwrap_or(0)
         + 1;
-    update_support_thread_id(guild_id.get() as i64, thread_id).await?;
+    update_support_thread_id(pool, guild_id.get(), thread_id).await?;
 
     let thread_name = get_thread_name(thread_id, &msg.author.name, &msg.content);
     // let files = self.0.attachments.as_mut().map_or(Vec::new(), |a| a.take_files());
