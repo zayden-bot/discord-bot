@@ -1,5 +1,3 @@
-use std::vec;
-
 use serenity::all::{
     AutoArchiveDuration, ChannelId, ChannelType, Context, CreateEmbed, CreateEmbedFooter,
     CreateInteractionResponse, CreateMessage, CreateThread, InputText, ModalInteraction, Role,
@@ -9,7 +7,7 @@ use serenity::all::{
 use crate::{
     sqlx_lib::{
         get_support_channel_ids, get_support_role_ids, get_support_thead_id,
-        update_support_thread_id,
+        update_support_thread_id, PostgresPool,
     },
     utils::support::{get_thread_name, send_support_message},
     Error, Result,
@@ -20,11 +18,16 @@ use super::parse_modal_data;
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let guild_id = modal.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let support_channel_ids = get_support_channel_ids(guild_id.get()).await?;
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.");
+
+    let support_channel_ids = get_support_channel_ids(pool, guild_id.get()).await?;
 
     let guild_roles = guild_id.roles(&ctx).await?;
 
-    let support_roles = get_support_role_ids(guild_id.get())
+    let support_roles = get_support_role_ids(pool, guild_id.get())
         .await?
         .into_iter()
         .map(|id| {
@@ -34,7 +37,10 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         })
         .collect::<Result<Vec<&Role>>>()?;
 
-    let thread_id = get_support_thead_id(guild_id.get()).await.unwrap_or(0) + 1;
+    let thread_id = get_support_thead_id(pool, guild_id.get())
+        .await
+        .unwrap_or(0)
+        + 1;
 
     let data = parse_modal_data(&modal.data.components);
     let content = match data.get("issue") {
@@ -87,7 +93,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         send_support_message(ctx, &thread, &support_roles, &modal.user, messages.clone()).await?;
     }
 
-    update_support_thread_id(guild_id.get() as i64, thread_id).await?;
+    update_support_thread_id(pool, guild_id.get(), thread_id).await?;
 
     modal
         .create_response(ctx, CreateInteractionResponse::Acknowledge)
