@@ -58,7 +58,6 @@ pub async fn update_support_thread_id(
         thread_id
     ).execute(pool).await?;
 
-    pool.close().await;
     Ok(())
 }
 
