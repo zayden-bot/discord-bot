@@ -10,6 +10,7 @@ pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) ->
 
     match command.data.name.as_str() {
         "add_artist" => add_artist::run(ctx, command).await?,
+        "availability_check" => availability_check::run(ctx, command).await?,
         "close" => close::run(ctx, command).await?,
         "faq" => faq::run(ctx, command).await?,
         "fetch_suggestions" => fetch_suggestions::run(ctx, command).await?,
@@ -55,7 +56,11 @@ pub async fn interaction_component(ctx: &Context, component: &ComponentInteracti
     match component.data.custom_id.as_str() {
         "cron_available" => components::availability_check(ctx, component, true).await?,
         "cron_unavailable" => components::availability_check(ctx, component, false).await?,
-        "faq" | "faq_ephemeral" => components::faq(ctx, component).await?,
+        "faq" => components::faq(ctx, component, false).await?,
+        "faq_ephemeral" => components::faq(ctx, component, true).await?,
+        "levels_previous" => components::levels(ctx, component, "previous").await?,
+        "levels_user" => components::levels(ctx, component, "user").await?,
+        "levels_next" => components::levels(ctx, component, "next").await?,
         "production_request" => components::production_request(ctx, component).await?,
         "suggestions_accept" | "accept" => components::suggestions(ctx, component, true).await?,
         "suggestions_reject" | "reject" => components::suggestions(ctx, component, false).await?,
