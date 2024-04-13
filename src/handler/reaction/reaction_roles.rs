@@ -34,7 +34,14 @@ pub async fn reaction_remove(ctx: &Context, reaction: &Reaction) -> Result<()> {
         .expect("PostgresPool should exist in data.");
 
     let reaction_roles = get_reaction_roles(pool, guild_id).await?;
-    let member = reaction.member.as_ref().ok_or_else(|| Error::NoMember)?;
+    let member = match reaction.member {
+        Some(ref member) => member.clone(),
+        None => {
+            guild_id
+                .member(ctx, reaction.user_id.ok_or_else(|| Error::NoUser)?)
+                .await?
+        }
+    };
 
     for reaction_role in reaction_roles {
         if (reaction.message_id.get() == (reaction_role.message_id as u64))
