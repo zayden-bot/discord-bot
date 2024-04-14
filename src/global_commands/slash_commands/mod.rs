@@ -17,19 +17,21 @@ pub mod stars;
 pub mod xp;
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    gold_star::register(ctx).await?;
-    infraction::register(ctx).await?;
-    levels::register(ctx).await?;
-    logs::register(ctx).await?;
-    member_count::register(ctx).await?;
-    ping::register(ctx).await?;
-    rank::register(ctx).await?;
-    reaction_role::register(ctx).await?;
-    rule::register(ctx).await?;
-    scam::register(ctx).await?;
-    server_info::register(ctx).await?;
-    stars::register(ctx).await?;
-    xp::register(ctx).await?;
+    tokio::try_join!(
+        gold_star::register(ctx),
+        infraction::register(ctx),
+        levels::register(ctx),
+        logs::register(ctx),
+        member_count::register(ctx),
+        ping::register(ctx),
+        rank::register(ctx),
+        reaction_role::register(ctx),
+        rule::register(ctx),
+        scam::register(ctx),
+        server_info::register(ctx),
+        stars::register(ctx),
+        xp::register(ctx),
+    )?;
 
     Ok(())
 }
