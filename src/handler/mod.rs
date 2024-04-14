@@ -74,7 +74,7 @@ impl RawEventHandler for Handler {
 
         if let Err(e) = result {
             let msg = format!("Error handling {:?}: {:?}", event_name, e);
-            println!("{}\n{}", msg, ev_debug);
+            eprintln!("{}\n{}", msg, ev_debug);
 
             if let Ok(channel) = OSCAR_SIX_ID.create_dm_channel(&ctx).await {
                 let _ = channel.say(&ctx, msg).await;
