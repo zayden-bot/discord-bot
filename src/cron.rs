@@ -8,7 +8,13 @@ use crate::guild_commands::slash_commands::availability_check::availability_chec
 use crate::guilds::college_kings_team::TEAM_LEADS_CHANNEL_ID;
 use crate::Result;
 
-pub async fn start_cron_jobs(ctx: Context) -> Result<()> {
+pub async fn start_cron_jobs(ctx: Context) {
+    if let Err(e) = _start_cron_jobs(ctx).await {
+        eprintln!("Error starting cron jobs: {:?}", e);
+    }
+}
+
+async fn _start_cron_jobs(ctx: Context) -> Result<()> {
     let mut jobs: Vec<(Schedule, _)> = vec![(
         Schedule::from_str("0 0 14 * * Mon,Thu")?,
         send_availability_check,
