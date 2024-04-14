@@ -25,7 +25,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     let member = guild_id.member(&ctx, user).await?;
     let guild = guild_id.to_partial_guild(&ctx).await?;
 
-    user.create_dm_channel(&ctx)
+    match user
+        .create_dm_channel(&ctx)
         .await?
         .send_message(
             &ctx,
@@ -34,7 +35,13 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 guild.name, reason
             ))),
         )
-        .await?;
+        .await
+    {
+        Err(serenity::Error::Http(serenity::http::HttpError::UnsuccessfulRequest(_))) => {}
+        result => {
+            result?;
+        }
+    }
 
     guild_id.ban_with_reason(&ctx, user, 1, reason).await?;
     guild_id.unban(&ctx, user).await?;

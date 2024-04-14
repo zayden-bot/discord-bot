@@ -96,7 +96,12 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
             .await?;
     }
 
-    msg.delete(&ctx).await?;
+    match msg.delete(&ctx).await {
+        Err(serenity::Error::Http(serenity::http::HttpError::UnsuccessfulRequest(_))) => {}
+        result => {
+            result?;
+        }
+    }
 
     Ok(())
 }
