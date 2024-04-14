@@ -21,7 +21,7 @@ pub async fn ready(ctx: &Context, ready: Ready) -> Result<()> {
     )?;
 
     let ctx_clone = ctx.clone();
-    tokio::spawn(async move { start_cron_jobs(ctx_clone).await }).await??;
+    tokio::spawn(async move { start_cron_jobs(ctx_clone).await });
 
     Ok(())
 }
