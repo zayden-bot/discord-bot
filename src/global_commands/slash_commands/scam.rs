@@ -1,9 +1,11 @@
-use crate::utils::{embed_response, parse_options};
-use crate::{Error, Result};
 use serenity::all::{
     Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, Permissions, ResolvedValue,
+    CreateEmbed, CreateMessage, DiscordJsonError, ErrorResponse, Permissions, ResolvedValue,
 };
+use serenity::http::HttpError::UnsuccessfulRequest;
+
+use crate::utils::{embed_response, parse_options};
+use crate::{Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
@@ -37,7 +39,10 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         )
         .await
     {
-        Err(serenity::Error::Http(serenity::http::HttpError::UnsuccessfulRequest(_))) => {}
+        Err(serenity::Error::Http(UnsuccessfulRequest(ErrorResponse {
+            error: DiscordJsonError { message, .. },
+            ..
+        }))) if (message == "Cannot send messages to this user") => {}
         result => {
             result?;
         }

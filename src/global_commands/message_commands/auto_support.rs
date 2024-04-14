@@ -1,13 +1,15 @@
+use serenity::all::{
+    AutoArchiveDuration, ChannelType, Context, CreateAttachment, CreateMessage, CreateThread,
+    DiscordJsonError, ErrorResponse, Message,
+};
+use serenity::http::HttpError::UnsuccessfulRequest;
+
 use crate::sqlx_lib::{
     get_support_channel_ids, get_support_role_ids, get_support_thead_id, update_support_thread_id,
     PostgresPool,
 };
 use crate::utils::support::get_thread_name;
 use crate::{Error, Result};
-use serenity::all::{
-    AutoArchiveDuration, ChannelType, Context, CreateAttachment, CreateMessage, CreateThread,
-    Message,
-};
 
 async fn get_attachments(msg: &Message) -> serenity::Result<Vec<CreateAttachment>> {
     let mut attachments: Vec<CreateAttachment> = Vec::new();
@@ -97,7 +99,10 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     }
 
     match msg.delete(&ctx).await {
-        Err(serenity::Error::Http(serenity::http::HttpError::UnsuccessfulRequest(_))) => {}
+        Err(serenity::Error::Http(UnsuccessfulRequest(ErrorResponse {
+            error: DiscordJsonError { message, .. },
+            ..
+        }))) if (message == "Unkown Message") => {}
         result => {
             result?;
         }
