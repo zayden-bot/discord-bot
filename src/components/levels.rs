@@ -19,7 +19,7 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
         .get::<PostgresPool>()
         .expect("PostgresPool should exist in data.");
 
-    let old_embed = interaction.message.embeds[0].clone();
+    let mut old_embed = interaction.message.embeds[0].clone();
 
     let mut page_number: i64 = old_embed
         .footer
@@ -30,6 +30,7 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
         .unwrap()
         .parse()?;
 
+    old_embed.fields = Vec::new();
     let mut new_embed: CreateEmbed = old_embed.into();
 
     match action {
