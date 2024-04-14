@@ -125,28 +125,21 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
 }
 
 async fn resend_button_message(ctx: &Context, interaction: &ModalInteraction) -> Result<()> {
-    let mut message = None;
-    while let Some(Ok(msg)) = interaction
-        .channel_id
-        .messages_iter(ctx)
-        .boxed()
-        .next()
-        .await
-    {
-        if let Some(ActionRowComponent::Button(b)) =
-            msg.components.first().and_then(|c| c.components.first())
+    let mut messages = interaction.channel_id.messages_iter(ctx).boxed();
+
+    while let Some(Ok(message)) = messages.next().await {
+        if let Some(ActionRowComponent::Button(b)) = message
+            .components
+            .first()
+            .and_then(|c| c.components.first())
         {
             if let ButtonKind::NonLink { custom_id, .. } = &b.data {
                 if custom_id == "production_request" {
-                    message = Some(msg);
+                    message.delete(ctx).await?;
                     break;
                 }
             }
         }
-    }
-
-    if let Some(message) = message {
-        message.delete(ctx).await?;
     }
 
     interaction
