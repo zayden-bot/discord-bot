@@ -24,7 +24,21 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => "Compromised account: Sending scam links.",
     };
 
-    let member = guild_id.member(&ctx, user).await?;
+    let member = match guild_id.member(&ctx, user).await {
+        Ok(member) => member,
+        Err(_) => {
+            embed_response(
+                ctx,
+                interaction,
+                CreateEmbed::new()
+                    .title("Error")
+                    .description("Member not found."),
+            )
+            .await?;
+            return Ok(());
+        }
+    };
+
     let guild = guild_id.to_partial_guild(&ctx).await?;
 
     match user
