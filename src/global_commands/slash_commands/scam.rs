@@ -53,10 +53,11 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         )
         .await
     {
+        // 50007: Cannot send messages to this user
         Err(serenity::Error::Http(UnsuccessfulRequest(ErrorResponse {
-            error: DiscordJsonError { message, .. },
+            error: DiscordJsonError { code: 50007, .. },
             ..
-        }))) if (message == "Cannot send messages to this user") => {}
+        }))) => {}
         result => {
             result?;
         }

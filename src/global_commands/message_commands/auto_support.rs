@@ -99,10 +99,11 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     }
 
     match msg.delete(&ctx).await {
+        // 10008: Unknown Message
         Err(serenity::Error::Http(UnsuccessfulRequest(ErrorResponse {
-            error: DiscordJsonError { message, .. },
+            error: DiscordJsonError { code: 10008, .. },
             ..
-        }))) if (message == "Unkown Message") => {}
+        }))) => {}
         result => {
             result?;
         }
