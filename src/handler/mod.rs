@@ -63,6 +63,8 @@ impl RawEventHandler for Handler {
         let event_name = ev.name().unwrap_or(String::from("Unknown"));
         let ev_debug = format!("{:?}", ev);
 
+        let backtrace = Backtrace::force_capture();
+
         let result = match ev {
             Event::InteractionCreate(interaction) => {
                 self.interaction_create(&ctx, interaction.interaction).await
@@ -75,10 +77,8 @@ impl RawEventHandler for Handler {
         };
 
         if let Err(e) = result {
-            let backtrace = Backtrace::force_capture();
-
             let msg = format!("Error handling {:?}: {:?}", event_name, e);
-            eprintln!("{}\n{:?}\n{}\n\n", msg, backtrace, ev_debug);
+            eprintln!("{}\n{}\n{}\n\n", msg, backtrace, ev_debug);
 
             if let Ok(channel) = OSCAR_SIX_ID.create_dm_channel(&ctx).await {
                 let _ = channel.say(&ctx, msg).await;
