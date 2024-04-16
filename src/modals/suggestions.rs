@@ -1,6 +1,6 @@
 use serenity::all::{
-    ChannelId, Context, CreateEmbed, CreateInteractionResponse, CreateMessage, EditChannel,
-    EditMessage, InputText, ModalInteraction,
+    ChannelId, Context, CreateEmbed, CreateInteractionResponse, CreateMessage, EditMessage,
+    EditThread, InputText, ModalInteraction,
 };
 
 use crate::Result;
@@ -45,7 +45,9 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction, accepted: bool) -> Res
             .collect::<String>()
     };
 
-    channel_id.edit(ctx, EditChannel::new().name(&name)).await?;
+    channel_id
+        .edit_thread(ctx, EditThread::new().name(&name).archived(false))
+        .await?;
 
     message
         .edit(
@@ -77,6 +79,8 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction, accepted: bool) -> Res
             ctx,
             CreateMessage::new().embed(CreateEmbed::new().title(title).description(response)),
         )
+        .await?
+        .pin(ctx)
         .await?;
 
     Ok(())
