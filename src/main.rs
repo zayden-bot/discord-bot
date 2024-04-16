@@ -23,8 +23,8 @@ use std::env;
 use crate::image_cache::ImageCache;
 pub use error::{Error, Result};
 
-pub const SERVER_IP: &str = "82.9.123.190";
-pub const SERVER_URL: &str = "http://82.9.123.190";
+pub const SERVER_IP: &str = "82.9.123.190:8080";
+pub const SERVER_URL: &str = "http://82.9.123.190:8080";
 pub const OSCAR_SIX_ID: UserId = UserId::new(211486447369322506);
 
 #[tokio::main]
