@@ -37,10 +37,7 @@ async fn download(
         _ => unreachable!("Game option is required"),
     };
 
-    let mut game_folder = game.to_lowercase();
-    if game_folder == "college_kings" {
-        game_folder = "college_kings_1".to_string();
-    }
+    let game_folder = game.to_lowercase();
 
     let platform = match options.get("platform") {
         Some(ResolvedValue::String(platform)) => platform,
