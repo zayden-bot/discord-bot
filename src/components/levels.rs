@@ -37,7 +37,7 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
 
     match action {
         "previous" => {
-            page_number = (page_number - 1).max(0);
+            page_number = (page_number - 1).max(1);
         }
         "user" => {
             let row_number = get_user_row_number(pool, interaction.user.id.get())
