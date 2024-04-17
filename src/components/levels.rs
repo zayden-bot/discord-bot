@@ -1,5 +1,5 @@
 use serenity::all::{
-    ComponentInteraction, Context, CreateEmbed, CreateEmbedFooter, CreateInteractionResponse,
+    ComponentInteraction, Context, CreateEmbed, CreateEmbedFooter, EditInteractionResponse,
     EditMessage, UserId,
 };
 
@@ -14,6 +14,8 @@ use crate::{
 const LIMIT: i64 = 10;
 
 pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &str) -> Result<()> {
+    interaction.defer(ctx).await?;
+
     let data = ctx.data.read().await;
     let pool = data
         .get::<PostgresPool>()
@@ -74,7 +76,7 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
         .await?;
 
     interaction
-        .create_response(ctx, CreateInteractionResponse::Acknowledge)
+        .edit_response(ctx, EditInteractionResponse::new())
         .await?;
 
     Ok(())
