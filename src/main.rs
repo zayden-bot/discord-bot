@@ -39,6 +39,7 @@ async fn main() -> Result<()> {
 
     let mut data = client.data.write().await;
     data.insert::<ImageCache>(ImageCache::new());
+    data.insert::<LockedUsers>(Vec::new());
     create_pool(data).await?;
 
     client.start().await?;
