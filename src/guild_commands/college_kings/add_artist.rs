@@ -1,7 +1,4 @@
-use crate::{
-    guilds::college_kings::GUILD_ID,
-    utils::{message_response, parse_options},
-};
+use crate::utils::{message_response, parse_options};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     Permissions, ResolvedValue, RoleId,
@@ -36,23 +33,16 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("add_artist")
-                .description("Adds a user as an artist")
-                .default_member_permissions(Permissions::MANAGE_MESSAGES)
-                .add_option(
-                    CreateCommandOption::new(
-                        CommandOptionType::User,
-                        "user",
-                        "The user to add as an artist",
-                    )
-                    .required(true),
-                ),
+pub fn register() -> CreateCommand {
+    CreateCommand::new("add_artist")
+        .description("Adds a user as an artist")
+        .default_member_permissions(Permissions::MANAGE_MESSAGES)
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::User,
+                "user",
+                "The user to add as an artist",
+            )
+            .required(true),
         )
-        .await?;
-
-    Ok(())
 }

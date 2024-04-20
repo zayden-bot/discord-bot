@@ -3,7 +3,7 @@ use crate::utils::embed_response;
 use crate::utils::parse_options;
 use crate::Result;
 use serenity::all::{
-    Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, ResolvedValue,
 };
 
@@ -16,12 +16,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => &interaction.user,
     };
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
-    let stars = get_gold_stars(pool, user.id.get())
+    let stars = get_gold_stars(&pool, user.id.get())
         .await
         .unwrap_or_default();
 
@@ -39,21 +41,15 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("stars")
-            .description("Get the number of stars a user has.")
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::User,
-                    "user",
-                    "The user to get the stars for.",
-                )
-                .required(false),
-            ),
-    )
-    .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("stars")
+        .description("Get the number of stars a user has.")
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::User,
+                "user",
+                "The user to get the stars for.",
+            )
+            .required(false),
+        )
 }

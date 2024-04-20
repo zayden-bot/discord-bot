@@ -1,5 +1,5 @@
+use crate::utils::embed_response;
 use crate::Result;
-use crate::{guilds::college_kings::GUILD_ID, utils::embed_response};
 use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -16,14 +16,6 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("reputation")
-                .description("View the secrets behind the reputation value"),
-        )
-        .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("reputation").description("View the secrets behind the reputation value")
 }

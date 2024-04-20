@@ -1,4 +1,4 @@
-use crate::{guilds::college_kings::GUILD_ID, Result};
+use crate::Result;
 use crate::{
     utils::{embed_response, parse_options},
     SERVER_URL,
@@ -97,39 +97,28 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("patreon")
-                .description("Patreon information")
-                .add_option(CreateCommandOption::new(
-                    CommandOptionType::SubCommand,
-                    "info",
-                    "Patreon information",
-                ))
-                .add_option(
-                    CreateCommandOption::new(
-                        CommandOptionType::SubCommand,
-                        "check",
-                        "Check if you're a patron",
-                    )
-                    .add_sub_option(
-                        CreateCommandOption::new(
-                            CommandOptionType::String,
-                            "email",
-                            "Your Patreon email",
-                        )
-                        .required(true),
-                    )
-                    .add_sub_option(CreateCommandOption::new(
-                        CommandOptionType::Boolean,
-                        "force",
-                        "Check via the Patreon API instead of the cache",
-                    )),
-                ),
+pub fn register() -> CreateCommand {
+    CreateCommand::new("patreon")
+        .description("Patreon information")
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::SubCommand,
+            "info",
+            "Patreon information",
+        ))
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::SubCommand,
+                "check",
+                "Check if you're a patron",
+            )
+            .add_sub_option(
+                CreateCommandOption::new(CommandOptionType::String, "email", "Your Patreon email")
+                    .required(true),
+            )
+            .add_sub_option(CreateCommandOption::new(
+                CommandOptionType::Boolean,
+                "force",
+                "Check via the Patreon API instead of the cache",
+            )),
         )
-        .await?;
-
-    Ok(())
 }

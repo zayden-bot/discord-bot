@@ -1,5 +1,5 @@
 use serenity::all::{
-    Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, CreateMessage, DiscordJsonError, ErrorResponse, Permissions, ResolvedValue,
 };
 use serenity::http::HttpError::UnsuccessfulRequest;
@@ -79,26 +79,16 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("scam")
-            .description("Soft ban a compromised account")
-            .default_member_permissions(Permissions::KICK_MEMBERS)
-            .add_option(
-                CreateCommandOption::new(CommandOptionType::User, "member", "Member to soft ban")
-                    .required(true),
-            )
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::String,
-                    "reason",
-                    "Reason for soft ban",
-                )
+pub fn register() -> CreateCommand {
+    CreateCommand::new("scam")
+        .description("Soft ban a compromised account")
+        .default_member_permissions(Permissions::KICK_MEMBERS)
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::User, "member", "Member to soft ban")
+                .required(true),
+        )
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::String, "reason", "Reason for soft ban")
                 .required(false),
-            ),
-    )
-    .await?;
-
-    Ok(())
+        )
 }

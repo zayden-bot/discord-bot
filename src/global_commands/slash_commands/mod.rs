@@ -1,4 +1,4 @@
-use serenity::all::Context;
+use serenity::all::{Command, Context};
 
 use crate::Result;
 
@@ -17,21 +17,25 @@ pub mod stars;
 pub mod xp;
 
 pub async fn register(ctx: &Context) -> Result<()> {
-    tokio::try_join!(
-        gold_star::register(ctx),
-        infraction::register(ctx),
-        levels::register(ctx),
-        logs::register(ctx),
-        member_count::register(ctx),
-        ping::register(ctx),
-        rank::register(ctx),
-        reaction_role::register(ctx),
-        rule::register(ctx),
-        scam::register(ctx),
-        server_info::register(ctx),
-        stars::register(ctx),
-        xp::register(ctx),
-    )?;
+    Command::set_global_commands(
+        ctx,
+        vec![
+            gold_star::register(),
+            infraction::register(),
+            levels::register(),
+            logs::register(),
+            member_count::register(),
+            ping::register(),
+            rank::register(),
+            reaction_role::register(),
+            rule::register(),
+            scam::register(),
+            server_info::register(),
+            stars::register(),
+            xp::register(),
+        ],
+    )
+    .await?;
 
     Ok(())
 }

@@ -1,5 +1,4 @@
 use crate::{
-    guilds::college_kings::GUILD_ID,
     utils::{message_response, parse_options},
     Error, Result,
 };
@@ -69,20 +68,13 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("fixed")
-                .description("Mark support ticket as fixed")
-                .default_member_permissions(Permissions::MANAGE_MESSAGES)
-                .add_option(CreateCommandOption::new(
-                    CommandOptionType::String,
-                    "version",
-                    "The version the issue was fixed in",
-                )),
-        )
-        .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("fixed")
+        .description("Mark support ticket as fixed")
+        .default_member_permissions(Permissions::MANAGE_MESSAGES)
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::String,
+            "version",
+            "The version the issue was fixed in",
+        ))
 }

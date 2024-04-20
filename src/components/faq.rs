@@ -6,7 +6,7 @@ use serenity::{
     futures::StreamExt,
 };
 
-use crate::{guild_commands::slash_commands::faq::FAQ_CHANNEL_ID, Error, Result};
+use crate::{guilds::college_kings::FAQ_CHANNEL_ID, Error, Result};
 
 pub async fn faq(ctx: &Context, interaction: &ComponentInteraction, ephemeral: bool) -> Result<()> {
     let index =

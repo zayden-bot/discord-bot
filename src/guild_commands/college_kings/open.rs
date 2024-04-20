@@ -1,5 +1,5 @@
 use crate::utils::message_response;
-use crate::{guilds::college_kings::GUILD_ID, Error, Result};
+use crate::{Error, Result};
 use serenity::all::{
     ChannelId, CommandInteraction, Context, CreateCommand, EditChannel, Permissions,
 };
@@ -39,15 +39,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("open")
-                .description("Reopen a support ticket")
-                .default_member_permissions(Permissions::MANAGE_MESSAGES),
-        )
-        .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("open")
+        .description("Reopen a support ticket")
+        .default_member_permissions(Permissions::MANAGE_MESSAGES)
 }

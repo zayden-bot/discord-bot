@@ -1,7 +1,7 @@
 use crate::sqlx_lib::{add_star_to_user, get_gold_stars, remove_star_from_author, PostgresPool};
 use crate::utils::{embed_response, message_response, parse_options};
 use serenity::all::{
-    Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, ResolvedValue,
 };
 
@@ -23,13 +23,15 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         return Ok(());
     }
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
-    let author_stars = get_gold_stars(pool, interaction.user.id.get()).await?;
-    let member_stars = get_gold_stars(pool, user.id.get()).await?;
+    let author_stars = get_gold_stars(&pool, interaction.user.id.get()).await?;
+    let member_stars = get_gold_stars(&pool, user.id.get()).await?;
 
     let has_free_star = author_stars
         .last_free_star
@@ -42,14 +44,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     }
 
     remove_star_from_author(
-        pool,
+        &pool,
         interaction.user.id.get(),
         STARS_TO_GIVE,
         has_free_star,
     )
     .await?;
 
-    add_star_to_user(pool, user.id.get(), STARS_TO_GIVE).await?;
+    add_star_to_user(&pool, user.id.get(), STARS_TO_GIVE).await?;
 
     let mut description = format!(
         "{} received a golden star from {} for a total of **{}** stars.",
@@ -74,26 +76,20 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("gold_star")
-            .description("Give a user a star")
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::User,
-                    "member",
-                    "The member to give a star to",
-                )
-                .required(true),
+pub fn register() -> CreateCommand {
+    CreateCommand::new("gold_star")
+        .description("Give a user a star")
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::User,
+                "member",
+                "The member to give a star to",
             )
-            .add_option(CreateCommandOption::new(
-                CommandOptionType::String,
-                "reason",
-                "The reason for giving a star",
-            )),
-    )
-    .await?;
-
-    Ok(())
+            .required(true),
+        )
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::String,
+            "reason",
+            "The reason for giving a star",
+        ))
 }

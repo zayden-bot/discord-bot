@@ -1,7 +1,7 @@
-use serenity::all::{Command, CreateEmbedFooter, UserId};
 use serenity::all::{
     CommandInteraction, Context, CreateButton, CreateCommand, CreateEmbed, EditInteractionResponse,
 };
+use serenity::all::{CreateEmbedFooter, UserId};
 
 use crate::sqlx_lib::user_levels::get_users;
 use crate::sqlx_lib::PostgresPool;
@@ -10,13 +10,15 @@ use crate::Result;
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
     let page_number = 1;
-    let users = get_users(pool, page_number, 10).await?;
+    let users = get_users(&pool, page_number, 10).await?;
 
     let mut fields = Vec::new();
     for level_data in users {
@@ -51,12 +53,6 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("levels").description("Get the leaderboard"),
-    )
-    .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("levels").description("Get the leaderboard")
 }

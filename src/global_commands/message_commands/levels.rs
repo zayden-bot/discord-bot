@@ -36,11 +36,13 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
         return Ok(());
     }
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
-    let level_data = get_user_level_data(pool, msg.author.id.get()).await?;
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
+    let level_data = get_user_level_data(&pool, msg.author.id.get()).await?;
 
     if level_data.last_xp
         >= (Utc::now().naive_utc() - TimeDelta::try_minutes(1).ok_or_else(|| Error::TimeDelta)?)
@@ -62,7 +64,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
 
     let xp = total_xp - current_total_xp;
 
-    update_user_level_data(pool, level_data.id, xp, total_xp, level).await?;
+    update_user_level_data(&pool, level_data.id, xp, total_xp, level).await?;
     update_member_roles(msg, ctx, level).await?;
 
     Ok(())

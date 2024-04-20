@@ -1,5 +1,4 @@
 use crate::{
-    guilds::college_kings::GUILD_ID,
     utils::{message_response, parse_options},
     SERVER_URL,
 };
@@ -64,43 +63,36 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("link")
-                .description("Helper command for getting links")
-                .add_option(
-                    CreateCommandOption::new(
-                        CommandOptionType::SubCommand,
-                        "download",
-                        "Direct download link",
-                    )
-                    .add_sub_option(
-                        CreateCommandOption::new(
-                            CommandOptionType::String,
-                            "game",
-                            "The game to get the download link for",
-                        )
-                        .add_string_choice("College Kings 1", "College_Kings")
-                        .add_string_choice("College Kings 2", "College_Kings_2")
-                        .required(true),
-                    )
-                    .add_sub_option(
-                        CreateCommandOption::new(
-                            CommandOptionType::String,
-                            "platform",
-                            "The platform to get the download link for",
-                        )
-                        .add_string_choice("Windows", "pc")
-                        .add_string_choice("Mac", "mac")
-                        .add_string_choice("Linux", "pc")
-                        .required(true),
-                    ),
+pub fn register() -> CreateCommand {
+    CreateCommand::new("link")
+        .description("Helper command for getting links")
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::SubCommand,
+                "download",
+                "Direct download link",
+            )
+            .add_sub_option(
+                CreateCommandOption::new(
+                    CommandOptionType::String,
+                    "game",
+                    "The game to get the download link for",
                 )
-                .default_member_permissions(Permissions::MANAGE_MESSAGES),
+                .add_string_choice("College Kings 1", "College_Kings")
+                .add_string_choice("College Kings 2", "College_Kings_2")
+                .required(true),
+            )
+            .add_sub_option(
+                CreateCommandOption::new(
+                    CommandOptionType::String,
+                    "platform",
+                    "The platform to get the download link for",
+                )
+                .add_string_choice("Windows", "pc")
+                .add_string_choice("Mac", "mac")
+                .add_string_choice("Linux", "pc")
+                .required(true),
+            ),
         )
-        .await?;
-
-    Ok(())
+        .default_member_permissions(Permissions::MANAGE_MESSAGES)
 }

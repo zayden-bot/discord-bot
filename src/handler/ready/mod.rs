@@ -30,5 +30,7 @@ async fn update_messages(ctx: &Context) -> Result<()> {
     update_information_message::run(ctx).await?;
     update_support_messages::run(ctx).await?;
 
+    println!("Messages updated!");
+
     Ok(())
 }

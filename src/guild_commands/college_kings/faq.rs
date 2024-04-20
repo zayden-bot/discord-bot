@@ -1,17 +1,13 @@
-use crate::guilds::college_kings::GUILD_ID;
-
 use serenity::{
     all::{
-        ChannelId, CommandInteraction, CommandOptionType, Context, CreateCommand,
-        CreateCommandOption, CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption,
-        EditInteractionResponse, ResolvedOption, ResolvedValue,
+        CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+        CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption, EditInteractionResponse,
+        ResolvedOption, ResolvedValue,
     },
     futures::StreamExt,
 };
 
-use crate::Result;
-
-pub const FAQ_CHANNEL_ID: ChannelId = ChannelId::new(1196346920059289690);
+use crate::{guilds::college_kings::FAQ_CHANNEL_ID, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer_ephemeral(ctx).await?;
@@ -59,19 +55,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("faq")
-                .description("Displays a FAQ message")
-                .add_option(CreateCommandOption::new(
-                    CommandOptionType::Boolean,
-                    "ephemeral",
-                    "Whether the response should be ephemeral",
-                )),
-        )
-        .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("faq")
+        .description("Displays a FAQ message")
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::Boolean,
+            "ephemeral",
+            "Whether the response should be ephemeral",
+        ))
 }

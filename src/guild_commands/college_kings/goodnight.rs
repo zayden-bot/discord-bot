@@ -1,28 +1,34 @@
 use std::time::Duration;
 
-use crate::{guilds::college_kings::GUILD_ID, Error, ImageCache, Result};
+use crate::guilds::college_kings::GENERAL_CHANNEL_ID;
+use crate::image_cache::ImageCache;
+use crate::utils::message_response;
+use crate::{Error, Result};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::all::{
     CommandInteraction, Context, CreateAttachment, CreateCommand, CreateEmbed, EditAttachments,
-    EditInteractionResponse,
+    EditInteractionResponse, UserId,
 };
+use serenity::prelude::TypeMapKey;
 
-pub struct GoodMorningLockedUsers;
+pub struct GoodNightLockedUsers;
 
-impl TypeMapKey for LockedUsers {
+impl TypeMapKey for GoodNightLockedUsers {
     type Value = Vec<UserId>;
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
 
-    let data = ctx.data.read().await;
+    let mut data = ctx.data.write().await;
     let locked_users = data
-        .get::<LockedUsers>()
+        .get_mut::<GoodNightLockedUsers>()
         .ok_or_else(|| Error::DataNotFound)?;
 
-    if locked_users.contains(&interaction.user.id) {
+    let user_id = interaction.user.id;
+
+    if locked_users.contains(&user_id) {
         message_response(
             ctx,
             interaction,
@@ -31,18 +37,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .await?;
         return Ok(());
     } else if interaction.channel_id == GENERAL_CHANNEL_ID {
-        let data = ctx.data.write().await;
-        let locked_users = data
-            .get_mut::<LockedUsers>()
-            .ok_or_else(|| Error::DataNotFound)?;
-        locked_users.push(interaction.user.id);
+        locked_users.push(user_id);
     }
 
     let image_cache = data
         .get::<ImageCache>()
         .ok_or_else(|| Error::DataNotFound)?;
 
-    let entries = &image_cache.good_morning_images;
+    let entries = &image_cache.good_night_images;
 
     let image_path = entries
         .choose(&mut thread_rng())
@@ -59,7 +61,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             EditInteractionResponse::new()
                 .embed(
                     CreateEmbed::new()
-                        .title(format!("Good Morning, {}!", interaction.user.name))
+                        .title(format!("Good Night, {}!", interaction.user.name))
                         .attachment(file_name),
                 )
                 .attachments(EditAttachments::new().add(CreateAttachment::path(image_path).await?)),
@@ -67,27 +69,21 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .await?;
 
     if interaction.channel_id == GENERAL_CHANNEL_ID {
-        tokio::time::sleep(Duration::from_secs(60 * 60 * 8)).await;
-        let data = ctx.data.write().await;
-        let locked_users = data
-            .get_mut::<LockedUsers>()
-            .ok_or_else(|| Error::DataNotFound)?;
-
-        if let Some(pos) = locked_users.iter().position(|x| *x == interaction.user.id) {
-            locked_users.remove(pos);
-        }
+        tokio::spawn({
+            let ctx = ctx.clone();
+            async move {
+                tokio::time::sleep(Duration::from_secs(60 * 60 * 8)).await;
+                let mut data = ctx.data.write().await;
+                if let Some(locked_users) = data.get_mut::<GoodNightLockedUsers>() {
+                    locked_users.retain(|x| *x != user_id);
+                }
+            }
+        });
     }
 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("goodmorning").description("Have a CK girl bless your morning"),
-        )
-        .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("goodnight").description("Have a CK girl wish you good night")
 }

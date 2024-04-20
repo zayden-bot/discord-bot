@@ -1,5 +1,5 @@
 use serenity::all::{
-    Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, ResolvedValue,
 };
 
@@ -22,16 +22,18 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => &interaction.user,
     };
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
-    let level_data = get_user_level_data(pool, user.id.get()).await?;
+    let level_data = get_user_level_data(&pool, user.id.get()).await?;
 
     let level = level_data.level;
     let xp_for_next_level = 5 * (level * level) + 50 * level + 100;
-    let user_rank = get_user_rank(pool, user.id.get())
+    let user_rank = get_user_rank(&pool, user.id.get())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
 
@@ -54,23 +56,17 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("rank")
-            .description("Get your rank or another member's rank")
-            .add_option(CreateCommandOption::new(
-                CommandOptionType::User,
-                "user",
-                "The user to get the xp of",
-            ))
-            .add_option(CreateCommandOption::new(
-                CommandOptionType::Boolean,
-                "ephemeral",
-                "Whether the response should be ephemeral",
-            )),
-    )
-    .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("rank")
+        .description("Get your rank or another member's rank")
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::User,
+            "user",
+            "The user to get the xp of",
+        ))
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::Boolean,
+            "ephemeral",
+            "Whether the response should be ephemeral",
+        ))
 }

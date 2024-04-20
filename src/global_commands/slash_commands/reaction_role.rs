@@ -2,7 +2,7 @@ use crate::sqlx_lib::{create_reaction_role, delete_reaction_role, PostgresPool};
 use crate::utils::{message_response, parse_options};
 use crate::{Error, Result};
 use serenity::all::{
-    Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, CreateMessage, GuildId, Mentionable, MessageId, PartialChannel, Permissions,
     ReactionType, ResolvedValue, Role,
 };
@@ -99,10 +99,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => unreachable!("Emoji is required"),
     };
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
     match command.name {
         "add" => {
@@ -118,7 +120,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 _ => None,
             };
 
-            add(ctx, interaction, pool, channel, message_id, reaction, role).await?;
+            add(ctx, interaction, &pool, channel, message_id, reaction, role).await?;
         }
         "remove" => {
             let message_id = match options.get("message_id") {
@@ -129,7 +131,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             remove(
                 ctx,
                 interaction,
-                pool,
+                &pool,
                 channel,
                 guild_id,
                 message_id,
@@ -143,18 +145,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("reaction_role")
-            .description("Adds or removes a reaction role")
-            .default_member_permissions(Permissions::MANAGE_MESSAGES)
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::SubCommand,
-                    "add",
-                    "Adds a reaction role",
-                )
+pub fn register() -> CreateCommand {
+    CreateCommand::new("reaction_role")
+        .description("Adds or removes a reaction role")
+        .default_member_permissions(Permissions::MANAGE_MESSAGES)
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::SubCommand, "add", "Adds a reaction role")
                 .add_sub_option(
                     CreateCommandOption::new(
                         CommandOptionType::Channel,
@@ -184,40 +180,36 @@ pub async fn register(ctx: &Context) -> Result<()> {
                     "message_id",
                     "The message id of the reaction role message",
                 )),
+        )
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::SubCommand,
+                "remove",
+                "Removes a reaction role",
             )
-            .add_option(
+            .add_sub_option(
                 CreateCommandOption::new(
-                    CommandOptionType::SubCommand,
-                    "remove",
-                    "Removes a reaction role",
+                    CommandOptionType::Channel,
+                    "channel",
+                    "The channel the message is in",
                 )
-                .add_sub_option(
-                    CreateCommandOption::new(
-                        CommandOptionType::Channel,
-                        "channel",
-                        "The channel the message is in",
-                    )
-                    .required(true),
+                .required(true),
+            )
+            .add_sub_option(
+                CreateCommandOption::new(
+                    CommandOptionType::String,
+                    "message_id",
+                    "The message id of the reaction role message",
                 )
-                .add_sub_option(
-                    CreateCommandOption::new(
-                        CommandOptionType::String,
-                        "message_id",
-                        "The message id of the reaction role message",
-                    )
-                    .required(true),
+                .required(true),
+            )
+            .add_sub_option(
+                CreateCommandOption::new(
+                    CommandOptionType::String,
+                    "emoji",
+                    "The emoji of the reaction role",
                 )
-                .add_sub_option(
-                    CreateCommandOption::new(
-                        CommandOptionType::String,
-                        "emoji",
-                        "The emoji of the reaction role",
-                    )
-                    .required(true),
-                ),
+                .required(true),
             ),
-    )
-    .await?;
-
-    Ok(())
+        )
 }

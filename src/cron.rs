@@ -4,7 +4,7 @@ use std::str::FromStr;
 use std::time::Duration;
 use tokio::time::sleep;
 
-use crate::guild_commands::slash_commands::availability_check::availability_check_message;
+use crate::guild_commands::college_kings::availability_check::availability_check_message;
 use crate::guilds::college_kings_team::TEAM_LEADS_CHANNEL_ID;
 use crate::Result;
 

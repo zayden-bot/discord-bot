@@ -3,7 +3,7 @@ use serenity::all::{
     CreateCommandOption, CreateEmbed, CreateMessage, Mentionable, ResolvedValue,
 };
 
-use crate::guilds::college_kings_team::{GUILD_ID, TEAM_LEADS_CHANNEL_ID, TEAM_LEADS_ROLE_ID};
+use crate::guilds::college_kings_team::{TEAM_LEADS_CHANNEL_ID, TEAM_LEADS_ROLE_ID};
 use crate::utils::{message_response, parse_options};
 use crate::Result;
 
@@ -27,21 +27,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("availability_check")
-                .description("Check availability for team leads")
-                .add_option(CreateCommandOption::new(
-                    CommandOptionType::String,
-                    "title",
-                    "Title of the availability check",
-                )),
-        )
-        .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("availability_check")
+        .description("Check availability for team leads")
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::String,
+            "title",
+            "Title of the availability check",
+        ))
 }
 
 pub fn availability_check_message(title: impl Into<String>) -> CreateMessage {

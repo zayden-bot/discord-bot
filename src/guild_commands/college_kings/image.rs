@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::image_cache::ImageCache;
-use crate::{guilds::college_kings::GUILD_ID, Error, Result};
+use crate::{Error, Result};
 use rand::seq::{IteratorRandom, SliceRandom};
 use rand::thread_rng;
 use serenity::all::{
@@ -69,13 +69,6 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("image").description("Get a random image from the image cache"),
-        )
-        .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("image").description("Get a random image from the image cache")
 }

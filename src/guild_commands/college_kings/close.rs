@@ -1,5 +1,4 @@
 use crate::{
-    guilds::college_kings::GUILD_ID,
     utils::{message_response, parse_options},
     Error, Result,
 };
@@ -61,20 +60,13 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    GUILD_ID
-        .create_command(
-            ctx,
-            CreateCommand::new("close")
-                .description("Mark support ticket as closed")
-                .default_member_permissions(Permissions::MANAGE_MESSAGES)
-                .add_option(CreateCommandOption::new(
-                    CommandOptionType::String,
-                    "message",
-                    "The message to send to the ticket",
-                )),
-        )
-        .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("close")
+        .description("Mark support ticket as closed")
+        .default_member_permissions(Permissions::MANAGE_MESSAGES)
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::String,
+            "message",
+            "The message to send to the ticket",
+        ))
 }

@@ -16,10 +16,12 @@ const LIMIT: i64 = 10;
 pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &str) -> Result<()> {
     interaction.defer(ctx).await?;
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
     let mut old_embed = interaction.message.embeds[0].clone();
 
@@ -40,7 +42,7 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
             page_number = (page_number - 1).max(1);
         }
         "user" => {
-            let row_number = get_user_row_number(pool, interaction.user.id.get())
+            let row_number = get_user_row_number(&pool, interaction.user.id.get())
                 .await?
                 .ok_or_else(|| Error::UserNotFound)?;
 
@@ -53,7 +55,7 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
     };
 
     let mut fields = Vec::new();
-    for level_data in get_users(pool, page_number, 10).await? {
+    for level_data in get_users(&pool, page_number, 10).await? {
         let user = UserId::new(level_data.id as u64).to_user(ctx).await?;
 
         fields.push((

@@ -1,14 +1,10 @@
 pub mod user_levels;
 
-use std::env;
-
 use chrono::Utc;
-use serenity::prelude::TypeMap;
+use serenity::all::Context;
 use serenity::prelude::TypeMapKey;
-use sqlx::postgres::PgPoolOptions;
 use sqlx::Pool;
 use sqlx::Postgres;
-use tokio::sync::RwLockWriteGuard;
 
 use crate::models::*;
 use crate::Error;
@@ -20,15 +16,16 @@ impl TypeMapKey for PostgresPool {
     type Value = Pool<Postgres>;
 }
 
-pub async fn create_pool(mut data: RwLockWriteGuard<'_, TypeMap>) -> Result<()> {
-    data.insert::<PostgresPool>(
-        PgPoolOptions::new()
-            .max_connections(5)
-            .connect(&env::var("DATABASE_URL")?)
-            .await?,
-    );
+#[allow(dead_code)]
+pub async fn get_pool(ctx: &Context) -> Result<Pool<Postgres>> {
+    let data = ctx.data.read().await;
+    let pool = data
+        .get::<PostgresPool>()
+        .expect("PostgresPool should exist in data.")
+        .clone();
+    drop(data);
 
-    Ok(())
+    Ok(pool)
 }
 
 pub async fn get_support_thead_id(

@@ -18,16 +18,18 @@ use super::parse_modal_data;
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let guild_id = modal.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
-    let support_channel_ids = get_support_channel_ids(pool, guild_id.get()).await?;
+    let support_channel_ids = get_support_channel_ids(&pool, guild_id.get()).await?;
 
     let guild_roles = guild_id.roles(&ctx).await?;
 
-    let support_roles = get_support_role_ids(pool, guild_id.get())
+    let support_roles = get_support_role_ids(&pool, guild_id.get())
         .await?
         .into_iter()
         .map(|id| {
@@ -37,7 +39,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         })
         .collect::<Result<Vec<&Role>>>()?;
 
-    let thread_id = get_support_thead_id(pool, guild_id.get())
+    let thread_id = get_support_thead_id(&pool, guild_id.get())
         .await
         .unwrap_or(0)
         + 1;
@@ -93,7 +95,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         send_support_message(ctx, &thread, &support_roles, &modal.user, messages.clone()).await?;
     }
 
-    update_support_thread_id(pool, guild_id.get(), thread_id).await?;
+    update_support_thread_id(&pool, guild_id.get(), thread_id).await?;
 
     modal
         .create_response(ctx, CreateInteractionResponse::Acknowledge)

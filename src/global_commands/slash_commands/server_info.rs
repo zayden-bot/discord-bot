@@ -1,7 +1,6 @@
 use crate::{utils::embed_response, Error, Result};
 use serenity::all::{
-    ChannelType, Command, CommandInteraction, Context, CreateCommand, CreateEmbed,
-    CreateEmbedAuthor,
+    ChannelType, CommandInteraction, Context, CreateCommand, CreateEmbed, CreateEmbedAuthor,
 };
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -53,12 +52,6 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     Ok(())
 }
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("server_info").description("Get information about the server"),
-    )
-    .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("server_info").description("Get information about the server")
 }

@@ -13,11 +13,15 @@ mod models;
 mod sqlx_lib;
 mod utils;
 
+use guild_commands::college_kings::{
+    goodmorning::GoodMorningLockedUsers, goodnight::GoodNightLockedUsers,
+};
 use serenity::{
     all::{GatewayIntents, UserId},
     Client,
 };
-use sqlx_lib::create_pool;
+use sqlx::postgres::PgPoolOptions;
+use sqlx_lib::PostgresPool;
 use std::env;
 
 use crate::image_cache::ImageCache;
@@ -39,8 +43,15 @@ async fn main() -> Result<()> {
 
     let mut data = client.data.write().await;
     data.insert::<ImageCache>(ImageCache::new());
-    data.insert::<LockedUsers>(Vec::new());
-    create_pool(data).await?;
+    data.insert::<GoodMorningLockedUsers>(Vec::new());
+    data.insert::<GoodNightLockedUsers>(Vec::new());
+    data.insert::<PostgresPool>(
+        PgPoolOptions::new()
+            .max_connections(5)
+            .connect(&env::var("DATABASE_URL")?)
+            .await?,
+    );
+    drop(data);
 
     client.start().await?;
 

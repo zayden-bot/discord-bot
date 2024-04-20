@@ -2,7 +2,7 @@ use crate::sqlx_lib::{get_user_infractions, PostgresPool};
 use crate::utils::{embed_response, parse_options};
 use crate::Result;
 use serenity::all::{
-    Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, Permissions, ResolvedValue,
 };
 
@@ -20,12 +20,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => "recent",
     };
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
-    let infractions = get_user_infractions(pool, user.id.get(), filter == "recent").await?;
+    let infractions = get_user_infractions(&pool, user.id.get(), filter == "recent").await?;
 
     let fields = infractions.into_iter().map(|infraction| {
         (
@@ -56,31 +58,21 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("logs")
-            .description("Get logs for a user")
-            .default_member_permissions(Permissions::MODERATE_MEMBERS)
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::User,
-                    "user",
-                    "The user to get logs for",
-                )
+pub fn register() -> CreateCommand {
+    CreateCommand::new("logs")
+        .description("Get logs for a user")
+        .default_member_permissions(Permissions::MODERATE_MEMBERS)
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::User, "user", "The user to get logs for")
                 .required(true),
+        )
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::String,
+                "filter",
+                "The number of logs to get",
             )
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::String,
-                    "filter",
-                    "The number of logs to get",
-                )
-                .add_string_choice("Recent (default)", "recent")
-                .add_string_choice("All", "all"),
-            ),
-    )
-    .await?;
-
-    Ok(())
+            .add_string_choice("Recent (default)", "recent")
+            .add_string_choice("All", "all"),
+        )
 }

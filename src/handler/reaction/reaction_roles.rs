@@ -6,12 +6,14 @@ use crate::{models::ReactionRole, sqlx_lib::PostgresPool, Error, Result};
 pub async fn reaction_add(ctx: &Context, reaction: &Reaction) -> Result<()> {
     let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
-    let reaction_roles = get_reaction_roles(pool, guild_id).await?;
+    let reaction_roles = get_reaction_roles(&pool, guild_id).await?;
     let member = reaction.member.as_ref().ok_or_else(|| Error::NoMember)?;
 
     for reaction_role in reaction_roles {
@@ -28,12 +30,14 @@ pub async fn reaction_add(ctx: &Context, reaction: &Reaction) -> Result<()> {
 pub async fn reaction_remove(ctx: &Context, reaction: &Reaction) -> Result<()> {
     let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
-    let reaction_roles = get_reaction_roles(pool, guild_id).await?;
+    let reaction_roles = get_reaction_roles(&pool, guild_id).await?;
     let member = match reaction.member {
         Some(ref member) => member.clone(),
         None => {

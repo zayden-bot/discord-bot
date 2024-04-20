@@ -1,5 +1,5 @@
 use crate::{utils::message_response, Error, Result};
-use serenity::all::{Command, CommandInteraction, Context, CreateCommand};
+use serenity::all::{CommandInteraction, Context, CreateCommand};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
@@ -19,12 +19,6 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("member_count").description("View the total member count"),
-    )
-    .await?;
-
-    Ok(())
+pub fn register() -> CreateCommand {
+    CreateCommand::new("member_count").description("View the total member count")
 }

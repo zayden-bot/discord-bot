@@ -4,7 +4,7 @@ use crate::sqlx_lib::{
 use crate::utils::{embed_response, message_response, parse_options};
 use crate::{Error, Result};
 use serenity::all::{
-    Command, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, GuildId, Permissions, ResolvedValue,
 };
 use sqlx::{Pool, Postgres};
@@ -95,13 +95,15 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     };
     let options = parse_options(options);
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
     if command.name == "list" {
-        list(ctx, interaction, pool, guild_id).await?;
+        list(ctx, interaction, &pool, guild_id).await?;
         return Ok(());
     }
 
@@ -111,23 +113,23 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     };
 
     match command.name {
-        "get" => get(ctx, interaction, pool, guild_id, id).await?,
+        "get" => get(ctx, interaction, &pool, guild_id, id).await?,
         "add" => {
             let answer = match options.get("answer") {
                 Some(ResolvedValue::String(answer)) => *answer,
                 _ => unreachable!("Answer is required"),
             };
 
-            add(ctx, interaction, pool, guild_id, id, answer).await?
+            add(ctx, interaction, &pool, guild_id, id, answer).await?
         }
-        "remove" => remove(ctx, interaction, pool, guild_id, id).await?,
+        "remove" => remove(ctx, interaction, &pool, guild_id, id).await?,
         _ => unreachable!("Invalid subcommand"),
     };
 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
+pub fn register() -> CreateCommand {
     let id_option = CreateCommandOption::new(
         CommandOptionType::String,
         "id",
@@ -135,25 +137,15 @@ pub async fn register(ctx: &Context) -> Result<()> {
     )
     .required(true);
 
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("support")
-            .description("Manage support info")
-            .default_member_permissions(Permissions::MOVE_MEMBERS)
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::SubCommand,
-                    "get",
-                    "Get a support info",
-                )
+    CreateCommand::new("support")
+        .description("Manage support info")
+        .default_member_permissions(Permissions::MOVE_MEMBERS)
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::SubCommand, "get", "Get a support info")
                 .add_sub_option(id_option.clone()),
-            )
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::SubCommand,
-                    "add",
-                    "Add a support info",
-                )
+        )
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::SubCommand, "add", "Add a support info")
                 .add_sub_option(id_option.clone())
                 .add_sub_option(
                     CreateCommandOption::new(
@@ -163,22 +155,18 @@ pub async fn register(ctx: &Context) -> Result<()> {
                     )
                     .required(true),
                 ),
-            )
-            .add_option(CreateCommandOption::new(
+        )
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::SubCommand,
+            "list",
+            "Get a list of valid support IDs",
+        ))
+        .add_option(
+            CreateCommandOption::new(
                 CommandOptionType::SubCommand,
-                "list",
-                "Get a list of valid support IDs",
-            ))
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::SubCommand,
-                    "remove",
-                    "Remove an existing support ID",
-                )
-                .add_sub_option(id_option),
-            ),
-    )
-    .await?;
-
-    Ok(())
+                "remove",
+                "Remove an existing support ID",
+            )
+            .add_sub_option(id_option),
+        )
 }

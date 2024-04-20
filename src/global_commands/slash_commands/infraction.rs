@@ -1,9 +1,9 @@
 use crate::infraction_type::InfractionType;
 use crate::models::Infraction;
 use crate::sqlx_lib::{create_user_infraction, get_user_infractions, PostgresPool};
-use crate::utils::{message_response, parse_options};
-use chrono::{Duration, Months, TimeDelta, Utc};
-use serenity::all::{Command, CommandInteraction, CommandOptionType, CreateEmbed, ResolvedValue};
+use crate::utils::{embed_response, parse_options};
+use chrono::{Months, TimeDelta, Utc};
+use serenity::all::{CommandInteraction, CommandOptionType, CreateEmbed, ResolvedValue};
 use serenity::builder::{CreateCommand, CreateCommandOption, CreateMessage};
 use serenity::model::prelude::{GuildId, Member};
 use serenity::model::{Permissions, Timestamp};
@@ -21,7 +21,7 @@ async fn warn<'a>(
     moderator: Member,
     points: i32,
     reason: &str,
-) -> Result<&'a str> {
+) -> Result<CreateEmbed> {
     member
         .user
         .dm(
@@ -30,7 +30,7 @@ async fn warn<'a>(
                 CreateEmbed::new()
                     .title("You have been warned")
                     .description(format!(
-                        "You have been warned in {} for the following reason: {}",
+                        "You have been warned in {} for the following reason:\n{}",
                         guild_id.to_partial_guild(ctx).await?.name,
                         reason
                     )),
@@ -38,11 +38,13 @@ async fn warn<'a>(
         )
         .await?;
 
+    let username = member.user.name;
+
     create_user_infraction(
         pool,
         Infraction::new(
             member.user.id.get(),
-            &member.user.name,
+            &username,
             guild_id.get(),
             InfractionType::Ban,
             moderator,
@@ -52,7 +54,11 @@ async fn warn<'a>(
     )
     .await?;
 
-    Ok("User has been warned")
+    let mut embed = CreateEmbed::new().title(format!("{} has been muted", username));
+    if reason != "No reason provided." {
+        embed = embed.description(reason);
+    }
+    Ok(embed)
 }
 
 async fn mute<'a>(
@@ -60,16 +66,47 @@ async fn mute<'a>(
     pool: &Pool<Postgres>,
     mut member: Member,
     moderator: Member,
-    duration: Duration,
+    duration: TimeDelta,
     points: i32,
     reason: &str,
-) -> Result<&'a str> {
+) -> Result<CreateEmbed> {
     let guild_id = member.guild_id;
     let timestamp = (Utc::now() + duration).timestamp();
 
     member
         .disable_communication_until_datetime(ctx, Timestamp::from_unix_timestamp(timestamp)?)
         .await?;
+
+    let days = duration.num_days();
+    let hours = duration.num_hours() % 24;
+
+    let mut duration_str = String::new();
+    if days > 0 {
+        duration_str.push_str(&format!("{} day", days));
+        if days > 1 {
+            duration_str.push('s');
+        }
+    } else if hours > 0 {
+        duration_str.push_str(&format!("{} hour", hours));
+        if hours > 1 {
+            duration_str.push('s');
+        }
+    }
+
+    let desc: String = if reason == "No reason provided." {
+        format!(
+            "You have been muted in {} for {}.",
+            guild_id.to_partial_guild(ctx).await?.name,
+            duration_str
+        )
+    } else {
+        format!(
+            "You have been muted in {} for {}\n{}",
+            guild_id.to_partial_guild(ctx).await?.name,
+            duration_str,
+            reason
+        )
+    };
 
     member
         .user
@@ -78,20 +115,18 @@ async fn mute<'a>(
             CreateMessage::new().add_embed(
                 CreateEmbed::new()
                     .title("You have been muted")
-                    .description(format!(
-                        "You have been muted in {} for the following reason: {}",
-                        guild_id.to_partial_guild(ctx).await?.name,
-                        reason
-                    )),
+                    .description(desc),
             ),
         )
         .await?;
+
+    let username = member.user.name;
 
     create_user_infraction(
         pool,
         Infraction::new(
             member.user.id.get(),
-            &member.user.name,
+            &username,
             guild_id.get(),
             InfractionType::Ban,
             moderator,
@@ -101,7 +136,11 @@ async fn mute<'a>(
     )
     .await?;
 
-    Ok("User has been muted")
+    let mut embed = CreateEmbed::new().title(format!("{} has been muted", username));
+    if reason != "No reason provided." {
+        embed = embed.description(reason);
+    }
+    Ok(embed)
 }
 
 async fn ban<'a>(
@@ -112,8 +151,8 @@ async fn ban<'a>(
     moderator: Member,
     points: i32,
     reason: &str,
-) -> Result<&'a str> {
-    member.ban_with_reason(ctx, 7, &reason).await?;
+) -> Result<CreateEmbed> {
+    member.ban_with_reason(ctx, 1, &reason).await?;
 
     member
         .user
@@ -123,7 +162,7 @@ async fn ban<'a>(
                 CreateEmbed::new()
                     .title("You have been banned")
                     .description(format!(
-                        "You have been banned from {} for the following reason: {}",
+                        "You have been banned in {} for the following reason:\n{}",
                         guild_id.to_partial_guild(ctx).await?.name,
                         reason
                     )),
@@ -131,11 +170,13 @@ async fn ban<'a>(
         )
         .await?;
 
+    let username = member.user.name;
+
     create_user_infraction(
         pool,
         Infraction::new(
             member.user.id.get(),
-            &member.user.name,
+            &username,
             guild_id.get(),
             InfractionType::Ban,
             moderator,
@@ -145,7 +186,11 @@ async fn ban<'a>(
     )
     .await?;
 
-    Ok("User has been banned")
+    let mut embed = CreateEmbed::new().title(format!("{} has been banned", username));
+    if reason != "No reason provided." {
+        embed = embed.description(reason);
+    }
+    Ok(embed)
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -168,15 +213,17 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let reason = match options.get("reason") {
         Some(ResolvedValue::String(reason)) => *reason,
-        _ => "No reason provided",
+        _ => "No reason provided.",
     };
 
-    let data = ctx.data.read().await;
-    let pool = data
-        .get::<PostgresPool>()
-        .expect("PostgresPool should exist in data.");
+    let pool = {
+        let data = ctx.data.read().await;
+        data.get::<PostgresPool>()
+            .expect("PostgresPool should exist in data.")
+            .clone()
+    };
 
-    let user_infractions = get_user_infractions(pool, user.id.get(), false).await?;
+    let user_infractions = get_user_infractions(&pool, user.id.get(), false).await?;
 
     let six_months_age = Utc::now()
         .checked_sub_months(Months::new(6))
@@ -195,12 +242,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let member = guild_id.member(&ctx, user).await?;
 
-    let message = match infraction_count {
-        1 => warn(ctx, pool, member, &guild_id, moderator, points, reason).await?,
+    let embed = match infraction_count {
+        1 => warn(ctx, &pool, member, &guild_id, moderator, points, reason).await?,
         2 => {
             mute(
                 ctx,
-                pool,
+                &pool,
                 member,
                 moderator,
                 TimeDelta::try_hours(1).ok_or_else(|| Error::TimeDelta)?,
@@ -212,7 +259,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         3 => {
             mute(
                 ctx,
-                pool,
+                &pool,
                 member,
                 moderator,
                 TimeDelta::try_hours(8).ok_or_else(|| Error::TimeDelta)?,
@@ -224,7 +271,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         4 => {
             mute(
                 ctx,
-                pool,
+                &pool,
                 member,
                 moderator,
                 TimeDelta::try_days(28).ok_or_else(|| Error::TimeDelta)?,
@@ -233,42 +280,36 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             )
             .await?
         }
-        5 => ban(ctx, pool, member, &guild_id, moderator, points, reason).await?,
+        5 => ban(ctx, &pool, member, &guild_id, moderator, points, reason).await?,
         _ => unreachable!("Invalid infraction count"),
     };
 
-    message_response(ctx, interaction, message).await?;
+    embed_response(ctx, interaction, embed).await?;
 
     Ok(())
 }
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::create_global_command(
-        ctx,
-        CreateCommand::new("infraction")
-            .name("infraction")
-            .description("Warn, mute, or ban a user")
-            .default_member_permissions(Permissions::MODERATE_MEMBERS)
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::User,
-                    "user",
-                    "The user to warn, mute, or ban",
-                )
-                .required(true),
+pub fn register() -> CreateCommand {
+    CreateCommand::new("infraction")
+        .name("infraction")
+        .description("Warn, mute, or ban a user")
+        .default_member_permissions(Permissions::MODERATE_MEMBERS)
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::User,
+                "user",
+                "The user to warn, mute, or ban",
             )
-            .add_option(CreateCommandOption::new(
-                CommandOptionType::Integer,
-                "points",
-                "The number of infractions to give the user",
-            ))
-            .add_option(CreateCommandOption::new(
-                CommandOptionType::String,
-                "reason",
-                "The reason for the infraction",
-            )),
-    )
-    .await?;
-
-    Ok(())
+            .required(true),
+        )
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::Integer,
+            "points",
+            "The number of infractions to give the user",
+        ))
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::String,
+            "reason",
+            "The reason for the infraction",
+        ))
 }
