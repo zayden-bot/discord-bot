@@ -41,8 +41,6 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         locked_users.push(user_id);
     }
 
-    println!("Good Morning");
-
     let image_cache = data
         .get::<ImageCache>()
         .ok_or_else(|| Error::DataNotFound)?;
