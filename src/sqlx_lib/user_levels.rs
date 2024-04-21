@@ -85,12 +85,8 @@ pub async fn get_user_row_number(
     Ok(data.row_number)
 }
 
-pub async fn get_users(
-    pool: &Pool<Postgres>,
-    page: impl Into<i64>,
-    limit: i64,
-) -> Result<Vec<UserLevelData>> {
-    let offset = (page.into() - 1) * limit;
+pub async fn get_users(pool: &Pool<Postgres>, page: i64, limit: i64) -> Result<Vec<UserLevelData>> {
+    let offset = (page - 1) * limit;
 
     let data = sqlx::query_as!(
         UserLevelData,
