@@ -9,6 +9,7 @@ edition = "2021"
 chrono = "*"
 cron = { version = "*", features = [] }
 dotenvy = "*"
+futures = "*"
 lazy_static = "*"
 log = { version = "*", features = ["release_max_level_info"] }
 rand = "*"
