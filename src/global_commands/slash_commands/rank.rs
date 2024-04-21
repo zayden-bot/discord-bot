@@ -3,8 +3,8 @@ use serenity::all::{
     CreateEmbed, ResolvedValue,
 };
 
+use crate::sqlx_lib::get_pool;
 use crate::sqlx_lib::user_levels::{get_user_level_data, get_user_rank};
-use crate::sqlx_lib::PostgresPool;
 use crate::utils::{embed_response, parse_options};
 use crate::{Error, Result};
 
@@ -22,12 +22,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => &interaction.user,
     };
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let level_data = get_user_level_data(&pool, user.id.get()).await?;
 

@@ -16,7 +16,6 @@ impl TypeMapKey for PostgresPool {
     type Value = Pool<Postgres>;
 }
 
-#[allow(dead_code)]
 pub async fn get_pool(ctx: &Context) -> Result<Pool<Postgres>> {
     let data = ctx.data.read().await;
     let pool = data

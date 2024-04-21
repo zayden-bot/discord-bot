@@ -1,17 +1,12 @@
 use serenity::all::{Context, Reaction};
 use sqlx::{Pool, Postgres};
 
-use crate::{models::ReactionRole, sqlx_lib::PostgresPool, Error, Result};
+use crate::{models::ReactionRole, sqlx_lib::get_pool, Error, Result};
 
 pub async fn reaction_add(ctx: &Context, reaction: &Reaction) -> Result<()> {
     let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let reaction_roles = get_reaction_roles(&pool, guild_id).await?;
     let member = reaction.member.as_ref().ok_or_else(|| Error::NoMember)?;
@@ -30,12 +25,7 @@ pub async fn reaction_add(ctx: &Context, reaction: &Reaction) -> Result<()> {
 pub async fn reaction_remove(ctx: &Context, reaction: &Reaction) -> Result<()> {
     let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let reaction_roles = get_reaction_roles(&pool, guild_id).await?;
     let member = match reaction.member {

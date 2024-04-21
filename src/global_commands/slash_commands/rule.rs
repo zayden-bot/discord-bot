@@ -1,4 +1,4 @@
-use crate::sqlx_lib::{get_rule, PostgresPool};
+use crate::sqlx_lib::{get_pool, get_rule};
 use crate::utils::{embed_response, parse_options};
 use crate::{Error, Result};
 use serenity::all::{
@@ -19,12 +19,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => unreachable!("Rule ID is required"),
     };
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let rule = get_rule(&pool, rule_id, guild_id.get()).await?;
 

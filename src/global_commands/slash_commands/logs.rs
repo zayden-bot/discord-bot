@@ -1,4 +1,4 @@
-use crate::sqlx_lib::{get_user_infractions, PostgresPool};
+use crate::sqlx_lib::{get_pool, get_user_infractions};
 use crate::utils::{embed_response, parse_options};
 use crate::Result;
 use serenity::all::{
@@ -20,12 +20,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => "recent",
     };
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let infractions = get_user_infractions(&pool, user.id.get(), filter == "recent").await?;
 

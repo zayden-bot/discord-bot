@@ -12,23 +12,25 @@ use serenity::all::{
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
 
-    let data = ctx.data.read().await;
-    let image_cache = data
-        .get::<ImageCache>()
-        .ok_or_else(|| Error::DataNotFound)?;
-    let image_map = &image_cache.character_map;
-
     let guild_roles = interaction
         .guild_id
         .ok_or_else(|| Error::NoGuild)?
-        .to_partial_guild(&ctx)
-        .await?
-        .roles;
+        .roles(&ctx)
+        .await?;
+
     let member_roles = &interaction
         .member
         .as_ref()
         .ok_or_else(|| Error::NoMember)?
         .roles;
+
+    let image_map = {
+        let data = ctx.data.read().await;
+        let image_cache = data
+            .get::<ImageCache>()
+            .ok_or_else(|| Error::DataNotFound)?;
+        image_cache.character_map.clone()
+    };
 
     let entries: Vec<&PathBuf> = member_roles
         .iter()

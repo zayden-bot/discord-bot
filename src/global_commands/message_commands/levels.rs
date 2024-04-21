@@ -6,8 +6,8 @@ use std::collections::HashMap;
 
 use crate::{
     sqlx_lib::{
+        get_pool,
         user_levels::{get_user_level_data, update_user_level_data},
-        PostgresPool,
     },
     Error, Result,
 };
@@ -36,12 +36,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
         return Ok(());
     }
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
     let level_data = get_user_level_data(&pool, msg.author.id.get()).await?;
 
     if level_data.last_xp

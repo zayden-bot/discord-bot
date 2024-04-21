@@ -47,7 +47,8 @@ async fn main() -> Result<()> {
     data.insert::<GoodNightLockedUsers>(Vec::new());
     data.insert::<PostgresPool>(
         PgPoolOptions::new()
-            .max_connections(5)
+            .max_connections(10)
+            .min_connections(3)
             .connect(&env::var("DATABASE_URL")?)
             .await?,
     );

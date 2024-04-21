@@ -1,6 +1,6 @@
 use crate::infraction_type::InfractionType;
 use crate::models::Infraction;
-use crate::sqlx_lib::{create_user_infraction, get_user_infractions, PostgresPool};
+use crate::sqlx_lib::{create_user_infraction, get_pool, get_user_infractions};
 use crate::utils::{embed_response, parse_options};
 use chrono::{Months, TimeDelta, Utc};
 use serenity::all::{CommandInteraction, CommandOptionType, CreateEmbed, ResolvedValue};
@@ -54,7 +54,7 @@ async fn warn<'a>(
     )
     .await?;
 
-    let mut embed = CreateEmbed::new().title(format!("{} has been muted", username));
+    let mut embed = CreateEmbed::new().title(format!("{} has been warned", username));
     if reason != "No reason provided." {
         embed = embed.description(reason);
     }
@@ -216,12 +216,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => "No reason provided.",
     };
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let user_infractions = get_user_infractions(&pool, user.id.get(), false).await?;
 

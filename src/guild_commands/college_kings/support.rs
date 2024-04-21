@@ -1,5 +1,5 @@
 use crate::sqlx_lib::{
-    create_support_faq, delete_support_faq, get_all_support_faq, get_support_answer, PostgresPool,
+    create_support_faq, delete_support_faq, get_all_support_faq, get_pool, get_support_answer,
 };
 use crate::utils::{embed_response, message_response, parse_options};
 use crate::{Error, Result};
@@ -95,12 +95,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     };
     let options = parse_options(options);
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     if command.name == "list" {
         list(ctx, interaction, &pool, guild_id).await?;

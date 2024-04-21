@@ -10,6 +10,7 @@ chrono = "*"
 cron = { version = "*", features = [] }
 dotenvy = "*"
 lazy_static = "*"
+log = { version = "*", features = ["release_max_level_info"] }
 rand = "*"
 regex = "*"
 reqwest = { version = "*", features = ["json"] }

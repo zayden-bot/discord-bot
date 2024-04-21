@@ -1,4 +1,4 @@
-use crate::sqlx_lib::{create_reaction_role, delete_reaction_role, PostgresPool};
+use crate::sqlx_lib::{create_reaction_role, delete_reaction_role, get_pool};
 use crate::utils::{message_response, parse_options};
 use crate::{Error, Result};
 use serenity::all::{
@@ -99,12 +99,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => unreachable!("Emoji is required"),
     };
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     match command.name {
         "add" => {

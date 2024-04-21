@@ -5,8 +5,8 @@ use serenity::all::{
 
 use crate::{
     sqlx_lib::{
+        get_pool,
         user_levels::{get_user_row_number, get_users},
-        PostgresPool,
     },
     Error, Result,
 };
@@ -16,12 +16,7 @@ const LIMIT: i64 = 10;
 pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &str) -> Result<()> {
     interaction.defer(ctx).await?;
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let mut old_embed = interaction.message.embeds[0].clone();
 

@@ -1,4 +1,4 @@
-use crate::sqlx_lib::{get_gold_stars, PostgresPool};
+use crate::sqlx_lib::{get_gold_stars, get_pool};
 use crate::utils::embed_response;
 use crate::utils::parse_options;
 use crate::Result;
@@ -16,12 +16,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => &interaction.user,
     };
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let stars = get_gold_stars(&pool, user.id.get())
         .await

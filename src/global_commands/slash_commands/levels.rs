@@ -3,19 +3,14 @@ use serenity::all::{
 };
 use serenity::all::{CreateEmbedFooter, UserId};
 
+use crate::sqlx_lib::get_pool;
 use crate::sqlx_lib::user_levels::get_users;
-use crate::sqlx_lib::PostgresPool;
 use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let page_number = 1;
     let users = get_users(&pool, page_number, 10).await?;

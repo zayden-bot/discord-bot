@@ -1,4 +1,4 @@
-use crate::sqlx_lib::{get_spoiler_channel_ids, get_support_channel_ids, PostgresPool};
+use crate::sqlx_lib::{get_pool, get_spoiler_channel_ids, get_support_channel_ids};
 use crate::utils::message_response;
 use crate::{Error, Result};
 use serenity::all::{CommandInteraction, Context, CreateCommand};
@@ -8,12 +8,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let support_thread_ids = get_support_channel_ids(&pool, guild_id.get()).await?;
     let support_thread_id = support_thread_ids

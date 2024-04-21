@@ -1,5 +1,5 @@
+use crate::sqlx_lib::get_pool;
 use crate::sqlx_lib::user_levels::get_user_level_data;
-use crate::sqlx_lib::PostgresPool;
 use crate::utils::{embed_response, parse_options};
 use crate::Result;
 use serenity::all::{
@@ -16,12 +16,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => interaction.defer(&ctx).await?,
     }
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let level_data = get_user_level_data(&pool, interaction.user.id.get()).await?;
 

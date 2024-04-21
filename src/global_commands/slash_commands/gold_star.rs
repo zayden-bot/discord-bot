@@ -1,4 +1,4 @@
-use crate::sqlx_lib::{add_star_to_user, get_gold_stars, remove_star_from_author, PostgresPool};
+use crate::sqlx_lib::{add_star_to_user, get_gold_stars, get_pool, remove_star_from_author};
 use crate::utils::{embed_response, message_response, parse_options};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
@@ -23,12 +23,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         return Ok(());
     }
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let author_stars = get_gold_stars(&pool, interaction.user.id.get()).await?;
     let member_stars = get_gold_stars(&pool, user.id.get()).await?;

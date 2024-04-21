@@ -31,7 +31,7 @@ fn create_character_map(images: Vec<PathBuf>) -> HashMap<String, Vec<PathBuf>> {
     character_map
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ImageCache {
     pub last_update: NaiveDateTime,
     pub good_morning_images: Vec<PathBuf>,

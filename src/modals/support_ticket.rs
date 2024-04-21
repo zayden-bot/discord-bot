@@ -6,8 +6,8 @@ use serenity::all::{
 
 use crate::{
     sqlx_lib::{
-        get_support_channel_ids, get_support_role_ids, get_support_thead_id,
-        update_support_thread_id, PostgresPool,
+        get_pool, get_support_channel_ids, get_support_role_ids, get_support_thead_id,
+        update_support_thread_id,
     },
     utils::support::{get_thread_name, send_support_message},
     Error, Result,
@@ -18,12 +18,7 @@ use super::parse_modal_data;
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let guild_id = modal.guild_id.ok_or_else(|| Error::NoGuild)?;
 
-    let pool = {
-        let data = ctx.data.read().await;
-        data.get::<PostgresPool>()
-            .expect("PostgresPool should exist in data.")
-            .clone()
-    };
+    let pool = get_pool(ctx).await?;
 
     let support_channel_ids = get_support_channel_ids(&pool, guild_id.get()).await?;
 
