@@ -1,9 +1,8 @@
-use crate::Result;
-use serenity::all::{ChannelId, Context, CreateEmbed};
+use serenity::all::{Context, CreateEmbed};
+
+use crate::{guilds::college_kings::INFORMATION_CHANNEL_ID, Result};
 
 use super::utils::send_or_update_message;
-
-const CHANNEL_ID: ChannelId = ChannelId::new(830927865784565800);
 
 pub async fn run(ctx: &Context) -> Result<()> {
     let embed = CreateEmbed::new()
@@ -52,7 +51,7 @@ Fan/Activity Roles:
         false,
     );
 
-    send_or_update_message(ctx, CHANNEL_ID, embed).await?;
+    send_or_update_message(ctx, INFORMATION_CHANNEL_ID, embed).await?;
 
     Ok(())
 }

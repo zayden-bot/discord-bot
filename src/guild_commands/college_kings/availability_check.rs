@@ -3,7 +3,7 @@ use serenity::all::{
     CreateCommandOption, CreateEmbed, CreateMessage, Mentionable, ResolvedValue,
 };
 
-use crate::guilds::college_kings_team::{TEAM_LEADS_CHANNEL_ID, TEAM_LEADS_ROLE_ID};
+use crate::guilds::college_kings_team::{TEAM_LEADERS_ROLE_ID, TEAM_LEADS_CHANNEL_ID};
 use crate::utils::{message_response, parse_options};
 use crate::Result;
 
@@ -39,7 +39,7 @@ pub fn register() -> CreateCommand {
 
 pub fn availability_check_message(title: impl Into<String>) -> CreateMessage {
     CreateMessage::default()
-        .content(TEAM_LEADS_ROLE_ID.mention().to_string())
+        .content(TEAM_LEADERS_ROLE_ID.mention().to_string())
         .embed(
             CreateEmbed::default()
                 .title(title)

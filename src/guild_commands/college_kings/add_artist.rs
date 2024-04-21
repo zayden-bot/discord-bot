@@ -1,12 +1,13 @@
-use crate::utils::{message_response, parse_options};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    Permissions, ResolvedValue, RoleId,
+    Permissions, ResolvedValue,
 };
 
+use crate::{
+    guilds::college_kings::ARTIST_ROLE_ID,
+    utils::{message_response, parse_options},
+};
 use crate::{Error, Result};
-
-const ROLE_ID: RoleId = RoleId::new(1043987303556726854);
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
@@ -21,7 +22,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let member = guild_id.member(&ctx, user).await?;
 
-    member.add_role(&ctx, ROLE_ID).await?;
+    member.add_role(&ctx, ARTIST_ROLE_ID).await?;
 
     message_response(
         ctx,

@@ -1,11 +1,9 @@
 use serenity::all::{
     ComponentInteraction, Context, CreateActionRow, CreateInputText, CreateInteractionResponse,
-    CreateInteractionResponseMessage, CreateModal, InputTextStyle, RoleId,
+    CreateInteractionResponseMessage, CreateModal, InputTextStyle,
 };
 
-use crate::Result;
-
-const TEAM_LEADERS_ROLE_ID: RoleId = RoleId::new(836275726352646176);
+use crate::{guilds::college_kings_team::TEAM_LEADERS_ROLE_ID, Result};
 
 pub async fn suggestions(
     ctx: &Context,

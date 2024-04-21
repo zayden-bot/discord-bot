@@ -1,17 +1,16 @@
 use serenity::{
     all::{
-        ButtonStyle, ChannelId, Context, CreateActionRow, CreateButton, CreateEmbed,
-        CreateEmbedAuthor, CreateEmbedFooter, CreateMessage, EditMessage, EmbedField, GuildChannel,
-        Message, Reaction, ReactionType,
+        ButtonStyle, Context, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedAuthor,
+        CreateEmbedFooter, CreateMessage, EditMessage, EmbedField, GuildChannel, Message, Reaction,
+        ReactionType,
     },
     futures::StreamExt,
 };
 
-use crate::Result;
+use crate::{guilds::college_kings_team::SUGGESTION_CATEGORY_ID, Result};
 
 const POSITIVE_REACTION: &str = "👍";
 const NEGATIVE_REACTION: &str = "👎";
-const CHANNEL_ID: ChannelId = ChannelId::new(1225381390539821086);
 
 pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChannel) -> Result<()> {
     let message = reaction.message(ctx).await?;
@@ -28,7 +27,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
     }
 
     if (positive_count - negative_count) >= 20 {
-        let mut messages = CHANNEL_ID.messages_iter(&ctx).boxed();
+        let mut messages = SUGGESTION_CATEGORY_ID.messages_iter(&ctx).boxed();
         while let Some(message_result) = messages.next().await {
             let mut msg = message_result?;
             if msg.embeds[0].url == Some(message.link()) {
@@ -49,7 +48,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
             }
         }
 
-        CHANNEL_ID
+        SUGGESTION_CATEGORY_ID
             .send_message(
                 ctx,
                 CreateMessage::new()
@@ -64,7 +63,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
             )
             .await?;
     } else if (negative_count - positive_count) <= 15 {
-        let mut messages = CHANNEL_ID.messages_iter(&ctx).boxed();
+        let mut messages = SUGGESTION_CATEGORY_ID.messages_iter(&ctx).boxed();
         while let Some(message_result) = messages.next().await {
             let msg = message_result?;
             if msg.embeds[0].url == Some(message.link()) {

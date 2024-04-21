@@ -1,12 +1,12 @@
-use crate::sqlx_lib::{get_pool, get_rule};
-use crate::utils::{embed_response, parse_options};
-use crate::{Error, Result};
 use serenity::all::{
-    ChannelId, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, Mentionable, ResolvedValue,
 };
 
-const CHANNEL_ID: ChannelId = ChannelId::new(747430712617074718);
+use crate::guilds::college_kings::RULE_CHANNEL_ID;
+use crate::sqlx_lib::{get_pool, get_rule};
+use crate::utils::{embed_response, parse_options};
+use crate::{Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
@@ -32,7 +32,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 "**{}.** {}\n\n**Please read the rest of the rules in {}!**",
                 rule_id,
                 rule,
-                CHANNEL_ID.mention()
+                RULE_CHANNEL_ID.mention()
             )),
     )
     .await?;

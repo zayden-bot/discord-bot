@@ -1,11 +1,11 @@
-use crate::utils::{message_response, parse_options};
-use crate::Result;
 use serenity::all::{
-    ChannelId, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, CreateMessage, ResolvedValue,
 };
 
-const CHANNEL_ID: ChannelId = ChannelId::new(1227244734515380316);
+use crate::guilds::college_kings_team::REVIEW_CHANNEL_ID;
+use crate::utils::{message_response, parse_options};
+use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer_ephemeral(ctx).await?;
@@ -23,7 +23,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => unreachable!("Feedback is required"),
     };
 
-    CHANNEL_ID
+    REVIEW_CHANNEL_ID
         .send_message(
             ctx,
             CreateMessage::new().embed(

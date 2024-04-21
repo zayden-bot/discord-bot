@@ -1,13 +1,12 @@
-use crate::Result;
 use serenity::{
-    all::{ActionRowComponent, ButtonKind, ChannelId, Context, CreateButton, CreateMessage},
+    all::{ActionRowComponent, ButtonKind, Context, CreateButton, CreateMessage},
     futures::StreamExt,
 };
 
-const CHANNEL_ID: ChannelId = ChannelId::new(919950775134847016);
+use crate::{guilds::college_kings::SUPPORT_CHANNEL_ID, Result};
 
 pub async fn run(ctx: &Context) -> Result<()> {
-    let mut messages = CHANNEL_ID.messages_iter(&ctx).boxed();
+    let mut messages = SUPPORT_CHANNEL_ID.messages_iter(&ctx).boxed();
     while let Some(Ok(message)) = messages.next().await {
         if let Some(ActionRowComponent::Button(b)) = message
             .components
@@ -23,7 +22,7 @@ pub async fn run(ctx: &Context) -> Result<()> {
         }
     }
 
-    CHANNEL_ID
+    SUPPORT_CHANNEL_ID
         .send_message(
             ctx,
             CreateMessage::default()

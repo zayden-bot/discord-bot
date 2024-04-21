@@ -1,14 +1,13 @@
-use crate::{
-    utils::{message_response, parse_options},
-    Error, Result,
-};
 use serenity::all::{
-    ChannelId, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     EditChannel, Permissions, ResolvedValue,
 };
 
-const CHANGE_LOG_CHANNEL_ID: ChannelId = ChannelId::new(992599169288122410);
-const SUPPORT_CHANNEL_ID: ChannelId = ChannelId::new(919950775134847016);
+use crate::{
+    guilds::college_kings::{CHANGE_LOG_CHANNEL_ID, SUPPORT_CHANNEL_ID},
+    utils::{message_response, parse_options},
+    Error, Result,
+};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
