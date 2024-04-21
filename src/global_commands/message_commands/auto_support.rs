@@ -31,7 +31,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     let pool = get_pool(ctx).await?;
 
     let support_channel_ids = get_support_channel_ids(&pool, guild_id.get()).await?;
-    if !support_channel_ids.contains(&(msg.channel_id.get() as i64)) {
+    if !support_channel_ids.contains(&msg.channel_id) {
         return Ok(());
     }
 
@@ -40,7 +40,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     let support_role_ids = get_support_role_ids(&pool, guild_id.get()).await?;
     let support_role = guild_roles
         .into_iter()
-        .find(|(role_id, _)| role_id.get() == (support_role_ids[0] as u64))
+        .find(|(role_id, _)| *role_id == support_role_ids[0])
         .ok_or_else(|| Error::NoRole)?
         .1;
 

@@ -1,7 +1,6 @@
 use serenity::all::{
-    AutoArchiveDuration, ChannelId, ChannelType, Context, CreateEmbed, CreateEmbedFooter,
+    AutoArchiveDuration, ChannelType, Context, CreateEmbed, CreateEmbedFooter,
     CreateInteractionResponse, CreateMessage, CreateThread, InputText, ModalInteraction, Role,
-    RoleId,
 };
 
 use crate::{
@@ -27,11 +26,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let support_roles = get_support_role_ids(&pool, guild_id.get())
         .await?
         .into_iter()
-        .map(|id| {
-            guild_roles
-                .get(&RoleId::new(id as u64))
-                .ok_or_else(|| Error::NoRole)
-        })
+        .map(|id| guild_roles.get(&id).ok_or_else(|| Error::NoRole))
         .collect::<Result<Vec<&Role>>>()?;
 
     let thread_id = get_support_thead_id(&pool, guild_id.get())
@@ -76,8 +71,6 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     }
 
     for channel_id in support_channel_ids {
-        let channel_id = ChannelId::new(channel_id as u64);
-
         let thread = channel_id
             .create_thread(
                 ctx,
