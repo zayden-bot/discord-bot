@@ -1,9 +1,13 @@
 use chrono::NaiveDateTime;
+use futures::{StreamExt, TryStreamExt};
+use serenity::all::{Context, User, UserId};
 use sqlx::{Pool, Postgres};
 
 use crate::{Error, Result};
 
-pub struct UserLevelData {
+use super::get_pool;
+
+pub struct Level {
     pub id: i64,
     pub xp: i32,
     pub level: i32,
@@ -15,17 +19,17 @@ pub struct UserLevelData {
 pub async fn get_user_level_data(
     pool: &Pool<Postgres>,
     user_id: impl TryInto<i64>,
-) -> Result<UserLevelData> {
+) -> Result<Level> {
     let user_id: i64 = user_id.try_into().map_err(|_| Error::ConversionError)?;
 
-    let data = match sqlx::query_as!(UserLevelData, "SELECT * FROM levels WHERE id = $1", user_id)
+    let data = match sqlx::query_as!(Level, "SELECT * FROM levels WHERE id = $1", user_id)
         .fetch_optional(pool)
         .await?
     {
         Some(data) => data,
         None => {
             sqlx::query_as!(
-                UserLevelData,
+                Level,
                 "INSERT INTO levels (id) VALUES ($1) RETURNING *",
                 user_id,
             )
@@ -85,16 +89,42 @@ pub async fn get_user_row_number(
     Ok(data.row_number)
 }
 
-pub async fn get_users(pool: &Pool<Postgres>, page: i64, limit: i64) -> Result<Vec<UserLevelData>> {
+pub struct UserLevel {
+    pub user: User,
+    pub xp: i32,
+    pub level: i32,
+    pub total_xp: i32,
+    pub message_count: i32,
+    pub last_xp: NaiveDateTime,
+}
+
+pub async fn get_users(ctx: &Context, page: i64, limit: i64) -> Result<Vec<UserLevel>> {
+    let pool = get_pool(ctx).await?;
+
     let offset = (page - 1) * limit;
 
     let data = sqlx::query_as!(
-        UserLevelData,
+        Level,
         "SELECT * FROM levels ORDER BY total_xp DESC LIMIT $1 OFFSET $2",
         limit,
         offset
     )
-    .fetch_all(pool)
+    .fetch(&pool)
+    .then(|level_result| async move {
+        let level = level_result?;
+
+        let userlevel = UserLevel {
+            user: UserId::new(level.id as u64).to_user(ctx).await?,
+            xp: level.xp,
+            level: level.level,
+            total_xp: level.total_xp,
+            message_count: level.message_count,
+            last_xp: level.last_xp,
+        };
+
+        Ok::<UserLevel, Error>(userlevel)
+    })
+    .try_collect::<Vec<_>>()
     .await?;
 
     Ok(data)

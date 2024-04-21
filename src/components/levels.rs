@@ -1,6 +1,6 @@
 use serenity::all::{
     ComponentInteraction, Context, CreateEmbed, CreateEmbedFooter, EditInteractionResponse,
-    EditMessage, UserId,
+    EditMessage,
 };
 
 use crate::{
@@ -49,19 +49,19 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
         _ => unreachable!(),
     };
 
-    let mut fields = Vec::with_capacity(LIMIT as usize);
-    for level_data in get_users(&pool, page_number, LIMIT).await? {
-        let user = UserId::new(level_data.id as u64).to_user(ctx).await?;
-
-        fields.push((
-            user.name,
-            format!(
-                "Messages: {} | Total XP: {} | Level: {}",
-                level_data.message_count, level_data.xp, level_data.level
-            ),
-            false,
-        ));
-    }
+    let fields = get_users(ctx, page_number, LIMIT)
+        .await?
+        .into_iter()
+        .map(|level_data| {
+            (
+                level_data.user.name,
+                format!(
+                    "Messages: {} | Total XP: {} | Level: {}",
+                    level_data.message_count, level_data.xp, level_data.level
+                ),
+                false,
+            )
+        });
 
     new_embed = new_embed.footer(CreateEmbedFooter::new(format!("Page {}", page_number)));
     new_embed = new_embed.fields(fields);
