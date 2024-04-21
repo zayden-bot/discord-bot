@@ -49,8 +49,8 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
         _ => unreachable!(),
     };
 
-    let mut fields = Vec::new();
-    for level_data in get_users(&pool, page_number, 10).await? {
+    let mut fields = Vec::with_capacity(LIMIT as usize);
+    for level_data in get_users(&pool, page_number, LIMIT).await? {
         let user = UserId::new(level_data.id as u64).to_user(ctx).await?;
 
         fields.push((
