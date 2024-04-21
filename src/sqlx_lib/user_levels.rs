@@ -124,7 +124,7 @@ pub async fn get_users(ctx: &Context, page: i64, limit: i64) -> Result<Vec<UserL
 
         Ok::<UserLevel, Error>(userlevel)
     })
-    .try_collect::<Vec<_>>()
+    .try_collect()
     .await?;
 
     Ok(data)
