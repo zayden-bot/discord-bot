@@ -1,10 +1,7 @@
-use futures::TryStreamExt;
-use serenity::{
-    all::{
-        ComponentInteraction, ComponentInteractionDataKind, Context, CreateEmbed,
-        CreateInteractionResponse, CreateInteractionResponseMessage,
-    },
-    futures::StreamExt,
+use futures::{StreamExt, TryStreamExt};
+use serenity::all::{
+    ComponentInteraction, ComponentInteractionDataKind, Context, CreateEmbed,
+    CreateInteractionResponse, CreateInteractionResponseMessage,
 };
 
 use crate::{guilds::college_kings::SUPPORT_FAQ_CHANNEL_ID, Error, Result};
