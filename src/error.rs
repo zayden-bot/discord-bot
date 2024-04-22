@@ -30,42 +30,16 @@ pub enum Error {
     NoSupportThread,
     NoSpoilerThread,
     FaqMessageNotFound(String),
+    EmptyMessage,
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            Error::Dotenvy(e) => write!(f, "{}", e),
-            Error::Serenity(e) => write!(f, "{}", e),
-            Error::SerenityTimestamp(e) => write!(f, "{}", e),
-            Error::Sqlx(e) => write!(f, "{}", e),
-            Error::EnvVar(e) => write!(f, "{}", e),
-            Error::Reqwest(e) => write!(f, "{}", e),
-            Error::Cron(e) => write!(f, "{}", e),
-            Error::ParseIntError(e) => write!(f, "{}", e),
-            Error::ReactionConversionError(e) => write!(f, "{}", e),
-            Error::JoinError(e) => write!(f, "{}", e),
-            Error::ChronoError => write!(f, "Chrono error"),
-            Error::ConversionError => write!(f, "Conversion error"),
-            Error::CommandNotFound(name) => write!(f, "Command not found: {}", name),
-            Error::DataNotFound => write!(f, "Data not found"),
-            Error::TimeDelta => write!(f, "TimeDelta error"),
-            Error::NoImage => write!(f, "No image found"),
-            Error::NoUser => write!(f, "No user found"),
-            Error::UserNotFound => write!(f, "User not found"),
-            Error::NoGuild => write!(f, "No guild found"),
-            Error::NoRole => write!(f, "No role found"),
-            Error::RoleNotFound(id) => write!(f, "Role not found: {}", id),
-            Error::NoMember => write!(f, "No member found"),
-            Error::NoChannel => write!(f, "No channel found"),
-            Error::NoParent => write!(f, "No parent channel found"),
-            Error::NoFileName => write!(f, "No file name found"),
-            Error::NoSupportThread => write!(f, "No support thread found"),
-            Error::NoSpoilerThread => write!(f, "No spoiler thread found"),
-            Error::FaqMessageNotFound(content) => write!(f, "FAQ message not found: {}", content),
-        }
+        write!(f, "{self:?}")
     }
 }
+
+impl std::error::Error for Error {}
 
 impl From<dotenvy::Error> for Error {
     fn from(e: dotenvy::Error) -> Self {
