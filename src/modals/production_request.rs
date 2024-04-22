@@ -1,11 +1,9 @@
+use futures::{StreamExt, TryStreamExt};
 use lazy_static::lazy_static;
-use serenity::{
-    all::{
-        ActionRowComponent, AutoArchiveDuration, ButtonKind, ChannelType, Context, CreateButton,
-        CreateEmbed, CreateEmbedAuthor, CreateInteractionResponse, CreateMessage, CreateThread,
-        InputText, Mentionable, ModalInteraction, RoleId,
-    },
-    futures::StreamExt,
+use serenity::all::{
+    ActionRowComponent, AutoArchiveDuration, ButtonKind, ChannelType, Context, CreateButton,
+    CreateEmbed, CreateEmbedAuthor, CreateInteractionResponse, CreateMessage, CreateThread,
+    InputText, Mentionable, ModalInteraction, RoleId,
 };
 use std::collections::HashMap;
 
@@ -127,7 +125,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
 async fn resend_button_message(ctx: &Context, interaction: &ModalInteraction) -> Result<()> {
     let mut messages = interaction.channel_id.messages_iter(ctx).boxed();
 
-    while let Some(Ok(message)) = messages.next().await {
+    while let Some(message) = messages.try_next().await? {
         if let Some(ActionRowComponent::Button(b)) = message
             .components
             .first()

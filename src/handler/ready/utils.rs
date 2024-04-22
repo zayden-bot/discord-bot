@@ -1,7 +1,5 @@
-use serenity::{
-    all::{ChannelId, Context, CreateEmbed, CreateMessage, EditMessage},
-    futures::StreamExt,
-};
+use futures::{StreamExt, TryStreamExt};
+use serenity::all::{ChannelId, Context, CreateEmbed, CreateMessage, EditMessage};
 
 use crate::Result;
 
@@ -10,11 +8,11 @@ pub async fn send_or_update_message(
     channel_id: ChannelId,
     embed: CreateEmbed,
 ) -> Result<()> {
-    let message = channel_id.messages_iter(ctx).boxed().next().await;
+    let message = channel_id.messages_iter(ctx).boxed().try_next().await?;
 
     match message {
-        Some(message) => {
-            message?.edit(&ctx, EditMessage::new().embed(embed)).await?;
+        Some(mut message) => {
+            message.edit(&ctx, EditMessage::new().embed(embed)).await?;
         }
         None => {
             channel_id

@@ -1,13 +1,11 @@
-use serenity::{
-    all::{ActionRowComponent, ButtonKind, Context, CreateButton, CreateMessage},
-    futures::StreamExt,
-};
+use futures::{StreamExt, TryStreamExt};
+use serenity::all::{ActionRowComponent, ButtonKind, Context, CreateButton, CreateMessage};
 
 use crate::{guilds::college_kings::SUPPORT_CHANNEL_ID, Result};
 
 pub async fn run(ctx: &Context) -> Result<()> {
     let mut messages = SUPPORT_CHANNEL_ID.messages_iter(&ctx).boxed();
-    while let Some(Ok(message)) = messages.next().await {
+    while let Some(message) = messages.try_next().await? {
         if let Some(ActionRowComponent::Button(b)) = message
             .components
             .first()

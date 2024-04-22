@@ -6,7 +6,7 @@ use rand::seq::{IteratorRandom, SliceRandom};
 use rand::thread_rng;
 use serenity::all::{
     CommandInteraction, Context, CreateAttachment, CreateCommand, CreateEmbed, EditAttachments,
-    EditInteractionResponse,
+    EditInteractionResponse, Role,
 };
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -18,11 +18,18 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .roles(&ctx)
         .await?;
 
-    let member_roles = &interaction
+    let member_roles: Vec<&Role> = interaction
         .member
         .as_ref()
         .ok_or_else(|| Error::NoMember)?
-        .roles;
+        .roles
+        .iter()
+        .map(|role| -> Result<&Role> {
+            guild_roles
+                .get(role)
+                .ok_or_else(|| Error::RoleNotFound(role.get()))
+        })
+        .collect::<Result<_>>()?;
 
     let image_map = {
         let data = ctx.data.read().await;
@@ -33,14 +40,10 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     };
 
     let entries: Vec<&PathBuf> = member_roles
-        .iter()
-        .map(|role_id| -> Result<&str> {
-            let role = guild_roles.get(role_id).ok_or_else(|| Error::NoRole)?;
-            Ok(&role.name)
-        })
-        .filter_map(|name| {
-            let name = name.ok()?.split('\'').next()?;
-            image_map.get(&name.to_lowercase())
+        .into_iter()
+        .filter_map(|role| {
+            let name = role.name.split('\'').next()?.to_lowercase();
+            image_map.get(&name)
         })
         .flatten()
         .collect();

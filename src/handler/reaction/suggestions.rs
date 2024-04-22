@@ -1,10 +1,8 @@
-use serenity::{
-    all::{
-        ButtonStyle, Context, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedAuthor,
-        CreateEmbedFooter, CreateMessage, EditMessage, EmbedField, GuildChannel, Message, Reaction,
-        ReactionType,
-    },
-    futures::StreamExt,
+use futures::{StreamExt, TryStreamExt};
+use serenity::all::{
+    ButtonStyle, Context, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedAuthor,
+    CreateEmbedFooter, CreateMessage, EditMessage, EmbedField, GuildChannel, Message, Reaction,
+    ReactionType,
 };
 
 use crate::{guilds::college_kings_team::SUGGESTION_CATEGORY_ID, Result};
@@ -26,10 +24,10 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
         }
     }
 
+    let mut messages = SUGGESTION_CATEGORY_ID.messages_iter(&ctx).boxed();
+
     if (positive_count - negative_count) >= 20 {
-        let mut messages = SUGGESTION_CATEGORY_ID.messages_iter(&ctx).boxed();
-        while let Some(message_result) = messages.next().await {
-            let mut msg = message_result?;
+        while let Some(mut msg) = messages.try_next().await? {
             if msg.embeds[0].url == Some(message.link()) {
                 msg.edit(
                     ctx,
@@ -63,9 +61,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
             )
             .await?;
     } else if (negative_count - positive_count) <= 15 {
-        let mut messages = SUGGESTION_CATEGORY_ID.messages_iter(&ctx).boxed();
-        while let Some(message_result) = messages.next().await {
-            let msg = message_result?;
+        while let Some(msg) = messages.try_next().await? {
             if msg.embeds[0].url == Some(message.link()) {
                 msg.delete(ctx).await?;
                 return Ok(());

@@ -1,13 +1,11 @@
-use serenity::{
-    all::{
-        CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-        CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption, EditInteractionResponse,
-        ResolvedOption, ResolvedValue,
-    },
-    futures::StreamExt,
+use futures::{StreamExt, TryStreamExt};
+use serenity::all::{
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption, EditInteractionResponse,
+    ResolvedOption, ResolvedValue,
 };
 
-use crate::{guilds::college_kings::FAQ_CHANNEL_ID, Result};
+use crate::{guilds::college_kings::FAQ_CHANNEL_ID, Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer_ephemeral(ctx).await?;
@@ -22,17 +20,26 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => "faq_ephemeral",
     };
 
-    let mut ids = FAQ_CHANNEL_ID
+    let mut menu_options: Vec<CreateSelectMenuOption> = FAQ_CHANNEL_ID
         .messages_iter(ctx)
-        .filter_map(|msg_result| async {
-            match msg_result {
-                Ok(msg) => Some(msg.content.lines().next()?.trim().to_string()),
-                Err(_) => None,
-            }
+        .enumerate()
+        .then(|(index, msg_result)| async move {
+            let msg = msg_result?;
+            let id = msg
+                .content
+                .lines()
+                .next()
+                .ok_or_else(|| Error::EmptyMessage)?
+                .trim();
+
+            Ok::<CreateSelectMenuOption, Error>(CreateSelectMenuOption::new(
+                id[2..id.len() - 2].to_string(),
+                index.to_string(),
+            ))
         })
-        .collect::<Vec<_>>()
-        .await;
-    ids.pop();
+        .try_collect()
+        .await?;
+    menu_options.pop();
 
     interaction
         .edit_response(
@@ -40,13 +47,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             EditInteractionResponse::default().select_menu(CreateSelectMenu::new(
                 select_menu_id,
                 CreateSelectMenuKind::String {
-                    options: ids
-                        .into_iter()
-                        .enumerate()
-                        .map(|(index, id)| {
-                            CreateSelectMenuOption::new(&id[2..id.len() - 2], index.to_string())
-                        })
-                        .collect(),
+                    options: menu_options,
                 },
             )),
         )
@@ -61,6 +62,6 @@ pub fn register() -> CreateCommand {
         .add_option(CreateCommandOption::new(
             CommandOptionType::Boolean,
             "ephemeral",
-            "Whether the response should be ephemeral",
+            "Whether the response should be ephemeral | Default: true",
         ))
 }

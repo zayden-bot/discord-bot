@@ -10,7 +10,7 @@ pub async fn message(ctx: &Context, msg: Message) -> Result<()> {
         return Ok(());
     }
 
-    let command = msg.content.split_whitespace().next().unwrap_or("");
+    let command = msg.content.split_whitespace().next().unwrap_or_default();
 
     match command.to_lowercase().as_str() {
         "!ping" => ping::run(ctx, msg).await?,
