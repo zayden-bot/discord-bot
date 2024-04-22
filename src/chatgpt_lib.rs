@@ -1,10 +1,16 @@
 use crate::Result;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use std::env;
 
 const ROOT_URL: &str = "https://api.openai.com/v1/";
+
+#[derive(Debug, Serialize)]
+struct ChatRequest {
+    model: String,
+    messages: Vec<Message>,
+    max_tokens: u64,
+}
 
 #[derive(Deserialize)]
 pub struct ChatResponse {
@@ -36,7 +42,7 @@ pub struct ChatUsage {
     pub total_tokens: u64,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 struct Message {
     role: String,
     content: String,
@@ -79,11 +85,11 @@ pub async fn chat(
 
     messages.push(Message::new("user", message_content, user_name));
 
-    let params = json!({
-        "model": "gpt-3.5-turbo",
-        "messages": messages,
-        "max_tokens": 100
-    });
+    let params = ChatRequest {
+        model: "gpt-3.5-turbo".to_string(),
+        messages,
+        max_tokens: 100,
+    };
 
     let client = Client::new();
     let res = client

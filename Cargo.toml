@@ -11,12 +11,10 @@ cron = { version = "*", features = [] }
 dotenvy = "*"
 futures = "*"
 lazy_static = "*"
-log = { version = "*", features = ["release_max_level_info"] }
 rand = "*"
 regex = "*"
 reqwest = { version = "*", features = ["json"] }
 serde = "*"
-serde_json = "*"
 sqlx = { version = "*", features = [
     "runtime-tokio",
     "tls-native-tls",

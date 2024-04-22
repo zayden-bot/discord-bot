@@ -1,15 +1,21 @@
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use serenity::all::{
+    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
+    CreateEmbed, CreateEmbedFooter, ResolvedValue,
+};
+
 use crate::Result;
 use crate::{
     utils::{embed_response, parse_options},
     SERVER_URL,
 };
-use reqwest::Client;
-use serde::Deserialize;
-use serde_json::json;
-use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateEmbedFooter, ResolvedValue,
-};
+
+#[derive(Debug, Serialize)]
+struct UserRequest {
+    email: String,
+    force: bool,
+}
 
 #[derive(Deserialize, Debug)]
 pub struct MemberAttributes {
@@ -58,7 +64,10 @@ async fn check(
 
     let attributes: MemberAttributes = Client::new()
         .post(&format!("{}/api/v1/patreon/get_user", SERVER_URL))
-        .json(&json!({ "email": email, "force": force}))
+        .json(&UserRequest {
+            email: email.to_string(),
+            force,
+        })
         .send()
         .await?
         .json()
