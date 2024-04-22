@@ -2,6 +2,8 @@ use serenity::all::{ChannelId, GuildId, RoleId};
 
 pub const GUILD_ID: GuildId = GuildId::new(745662812335898806);
 
+pub const SUPPORT_FAQ_CHANNEL_ID: ChannelId = ChannelId::new(1224557981849485392);
+
 pub const INFORMATION_CHANNEL_ID: ChannelId = ChannelId::new(830927865784565800);
 pub const RULE_CHANNEL_ID: ChannelId = ChannelId::new(747430712617074718);
 pub const CHANGE_LOG_CHANNEL_ID: ChannelId = ChannelId::new(992599169288122410);

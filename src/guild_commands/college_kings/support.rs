@@ -1,92 +1,86 @@
-use crate::sqlx_lib::{
-    create_support_faq, delete_support_faq, get_all_support_faq, get_pool, get_support_answer,
-};
-use crate::utils::{embed_response, message_response, parse_options};
-use crate::{Error, Result};
+use futures::{StreamExt, TryStreamExt};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, GuildId, Permissions, ResolvedValue,
+    CreateEmbed, CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption,
+    EditInteractionResponse, Permissions, ResolvedValue,
 };
-use sqlx::{Pool, Postgres};
 
-async fn get(
-    ctx: &Context,
-    interaction: &CommandInteraction,
-    pool: &Pool<Postgres>,
-    guild_id: GuildId,
-    support_id: &str,
-) -> Result<()> {
-    let answer = get_support_answer(pool, guild_id.get(), &support_id.to_lowercase()).await?;
+use crate::guilds::college_kings::SUPPORT_FAQ_CHANNEL_ID;
+use crate::utils::parse_options;
+use crate::{Error, Result};
 
-    embed_response(
-        ctx,
-        interaction,
-        CreateEmbed::new().title(support_id).description(answer),
-    )
-    .await?;
+pub async fn list(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    let menu_options: Vec<CreateSelectMenuOption> = SUPPORT_FAQ_CHANNEL_ID
+        .messages_iter(ctx)
+        .enumerate()
+        .then(|(index, msg_result)| async move {
+            let msg = msg_result?;
+            let id = msg
+                .content
+                .lines()
+                .next()
+                .ok_or_else(|| Error::EmptyMessage)?
+                .trim();
+
+            Ok::<CreateSelectMenuOption, Error>(CreateSelectMenuOption::new(
+                id[2..id.len() - 2].to_string(),
+                index.to_string(),
+            ))
+        })
+        .try_collect()
+        .await?;
+
+    interaction
+        .edit_response(
+            ctx,
+            EditInteractionResponse::new().select_menu(CreateSelectMenu::new(
+                "support_faq",
+                CreateSelectMenuKind::String {
+                    options: menu_options,
+                },
+            )),
+        )
+        .await?;
 
     Ok(())
 }
 
-async fn add(
-    ctx: &Context,
-    interaction: &CommandInteraction,
-    pool: &Pool<Postgres>,
-    guild_id: GuildId,
-    support_id: &str,
-    answer: &str,
-) -> Result<()> {
-    create_support_faq(pool, guild_id.get(), &support_id.to_lowercase(), answer).await?;
+pub async fn get(ctx: &Context, interaction: &CommandInteraction, id: &str) -> Result<()> {
+    let mut stream = SUPPORT_FAQ_CHANNEL_ID.messages_iter(ctx).boxed();
 
-    message_response(ctx, interaction, "Support info added").await?;
+    while let Some(msg) = stream.try_next().await? {
+        let support_id = msg
+            .content
+            .lines()
+            .next()
+            .ok_or(Error::EmptyMessage)?
+            .trim();
 
-    Ok(())
-}
+        let title = &support_id[2..support_id.len() - 2];
+        let description = msg.content.strip_prefix(support_id).unwrap();
 
-async fn list(
-    ctx: &Context,
-    interaction: &CommandInteraction,
-    pool: &Pool<Postgres>,
-    guild_id: GuildId,
-) -> Result<()> {
-    let faqs = get_all_support_faq(pool, guild_id.get()).await?;
-
-    if faqs.is_empty() {
-        message_response(ctx, interaction, "No support for this server").await?;
-        return Ok(());
+        if support_id.contains(id) {
+            interaction
+                .edit_response(
+                    ctx,
+                    EditInteractionResponse::new()
+                        .embed(CreateEmbed::new().title(title).description(description)),
+                )
+                .await?;
+            return Ok(());
+        }
     }
 
-    let ids: Vec<String> = faqs.into_iter().map(|faq| faq.id).collect();
-
-    embed_response(
-        ctx,
-        interaction,
-        CreateEmbed::new()
-            .title("Support IDs")
-            .description(ids.join("\n")),
-    )
-    .await?;
-
-    Ok(())
-}
-
-async fn remove(
-    ctx: &Context,
-    interaction: &CommandInteraction,
-    pool: &Pool<Postgres>,
-    guild_id: GuildId,
-    support_id: &str,
-) -> Result<()> {
-    delete_support_faq(pool, guild_id.get(), &support_id.to_lowercase()).await?;
-
-    message_response(ctx, interaction, "Support info removed").await?;
-
+    interaction
+        .edit_response(
+            ctx,
+            EditInteractionResponse::new().content("Support message not found"),
+        )
+        .await?;
     Ok(())
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
-
     let command = &interaction.data.options()[0];
 
     let options = match &command.value {
@@ -95,73 +89,48 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     };
     let options = parse_options(options);
 
-    let pool = get_pool(ctx).await?;
-
-    if command.name == "list" {
-        list(ctx, interaction, &pool, guild_id).await?;
-        return Ok(());
-    }
-
-    let id = match options.get("id") {
-        Some(ResolvedValue::String(id)) => *id,
-        _ => unreachable!("ID is required"),
-    };
-
     match command.name {
-        "get" => get(ctx, interaction, &pool, guild_id, id).await?,
-        "add" => {
-            let answer = match options.get("answer") {
-                Some(ResolvedValue::String(answer)) => *answer,
-                _ => unreachable!("Answer is required"),
-            };
-
-            add(ctx, interaction, &pool, guild_id, id, answer).await?
+        "list" => {
+            interaction.defer_ephemeral(ctx).await?;
+            list(ctx, interaction).await?;
         }
-        "remove" => remove(ctx, interaction, &pool, guild_id, id).await?,
+        "get" => {
+            interaction.defer(ctx).await?;
+
+            let id = match options.get("id") {
+                Some(ResolvedValue::String(id)) => *id,
+                _ => unreachable!("ID is required"),
+            };
+            get(ctx, interaction, id).await?;
+        }
         _ => unreachable!("Invalid subcommand"),
-    };
+    }
 
     Ok(())
 }
 
 pub fn register() -> CreateCommand {
-    let id_option = CreateCommandOption::new(
-        CommandOptionType::String,
-        "id",
-        "The ID of the support info",
-    )
-    .required(true);
-
     CreateCommand::new("support")
-        .description("Manage support info")
-        .default_member_permissions(Permissions::MOVE_MEMBERS)
-        .add_option(
-            CreateCommandOption::new(CommandOptionType::SubCommand, "get", "Get a support info")
-                .add_sub_option(id_option.clone()),
-        )
-        .add_option(
-            CreateCommandOption::new(CommandOptionType::SubCommand, "add", "Add a support info")
-                .add_sub_option(id_option.clone())
-                .add_sub_option(
-                    CreateCommandOption::new(
-                        CommandOptionType::String,
-                        "answer",
-                        "The answer of the support info",
-                    )
-                    .required(true),
-                ),
-        )
+        .description("Displays a support message")
+        .default_member_permissions(Permissions::MANAGE_MESSAGES)
         .add_option(CreateCommandOption::new(
             CommandOptionType::SubCommand,
             "list",
-            "Get a list of valid support IDs",
+            "Lists all support messages",
         ))
         .add_option(
             CreateCommandOption::new(
                 CommandOptionType::SubCommand,
-                "remove",
-                "Remove an existing support ID",
+                "get",
+                "Displays a support message",
             )
-            .add_sub_option(id_option),
+            .add_sub_option(
+                CreateCommandOption::new(
+                    CommandOptionType::String,
+                    "id",
+                    "The ID of the support message",
+                )
+                .required(true),
+            ),
         )
 }
