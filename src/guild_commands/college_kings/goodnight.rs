@@ -28,15 +28,17 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let user_id = interaction.user.id;
 
-    if locked_users.contains(&user_id) {
-        message_response(
-            ctx,
-            interaction,
-            "You have already used this command today.",
-        )
-        .await?;
-        return Ok(());
-    } else if interaction.channel_id == GENERAL_CHANNEL_ID {
+    if interaction.channel_id == GENERAL_CHANNEL_ID {
+        if locked_users.contains(&user_id) {
+            message_response(
+                ctx,
+                interaction,
+                "You have already used this command today.",
+            )
+            .await?;
+            return Ok(());
+        }
+
         locked_users.push(user_id);
     }
 
