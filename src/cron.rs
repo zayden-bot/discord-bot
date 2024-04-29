@@ -36,8 +36,7 @@ async fn _start_cron_jobs(ctx: Context) -> Result<()> {
             println!("Next job: {:?}", when);
             sleep(duration).await;
 
-            let ctx_clone = ctx.clone();
-            tokio::spawn(async move { action(ctx_clone).await }).await??;
+            action(&ctx).await?;
             sleep(Duration::from_secs(60)).await;
         }
 
@@ -45,12 +44,12 @@ async fn _start_cron_jobs(ctx: Context) -> Result<()> {
     }
 }
 
-async fn send_availability_check(ctx: Context) -> Result<()> {
+async fn send_availability_check(ctx: &Context) -> Result<()> {
     println!("Sending availability check");
 
     TEAM_LEADS_CHANNEL_ID
         .send_message(
-            &ctx,
+            ctx,
             availability_check_message("Are you available for tomorrow's meeting?"),
         )
         .await?;
