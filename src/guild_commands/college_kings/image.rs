@@ -43,7 +43,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .into_iter()
         .filter_map(|role| {
             let name = role.name.split('\'').next()?.to_lowercase();
-            image_map.get(&name)
+            image_map.get(name.as_str())
         })
         .flatten()
         .collect();

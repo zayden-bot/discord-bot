@@ -13,7 +13,7 @@ fn get_images() -> Vec<PathBuf> {
         .collect()
 }
 
-fn create_character_map(images: Vec<PathBuf>) -> HashMap<String, Vec<PathBuf>> {
+fn create_character_map(images: Vec<PathBuf>) -> HashMap<Box<str>, Vec<PathBuf>> {
     let mut character_map = HashMap::new();
 
     for image in images {
@@ -21,8 +21,8 @@ fn create_character_map(images: Vec<PathBuf>) -> HashMap<String, Vec<PathBuf>> {
             .iter()
             .nth(2)
             .and_then(|s| s.to_str())
-            .map(|s| s.to_string())
-            .unwrap_or("unknown".to_string());
+            .map(Box::from)
+            .unwrap_or(Box::from("unknown"));
 
         let entry = character_map.entry(character).or_insert_with(Vec::new);
         entry.push(image);
@@ -36,7 +36,7 @@ pub struct ImageCache {
     pub last_update: NaiveDateTime,
     pub good_morning_images: Vec<PathBuf>,
     pub good_night_images: Vec<PathBuf>,
-    pub character_map: HashMap<String, Vec<PathBuf>>,
+    pub character_map: HashMap<Box<str>, Vec<PathBuf>>,
 }
 
 impl ImageCache {
