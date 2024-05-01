@@ -1,7 +1,23 @@
+mod update_information_message;
+mod update_render_requests_messages;
+mod update_support_messages;
+
+use crate::Result;
+
 use futures::{StreamExt, TryStreamExt};
 use serenity::all::{ChannelId, Context, CreateEmbed, CreateMessage, EditMessage};
 
-use crate::Result;
+pub async fn update_messages(ctx: &Context) -> Result<()> {
+    tokio::try_join!(
+        update_information_message::run(ctx),
+        update_support_messages::run(ctx),
+        update_render_requests_messages::run(ctx),
+    )?;
+
+    println!("Messages updated!");
+
+    Ok(())
+}
 
 pub async fn send_or_update_message(
     ctx: &Context,
@@ -23,15 +39,3 @@ pub async fn send_or_update_message(
 
     Ok(())
 }
-
-/*
-
-let mut message = ctx
-    .http
-    .get_message(
-        ChannelId::new(INFORMATION_CHANNEL_ID),
-        MessageId::new(INFORMATION_MESSAGE_ID),
-    )
-    .await?;
-message.edit(&ctx, EditMessage::new().embed(embed)).await?;
- */

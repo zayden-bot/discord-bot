@@ -2,7 +2,7 @@ use serenity::all::{Context, CreateEmbed};
 
 use crate::{guilds::college_kings::INFORMATION_CHANNEL_ID, Result};
 
-use super::utils::send_or_update_message;
+use super::send_or_update_message;
 
 pub async fn run(ctx: &Context) -> Result<()> {
     let embed = CreateEmbed::new()
