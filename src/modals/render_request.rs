@@ -1,6 +1,6 @@
 use serenity::all::{
     ButtonStyle, Context, CreateButton, CreateChannel, CreateEmbed, CreateInteractionResponse,
-    CreateInteractionResponseMessage, CreateMessage, InputText, ModalInteraction,
+    CreateInteractionResponseMessage, CreateMessage, InputText, Mentionable, ModalInteraction,
     PermissionOverwrite, PermissionOverwriteType, Permissions, UserId,
 };
 
@@ -118,7 +118,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
             kind: PermissionOverwriteType::Role(guild_id.everyone_role()),
         },
         PermissionOverwrite {
-            allow: Permissions::VIEW_CHANNEL,
+            allow: Permissions::VIEW_CHANNEL | Permissions::MANAGE_CHANNELS,
             deny: Permissions::empty(),
             kind: PermissionOverwriteType::Member(MESSY_USER_ID),
         },
@@ -142,11 +142,18 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     channel
         .send_message(
             ctx,
-            CreateMessage::new().embed(request).button(
-                CreateButton::new("delete_channel")
-                    .label("Delete Channel")
-                    .style(ButtonStyle::Danger),
-            ),
+            CreateMessage::new()
+                .content(format!(
+                    "{} {}",
+                    MESSY_USER_ID.mention(),
+                    modal.user.mention()
+                ))
+                .embed(request)
+                .button(
+                    CreateButton::new("delete_channel")
+                        .label("Delete Channel")
+                        .style(ButtonStyle::Danger),
+                ),
         )
         .await?;
 
