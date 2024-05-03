@@ -3,7 +3,9 @@ use serenity::all::{
     CreateCommandOption, CreateEmbed, CreateMessage, Mentionable, ResolvedValue,
 };
 
-use crate::guilds::college_kings_team::{TEAM_LEADERS_ROLE_ID, TEAM_LEADS_CHANNEL_ID};
+use crate::guilds::college_kings_team::{
+    STEVE_USER_ID, TEAM_LEADERS_ROLE_ID, TEAM_LEADS_CHANNEL_ID,
+};
 use crate::utils::{message_response, parse_options};
 use crate::Result;
 
@@ -44,7 +46,7 @@ pub fn availability_check_message(title: impl Into<String>) -> CreateMessage {
             CreateEmbed::default()
                 .title(title)
                 .field("Attending", "", true)
-                .field("Unavailable", "", true),
+                .field("Unavailable", STEVE_USER_ID.mention().to_string(), true),
         )
         .button(
             CreateButton::new("cron_available")
