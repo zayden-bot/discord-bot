@@ -31,7 +31,6 @@ pub async fn suggestions(
     }
 
     let response = CreateInputText::new(InputTextStyle::Paragraph, "Response", "response")
-        .required(true)
         .placeholder("Response to the suggestion");
 
     let id = if accepted {

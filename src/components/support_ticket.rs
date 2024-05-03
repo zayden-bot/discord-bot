@@ -6,12 +6,10 @@ use serenity::all::{
 use crate::Result;
 
 pub async fn support_ticket(ctx: &Context, interaction: &ComponentInteraction) -> Result<()> {
-    let version_input = CreateInputText::new(InputTextStyle::Short, "Game Version", "version")
-        .required(true)
-        .placeholder("1.0.0");
+    let version_input =
+        CreateInputText::new(InputTextStyle::Short, "Game Version", "version").placeholder("1.0.0");
 
     let issue_input = CreateInputText::new(InputTextStyle::Paragraph, "Issue", "issue")
-        .required(true)
         .placeholder("Describe the issue you're experiencing");
 
     let additional_input = CreateInputText::new(

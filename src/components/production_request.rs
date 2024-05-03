@@ -6,20 +6,16 @@ use serenity::all::{
 use crate::Result;
 
 pub async fn production_request(ctx: &Context, interaction: &ComponentInteraction) -> Result<()> {
-    let app_name_input = CreateInputText::new(InputTextStyle::Short, "App Name", "app_name")
-        .required(true)
-        .value("CK2");
+    let app_name_input =
+        CreateInputText::new(InputTextStyle::Short, "App Name", "app_name").value("CK2");
 
-    let episode_input = CreateInputText::new(InputTextStyle::Short, "Episode", "episode")
-        .required(true)
-        .placeholder("Ep4");
+    let episode_input =
+        CreateInputText::new(InputTextStyle::Short, "Episode", "episode").placeholder("Ep4");
 
-    let scene_input = CreateInputText::new(InputTextStyle::Short, "Scene", "scene")
-        .required(true)
-        .placeholder("S69");
+    let scene_input =
+        CreateInputText::new(InputTextStyle::Short, "Scene", "scene").placeholder("S69");
 
     let request_input = CreateInputText::new(InputTextStyle::Paragraph, "Request", "request")
-        .required(true)
         .placeholder(
             "Please provide a detailed description of the request you would like to make.",
         );

@@ -60,6 +60,7 @@ pub async fn interaction_component(ctx: &Context, component: &ComponentInteracti
         "levels_user" => components::levels(ctx, component, "user").await?,
         "levels_next" => components::levels(ctx, component, "next").await?,
         "production_request" => components::production_request(ctx, component).await?,
+        "render_request" => components::render_request(ctx, component).await?,
         "suggestions_accept" | "accept" => components::suggestions(ctx, component, true).await?,
         "suggestions_reject" | "reject" => components::suggestions(ctx, component, false).await?,
         "suggestions_added" => components::suggestions(ctx, component, true).await?,
@@ -78,6 +79,9 @@ pub async fn interaction_modal(ctx: &Context, modal: &ModalInteraction) -> Resul
     match modal.data.custom_id.as_str() {
         "production_request" => {
             modals::production_request::run(ctx, modal).await?;
+        }
+        "render_request" => {
+            modals::render_request::run(ctx, modal).await?;
         }
         "suggestions_accept" => {
             modals::suggestions::run(ctx, modal, true).await?;
