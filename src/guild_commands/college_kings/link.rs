@@ -2,20 +2,12 @@ use crate::{
     utils::{message_response, parse_options},
     SERVER_URL,
 };
-use serde::Deserialize;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     Permissions, ResolvedValue,
 };
 
 use crate::Result;
-
-#[derive(Deserialize, Debug)]
-pub struct MemberAttributes {
-    pub currently_entitled_amount_cents: Option<i32>,
-    pub email: Option<String>,
-    pub lifetime_support_cents: Option<i32>,
-}
 
 async fn download(
     ctx: &Context,

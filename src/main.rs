@@ -10,6 +10,7 @@ mod image_cache;
 mod infraction_type;
 pub mod modals;
 mod models;
+pub mod patreon_lib;
 mod sqlx_lib;
 mod utils;
 

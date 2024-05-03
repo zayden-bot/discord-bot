@@ -1,28 +1,10 @@
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, CreateEmbedFooter, ResolvedValue,
 };
 
-use crate::Result;
-use crate::{
-    utils::{embed_response, parse_options},
-    SERVER_URL,
-};
-
-#[derive(Debug, Serialize)]
-struct UserRequest {
-    email: String,
-    force: bool,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct MemberAttributes {
-    pub currently_entitled_amount_cents: Option<i32>,
-    pub email: Option<String>,
-    pub lifetime_support_cents: Option<i32>,
-}
+use crate::utils::{embed_response, parse_options};
+use crate::{patreon_lib, Result};
 
 async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(ctx).await?;
@@ -62,16 +44,7 @@ async fn check(
         _ => false,
     };
 
-    let attributes: MemberAttributes = Client::new()
-        .post(&format!("{}/api/v1/patreon/get_user", SERVER_URL))
-        .json(&UserRequest {
-            email: email.to_string(),
-            force,
-        })
-        .send()
-        .await?
-        .json()
-        .await?;
+    let attributes = patreon_lib::get_user(email, force).await?;
 
     embed_response(
         ctx,

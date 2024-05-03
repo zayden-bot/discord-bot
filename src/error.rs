@@ -31,6 +31,7 @@ pub enum Error {
     NoSpoilerThread,
     FaqMessageNotFound(String),
     EmptyMessage,
+    InvalidEmail,
 }
 
 impl std::fmt::Display for Error {
