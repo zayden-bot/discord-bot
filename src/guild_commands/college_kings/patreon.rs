@@ -53,7 +53,7 @@ async fn check(
             .title("Patreon Status")
             .description(format!(
                 "Email: {}\n Lifetime Support: **${}**\nCurrent Tier: **${}**",
-                attributes.email.unwrap_or_default(),
+                email,
                 attributes.lifetime_support_cents.unwrap_or_default() / 100,
                 attributes
                     .currently_entitled_amount_cents

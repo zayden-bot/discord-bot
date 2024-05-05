@@ -12,7 +12,6 @@ struct UserRequest {
 #[derive(Deserialize, Debug)]
 pub struct MemberAttributes {
     pub currently_entitled_amount_cents: Option<i32>,
-    pub email: Option<String>,
     pub lifetime_support_cents: Option<i32>,
 }
 
@@ -27,8 +26,7 @@ pub async fn get_user(email: &str, force: bool) -> Result<MemberAttributes> {
         .await?;
 
     if res.status().is_success() {
-        let attributes = res.json().await?;
-        Ok(attributes)
+        Ok(res.json().await?)
     } else {
         Err(Error::InvalidEmail)
     }
