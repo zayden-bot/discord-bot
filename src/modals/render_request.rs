@@ -1,14 +1,15 @@
 use serenity::all::{
     ButtonStyle, Context, CreateButton, CreateChannel, CreateEmbed, CreateInteractionResponse,
     CreateInteractionResponseMessage, CreateMessage, InputText, Mentionable, ModalInteraction,
-    PermissionOverwrite, PermissionOverwriteType, Permissions, UserId,
+    PermissionOverwrite, PermissionOverwriteType, Permissions,
 };
 
-use crate::{guilds::college_kings::RENDER_REQUESTS_CHANNEL_ID, patreon_lib, Error, Result};
+use crate::{
+    guilds::{college_kings::RENDER_REQUESTS_CHANNEL_ID, college_kings_team::MESSY_USER_ID},
+    patreon_lib, Error, Result,
+};
 
 use super::parse_modal_data;
-
-const MESSY_USER_ID: UserId = UserId::new(841466088612298793);
 
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let guild_id = modal.guild_id.ok_or_else(|| Error::NoGuild)?;
@@ -69,11 +70,12 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         Err(e) => return Err(e),
     };
 
-    if attributes
+    let current_tier = attributes
         .currently_entitled_amount_cents
         .unwrap_or_default()
-        < 5000
-    {
+        / 100;
+
+    if current_tier < 50 {
         println!("User not a $50 patron: {}", email);
         modal
             .create_response(
@@ -92,6 +94,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         .title("Render Request")
         .description(description)
         .fields(vec![
+            ("Tier", current_tier.to_string().as_str(), true),
             ("Character", character, false),
             ("Prop", prop, false),
             ("Location", location, false),
