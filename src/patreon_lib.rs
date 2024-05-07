@@ -15,13 +15,14 @@ pub struct MemberAttributes {
     pub lifetime_support_cents: Option<i32>,
 }
 
-pub async fn get_user(email: &str, force: bool) -> Result<MemberAttributes> {
-    let res = Client::new()
-        .post(&format!("{}/api/v1/patreon/get_user", SERVER_URL))
-        .json(&UserRequest {
-            email: email.to_string(),
-            force,
-        })
+pub async fn get_user(
+    client: &Client,
+    key: impl std::fmt::Display,
+    force: bool,
+) -> Result<MemberAttributes> {
+    let res = client
+        .get(&format!("{SERVER_URL}/api/v1/patreon/user/{key}"))
+        .query(&[("force", force)])
         .send()
         .await?;
 
