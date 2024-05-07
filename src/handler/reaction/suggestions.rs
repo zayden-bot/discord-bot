@@ -5,7 +5,7 @@ use serenity::all::{
     ReactionType,
 };
 
-use crate::{guilds::college_kings_team::SUGGESTION_CATEGORY_ID, Result};
+use crate::{guilds::college_kings_team::SUGGESTION_CHANNEL_ID, Result};
 
 const POSITIVE_REACTION: &str = "👍";
 const NEGATIVE_REACTION: &str = "👎";
@@ -24,7 +24,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
         }
     }
 
-    let mut messages = SUGGESTION_CATEGORY_ID.messages_iter(&ctx).boxed();
+    let mut messages = SUGGESTION_CHANNEL_ID.messages_iter(&ctx).boxed();
 
     if (positive_count - negative_count) >= 20 {
         while let Some(mut msg) = messages.try_next().await? {
@@ -46,7 +46,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
             }
         }
 
-        SUGGESTION_CATEGORY_ID
+        SUGGESTION_CHANNEL_ID
             .send_message(
                 ctx,
                 CreateMessage::new()
