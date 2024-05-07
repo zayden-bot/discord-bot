@@ -1,7 +1,10 @@
 use crate::{
+    guilds::college_kings::SUPPORT_CHANNEL_ID,
+    patreon_lib,
     utils::{message_response, parse_options},
-    SERVER_URL,
+    Error, SERVER_URL,
 };
+use reqwest::Client;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     Permissions, ResolvedValue,
@@ -14,7 +17,17 @@ async fn download(
     interaction: &CommandInteraction,
     subcommand: &ResolvedValue<'_>,
 ) -> Result<()> {
-    interaction.defer(ctx).await?;
+    if interaction
+        .channel
+        .as_ref()
+        .ok_or_else(|| Error::NotInGuild)?
+        .parent_id
+        .is_some_and(|id| id == SUPPORT_CHANNEL_ID)
+    {
+        interaction.defer(ctx).await?;
+    } else {
+        interaction.defer_ephemeral(ctx).await?;
+    }
 
     let subcommand = match subcommand {
         ResolvedValue::SubCommand(subcommand) => subcommand,
@@ -24,9 +37,32 @@ async fn download(
     let options = parse_options(subcommand);
 
     let game = match options.get("game") {
-        Some(ResolvedValue::String(game)) => game,
+        Some(ResolvedValue::String(game)) => *game,
         _ => unreachable!("Game option is required"),
     };
+
+    if interaction.member.as_ref().is_some_and(|member| {
+        member
+            .permissions
+            .is_some_and(|perms| perms.contains(Permissions::MANAGE_MESSAGES))
+    }) {
+        let result = patreon_lib::get_user(&Client::new(), interaction.user.id, false).await;
+
+        if game == "College_Kings_2"
+            && result.is_ok_and(|member| {
+                member.currently_entitled_amount_cents < Some(1000)
+                    && member.lifetime_support_cents < Some(2000)
+            })
+        {
+            message_response(
+                ctx,
+                interaction,
+                "You need to be an active $10 (Junior) patron with a lifetime subscription of $20 to access College Kings 2.",
+            )
+            .await?;
+            return Ok(());
+        }
+    }
 
     let game_folder = game.to_lowercase();
 
@@ -86,5 +122,4 @@ pub fn register() -> CreateCommand {
                 .required(true),
             ),
         )
-        .default_member_permissions(Permissions::MANAGE_MESSAGES)
 }
