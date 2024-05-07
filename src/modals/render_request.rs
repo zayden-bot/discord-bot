@@ -1,3 +1,4 @@
+use reqwest::Client;
 use serenity::all::{
     ButtonStyle, Context, CreateButton, CreateChannel, CreateEmbed, CreateInteractionResponse,
     CreateInteractionResponseMessage, CreateMessage, InputText, Mentionable, ModalInteraction,
@@ -50,7 +51,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         _ => "No description specified.",
     };
 
-    let attributes = match patreon_lib::get_user(email, false).await {
+    let attributes = match patreon_lib::get_user(&Client::new(), email, false).await {
         Ok(attributes) => attributes,
         Err(Error::InvalidEmail) => {
             println!("Invalid email: {}", email);
