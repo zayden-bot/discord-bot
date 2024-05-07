@@ -14,7 +14,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let guild_roles = interaction
         .guild_id
-        .ok_or_else(|| Error::NoGuild)?
+        .ok_or_else(|| Error::NotInGuild)?
         .roles(&ctx)
         .await?;
 

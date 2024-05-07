@@ -4,7 +4,7 @@ use sqlx::{Pool, Postgres};
 use crate::{models::ReactionRole, sqlx_lib::get_pool, Error, Result};
 
 pub async fn reaction_add(ctx: &Context, reaction: &Reaction) -> Result<()> {
-    let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = reaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let pool = get_pool(ctx).await?;
 
@@ -23,7 +23,7 @@ pub async fn reaction_add(ctx: &Context, reaction: &Reaction) -> Result<()> {
 }
 
 pub async fn reaction_remove(ctx: &Context, reaction: &Reaction) -> Result<()> {
-    let guild_id = reaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = reaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let pool = get_pool(ctx).await?;
 

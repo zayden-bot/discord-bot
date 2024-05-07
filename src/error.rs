@@ -2,17 +2,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-    Dotenvy(dotenvy::Error),
-    Serenity(serenity::Error),
-    SerenityTimestamp(serenity::model::timestamp::InvalidTimestamp),
-    Sqlx(sqlx::Error),
-    EnvVar(std::env::VarError),
-    Reqwest(reqwest::Error),
-    Cron(cron::error::Error),
-    ParseIntError(std::num::ParseIntError),
-    ReactionConversionError(serenity::all::ReactionConversionError),
-    JoinError(tokio::task::JoinError),
-    ChronoError,
     ConversionError,
     CommandNotFound(String),
     DataNotFound,
@@ -20,7 +9,6 @@ pub enum Error {
     NoImage,
     NoUser,
     UserNotFound,
-    NoGuild,
     NoRole,
     RoleNotFound(u64),
     NoMember,
@@ -32,6 +20,18 @@ pub enum Error {
     FaqMessageNotFound(String),
     EmptyMessage,
     InvalidEmail,
+    NotInGuild,
+
+    Dotenvy(dotenvy::Error),
+    Serenity(serenity::Error),
+    SerenityTimestamp(serenity::model::timestamp::InvalidTimestamp),
+    Sqlx(sqlx::Error),
+    EnvVar(std::env::VarError),
+    Reqwest(reqwest::Error),
+    Cron(cron::error::Error),
+    ParseIntError(std::num::ParseIntError),
+    ReactionConversionError(serenity::all::ReactionConversionError),
+    JoinError(tokio::task::JoinError),
 }
 
 impl std::fmt::Display for Error {

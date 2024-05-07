@@ -4,7 +4,7 @@ use crate::{Error, Result};
 use serenity::all::{CommandInteraction, Context, CreateCommand};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let pool = get_pool(ctx).await?;
 

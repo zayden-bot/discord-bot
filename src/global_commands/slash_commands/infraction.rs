@@ -194,7 +194,7 @@ async fn ban<'a>(
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let options = interaction.data.options();
     let options = parse_options(&options);

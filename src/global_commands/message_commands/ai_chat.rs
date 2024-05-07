@@ -15,7 +15,7 @@ async fn parse_mentions(ctx: &Context, message: &Message) -> Result<String> {
             continue;
         }
 
-        let guild_id = message.guild_id.ok_or_else(|| Error::NoGuild)?;
+        let guild_id = message.guild_id.ok_or_else(|| Error::NotInGuild)?;
         let member = guild_id.member(&ctx, mention.id).await?;
 
         parsed_content = parsed_content.replace(&mention_tag, member.display_name());

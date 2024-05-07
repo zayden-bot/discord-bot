@@ -91,7 +91,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
 
     let channels = modal
         .guild_id
-        .ok_or_else(|| Error::NoGuild)?
+        .ok_or_else(|| Error::NotInGuild)?
         .channels(ctx)
         .await?;
     let channel = channels

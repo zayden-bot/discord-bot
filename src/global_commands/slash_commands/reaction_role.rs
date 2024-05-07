@@ -79,7 +79,7 @@ async fn remove(
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let command = &interaction.data.options()[0];
 

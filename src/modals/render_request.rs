@@ -13,7 +13,7 @@ use crate::{
 use super::parse_modal_data;
 
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
-    let guild_id = modal.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = modal.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let data = parse_modal_data(&modal.data.components);
     let email = match data.get("email") {

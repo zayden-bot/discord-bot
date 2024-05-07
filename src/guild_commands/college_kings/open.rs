@@ -10,7 +10,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .to_channel(&ctx)
         .await?
         .guild()
-        .ok_or_else(|| Error::NoGuild)?;
+        .ok_or_else(|| Error::NotInGuild)?;
 
     if current_channel.parent_id.ok_or_else(|| Error::NoParent)? != SUPPORT_CHANNEL_ID {
         message_response(

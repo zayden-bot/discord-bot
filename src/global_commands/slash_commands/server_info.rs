@@ -4,7 +4,7 @@ use serenity::all::{
 };
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
     let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await?;
 
     let mut category_channel_count = 0;

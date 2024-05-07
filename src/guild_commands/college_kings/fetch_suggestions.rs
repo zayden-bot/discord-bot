@@ -10,7 +10,7 @@ use crate::{Error, Result};
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let start_time = time::Instant::now();
 
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let active_guild_threads = guild_id.get_active_threads(&ctx).await?;
     let threads: Vec<GuildChannel> = active_guild_threads

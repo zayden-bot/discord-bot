@@ -10,7 +10,7 @@ use crate::{Error, Result};
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
 
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let options = interaction.data.options();
     let options = parse_options(&options);

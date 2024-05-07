@@ -8,7 +8,7 @@ use serenity::all::{
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(ctx).await?;
 
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NoGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let pool = get_pool(ctx).await?;
 
