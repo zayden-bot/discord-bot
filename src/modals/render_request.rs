@@ -60,7 +60,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
                     ctx,
                     CreateInteractionResponse::Message(
                         CreateInteractionResponseMessage::new()
-                            .content("Email not found. Please make sure you're using the email associated with your Patreon account. If you've recently joined, please wait a day and try again or contact us through the support channel.")
+                            .content("Email not found. Please make sure you're using the email associated with your Patreon account. If you've recently joined, please use `/patreon login` to manually update the cache and link your Discord account.")
                             .ephemeral(true),
                     ),
                 )

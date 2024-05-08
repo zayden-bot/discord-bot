@@ -57,7 +57,7 @@ async fn download(
             message_response(
                 ctx,
                 interaction,
-                "You need to be an active $10 (Junior) patron with a lifetime subscription of $20 to access College Kings 2.",
+                "To access College Kings 2, you need to be an active $10 (Junior) patron with a lifetime subscription of $20.\nUse `/patreon login` to manually update the cache and link your Discord account.",
             )
             .await?;
             return Ok(());
