@@ -1,3 +1,7 @@
+use serenity::all::{CommandInteraction, Context, Mentionable};
+
+use crate::{utils::message_response, OSCAR_SIX_ID};
+
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
@@ -19,7 +23,7 @@ pub enum Error {
     NoSpoilerThread,
     FaqMessageNotFound(String),
     EmptyMessage,
-    InvalidEmail,
+    PatreonAccountNotFound(String),
     NotInGuild,
 
     Dotenvy(dotenvy::Error),
@@ -32,6 +36,32 @@ pub enum Error {
     ParseIntError(std::num::ParseIntError),
     ReactionConversionError(serenity::all::ReactionConversionError),
     JoinError(tokio::task::JoinError),
+}
+
+impl Error {
+    pub async fn to_response(self, ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+        let msg = match self {
+            Error::PatreonAccountNotFound(_) => String::from("Patreon account not found.\nIf you've recently joined, please use `/patreon login` to manually update the cache and link your Discord account."),
+            _ => String::new(),
+        };
+
+        if msg.is_empty() {
+            message_response(
+                ctx,
+                interaction,
+                format!(
+                    "An error occurred. Please contact {} if this issue persists.",
+                    OSCAR_SIX_ID.mention()
+                ),
+            )
+            .await?;
+
+            Err(self)
+        } else {
+            message_response(ctx, interaction, msg).await?;
+            Ok(())
+        }
+    }
 }
 
 impl std::fmt::Display for Error {
