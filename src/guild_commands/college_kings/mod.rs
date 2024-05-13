@@ -5,6 +5,7 @@ use crate::{guilds::college_kings::GUILD_ID, Result};
 pub mod add_artist;
 pub mod availability_check;
 pub mod close;
+pub mod cooldown;
 pub mod faq;
 pub mod fetch_suggestions;
 pub mod fixed;
@@ -28,6 +29,7 @@ pub async fn register(ctx: &Context) -> Result<()> {
                 add_artist::register(),
                 availability_check::register(),
                 close::register(),
+                cooldown::register(),
                 faq::register(),
                 fetch_suggestions::register(),
                 fixed::register(),

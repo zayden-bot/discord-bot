@@ -19,7 +19,8 @@ pub async fn message(ctx: &Context, msg: Message) -> Result<()> {
             tokio::join!(
                 ai_chat::run(ctx, &msg),
                 auto_support::run(ctx, &msg),
-                levels::run(ctx, &msg)
+                levels::run(ctx, &msg),
+                cooldown::run(ctx, &msg)
             )
             .1?;
         }
