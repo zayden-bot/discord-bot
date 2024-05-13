@@ -12,6 +12,7 @@ pub mod modals;
 mod models;
 pub mod patreon_lib;
 mod sqlx_lib;
+pub mod state;
 mod utils;
 
 use guild_commands::college_kings::{
@@ -23,6 +24,7 @@ use serenity::{
 };
 use sqlx::postgres::PgPoolOptions;
 use sqlx_lib::PostgresPool;
+use state::State;
 use std::env;
 
 use crate::image_cache::ImageCache;
@@ -43,6 +45,7 @@ async fn main() -> Result<()> {
         .await?;
 
     let mut data = client.data.write().await;
+    data.insert::<State>(State::new());
     data.insert::<ImageCache>(ImageCache::new());
     data.insert::<GoodMorningLockedUsers>(Vec::new());
     data.insert::<GoodNightLockedUsers>(Vec::new());
