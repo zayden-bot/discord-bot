@@ -15,12 +15,14 @@ use super::parse_modal_data;
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let guild_id = modal.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
+    let client = Client::new();
+
     let data = parse_modal_data(&modal.data.components);
-    let email = match data.get("email") {
+    let user = match data.get("email") {
         Some(InputText {
-            value: Some(value), ..
-        }) => value.as_str(),
-        _ => unreachable!("Email input is required"),
+            value: Some(email), ..
+        }) => patreon_lib::get_user(&client, email, false).await?,
+        _ => patreon_lib::get_user(&client, modal.user.id, false).await?,
     };
 
     let character = match data.get("character") {
@@ -51,33 +53,9 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         _ => "No description specified.",
     };
 
-    let attributes = match patreon_lib::get_user(&Client::new(), email, false).await {
-        Ok(attributes) => attributes,
-        Err(Error::InvalidEmail) => {
-            println!("Invalid email: {}", email);
-            modal
-                .create_response(
-                    ctx,
-                    CreateInteractionResponse::Message(
-                        CreateInteractionResponseMessage::new()
-                            .content("Email not found. Please make sure you're using the email associated with your Patreon account. If you've recently joined, please use `/patreon login` to manually update the cache and link your Discord account.")
-                            .ephemeral(true),
-                    ),
-                )
-                .await?;
-
-            return Ok(());
-        }
-        Err(e) => return Err(e),
-    };
-
-    let current_tier = attributes
-        .currently_entitled_amount_cents
-        .unwrap_or_default()
-        / 100;
+    let current_tier = user.tier.amount_cents / 100;
 
     if current_tier < 50 {
-        println!("User not a $50 patron: {}", email);
         modal
             .create_response(
                 ctx,
@@ -95,7 +73,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         .title("Render Request")
         .description(description)
         .fields(vec![
-            ("Tier", current_tier.to_string().as_str(), true),
+            ("Tier", format!("${current_tier}").as_str(), true),
             ("Character", character, false),
             ("Prop", prop, false),
             ("Location", location, false),
