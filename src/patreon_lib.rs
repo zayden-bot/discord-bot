@@ -1,3 +1,5 @@
+use std::fmt;
+
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -10,16 +12,21 @@ struct UserRequest {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct MemberAttributes {
-    pub currently_entitled_amount_cents: Option<i32>,
-    pub lifetime_support_cents: Option<i32>,
+pub struct UserResponse {
+    pub lifetime_support_cents: i32,
+    pub tier: Tier,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Tier {
+    pub amount_cents: i32,
 }
 
 pub async fn get_user(
     client: &Client,
-    key: impl std::fmt::Display,
+    key: impl fmt::Display,
     force: bool,
-) -> Result<MemberAttributes> {
+) -> Result<UserResponse> {
     let res = client
         .get(&format!("{SERVER_URL}/api/v1/patreon/user/{key}"))
         .query(&[("force", force)])
@@ -29,6 +36,6 @@ pub async fn get_user(
     if res.status().is_success() {
         Ok(res.json().await?)
     } else {
-        Err(Error::InvalidEmail)
+        Err(Error::PatreonAccountNotFound(key.to_string()))
     }
 }
