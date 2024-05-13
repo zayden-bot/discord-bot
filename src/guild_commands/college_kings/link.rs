@@ -41,18 +41,16 @@ async fn download(
         _ => unreachable!("Game option is required"),
     };
 
-    if interaction.member.as_ref().is_some_and(|member| {
+    if !interaction.member.as_ref().is_some_and(|member| {
         member
             .permissions
             .is_some_and(|perms| perms.contains(Permissions::MANAGE_MESSAGES))
     }) {
-        let result = patreon_lib::get_user(&Client::new(), interaction.user.id, false).await;
+        let user = patreon_lib::get_user(&Client::new(), interaction.user.id, false).await?;
 
         if game == "College_Kings_2"
-            && result.is_ok_and(|member| {
-                member.currently_entitled_amount_cents < Some(1000)
-                    && member.lifetime_support_cents < Some(2000)
-            })
+            && user.tier.amount_cents < 1000
+            && user.lifetime_support_cents < 2000
         {
             message_response(
                 ctx,

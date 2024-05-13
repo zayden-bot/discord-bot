@@ -96,11 +96,8 @@ async fn check(
             .description(format!(
                 "Email: {}\n Lifetime Support: **${}**\nCurrent Tier: **${}**",
                 email,
-                attributes.lifetime_support_cents.unwrap_or_default() / 100,
-                attributes
-                    .currently_entitled_amount_cents
-                    .unwrap_or_default()
-                    / 100
+                attributes.lifetime_support_cents / 100,
+                attributes.tier.amount_cents / 100
             )),
     )
     .await?;
