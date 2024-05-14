@@ -1,4 +1,5 @@
 mod chatgpt_lib;
+pub mod commands;
 pub mod components;
 pub mod cron;
 mod error;
@@ -15,6 +16,7 @@ mod sqlx_lib;
 pub mod state;
 mod utils;
 
+use commands::Commands;
 use guild_commands::college_kings::{
     goodmorning::GoodMorningLockedUsers, goodnight::GoodNightLockedUsers,
 };
@@ -45,6 +47,7 @@ async fn main() -> Result<()> {
         .await?;
 
     let mut data = client.data.write().await;
+    data.insert::<Commands>(Commands::new());
     data.insert::<State>(State::new());
     data.insert::<ImageCache>(ImageCache::new());
     data.insert::<GoodMorningLockedUsers>(Vec::new());
