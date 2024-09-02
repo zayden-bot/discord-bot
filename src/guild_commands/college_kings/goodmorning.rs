@@ -1,7 +1,10 @@
 use std::time::Duration;
 
 use crate::{
-    guilds::college_kings::GENERAL_CHANNEL_ID, utils::message_response, Error, ImageCache, Result,
+    guilds::{ServersTable, ServersTableError},
+    sqlx_lib::PostgresPool,
+    utils::message_response,
+    Error, ImageCache, Result,
 };
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -12,6 +15,7 @@ use serenity::{
     },
     prelude::TypeMapKey,
 };
+use tracing::trace;
 
 pub struct GoodMorningLockedUsers;
 
@@ -22,14 +26,27 @@ impl TypeMapKey for GoodMorningLockedUsers {
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
 
+    trace!("Waiting for data lock");
+
     let mut data = ctx.data.write().await;
     let locked_users = data
         .get_mut::<GoodMorningLockedUsers>()
-        .ok_or_else(|| Error::DataNotFound)?;
+        .ok_or(Error::DataNotFound)?;
 
     let user_id = interaction.user.id;
 
-    if interaction.channel_id == GENERAL_CHANNEL_ID {
+    trace!("Waiting for pool lock");
+
+    let pool = PostgresPool::get(ctx).await;
+
+    let general_channel_id = ServersTable::get_row(&pool, interaction.guild_id.unwrap().get())
+        .await?
+        .ok_or(ServersTableError::ServerNotFound)?
+        .get_general_channel_id()?;
+
+    trace!("Got general channel id");
+
+    if interaction.channel_id == general_channel_id {
         if locked_users.contains(&user_id) {
             message_response(
                 ctx,
@@ -71,7 +88,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         )
         .await?;
 
-    if interaction.channel_id == GENERAL_CHANNEL_ID {
+    if interaction.channel_id == general_channel_id {
         tokio::spawn({
             let ctx = ctx.clone();
             async move {

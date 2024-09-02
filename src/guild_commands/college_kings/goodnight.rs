@@ -1,7 +1,8 @@
 use std::time::Duration;
 
-use crate::guilds::college_kings::GENERAL_CHANNEL_ID;
+use crate::guilds::{ServersTable, ServersTableError};
 use crate::image_cache::ImageCache;
+use crate::sqlx_lib::PostgresPool;
 use crate::utils::message_response;
 use crate::{Error, Result};
 use rand::seq::SliceRandom;
@@ -28,7 +29,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let user_id = interaction.user.id;
 
-    if interaction.channel_id == GENERAL_CHANNEL_ID {
+    let pool = PostgresPool::get(ctx).await;
+
+    let general_channel_id = ServersTable::get_row(&pool, interaction.guild_id.unwrap().get())
+        .await?
+        .ok_or(ServersTableError::ServerNotFound)?
+        .get_general_channel_id()?;
+
+    if interaction.channel_id == general_channel_id {
         if locked_users.contains(&user_id) {
             message_response(
                 ctx,
@@ -70,7 +78,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         )
         .await?;
 
-    if interaction.channel_id == GENERAL_CHANNEL_ID {
+    if interaction.channel_id == general_channel_id {
         tokio::spawn({
             let ctx = ctx.clone();
             async move {
