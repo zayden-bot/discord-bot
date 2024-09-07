@@ -22,14 +22,14 @@ impl TypeMapKey for GoodNightLockedUsers {
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
 
+    let pool = PostgresPool::get(ctx).await;
+
     let mut data = ctx.data.write().await;
     let locked_users = data
         .get_mut::<GoodNightLockedUsers>()
         .ok_or_else(|| Error::DataNotFound)?;
 
     let user_id = interaction.user.id;
-
-    let pool = PostgresPool::get(ctx).await;
 
     let general_channel_id = ServersTable::get_row(&pool, interaction.guild_id.unwrap().get())
         .await?

@@ -15,7 +15,6 @@ use serenity::{
     },
     prelude::TypeMapKey,
 };
-use tracing::trace;
 
 pub struct GoodMorningLockedUsers;
 
@@ -26,7 +25,7 @@ impl TypeMapKey for GoodMorningLockedUsers {
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await?;
 
-    trace!("Waiting for data lock");
+    let pool = PostgresPool::get(ctx).await;
 
     let mut data = ctx.data.write().await;
     let locked_users = data
@@ -35,16 +34,11 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let user_id = interaction.user.id;
 
-    trace!("Waiting for pool lock");
-
-    let pool = PostgresPool::get(ctx).await;
-
-    let general_channel_id = ServersTable::get_row(&pool, interaction.guild_id.unwrap().get())
+    let row = ServersTable::get_row(&pool, interaction.guild_id.unwrap().get())
         .await?
-        .ok_or(ServersTableError::ServerNotFound)?
-        .get_general_channel_id()?;
+        .ok_or(ServersTableError::ServerNotFound)?;
 
-    trace!("Got general channel id");
+    let general_channel_id = row.get_general_channel_id()?;
 
     if interaction.channel_id == general_channel_id {
         if locked_users.contains(&user_id) {
