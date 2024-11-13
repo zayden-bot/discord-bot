@@ -4,7 +4,8 @@ use serenity::all::{
     CreateModal, InputTextStyle,
 };
 
-use crate::{patreon_lib, Result};
+use crate::modules::patreon::PatreonUser;
+use crate::Result;
 
 pub async fn render_request(ctx: &Context, interaction: &ComponentInteraction) -> Result<()> {
     let character_input = CreateInputText::new(InputTextStyle::Short, "Character", "character")
@@ -25,12 +26,13 @@ pub async fn render_request(ctx: &Context, interaction: &ComponentInteraction) -
 
     let mut components = Vec::with_capacity(5);
 
-    let result = patreon_lib::get_user(&Client::new(), interaction.user.id, false).await;
-    if result.is_ok_and(|member| member.tier.amount_cents < 5000) {
+    let result = PatreonUser::get(&Client::new(), interaction.user.id, false).await;
+
+    if result.is_err() {
         let email_input = CreateInputText::new(InputTextStyle::Short, "Patreon Email", "email")
             .placeholder("example@example.com");
         components.push(CreateActionRow::InputText(email_input))
-    };
+    }
 
     components.extend([
         CreateActionRow::InputText(character_input),

@@ -1,17 +1,84 @@
 use std::time::Duration;
 
+use async_trait::async_trait;
 use reqwest::Client;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateEmbedFooter, ResolvedValue,
+    CreateEmbed, CreateEmbedFooter, Ready, ResolvedValue,
 };
 use url::Url;
+use zayden_core::{parse_options, SlashCommand};
 
-use crate::utils::{embed_response, message_response, parse_options};
-use crate::{patreon_lib, Result, SERVER_URL};
+pub use patreon_user::PatreonUser;
+
+use crate::utils::{embed_response, message_response};
+use crate::{Error, Result, SERVER_URL};
+
+mod patreon_user;
 
 const CLIENT_ID: &str = "co3TJ3lwqHN5WSVuIBiDNhfQv28V4FR-z6g-_fIogDzj_Um09DoWLGE5rvAJeTQd";
 
+pub fn register(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
+    let commands = vec![Patreon::register(ctx, ready)?];
+
+    Ok(commands)
+}
+
+pub struct Patreon;
+
+#[async_trait]
+impl SlashCommand<Error> for Patreon {
+    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+        let options = interaction.data.options();
+        let command = &options[0];
+
+        match command.name {
+            "info" => info(ctx, interaction).await?,
+            "login" => login(ctx, interaction).await?,
+            "check" => check(ctx, interaction, &command.value).await?,
+            _ => unreachable!("Unknown subcommand"),
+        };
+
+        Ok(())
+    }
+
+    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+        let command = CreateCommand::new("patreon")
+            .description("Patreon information")
+            .add_option(CreateCommandOption::new(
+                CommandOptionType::SubCommand,
+                "info",
+                "Patreon information",
+            ))
+            .add_option(CreateCommandOption::new(
+                CommandOptionType::SubCommand,
+                "login",
+                "Login to Patreon",
+            ))
+            .add_option(
+                CreateCommandOption::new(
+                    CommandOptionType::SubCommand,
+                    "check",
+                    "Check if you're a patron",
+                )
+                .add_sub_option(
+                    CreateCommandOption::new(
+                        CommandOptionType::String,
+                        "email",
+                        "Your Patreon email",
+                    )
+                    .required(true),
+                )
+                .add_sub_option(CreateCommandOption::new(
+                    CommandOptionType::Boolean,
+                    "force",
+                    "Check via the Patreon API instead of the cache",
+                )),
+            );
+
+        Ok(command)
+    }
+}
 async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(ctx).await?;
 
@@ -29,7 +96,7 @@ async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
 async fn login(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer_ephemeral(ctx).await?;
 
-    let patreon_url = Url::parse(&format!("https://www.patreon.com/oauth2/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={SERVER_URL}/api/v1/patreon/oauth/zayden&state={}", interaction.user.id)).unwrap();
+    let patreon_url = Url::parse(&format!("https://www.patreon.com/oauth2/authorize?response_type=code&client_id={}&redirect_uri={}/api/v1/patreon/oauth/zayden&state={}", CLIENT_ID, SERVER_URL, interaction.user.id)).unwrap();
     let url_as_str = patreon_url.as_str();
 
     message_response(ctx, interaction, url_as_str).await?;
@@ -39,7 +106,7 @@ async fn login(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     tokio::time::sleep(Duration::from_secs(5)).await;
 
     for _ in 0..10 * 60 {
-        if patreon_lib::get_user(&client, interaction.user.id, false)
+        if PatreonUser::get(&client, interaction.user.id, false)
             .await
             .is_ok()
         {
@@ -86,7 +153,7 @@ async fn check(
         _ => false,
     };
 
-    let attributes = patreon_lib::get_user(&Client::new(), email, force).await?;
+    let user = PatreonUser::get(&Client::new(), email.to_lowercase(), force).await?;
 
     embed_response(
         ctx,
@@ -95,57 +162,10 @@ async fn check(
             .title("Patreon Status")
             .description(format!(
                 "Email: {}\n Lifetime Support: **${}**\nCurrent Tier: **${}**",
-                email,
-                attributes.lifetime_support_cents / 100,
-                attributes.tier.amount_cents / 100
+                email, user.lifetime_support, user.tier
             )),
     )
     .await?;
 
     Ok(())
-}
-
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let options = interaction.data.options();
-    let command = &options[0];
-
-    match command.name {
-        "info" => info(ctx, interaction).await?,
-        "login" => login(ctx, interaction).await?,
-        "check" => check(ctx, interaction, &command.value).await?,
-        _ => unreachable!("Unknown subcommand"),
-    };
-
-    Ok(())
-}
-
-pub fn register() -> CreateCommand {
-    CreateCommand::new("patreon")
-        .description("Patreon information")
-        .add_option(CreateCommandOption::new(
-            CommandOptionType::SubCommand,
-            "info",
-            "Patreon information",
-        ))
-        .add_option(CreateCommandOption::new(
-            CommandOptionType::SubCommand,
-            "login",
-            "Login to Patreon",
-        ))
-        .add_option(
-            CreateCommandOption::new(
-                CommandOptionType::SubCommand,
-                "check",
-                "Check if you're a patron",
-            )
-            .add_sub_option(
-                CreateCommandOption::new(CommandOptionType::String, "email", "Your Patreon email")
-                    .required(true),
-            )
-            .add_sub_option(CreateCommandOption::new(
-                CommandOptionType::Boolean,
-                "force",
-                "Check via the Patreon API instead of the cache",
-            )),
-        )
 }

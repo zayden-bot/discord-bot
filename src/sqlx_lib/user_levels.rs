@@ -4,8 +4,7 @@ use serenity::all::{Context, User, UserId};
 use sqlx::{Pool, Postgres};
 
 use crate::{Error, Result};
-
-use super::get_pool;
+use crate::sqlx_lib::PostgresPool;
 
 pub struct Level {
     pub id: i64,
@@ -99,7 +98,7 @@ pub struct UserLevel {
 }
 
 pub async fn get_users(ctx: &Context, page: i64, limit: i64) -> Result<Vec<UserLevel>> {
-    let pool = get_pool(ctx).await?;
+    let pool = PostgresPool::get(ctx).await;
 
     let offset = (page - 1) * limit;
 

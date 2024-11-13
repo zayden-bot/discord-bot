@@ -1,22 +1,26 @@
 use serenity::all::{
     ComponentInteraction, Context, CreateEmbed, CreateEmbedFooter, EditInteractionResponse,
-    EditMessage,
+    MessageInteractionMetadata,
 };
 
-use crate::{
-    sqlx_lib::{
-        get_pool,
-        user_levels::{get_user_row_number, get_users},
-    },
-    Error, Result,
-};
+use crate::sqlx_lib::user_levels::{get_user_row_number, get_users};
+use crate::sqlx_lib::PostgresPool;
+use crate::{Error, Result};
 
 const LIMIT: i64 = 10;
 
 pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &str) -> Result<()> {
     interaction.defer(ctx).await?;
 
-    let pool = get_pool(ctx).await?;
+    if let Some(MessageInteractionMetadata::Component(metadata)) =
+        interaction.message.interaction_metadata.as_deref()
+    {
+        if metadata.user != interaction.user {
+            return Err(Error::NotInteractionAuthor);
+        }
+    }
+
+    let pool = PostgresPool::get(ctx).await;
 
     let mut old_embed = interaction.message.embeds[0].clone();
 
@@ -67,13 +71,7 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
     new_embed = new_embed.fields(fields);
 
     interaction
-        .message
-        .clone()
-        .edit(ctx, EditMessage::new().embed(new_embed))
-        .await?;
-
-    interaction
-        .edit_response(ctx, EditInteractionResponse::new())
+        .edit_response(ctx, EditInteractionResponse::new().embed(new_embed))
         .await?;
 
     Ok(())

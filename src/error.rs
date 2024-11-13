@@ -1,13 +1,12 @@
-use serenity::all::{CommandInteraction, Context, Mentionable};
-
-use crate::{utils::message_response, OSCAR_SIX_ID};
+use zayden_core::ErrorResponse;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
     ConversionError,
-    CommandNotFound(String),
+    UnknownCommand(String),
+    CommandNotFound,
     DataNotFound,
     TimeDelta,
     NoImage,
@@ -19,12 +18,17 @@ pub enum Error {
     NoChannel,
     NoParent,
     NoFileName,
-    NoSupportThread,
-    NoSpoilerThread,
     FaqMessageNotFound(String),
     EmptyMessage,
     PatreonAccountNotFound(String),
     NotInGuild,
+    NotInteractionAuthor,
+
+    ServersTable(crate::guilds::ServersTableError),
+
+    Family(family::Error),
+    GoldStar(gold_star::Error),
+    ReactionRole(reaction_roles::Error),
 
     Dotenvy(dotenvy::Error),
     Serenity(serenity::Error),
@@ -36,30 +40,21 @@ pub enum Error {
     ParseIntError(std::num::ParseIntError),
     ReactionConversionError(serenity::all::ReactionConversionError),
     JoinError(tokio::task::JoinError),
+    Bunny(bunny_cdn_wrapper::Error),
+    Charming(charming::EchartsError),
+    Io(std::io::Error),
+    TryFromInt(std::num::TryFromIntError),
 }
 
-impl Error {
-    pub async fn to_response(self, ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-        let msg = match self {
-            Error::PatreonAccountNotFound(_) => String::from("Patreon account not found.\nIf you've recently joined, please use `/patreon login` to manually update the cache and link your Discord account."),
+impl ErrorResponse for Error {
+    fn to_response(&self) -> String {
+        match self {
+            Error::PatreonAccountNotFound(_) => String::from("Patreon account not found.\nIf you've recently joined, please use `/patreon_user login` to manually update the cache and link your Discord account."),
+            Error::NotInteractionAuthor => String::from("You are not the author of this interaction."),
+            Error::Family(e) => e.to_response(),
+            Error::GoldStar(e) => e.to_response(),
+            Error::ReactionRole(e) => e.to_response(),
             _ => String::new(),
-        };
-
-        if msg.is_empty() {
-            message_response(
-                ctx,
-                interaction,
-                format!(
-                    "An error occurred. Please contact {} if this issue persists.",
-                    OSCAR_SIX_ID.mention()
-                ),
-            )
-            .await?;
-
-            Err(self)
-        } else {
-            message_response(ctx, interaction, msg).await?;
-            Ok(())
         }
     }
 }
@@ -71,6 +66,30 @@ impl std::fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+impl From<crate::guilds::ServersTableError> for Error {
+    fn from(e: crate::guilds::ServersTableError) -> Self {
+        Error::ServersTable(e)
+    }
+}
+
+impl From<reaction_roles::Error> for Error {
+    fn from(e: reaction_roles::Error) -> Self {
+        Error::ReactionRole(e)
+    }
+}
+
+impl From<family::Error> for Error {
+    fn from(e: family::Error) -> Self {
+        Error::Family(e)
+    }
+}
+
+impl From<gold_star::Error> for Error {
+    fn from(e: gold_star::Error) -> Self {
+        Error::GoldStar(e)
+    }
+}
 
 impl From<dotenvy::Error> for Error {
     fn from(e: dotenvy::Error) -> Self {
@@ -129,5 +148,29 @@ impl From<serenity::all::ReactionConversionError> for Error {
 impl From<tokio::task::JoinError> for Error {
     fn from(e: tokio::task::JoinError) -> Self {
         Error::JoinError(e)
+    }
+}
+
+impl From<bunny_cdn_wrapper::Error> for Error {
+    fn from(e: bunny_cdn_wrapper::Error) -> Self {
+        Error::Bunny(e)
+    }
+}
+
+impl From<charming::EchartsError> for Error {
+    fn from(e: charming::EchartsError) -> Self {
+        Error::Charming(e)
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(e: std::io::Error) -> Self {
+        Error::Io(e)
+    }
+}
+
+impl From<std::num::TryFromIntError> for Error {
+    fn from(e: std::num::TryFromIntError) -> Self {
+        Error::TryFromInt(e)
     }
 }

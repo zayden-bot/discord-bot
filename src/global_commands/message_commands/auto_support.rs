@@ -4,12 +4,12 @@ use serenity::all::{
 };
 use serenity::http::HttpError::UnsuccessfulRequest;
 
-use crate::guilds::ServersTableError;
+use crate::guilds::{ServersTable, ServersTableError};
 use crate::sqlx_lib::{
     get_support_role_ids, get_support_thead_id, update_support_thread_id, PostgresPool,
 };
 use crate::utils::support::get_thread_name;
-use crate::{guilds, Error, Result};
+use crate::{Error, Result};
 
 async fn get_attachments(msg: &Message) -> serenity::Result<Vec<CreateAttachment>> {
     let mut attachments: Vec<CreateAttachment> = Vec::new();
@@ -30,11 +30,12 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
 
     let pool = PostgresPool::get(ctx).await;
 
-    let support_channel_id = match guilds::ServersTable::get_row(&pool, guild_id.get())
-        .await?
-        .ok_or(ServersTableError::ServerNotFound)?
-        .get_support_channel_id()
-    {
+    let row = match ServersTable::get_row(&pool, guild_id.get()).await? {
+        Some(row) => row,
+        None => return Ok(()),
+    };
+
+    let support_channel_id = match row.get_support_channel_id() {
         Ok(channel_id) => channel_id,
         Err(Error::ServersTable(ServersTableError::SupportChannelNotFound)) => return Ok(()),
         Err(e) => return Err(e),

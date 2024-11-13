@@ -5,7 +5,7 @@ use serenity::all::{
     ReactionType,
 };
 
-use crate::{guilds::college_kings_team::SUGGESTION_CHANNEL_ID, Result};
+use crate::{guilds::ServersTable, sqlx_lib::PostgresPool, Result};
 
 const POSITIVE_REACTION: &str = "👍";
 const NEGATIVE_REACTION: &str = "👎";
@@ -24,7 +24,13 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
         }
     }
 
-    let mut messages = SUGGESTION_CHANNEL_ID.messages_iter(&ctx).boxed();
+    let pool = PostgresPool::get(ctx).await;
+    let suggestion_channel_id = ServersTable::get_row(&pool, channel.guild_id.get())
+        .await?
+        .ok_or(crate::guilds::ServersTableError::ServerNotFound)?
+        .get_suggestion_channel_id()?;
+
+    let mut messages = suggestion_channel_id.messages_iter(&ctx).boxed();
 
     if (positive_count - negative_count) >= 20 {
         while let Some(mut msg) = messages.try_next().await? {
@@ -46,7 +52,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
             }
         }
 
-        SUGGESTION_CHANNEL_ID
+        suggestion_channel_id
             .send_message(
                 ctx,
                 CreateMessage::new()

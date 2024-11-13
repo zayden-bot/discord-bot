@@ -1,13 +1,12 @@
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    EditChannel, Permissions, ResolvedValue,
+    EditChannel, Permissions, Ready, ResolvedValue,
 };
+use zayden_core::parse_options;
 
-use crate::{
-    guilds::college_kings::{CHANGE_LOG_CHANNEL_ID, SUPPORT_CHANNEL_ID},
-    utils::{message_response, parse_options},
-    Error, Result,
-};
+use crate::guilds::college_kings::CHANGE_LOG_CHANNEL_ID;
+use crate::guilds::{ServersTable, ServersTableError};
+use crate::{sqlx_lib::PostgresPool, utils::message_response, Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
@@ -30,7 +29,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .guild()
         .ok_or_else(|| Error::NotInGuild)?;
 
-    if current_channel.parent_id.ok_or_else(|| Error::NoParent)? != SUPPORT_CHANNEL_ID {
+    let pool = PostgresPool::get(ctx).await;
+
+    let support_channel_id = ServersTable::get_row(&pool, current_channel.guild_id)
+        .await?
+        .ok_or(ServersTableError::ServerNotFound)?
+        .get_support_channel_id()?;
+
+    if current_channel.parent_id.ok_or_else(|| Error::NoParent)? != support_channel_id {
         message_response(
             ctx,
             interaction,
@@ -67,13 +73,15 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("fixed")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("fixed")
         .description("Mark support ticket as fixed")
         .default_member_permissions(Permissions::MANAGE_MESSAGES)
         .add_option(CreateCommandOption::new(
             CommandOptionType::String,
             "version",
             "The version the issue was fixed in",
-        ))
+        ));
+
+    Ok(command)
 }

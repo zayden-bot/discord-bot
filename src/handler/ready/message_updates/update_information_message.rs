@@ -30,7 +30,7 @@ https://patreon.com/collegekings"#)
 <#747428461391380532> ~ [SPOILERS] Theories about the game including content from the latest updates
 <#817235460467720194> ~ [SPOILERS] Like to rank the ck characters? Let the world know about your ranking here
 <#1020000314260205670> ~ [NSFW] Discussion around games that aren't College Kings
-<#776139754408247326> ~ Please only use bot commands in this channel!", false)
+<#776139754408247326> ~ Please only use zayden-bot commands in this channel!", false)
 .field("Support Channels", "<#1068790374996377671> ~ Find community suggestions here
 <#829463308629180447> ~ You want to ask a question and are not sure if someone else already asked? Take a look in here
 <#919950775134847016> ~ Do you need help or did you find any bugs? Make sure to ask about it here.", false)

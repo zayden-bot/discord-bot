@@ -1,16 +1,13 @@
+use std::collections::HashMap;
+
 use chrono::{TimeDelta, Utc};
 use lazy_static::lazy_static;
 use rand::Rng;
 use serenity::all::{ChannelId, Context, Message, RoleId};
-use std::collections::HashMap;
 
-use crate::{
-    sqlx_lib::{
-        get_pool,
-        user_levels::{get_user_level_data, update_user_level_data},
-    },
-    Error, Result,
-};
+use crate::sqlx_lib::user_levels::{get_user_level_data, update_user_level_data};
+use crate::sqlx_lib::PostgresPool;
+use crate::{Error, Result};
 
 const BLOCKED_CHANNEL_IDS: [ChannelId; 1] = [ChannelId::new(776139754408247326)];
 
@@ -36,7 +33,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
         return Ok(());
     }
 
-    let pool = get_pool(ctx).await?;
+    let pool = PostgresPool::get(ctx).await;
     let level_data = get_user_level_data(&pool, msg.author.id.get()).await?;
 
     if level_data.last_xp

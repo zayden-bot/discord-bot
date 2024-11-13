@@ -3,11 +3,10 @@ use serenity::all::{
     CreateInteractionResponse, CreateMessage, CreateThread, InputText, ModalInteraction, Role,
 };
 
+use crate::guilds::{ServersTable, ServersTableError};
+use crate::sqlx_lib::PostgresPool;
 use crate::{
-    sqlx_lib::{
-        get_pool, get_support_channel_ids, get_support_role_ids, get_support_thead_id,
-        update_support_thread_id,
-    },
+    sqlx_lib::{get_support_role_ids, get_support_thead_id, update_support_thread_id},
     utils::support::{get_thread_name, send_support_message},
     Error, Result,
 };
@@ -17,9 +16,12 @@ use super::parse_modal_data;
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let guild_id = modal.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
-    let pool = get_pool(ctx).await?;
+    let pool = PostgresPool::get(ctx).await;
 
-    let support_channel_ids = get_support_channel_ids(&pool, guild_id.get()).await?;
+    let support_channel_id = ServersTable::get_row(&pool, guild_id.get())
+        .await?
+        .ok_or(ServersTableError::ServerNotFound)?
+        .get_support_channel_id()?;
 
     let guild_roles = guild_id.roles(&ctx).await?;
 
@@ -70,18 +72,16 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         }
     }
 
-    for channel_id in support_channel_ids {
-        let thread = channel_id
-            .create_thread(
-                ctx,
-                CreateThread::new(&thread_name)
-                    .kind(ChannelType::PrivateThread)
-                    .auto_archive_duration(AutoArchiveDuration::OneWeek),
-            )
-            .await?;
+    let thread = support_channel_id
+        .create_thread(
+            ctx,
+            CreateThread::new(&thread_name)
+                .kind(ChannelType::PrivateThread)
+                .auto_archive_duration(AutoArchiveDuration::OneWeek),
+        )
+        .await?;
 
-        send_support_message(ctx, &thread, &support_roles, &modal.user, messages.clone()).await?;
-    }
+    send_support_message(ctx, &thread, &support_roles, &modal.user, messages.clone()).await?;
 
     update_support_thread_id(&pool, guild_id.get(), thread_id).await?;
 

@@ -1,27 +1,52 @@
-mod message_updates;
-
+use async_trait::async_trait;
+use futures::future;
 use serenity::all::{Context, OnlineStatus, Ready};
 
 use message_updates::update_messages;
 
 use crate::cron::start_cron_jobs;
-use crate::{global_commands, guild_commands, Result};
+use crate::handler::Handler;
+use crate::modules;
+use crate::modules::misc::Sleep;
+use crate::{global_commands, guilds, Result};
 
-pub async fn ready(ctx: &Context, ready: Ready) -> Result<()> {
-    println!("{} is connected!", ready.user.name);
+mod message_updates;
 
-    ctx.set_presence(None, OnlineStatus::Online);
+impl Handler {
+    pub async fn ready(ctx: &Context, ready: Ready) -> Result<()> {
+        println!("{} is connected!", ready.user.name);
 
-    // TODO: Load Commands
+        ctx.set_presence(None, OnlineStatus::Online);
 
-    tokio::try_join!(
-        guild_commands::register(ctx),
-        global_commands::register(ctx),
-        update_messages(ctx)
-    )?;
+        // TODO: Load Commands
+        let mut command_map = guilds::commands(ctx, &ready)?;
 
-    let ctx_clone = ctx.clone();
-    tokio::spawn(async move { start_cron_jobs(ctx_clone).await });
+        let futures = ready.guilds.iter().map(|guild| {
+            let mut commands = command_map.remove(&guild.id).unwrap_or_default();
+            commands.extend(
+                [
+                    global_commands::register(ctx, &ready).unwrap(),
+                    modules::global_register(ctx, &ready).unwrap(),
+                ]
+                .concat(),
+            );
+            guild.id.set_commands(ctx.http.clone(), commands)
+        });
+        future::try_join_all(futures).await?;
 
-    Ok(())
+        update_messages(ctx).await?;
+
+        let ctx_clone = ctx.clone();
+        tokio::spawn(async move { Sleep::on_ready(ctx_clone, ready).await });
+
+        let ctx_clone = ctx.clone();
+        tokio::spawn(async move { start_cron_jobs(ctx_clone).await });
+
+        Ok(())
+    }
+}
+
+#[async_trait]
+pub trait OnReady {
+    async fn on_ready(ctx: Context, ready: Ready) -> Result<()>;
 }

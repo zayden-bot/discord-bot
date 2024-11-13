@@ -1,14 +1,35 @@
 #![allow(dead_code)]
 
 use serenity::all::{
-    CommandInteraction, Context, CreateEmbed, CreateInteractionResponseFollowup,
-    EditInteractionResponse, Message, ResolvedOption, ResolvedValue,
+    CommandInteraction, Context, CreateEmbed, CreateInteractionResponseFollowup, CreateMessage,
+    EditInteractionResponse, Message, UserId,
 };
-use std::collections::HashMap;
-
-use crate::Result;
+use serenity::Result;
 
 pub mod support;
+
+pub async fn dm_user_embed(
+    ctx: &Context,
+    user_id: impl Into<UserId>,
+    embed: CreateEmbed,
+) -> Result<Message> {
+    let user_id = user_id.into();
+
+    let channel = user_id.create_dm_channel(ctx).await?;
+    let message = channel
+        .send_message(ctx, CreateMessage::new().embed(embed))
+        .await?;
+
+    // {
+    //     Ok(_) => {}
+    //     Err(serenity::Error::Http(UnsuccessfulRequest(ErrorResponse {
+    //         error: DiscordJsonError { code: 50007, .. },
+    //         ..
+    //     }))) => {}
+    //     Err(e) => return Err(e.into()),
+    // }
+    Ok(message)
+}
 
 pub async fn message_response(
     ctx: &Context,
@@ -66,22 +87,4 @@ pub async fn embed_follow_up(
         .await?;
 
     Ok(message)
-}
-
-pub fn parse_options<'a>(
-    options: &'a Vec<ResolvedOption<'_>>,
-) -> HashMap<&'a str, &'a ResolvedValue<'a>> {
-    let mut parsed_options = HashMap::new();
-
-    for option in options {
-        parsed_options.insert(option.name, &option.value);
-
-        // if let ResolvedValue::SubCommand(subcommand) = option.value {
-        //     for subcommand_option in subcommand {
-        //         parsed_options.insert(subcommand_option.name, subcommand_option.value);
-        //     }
-        // }
-    }
-
-    parsed_options
 }

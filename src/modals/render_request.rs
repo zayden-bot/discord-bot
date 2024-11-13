@@ -5,9 +5,10 @@ use serenity::all::{
     PermissionOverwrite, PermissionOverwriteType, Permissions,
 };
 
+use crate::modules::patreon::PatreonUser;
 use crate::{
     guilds::{college_kings::RENDER_REQUESTS_CHANNEL_ID, college_kings_team::MESSY_USER_ID},
-    patreon_lib, Error, Result,
+    Error, Result,
 };
 
 use super::parse_modal_data;
@@ -21,8 +22,8 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let user = match data.get("email") {
         Some(InputText {
             value: Some(email), ..
-        }) => patreon_lib::get_user(&client, email, false).await?,
-        _ => patreon_lib::get_user(&client, modal.user.id, false).await?,
+        }) => PatreonUser::get(&client, email, false).await?,
+        _ => PatreonUser::get(&client, modal.user.id, false).await?,
     };
 
     let character = match data.get("character") {
@@ -53,9 +54,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         _ => "No description specified.",
     };
 
-    let current_tier = user.tier.amount_cents / 100;
-
-    if current_tier < 50 {
+    if user.tier < 50 {
         modal
             .create_response(
                 ctx,
@@ -73,7 +72,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         .title("Render Request")
         .description(description)
         .fields(vec![
-            ("Tier", format!("${current_tier}").as_str(), true),
+            ("Tier", format!("${}", user.tier).as_str(), true),
             ("Character", character, false),
             ("Prop", prop, false),
             ("Location", location, false),

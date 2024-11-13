@@ -1,6 +1,7 @@
-use serenity::all::{CommandInteraction, Context, CreateCommand, EditChannel, Permissions};
+use serenity::all::{CommandInteraction, Context, CreateCommand, EditChannel, Permissions, Ready};
 
-use crate::guilds::college_kings::SUPPORT_CHANNEL_ID;
+use crate::guilds::ServersTable;
+use crate::sqlx_lib::PostgresPool;
 use crate::utils::message_response;
 use crate::{Error, Result};
 
@@ -12,7 +13,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .guild()
         .ok_or_else(|| Error::NotInGuild)?;
 
-    if current_channel.parent_id.ok_or_else(|| Error::NoParent)? != SUPPORT_CHANNEL_ID {
+    let pool = PostgresPool::get(ctx).await;
+
+    let support_channel_id = ServersTable::get_row(&pool, current_channel.guild_id)
+        .await?
+        .ok_or(crate::guilds::ServersTableError::ServerNotFound)?
+        .get_support_channel_id()?;
+
+    if current_channel.parent_id.ok_or_else(|| Error::NoParent)? != support_channel_id {
         message_response(
             ctx,
             interaction,
@@ -37,8 +45,10 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("open")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("open")
         .description("Reopen a support ticket")
-        .default_member_permissions(Permissions::MANAGE_MESSAGES)
+        .default_member_permissions(Permissions::MANAGE_MESSAGES);
+
+    Ok(command)
 }

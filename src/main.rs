@@ -1,5 +1,19 @@
+use std::env;
+
+use serenity::{
+    all::{GatewayIntents, UserId},
+    Client,
+};
+
+pub use error::{Error, Result};
+use guild_commands::college_kings::{
+    goodmorning::GoodMorningLockedUsers, goodnight::GoodNightLockedUsers,
+};
+use sqlx_lib::PostgresPool;
+
+use crate::image_cache::ImageCache;
+
 mod chatgpt_lib;
-pub mod commands;
 pub mod components;
 pub mod cron;
 mod error;
@@ -8,57 +22,35 @@ mod guild_commands;
 pub mod guilds;
 mod handler;
 mod image_cache;
-mod infraction_type;
 pub mod modals;
 mod models;
-pub mod patreon_lib;
+pub mod modules;
 mod sqlx_lib;
-pub mod state;
 mod utils;
 
-use commands::Commands;
-use guild_commands::college_kings::{
-    goodmorning::GoodMorningLockedUsers, goodnight::GoodNightLockedUsers,
-};
-use serenity::{
-    all::{GatewayIntents, UserId},
-    Client,
-};
-use sqlx::postgres::PgPoolOptions;
-use sqlx_lib::PostgresPool;
-use state::State;
-use std::env;
-
-use crate::image_cache::ImageCache;
-pub use error::{Error, Result};
-
-pub const SERVER_IP: &str = "82.9.123.190:8080";
-pub const SERVER_URL: &str = "http://82.9.123.190:8080";
-pub const OSCAR_SIX_ID: UserId = UserId::new(211486447369322506);
+pub const SERVER_URL: &str = "http://145.40.184.89:8080";
+pub const SUPER_USERS: [UserId; 2] = [
+    UserId::new(211486447369322506),  // oscarsix
+    UserId::new(1287941705861173281), // ck_oscarsix
+];
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    tracing_subscriber::fmt::init();
     dotenvy::dotenv()?;
 
     let token = &env::var("DISCORD_TOKEN")?;
+    let pool = PostgresPool::init().await?;
 
     let mut client = Client::builder(token, GatewayIntents::all())
         .raw_event_handler(handler::Handler)
         .await?;
 
     let mut data = client.data.write().await;
-    data.insert::<Commands>(Commands::new());
-    data.insert::<State>(State::new());
     data.insert::<ImageCache>(ImageCache::new());
     data.insert::<GoodMorningLockedUsers>(Vec::new());
     data.insert::<GoodNightLockedUsers>(Vec::new());
-    data.insert::<PostgresPool>(
-        PgPoolOptions::new()
-            .max_connections(10)
-            .min_connections(3)
-            .connect(&env::var("DATABASE_URL")?)
-            .await?,
-    );
+    data.insert::<PostgresPool>(pool);
     drop(data);
 
     client.start().await?;

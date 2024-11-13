@@ -1,12 +1,12 @@
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    Permissions, ResolvedValue,
+    Permissions, Ready, ResolvedValue,
 };
+use zayden_core::parse_options;
 
-use crate::{
-    guilds::college_kings::ARTIST_ROLE_ID,
-    utils::{message_response, parse_options},
-};
+use crate::guilds::{ServersTable, ServersTableError};
+use crate::sqlx_lib::PostgresPool;
+use crate::utils::message_response;
 use crate::{Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -22,7 +22,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let member = guild_id.member(&ctx, user).await?;
 
-    member.add_role(&ctx, ARTIST_ROLE_ID).await?;
+    let pool = PostgresPool::get(ctx).await;
+
+    let artist_role_id = ServersTable::get_row(&pool, guild_id.get())
+        .await?
+        .ok_or(ServersTableError::ServerNotFound)?
+        .get_artist_role_id()?;
+
+    member.add_role(&ctx, artist_role_id).await?;
 
     message_response(
         ctx,
@@ -34,8 +41,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("add_artist")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("add_artist")
         .description("Adds a user as an artist")
         .default_member_permissions(Permissions::MANAGE_MESSAGES)
         .add_option(
@@ -45,5 +52,7 @@ pub fn register() -> CreateCommand {
                 "The user to add as an artist",
             )
             .required(true),
-        )
+        );
+
+    Ok(command)
 }
