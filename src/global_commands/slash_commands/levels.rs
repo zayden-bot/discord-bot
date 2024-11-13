@@ -1,6 +1,6 @@
 use serenity::all::{
     CommandInteraction, Context, CreateButton, CreateCommand, CreateEmbed, CreateEmbedFooter,
-    EditInteractionResponse,
+    EditInteractionResponse, Ready,
 };
 
 use crate::sqlx_lib::user_levels::get_users;
@@ -44,6 +44,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("levels").description("Get the leaderboard")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("levels").description("Get the leaderboard");
+
+    Ok(command)
 }

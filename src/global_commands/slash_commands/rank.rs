@@ -1,11 +1,12 @@
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, ResolvedValue,
+    CreateEmbed, Ready, ResolvedValue,
 };
+use zayden_core::parse_options;
 
-use crate::sqlx_lib::get_pool;
 use crate::sqlx_lib::user_levels::{get_user_level_data, get_user_rank};
-use crate::utils::{embed_response, parse_options};
+use crate::sqlx_lib::PostgresPool;
+use crate::utils::embed_response;
 use crate::{Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -22,7 +23,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => &interaction.user,
     };
 
-    let pool = get_pool(ctx).await?;
+    let pool = PostgresPool::get(ctx).await;
 
     let level_data = get_user_level_data(&pool, user.id.get()).await?;
 
@@ -51,8 +52,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("rank")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("rank")
         .description("Get your rank or another member's rank")
         .add_option(CreateCommandOption::new(
             CommandOptionType::User,
@@ -63,5 +64,7 @@ pub fn register() -> CreateCommand {
             CommandOptionType::Boolean,
             "ephemeral",
             "Whether the response should be ephemeral",
-        ))
+        ));
+
+    Ok(command)
 }

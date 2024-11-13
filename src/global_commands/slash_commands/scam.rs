@@ -1,10 +1,11 @@
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, DiscordJsonError, ErrorResponse, Permissions, ResolvedValue,
+    CreateEmbed, CreateMessage, DiscordJsonError, ErrorResponse, Permissions, Ready, ResolvedValue,
 };
 use serenity::http::HttpError::UnsuccessfulRequest;
+use zayden_core::parse_options;
 
-use crate::utils::{embed_response, parse_options};
+use crate::utils::embed_response;
 use crate::{Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -79,8 +80,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("scam")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("scam")
         .description("Soft ban a compromised account")
         .default_member_permissions(Permissions::KICK_MEMBERS)
         .add_option(
@@ -90,5 +91,7 @@ pub fn register() -> CreateCommand {
         .add_option(
             CreateCommandOption::new(CommandOptionType::String, "reason", "Reason for soft ban")
                 .required(false),
-        )
+        );
+
+    Ok(command)
 }

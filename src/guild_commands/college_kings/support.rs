@@ -2,11 +2,11 @@ use futures::{StreamExt, TryStreamExt};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption,
-    EditInteractionResponse, Permissions, ResolvedValue,
+    EditInteractionResponse, Permissions, Ready, ResolvedValue,
 };
+use zayden_core::parse_options;
 
 use crate::guilds::college_kings::SUPPORT_FAQ_CHANNEL_ID;
-use crate::utils::parse_options;
 use crate::{Error, Result};
 
 pub async fn list(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -109,8 +109,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("support")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("support")
         .description("Displays a support message")
         .default_member_permissions(Permissions::MANAGE_MESSAGES)
         .add_option(CreateCommandOption::new(
@@ -132,5 +132,7 @@ pub fn register() -> CreateCommand {
                 )
                 .required(true),
             ),
-        )
+        );
+
+    Ok(command)
 }

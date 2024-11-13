@@ -1,6 +1,7 @@
-use serenity::all::{ChannelId, CreateCommand, GuildId};
+use serenity::all::{ChannelId, Context, CreateCommand, GuildId, Ready};
 
 use crate::guild_commands::college_kings::*;
+use crate::Result;
 
 pub const GUILD_ID: GuildId = GuildId::new(745662812335898806);
 
@@ -12,22 +13,24 @@ pub const RENDER_REQUESTS_CHANNEL_ID: ChannelId = ChannelId::new(123526913424634
 pub const SUGGESTION_CATEGORY_ID: ChannelId = ChannelId::new(1068790374996377671);
 pub const FAQ_CHANNEL_ID: ChannelId = ChannelId::new(1196346920059289690);
 
-pub fn commands() -> Vec<CreateCommand> {
-    vec![
-        add_artist::register(),
-        availability_check::register(),
-        close::register(),
-        faq::register(),
-        fetch_suggestions::register(),
-        fixed::register(),
-        get_discord_role::register(),
-        goodmorning::register(),
-        goodnight::register(),
-        image::register(),
-        open::register(),
-        reputation::register(),
-        saves::register(),
-        spoilers::register(),
-        support::register(),
-    ]
+pub fn commands(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
+    let commands = vec![
+        add_artist::register(ctx, ready)?,
+        availability_check::register(ctx, ready)?,
+        close::register(ctx, ready)?,
+        faq::register(ctx, ready)?,
+        fetch_suggestions::register(ctx, ready)?,
+        fixed::register(ctx, ready)?,
+        get_discord_role::register(ctx, ready)?,
+        goodmorning::register(ctx, ready)?,
+        goodnight::register(ctx, ready)?,
+        image::register(ctx, ready)?,
+        open::register(ctx, ready)?,
+        reputation::register(ctx, ready)?,
+        saves::register(ctx, ready)?,
+        spoilers::register(ctx, ready)?,
+        support::register(ctx, ready)?,
+    ];
+
+    Ok(commands)
 }

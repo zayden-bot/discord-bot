@@ -1,7 +1,7 @@
 use crate::{guilds::college_kings::SUGGESTION_CATEGORY_ID, utils::message_response};
 use serenity::all::{
     CommandInteraction, Context, CreateCommand, CreateEmbed, CreateMessage, GuildChannel,
-    ReactionType,
+    ReactionType, Ready,
 };
 use std::time;
 
@@ -78,7 +78,9 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("fetch_suggestions")
-        .description("Fetch suggestions from the suggestion channel")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("fetch_suggestions")
+        .description("Fetch suggestions from the suggestion channel");
+
+    Ok(command)
 }

@@ -1,12 +1,13 @@
 use serenity::all::{
     ButtonStyle, CommandInteraction, CommandOptionType, Context, CreateButton, CreateCommand,
-    CreateCommandOption, CreateEmbed, CreateMessage, Mentionable, ResolvedValue,
+    CreateCommandOption, CreateEmbed, CreateMessage, Mentionable, Ready, ResolvedValue,
 };
+use zayden_core::parse_options;
 
 use crate::guilds::college_kings_team::{
     STEVE_USER_ID, TEAM_LEADERS_ROLE_ID, TEAM_LEADS_CHANNEL_ID,
 };
-use crate::utils::{message_response, parse_options};
+use crate::utils::message_response;
 use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -29,14 +30,16 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("availability_check")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("availability_check")
         .description("Check availability for team leads")
         .add_option(CreateCommandOption::new(
             CommandOptionType::String,
             "title",
             "Title of the availability check",
-        ))
+        ));
+
+    Ok(command)
 }
 
 pub fn availability_check_message(title: impl Into<String>) -> CreateMessage {

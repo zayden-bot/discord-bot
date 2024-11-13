@@ -1,7 +1,7 @@
 use futures::{StreamExt, TryStreamExt};
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption, EditInteractionResponse,
+    CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption, EditInteractionResponse, Ready,
     ResolvedOption, ResolvedValue,
 };
 
@@ -56,12 +56,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("faq")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("faq")
         .description("Displays a FAQ message")
         .add_option(CreateCommandOption::new(
             CommandOptionType::Boolean,
             "ephemeral",
             "Whether the response should be ephemeral | Default: true",
-        ))
+        ));
+
+    Ok(command)
 }

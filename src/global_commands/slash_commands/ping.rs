@@ -1,6 +1,6 @@
 use crate::utils::message_response;
 use crate::Result;
-use serenity::all::{CommandInteraction, Context, CreateCommand};
+use serenity::all::{CommandInteraction, Context, CreateCommand, Ready};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     message_response(ctx, interaction, "Pong!").await?;
@@ -8,6 +8,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("ping").description("A ping command")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("ping").description("A ping command");
+
+    Ok(command)
 }

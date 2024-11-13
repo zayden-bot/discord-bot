@@ -3,18 +3,24 @@ pub mod college_kings_team;
 pub mod error;
 
 pub use error::ServersTableError;
-use serenity::all::{ChannelId, CreateCommand, GuildId, RoleId};
+use serenity::all::{ChannelId, Context, CreateCommand, GuildId, Ready, RoleId};
 use sqlx::PgPool;
 use std::collections::HashMap;
 
 use crate::{Error, Result};
 
-pub fn commands() -> HashMap<GuildId, Vec<CreateCommand>> {
+pub fn commands(ctx: &Context, ready: &Ready) -> Result<HashMap<GuildId, Vec<CreateCommand>>> {
     let mut commands = HashMap::new();
-    commands.insert(college_kings::GUILD_ID, college_kings::commands());
-    commands.insert(college_kings_team::GUILD_ID, college_kings_team::commands());
+    commands.insert(
+        college_kings::GUILD_ID,
+        college_kings::commands(ctx, ready)?,
+    );
+    commands.insert(
+        college_kings_team::GUILD_ID,
+        college_kings_team::commands(ctx, ready)?,
+    );
 
-    commands
+    Ok(commands)
 }
 
 pub struct ServersTable;

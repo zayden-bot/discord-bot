@@ -9,7 +9,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::all::{
     CommandInteraction, Context, CreateAttachment, CreateCommand, CreateEmbed, EditAttachments,
-    EditInteractionResponse, UserId,
+    EditInteractionResponse, Ready, UserId,
 };
 use serenity::prelude::TypeMapKey;
 
@@ -94,6 +94,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("goodnight").description("Have a CK girl wish you good night")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("goodnight").description("Have a CK girl wish you good night");
+
+    Ok(command)
 }

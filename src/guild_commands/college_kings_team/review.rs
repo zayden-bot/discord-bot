@@ -1,10 +1,11 @@
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, ResolvedValue,
+    CreateEmbed, CreateMessage, Ready, ResolvedValue,
 };
+use zayden_core::parse_options;
 
 use crate::guilds::college_kings_team::REVIEW_CHANNEL_ID;
-use crate::utils::{message_response, parse_options};
+use crate::utils::message_response;
 use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -39,8 +40,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("review")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("review")
         .description("Submit feedback for a team")
         .add_option(
             CreateCommandOption::new(CommandOptionType::String, "for", "The team to review")
@@ -60,5 +61,7 @@ pub fn register() -> CreateCommand {
             )
             .description("Feedback for the team")
             .required(true),
-        )
+        );
+
+    Ok(command)
 }

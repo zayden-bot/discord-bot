@@ -1,5 +1,5 @@
 use crate::utils::message_response;
-use serenity::all::{CommandInteraction, Context, CreateCommand};
+use serenity::all::{CommandInteraction, Context, CreateCommand, Ready};
 
 use crate::Result;
 
@@ -16,6 +16,9 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("get_discord_role").description("How do I get my Discord role")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command =
+        CreateCommand::new("get_discord_role").description("How do I get my Discord role");
+
+    Ok(command)
 }

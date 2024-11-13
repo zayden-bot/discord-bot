@@ -6,7 +6,7 @@ use rand::seq::{IteratorRandom, SliceRandom};
 use rand::thread_rng;
 use serenity::all::{
     CommandInteraction, Context, CreateAttachment, CreateCommand, CreateEmbed, EditAttachments,
-    EditInteractionResponse, Role,
+    EditInteractionResponse, Ready, Role,
 };
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
@@ -74,6 +74,9 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("image").description("Get a random image from the image cache")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command =
+        CreateCommand::new("image").description("Get a random image from the image cache");
+
+    Ok(command)
 }

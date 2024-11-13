@@ -1,11 +1,13 @@
-use crate::sqlx_lib::get_pool;
-use crate::sqlx_lib::user_levels::get_user_level_data;
-use crate::utils::{embed_response, parse_options};
-use crate::Result;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, ResolvedValue,
+    CreateEmbed, Ready, ResolvedValue,
 };
+use zayden_core::parse_options;
+
+use crate::sqlx_lib::user_levels::get_user_level_data;
+use crate::sqlx_lib::PostgresPool;
+use crate::utils::embed_response;
+use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
@@ -16,7 +18,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => interaction.defer(&ctx).await?,
     }
 
-    let pool = get_pool(ctx).await?;
+    let pool = PostgresPool::get(ctx).await;
 
     let level_data = get_user_level_data(&pool, interaction.user.id.get()).await?;
 
@@ -33,12 +35,14 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("xp")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("xp")
         .description("Get your current xp")
         .add_option(CreateCommandOption::new(
             CommandOptionType::Boolean,
             "ephemeral",
             "Whether the response should be ephemeral",
-        ))
+        ));
+
+    Ok(command)
 }

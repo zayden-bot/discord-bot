@@ -1,41 +1,27 @@
-use serenity::all::{Command, Context};
+use serenity::all::{Context, CreateCommand, Ready};
 
 use crate::Result;
 
-pub mod gold_star;
-pub mod infraction;
 pub mod levels;
-pub mod logs;
 pub mod member_count;
 pub mod ping;
 pub mod rank;
-pub mod reaction_role;
 pub mod rule;
 pub mod scam;
 pub mod server_info;
-pub mod stars;
 pub mod xp;
 
-pub async fn register(ctx: &Context) -> Result<()> {
-    Command::set_global_commands(
-        ctx,
-        vec![
-            gold_star::register(),
-            infraction::register(),
-            levels::register(),
-            logs::register(),
-            member_count::register(),
-            ping::register(),
-            rank::register(),
-            reaction_role::register(),
-            rule::register(),
-            scam::register(),
-            server_info::register(),
-            stars::register(),
-            xp::register(),
-        ],
-    )
-    .await?;
+pub fn register(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
+    let commands = vec![
+        levels::register(ctx, ready)?,
+        member_count::register(ctx, ready)?,
+        ping::register(ctx, ready)?,
+        rank::register(ctx, ready)?,
+        rule::register(ctx, ready)?,
+        scam::register(ctx, ready)?,
+        server_info::register(ctx, ready)?,
+        xp::register(ctx, ready)?,
+    ];
 
-    Ok(())
+    Ok(commands)
 }

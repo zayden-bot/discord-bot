@@ -1,6 +1,6 @@
 use crate::utils::embed_response;
 use crate::Result;
-use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed};
+use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed, Ready};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     embed_response(
@@ -16,6 +16,9 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("reputation").description("View the secrets behind the reputation value")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command = CreateCommand::new("reputation")
+        .description("View the secrets behind the reputation value");
+
+    Ok(command)
 }

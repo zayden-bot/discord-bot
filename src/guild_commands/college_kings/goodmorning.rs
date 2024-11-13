@@ -11,7 +11,7 @@ use rand::thread_rng;
 use serenity::{
     all::{
         CommandInteraction, Context, CreateAttachment, CreateCommand, CreateEmbed, EditAttachments,
-        EditInteractionResponse, UserId,
+        EditInteractionResponse, Ready, UserId,
     },
     prelude::TypeMapKey,
 };
@@ -98,6 +98,9 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     Ok(())
 }
 
-pub fn register() -> CreateCommand {
-    CreateCommand::new("goodmorning").description("Have a CK girl bless your morning")
+pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    let command =
+        CreateCommand::new("goodmorning").description("Have a CK girl bless your morning");
+
+    Ok(command)
 }
