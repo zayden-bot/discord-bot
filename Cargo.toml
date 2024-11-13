@@ -1,20 +1,48 @@
 [package]
-name = "zayden"
-version = "2.1.0"
+name = "zayden-bot"
+version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+bunny-cdn-wrapper = { git = "https://github.com/ViridianLink/bunny-cdn-wrapper" }
+zayden-core = { git = "https://github.com/zayden-bot/slash-command-core.git", branch = "master" }
+reaction-roles = { git = "https://github.com/zayden-bot/reaction-roles.git", branch = "main" }
+family = { git = "https://github.com/zayden-bot/family.git", branch = "master" }
+gold-star = { git = "https://github.com/zayden-bot/gold-star.git", branch = "main" }
+async-trait = { version = "*", default-features = false }
+charming = { version = "*", default-features = false, features = ["ssr"] }
 chrono = "*"
 cron = "*"
-dotenvy = "*"
-futures = "*"
+dotenvy = { version = "*", default-features = false }
+futures = { version = "*", default-features = false }
 lazy_static = "*"
+#piet = "0.6.2"
+#  Features:
+#  - bmp
+#  - dds
+#  - dxt
+#  - farbfeld
+#  - gif
+#  - hdr
+#  - ico
+#  - image
+#  - image_png
+#  - jpeg
+#  - jpeg_rayon
+#  - os_info
+#  - pico-args
+#  - png
+#  - pnm
+#  - samples
+#  - serde
+#  - tga
+#  - tiff
+#  - webp
 rand = "*"
 reqwest = { version = "*", features = ["json"] }
 serde = "*"
-sqlx = { version = "*", features = [
+serde_json = "*"
+sqlx = { version = "*", default-features = false, features = [
     "runtime-tokio",
     "tls-native-tls",
     "postgres",
@@ -22,9 +50,16 @@ sqlx = { version = "*", features = [
     "chrono",
     "uuid",
 ] }
-tokio = { version = "*", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "*", default-features = false, features = [
+    "macros",
+    "rt-multi-thread",
+] }
 url = "*"
 walkdir = "*"
+tracing = { version = "*", default-features = false }
+tracing-subscriber = { version = "*", default-features = false, features = [
+    "fmt",
+] }
 
 [dependencies.serenity]
 version = "*"
@@ -40,7 +75,8 @@ features = [
 ]
 
 [profile.release]
-lto = true
-codegen-units = 1
+opt-level = 3
 panic = "abort"
-strip = "symbols"
+strip = true
+codegen-units = 1
+lto = "fat"
