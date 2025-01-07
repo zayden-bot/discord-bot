@@ -1,9 +1,7 @@
 use std::env;
 
-use serenity::{
-    all::{GatewayIntents, UserId},
-    Client,
-};
+use serenity::all::{ClientBuilder, GatewayIntents, UserId};
+use serenity::prelude::TypeMap;
 
 pub use error::{Error, Result};
 use guild_commands::college_kings::{
@@ -13,7 +11,6 @@ use sqlx_lib::PostgresPool;
 
 use crate::image_cache::ImageCache;
 
-mod chatgpt_lib;
 pub mod components;
 pub mod cron;
 mod error;
@@ -36,24 +33,25 @@ pub const SUPER_USERS: [UserId; 2] = [
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::fmt::init();
-    dotenvy::dotenv()?;
+    dotenvy::dotenv().unwrap();
+
+    let pool = PostgresPool::init().await.unwrap();
+
+    let mut type_map = TypeMap::new();
+    type_map.insert::<ImageCache>(ImageCache::new());
+    type_map.insert::<GoodMorningLockedUsers>(Vec::new());
+    type_map.insert::<GoodNightLockedUsers>(Vec::new());
+    type_map.insert::<PostgresPool>(pool);
 
     let token = &env::var("DISCORD_TOKEN")?;
-    let pool = PostgresPool::init().await?;
 
-    let mut client = Client::builder(token, GatewayIntents::all())
+    let mut client = ClientBuilder::new(token, GatewayIntents::all())
+        .type_map(type_map)
         .raw_event_handler(handler::Handler)
-        .await?;
+        .await
+        .unwrap();
 
-    let mut data = client.data.write().await;
-    data.insert::<ImageCache>(ImageCache::new());
-    data.insert::<GoodMorningLockedUsers>(Vec::new());
-    data.insert::<GoodNightLockedUsers>(Vec::new());
-    data.insert::<PostgresPool>(pool);
-    drop(data);
-
-    client.start().await?;
+    client.start().await.unwrap();
 
     Ok(())
 }

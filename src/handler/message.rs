@@ -23,12 +23,7 @@ impl Handler {
             "!ping" => ping::run(ctx, msg).await?,
             "!rank" => rank::run(ctx, msg).await?,
             _ => {
-                tokio::join!(
-                    ai_chat::run(ctx, &msg),
-                    auto_support::run(ctx, &msg),
-                    levels::run(ctx, &msg),
-                )
-                .1?;
+                tokio::join!(levels::run(ctx, &msg),).0?;
             }
         }
 

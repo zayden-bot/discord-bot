@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, Permissions, Ready, ResolvedValue,
+    CreateEmbed, Permissions, Ready, ResolvedOption, ResolvedValue,
 };
 use zayden_core::{parse_options, SlashCommand};
 
@@ -15,7 +15,11 @@ pub struct Logs;
 
 #[async_trait]
 impl SlashCommand<Error> for Logs {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         let options = interaction.data.options();
         let options = parse_options(&options);
 

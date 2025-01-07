@@ -3,7 +3,8 @@ use std::cmp;
 use async_trait::async_trait;
 use chrono::{Months, TimeDelta, Utc};
 use serenity::all::{
-    CommandInteraction, CommandOptionType, CreateEmbed, Message, Ready, ResolvedValue, User, UserId,
+    CommandInteraction, CommandOptionType, CreateEmbed, Message, Ready, ResolvedOption,
+    ResolvedValue, User, UserId,
 };
 use serenity::builder::{CreateCommand, CreateCommandOption};
 use serenity::model::prelude::GuildId;
@@ -22,7 +23,11 @@ pub struct Infraction;
 
 #[async_trait]
 impl SlashCommand<Error> for Infraction {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
         let options = interaction.data.options();

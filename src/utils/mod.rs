@@ -6,8 +6,6 @@ use serenity::all::{
 };
 use serenity::Result;
 
-pub mod support;
-
 pub async fn dm_user_embed(
     ctx: &Context,
     user_id: impl Into<UserId>,

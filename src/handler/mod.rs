@@ -1,5 +1,3 @@
-use interaction_components::interaction_component;
-use interaction_create::interaction_command;
 use serenity::all::{Event, InteractionCreateEvent, RawEventHandler};
 use serenity::async_trait;
 use serenity::model::prelude::Interaction;
@@ -7,10 +5,9 @@ use serenity::prelude::Context;
 
 pub use ready::OnReady;
 
-use crate::{Result, SUPER_USERS};
+use crate::SUPER_USERS;
 
-mod interaction_components;
-mod interaction_create;
+mod interaction;
 mod message;
 mod reaction_add;
 mod reaction_remove;
@@ -18,19 +15,6 @@ mod ready;
 mod suggestions;
 
 pub struct Handler;
-
-impl Handler {
-    async fn interaction_create(&self, ctx: &Context, interaction: Interaction) -> Result<()> {
-        match &interaction {
-            Interaction::Command(command) => interaction_command(ctx, command).await?,
-            Interaction::Component(component) => interaction_component(ctx, component).await?,
-            Interaction::Modal(modal) => interaction_create::interaction_modal(ctx, modal).await?,
-            _ => unimplemented!("Interaction not implemented: {:?}", interaction.kind()),
-        };
-
-        Ok(())
-    }
-}
 
 #[async_trait]
 impl RawEventHandler for Handler {
@@ -47,7 +31,7 @@ impl RawEventHandler for Handler {
 
         let result = match ev {
             Event::InteractionCreate(interaction) => {
-                self.interaction_create(&ctx, interaction.interaction).await
+                Self::interaction_create(&ctx, interaction.interaction).await
             }
             Event::MessageCreate(msg) => Self::message(&ctx, msg.message).await,
             Event::ReactionAdd(reaction) => Self::reaction_add(&ctx, reaction.reaction).await,
@@ -61,9 +45,8 @@ impl RawEventHandler for Handler {
             eprintln!("\n{}\n{}\n", msg, ev_debug);
 
             for user in SUPER_USERS {
-                if let Ok(channel) = user.create_dm_channel(&ctx).await {
-                    let _ = channel.say(&ctx, &msg).await;
-                }
+                let channel = user.create_dm_channel(&ctx).await.unwrap();
+                channel.say(&ctx, &msg).await.unwrap();
             }
         }
     }

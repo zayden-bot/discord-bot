@@ -30,7 +30,8 @@ impl Handler {
                 ]
                 .concat(),
             );
-            guild.id.set_commands(ctx.http.clone(), commands)
+
+            guild.id.set_commands(ctx, commands)
         });
         future::try_join_all(futures).await?;
 

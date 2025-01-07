@@ -3,8 +3,8 @@ use futures::{StreamExt, TryStreamExt};
 use serenity::all::{Context, User, UserId};
 use sqlx::{Pool, Postgres};
 
-use crate::{Error, Result};
 use crate::sqlx_lib::PostgresPool;
+use crate::{Error, Result};
 
 pub struct Level {
     pub id: i64,
@@ -121,7 +121,7 @@ pub async fn get_users(ctx: &Context, page: i64, limit: i64) -> Result<Vec<UserL
             last_xp: level.last_xp,
         };
 
-        Ok::<UserLevel, Error>(userlevel)
+        Ok::<_, Error>(userlevel)
     })
     .try_collect()
     .await?;

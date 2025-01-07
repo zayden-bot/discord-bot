@@ -17,19 +17,15 @@ pub fn commands(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
     let commands = vec![
         add_artist::register(ctx, ready)?,
         availability_check::register(ctx, ready)?,
-        close::register(ctx, ready)?,
         faq::register(ctx, ready)?,
         fetch_suggestions::register(ctx, ready)?,
-        fixed::register(ctx, ready)?,
         get_discord_role::register(ctx, ready)?,
         goodmorning::register(ctx, ready)?,
         goodnight::register(ctx, ready)?,
         image::register(ctx, ready)?,
-        open::register(ctx, ready)?,
         reputation::register(ctx, ready)?,
         saves::register(ctx, ready)?,
         spoilers::register(ctx, ready)?,
-        support::register(ctx, ready)?,
     ];
 
     Ok(commands)

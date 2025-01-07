@@ -1,20 +1,14 @@
 use serenity::all::{
     ChannelId, Context, CreateEmbed, CreateInteractionResponse, CreateMessage, EditMessage,
-    EditThread, InputText, ModalInteraction,
+    EditThread, ModalInteraction,
 };
+use zayden_core::parse_modal_data;
 
 use crate::Result;
 
-use super::parse_modal_data;
-
 pub async fn run(ctx: &Context, modal: &ModalInteraction, accepted: bool) -> Result<()> {
-    let data = parse_modal_data(&modal.data.components);
-    let response = match data.get("response") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value,
-        _ => unreachable!("Response input is required"),
-    };
+    let mut data = parse_modal_data(&modal.data.components);
+    let response = data.remove("response").unwrap();
 
     let mut message = match &modal.message {
         Some(message) => message.clone(),

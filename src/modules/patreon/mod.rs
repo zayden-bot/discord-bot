@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use reqwest::Client;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateEmbedFooter, Ready, ResolvedValue,
+    CreateEmbed, CreateEmbedFooter, Ready, ResolvedOption, ResolvedValue,
 };
 use url::Url;
 use zayden_core::{parse_options, SlashCommand};
@@ -14,6 +14,7 @@ pub use patreon_user::PatreonUser;
 use crate::utils::{embed_response, message_response};
 use crate::{Error, Result, SERVER_URL};
 
+pub mod cache;
 mod patreon_user;
 
 const CLIENT_ID: &str = "co3TJ3lwqHN5WSVuIBiDNhfQv28V4FR-z6g-_fIogDzj_Um09DoWLGE5rvAJeTQd";
@@ -28,8 +29,11 @@ pub struct Patreon;
 
 #[async_trait]
 impl SlashCommand<Error> for Patreon {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-        let options = interaction.data.options();
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         let command = &options[0];
 
         match command.name {
@@ -97,9 +101,8 @@ async fn login(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer_ephemeral(ctx).await?;
 
     let patreon_url = Url::parse(&format!("https://www.patreon.com/oauth2/authorize?response_type=code&client_id={}&redirect_uri={}/api/v1/patreon/oauth/zayden&state={}", CLIENT_ID, SERVER_URL, interaction.user.id)).unwrap();
-    let url_as_str = patreon_url.as_str();
 
-    message_response(ctx, interaction, url_as_str).await?;
+    message_response(ctx, interaction, patreon_url.as_str()).await?;
 
     let client = Client::new();
 
@@ -117,7 +120,7 @@ async fn login(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
             message_response(
                 ctx,
                 interaction,
-                format!("{url_as_str}\n\nStatus: User not currently in cache."),
+                format!("{patreon_url}\n\nStatus: User not currently in cache."),
             )
             .await?;
         }

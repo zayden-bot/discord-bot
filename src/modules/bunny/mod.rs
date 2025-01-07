@@ -6,7 +6,7 @@ use crate::Result;
 pub async fn latest_download_link(app_name: &str, platform: &str) -> Result<String> {
     let bunny_storage = BunnyStorage::new(
         "collegekingsstorage",
-        env::var("BUNNY_READ_ONLY_KEY")?,
+        &env::var("BUNNY_READ_ONLY_KEY")?,
         "de",
     )?;
     let files = bunny_storage

@@ -1,15 +1,11 @@
 pub mod add_artist;
 pub mod availability_check;
-pub mod close;
 pub mod faq;
 pub mod fetch_suggestions;
-pub mod fixed;
 pub mod get_discord_role;
 pub mod goodmorning;
 pub mod goodnight;
 pub mod image;
-pub mod open;
 pub mod reputation;
 pub mod saves;
 pub mod spoilers;
-pub mod support;

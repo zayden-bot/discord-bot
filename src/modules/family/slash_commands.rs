@@ -10,7 +10,7 @@ use family::commands::{
 };
 use serenity::all::{
     ButtonStyle, CommandInteraction, Context, CreateAttachment, CreateButton, CreateCommand,
-    CreateEmbed, EditInteractionResponse, Mentionable, Ready,
+    CreateEmbed, EditInteractionResponse, Mentionable, Ready, ResolvedOption,
 };
 use sqlx::Postgres;
 use zayden_core::SlashCommand;
@@ -23,7 +23,11 @@ pub struct AdoptCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for AdoptCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;
@@ -64,7 +68,11 @@ pub struct BlockCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for BlockCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer_ephemeral(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;
@@ -87,7 +95,11 @@ pub struct UnblockCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for UnblockCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer_ephemeral(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;
@@ -113,7 +125,11 @@ pub struct ChildrenCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for ChildrenCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;
@@ -163,7 +179,11 @@ pub struct MarryCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for MarryCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;
@@ -204,7 +224,11 @@ pub struct ParentsCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for ParentsCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;
@@ -254,7 +278,11 @@ pub struct PartnersCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for PartnersCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;
@@ -304,7 +332,11 @@ pub struct RelationshipCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for RelationshipCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;
@@ -342,7 +374,11 @@ pub struct SiblingsCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for SiblingsCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;
@@ -407,7 +443,11 @@ fn render_graph(data: GraphData) -> Result<Vec<u8>> {
 
 #[async_trait]
 impl SlashCommand<Error> for TreeCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer(ctx).await?;
 
         let pool = PostgresPool::get(ctx).await;

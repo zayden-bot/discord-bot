@@ -6,7 +6,6 @@ pub mod levels;
 pub mod member_count;
 pub mod ping;
 pub mod rank;
-pub mod rule;
 pub mod scam;
 pub mod server_info;
 pub mod xp;
@@ -17,7 +16,6 @@ pub fn register(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
         member_count::register(ctx, ready)?,
         ping::register(ctx, ready)?,
         rank::register(ctx, ready)?,
-        rule::register(ctx, ready)?,
         scam::register(ctx, ready)?,
         server_info::register(ctx, ready)?,
         xp::register(ctx, ready)?,

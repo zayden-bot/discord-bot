@@ -3,13 +3,12 @@ use lazy_static::lazy_static;
 use serenity::all::{
     ActionRowComponent, AutoArchiveDuration, ButtonKind, ChannelType, Context, CreateButton,
     CreateEmbed, CreateEmbedAuthor, CreateInteractionResponse, CreateMessage, CreateThread,
-    InputText, Mentionable, ModalInteraction, RoleId,
+    Mentionable, ModalInteraction, RoleId,
 };
 use std::collections::HashMap;
+use zayden_core::parse_modal_data;
 
 use crate::{Error, Result};
-
-use super::parse_modal_data;
 
 lazy_static! {
     static ref ROLE_MAP: HashMap<&'static str, RoleId> = {
@@ -23,41 +22,12 @@ lazy_static! {
 }
 
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
-    let data = parse_modal_data(&modal.data.components);
-    let app_name = match data.get("app_name") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value,
-        _ => unreachable!("App Name input is required"),
-    };
-
-    let episode = match data.get("episode") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value,
-        _ => unreachable!("Version input is required"),
-    };
-
-    let scene = match data.get("scene") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value,
-        _ => unreachable!("Scene input is required"),
-    };
-
-    let request = match data.get("request") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value,
-        _ => unreachable!("Request input is required"),
-    };
-
-    let affected_teams = match data.get("teams") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value,
-        _ => "",
-    };
+    let mut data = parse_modal_data(&modal.data.components);
+    let app_name = data.remove("app_name").unwrap();
+    let episode = data.remove("episode").unwrap();
+    let scene = data.remove("scene").unwrap();
+    let request = data.remove("request").unwrap();
+    let affected_teams = data.remove("teams").unwrap();
 
     let teams: Vec<String> = affected_teams
         .split(", ")

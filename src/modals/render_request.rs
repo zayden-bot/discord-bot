@@ -1,9 +1,10 @@
 use reqwest::Client;
 use serenity::all::{
     ButtonStyle, Context, CreateButton, CreateChannel, CreateEmbed, CreateInteractionResponse,
-    CreateInteractionResponseMessage, CreateMessage, InputText, Mentionable, ModalInteraction,
+    CreateInteractionResponseMessage, CreateMessage, Mentionable, ModalInteraction,
     PermissionOverwrite, PermissionOverwriteType, Permissions,
 };
+use zayden_core::parse_modal_data;
 
 use crate::modules::patreon::PatreonUser;
 use crate::{
@@ -11,48 +12,24 @@ use crate::{
     Error, Result,
 };
 
-use super::parse_modal_data;
-
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let guild_id = modal.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
     let client = Client::new();
 
-    let data = parse_modal_data(&modal.data.components);
-    let user = match data.get("email") {
-        Some(InputText {
-            value: Some(email), ..
-        }) => PatreonUser::get(&client, email, false).await?,
+    let mut data = parse_modal_data(&modal.data.components);
+
+    let user = match data.remove("email") {
+        Some(email) => PatreonUser::get(&client, email, false).await?,
         _ => PatreonUser::get(&client, modal.user.id, false).await?,
     };
 
-    let character = match data.get("character") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value.as_str(),
-        _ => unreachable!("Character input is required"),
-    };
-
-    let prop = match data.get("prop") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value.as_str(),
-        _ => "No prop specified.",
-    };
-
-    let location = match data.get("location") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value,
-        _ => "No location specified.",
-    };
-
-    let description = match data.get("description") {
-        Some(InputText {
-            value: Some(value), ..
-        }) => value,
-        _ => "No description specified.",
-    };
+    let character = data.remove("character").unwrap();
+    let prop = data.remove("prop").unwrap_or("No prop specified.");
+    let location = data.remove("location").unwrap_or("No location specified.");
+    let description = data
+        .remove("description")
+        .unwrap_or("No description specified.");
 
     if user.tier < 50 {
         modal

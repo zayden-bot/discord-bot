@@ -29,6 +29,7 @@ pub enum Error {
     Family(family::Error),
     GoldStar(gold_star::Error),
     ReactionRole(reaction_roles::Error),
+    Ticket(ticket::Error),
 
     Dotenvy(dotenvy::Error),
     Serenity(serenity::Error),
@@ -41,7 +42,7 @@ pub enum Error {
     ReactionConversionError(serenity::all::ReactionConversionError),
     JoinError(tokio::task::JoinError),
     Bunny(bunny_cdn_wrapper::Error),
-    Charming(charming::EchartsError),
+    // Charming(charming::EchartsError),
     Io(std::io::Error),
     TryFromInt(std::num::TryFromIntError),
 }
@@ -54,6 +55,7 @@ impl ErrorResponse for Error {
             Error::Family(e) => e.to_response(),
             Error::GoldStar(e) => e.to_response(),
             Error::ReactionRole(e) => e.to_response(),
+            Error::Ticket(e) => e.to_response(),
             _ => String::new(),
         }
     }
@@ -73,12 +75,6 @@ impl From<crate::guilds::ServersTableError> for Error {
     }
 }
 
-impl From<reaction_roles::Error> for Error {
-    fn from(e: reaction_roles::Error) -> Self {
-        Error::ReactionRole(e)
-    }
-}
-
 impl From<family::Error> for Error {
     fn from(e: family::Error) -> Self {
         Error::Family(e)
@@ -88,6 +84,18 @@ impl From<family::Error> for Error {
 impl From<gold_star::Error> for Error {
     fn from(e: gold_star::Error) -> Self {
         Error::GoldStar(e)
+    }
+}
+
+impl From<reaction_roles::Error> for Error {
+    fn from(e: reaction_roles::Error) -> Self {
+        Error::ReactionRole(e)
+    }
+}
+
+impl From<ticket::Error> for Error {
+    fn from(e: ticket::Error) -> Self {
+        Error::Ticket(e)
     }
 }
 
@@ -157,11 +165,11 @@ impl From<bunny_cdn_wrapper::Error> for Error {
     }
 }
 
-impl From<charming::EchartsError> for Error {
-    fn from(e: charming::EchartsError) -> Self {
-        Error::Charming(e)
-    }
-}
+// impl From<charming::EchartsError> for Error {
+//     fn from(e: charming::EchartsError) -> Self {
+//         Error::Charming(e)
+//     }
+// }
 
 impl From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {

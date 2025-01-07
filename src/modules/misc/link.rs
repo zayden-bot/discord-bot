@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use reqwest::Client;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    Permissions, Ready, ResolvedValue,
+    Permissions, Ready, ResolvedOption, ResolvedValue,
 };
 use zayden_core::{parse_options, SlashCommand};
 
@@ -17,7 +17,11 @@ pub struct Link;
 
 #[async_trait]
 impl SlashCommand<Error> for Link {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         let command = &interaction.data.options()[0];
 
         download(ctx, interaction, &command.value).await?;

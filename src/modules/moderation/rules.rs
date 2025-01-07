@@ -4,6 +4,7 @@ use std::str::FromStr;
 use async_trait::async_trait;
 use serenity::all::{
     ChannelId, Colour, CommandInteraction, CreateEmbed, EditMessage, MessageId, Ready,
+    ResolvedOption,
 };
 use serenity::builder::CreateCommand;
 use serenity::model::Permissions;
@@ -20,7 +21,11 @@ pub struct RulesCommand;
 
 #[async_trait]
 impl SlashCommand<Error> for RulesCommand {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer_ephemeral(ctx).await?;
 
         let rules_path = PathBuf::from_str("messages").unwrap().join("rules.md");

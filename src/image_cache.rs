@@ -1,4 +1,3 @@
-use chrono::{Local, NaiveDateTime};
 use serenity::prelude::TypeMapKey;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -33,7 +32,6 @@ fn create_character_map(images: Vec<PathBuf>) -> HashMap<Box<str>, Vec<PathBuf>>
 
 #[derive(Debug, Clone)]
 pub struct ImageCache {
-    pub last_update: NaiveDateTime,
     pub good_morning_images: Vec<PathBuf>,
     pub good_night_images: Vec<PathBuf>,
     pub character_map: HashMap<Box<str>, Vec<PathBuf>>,
@@ -44,7 +42,6 @@ impl ImageCache {
         let images = get_images();
 
         Self {
-            last_update: Local::now().naive_utc(),
             good_morning_images: images
                 .iter()
                 .filter(|p| p.iter().nth(1).and_then(|s| s.to_str()) == Some("good_morning"))

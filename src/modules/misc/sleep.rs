@@ -5,7 +5,8 @@ use futures::{StreamExt, TryStreamExt};
 use serenity::all::{
     ButtonStyle, CommandInteraction, CommandOptionType, Context, CreateButton, CreateCommand,
     CreateCommandOption, CreateEmbed, CreateInteractionResponse, EditInteractionResponse, GuildId,
-    Member, PermissionOverwrite, PermissionOverwriteType, Permissions, Ready, ResolvedValue,
+    Member, PermissionOverwrite, PermissionOverwriteType, Permissions, Ready, ResolvedOption,
+    ResolvedValue,
 };
 use sqlx::PgPool;
 use zayden_core::SlashCommand;
@@ -20,7 +21,11 @@ pub struct Sleep;
 
 #[async_trait]
 impl SlashCommand<Error> for Sleep {
-    async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+    ) -> Result<()> {
         interaction.defer_ephemeral(ctx).await?;
 
         let hours: u64 = match &interaction.data.options()[0].value {
