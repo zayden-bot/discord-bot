@@ -1,26 +1,24 @@
 use serenity::all::{
     ComponentInteraction, Context, CreateInteractionResponseFollowup, Mentionable,
 };
-use sqlx::{Pool, Postgres};
-use ticket::TicketComponent;
+use sqlx::PgPool;
 use zayden_core::ErrorResponse;
 
 use crate::handler::Handler;
+use crate::modules::ticket::components::{support_close, support_faq, support_ticket};
 // use crate::modules::family::components::{AdoptComponent, MarryComponent};
-use crate::sqlx_lib::{GuildTable, PostgresPool};
-use crate::{components, Error, Result, SUPER_USERS};
+use crate::{components, Result, SUPER_USERS};
 
 impl Handler {
     pub async fn interaction_component(
         ctx: &Context,
         component: &ComponentInteraction,
+        pool: &PgPool,
     ) -> Result<()> {
         println!(
             "{} ran component: {}",
             component.user.name, component.data.custom_id
         );
-
-        let pool: Pool<Postgres> = PostgresPool::get(ctx).await;
 
         let result = match component.data.custom_id.as_str() {
             "cron_available" => components::availability_check(ctx, component, true).await,
@@ -50,17 +48,9 @@ impl Handler {
             //endregion: Misc
 
             //region: Ticket
-            "support_close" => TicketComponent::support_close(ctx, component)
-                .await
-                .map_err(Error::from),
-            "support_faq" => {
-                TicketComponent::support_faq::<Postgres, GuildTable>(ctx, component, &pool)
-                    .await
-                    .map_err(Error::from)
-            }
-            "support_ticket" => TicketComponent::support_ticket(ctx, component)
-                .await
-                .map_err(Error::from),
+            "support_close" => support_close(ctx, component).await,
+            "support_faq" => support_faq(ctx, component, pool).await,
+            "support_ticket" => support_ticket(ctx, component).await,
             //endregion: Ticket
             _ => unimplemented!("Component not implemented: {}", component.data.custom_id),
         };

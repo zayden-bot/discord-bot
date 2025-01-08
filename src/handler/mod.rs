@@ -5,6 +5,7 @@ use serenity::prelude::Context;
 
 pub use ready::OnReady;
 
+use crate::sqlx_lib::PostgresPool;
 use crate::SUPER_USERS;
 
 mod interaction;
@@ -29,11 +30,13 @@ impl RawEventHandler for Handler {
         };
         let ev_debug = format!("{:?}", ev);
 
+        let pool = PostgresPool::get(&ctx).await;
+
         let result = match ev {
             Event::InteractionCreate(interaction) => {
-                Self::interaction_create(&ctx, interaction.interaction).await
+                Self::interaction_create(&ctx, interaction.interaction, &pool).await
             }
-            Event::MessageCreate(msg) => Self::message(&ctx, msg.message).await,
+            Event::MessageCreate(msg) => Self::message(&ctx, msg.message, &pool).await,
             Event::ReactionAdd(reaction) => Self::reaction_add(&ctx, reaction.reaction).await,
             Event::ReactionRemove(reaction) => Self::reaction_remove(&ctx, reaction.reaction).await,
             Event::Ready(ready) => Self::ready(&ctx, ready.ready).await,

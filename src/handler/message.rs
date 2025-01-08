@@ -1,12 +1,14 @@
 use serenity::all::{Channel, Context, Message};
+use sqlx::PgPool;
 
 use crate::global_commands::message_commands::*;
 use crate::global_commands::prefix_commands::*;
 use crate::handler::Handler;
+use crate::modules::ticket::message_commands::support;
 use crate::Result;
 
 impl Handler {
-    pub async fn message(ctx: &Context, msg: Message) -> Result<()> {
+    pub async fn message(ctx: &Context, msg: Message, pool: &PgPool) -> Result<()> {
         if msg.author.bot {
             return Ok(());
         }
@@ -23,7 +25,7 @@ impl Handler {
             "!ping" => ping::run(ctx, msg).await?,
             "!rank" => rank::run(ctx, msg).await?,
             _ => {
-                tokio::join!(levels::run(ctx, &msg),).0?;
+                tokio::try_join!(levels::run(ctx, &msg), support(ctx, &msg, pool))?;
             }
         }
 

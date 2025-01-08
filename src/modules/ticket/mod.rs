@@ -5,6 +5,8 @@ use ticket::{support_guild_manager::TicketGuildRow, TicketGuildManager};
 
 use crate::sqlx_lib::GuildTable;
 
+pub mod components;
+pub mod message_commands;
 pub mod slash_commands;
 
 #[async_trait]
