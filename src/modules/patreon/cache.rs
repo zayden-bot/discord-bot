@@ -8,6 +8,7 @@ use patreon_api::patreon_client::{PatreonClient, PatreonClientBuilder};
 use patreon_api::types::includes::MemberInclude;
 use patreon_api::types::response::{Cursors, MemberIncluded, Meta, Pagination};
 use serenity::all::Context;
+use sqlx::Transaction;
 
 use crate::cron::CronJob;
 use crate::sqlx_lib::PostgresPool;
@@ -33,14 +34,16 @@ impl CronJob for PatreonCache {
 
         let pool = PostgresPool::get(ctx).await;
 
-        let transaction = pool.begin().await.unwrap();
+        let mut transaction = pool.begin().await.unwrap();
 
         update_cache(
             &client,
-            transaction,
+            &mut transaction,
             Some(PaginationOptions::new().count(1000)),
         )
         .await;
+
+        transaction.commit().await.unwrap();
 
         Ok(())
     }
@@ -48,7 +51,7 @@ impl CronJob for PatreonCache {
 
 async fn update_cache(
     client: &PatreonClient,
-    mut transaction: sqlx::Transaction<'_, sqlx::Postgres>,
+    transaction: &mut Transaction<'_, sqlx::Postgres>,
     mut pagination: Option<PaginationOptions>,
 ) {
     let response = client
@@ -88,7 +91,7 @@ async fn update_cache(
             id,
             discord_id
         )
-        .execute(&mut *transaction)
+        .execute(&mut **transaction)
         .await
         .unwrap();
     }
