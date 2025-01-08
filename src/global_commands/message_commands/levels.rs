@@ -3,7 +3,9 @@ use std::collections::HashMap;
 use chrono::{TimeDelta, Utc};
 use lazy_static::lazy_static;
 use rand::Rng;
-use serenity::all::{ChannelId, Context, Message, RoleId};
+use serenity::all::{
+    ChannelId, Context, DiscordJsonError, ErrorResponse, HttpError, Message, RoleId,
+};
 
 use crate::sqlx_lib::user_levels::{get_user_level_data, update_user_level_data};
 use crate::sqlx_lib::PostgresPool;
@@ -34,7 +36,9 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     }
 
     let pool = PostgresPool::get(ctx).await;
-    let level_data = get_user_level_data(&pool, msg.author.id.get()).await?;
+    let level_data = get_user_level_data(&pool, msg.author.id.get())
+        .await
+        .unwrap();
 
     if level_data.last_xp
         >= (Utc::now().naive_utc() - TimeDelta::try_minutes(1).ok_or_else(|| Error::TimeDelta)?)
@@ -56,14 +60,16 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
 
     let xp = total_xp - current_total_xp;
 
-    update_user_level_data(&pool, level_data.id, xp, total_xp, level).await?;
+    update_user_level_data(&pool, level_data.id, xp, total_xp, level)
+        .await
+        .unwrap();
     update_member_roles(msg, ctx, level).await?;
 
     Ok(())
 }
 
 async fn update_member_roles(msg: &Message, ctx: &Context, level: i32) -> Result<()> {
-    let member = msg.member(&ctx).await?;
+    let member = msg.member(&ctx).await.unwrap();
 
     let highest_qualifying_role_id = LEVEL_ROLES
         .iter()
@@ -76,7 +82,13 @@ async fn update_member_roles(msg: &Message, ctx: &Context, level: i32) -> Result
         None => return Ok(()),
     };
 
-    member.add_role(&ctx, highest_role_id).await?;
+    if let Err(serenity::Error::Http(HttpError::UnsuccessfulRequest(ErrorResponse {
+        error: DiscordJsonError { code: 10011, .. },
+        ..
+    }))) = member.add_role(&ctx, highest_role_id).await
+    {
+        return Ok(());
+    }
 
     let roles_to_remove: Vec<&RoleId> = member
         .roles
@@ -87,7 +99,7 @@ async fn update_member_roles(msg: &Message, ctx: &Context, level: i32) -> Result
         .collect();
 
     for role in roles_to_remove {
-        member.remove_role(&ctx, *role).await?
+        member.remove_role(&ctx, *role).await.unwrap()
     }
 
     Ok(())
