@@ -104,16 +104,19 @@ impl OnReady for Sleep {
         let pool = PostgresPool::get(&ctx).await;
 
         for guild in ready.guilds {
-            foo(&ctx, &pool, guild.id).await?;
+            reset_sleep(&ctx, &pool, guild.id).await?;
         }
 
         Ok(())
     }
 }
 
-async fn foo(ctx: &Context, pool: &PgPool, guild_id: GuildId) -> Result<()> {
+async fn reset_sleep(ctx: &Context, pool: &PgPool, guild_id: GuildId) -> Result<()> {
     let sleep_role_id = match ServersTable::get_row(pool, guild_id).await.unwrap() {
-        Some(row) => row.sleep_role_id().unwrap(),
+        Some(row) => match row.sleep_role_id() {
+            Some(id) => id,
+            None => return Ok(()),
+        },
         None => return Ok(()),
     };
 
