@@ -1,13 +1,11 @@
 pub mod college_kings;
 pub mod college_kings_team;
-pub mod error;
 
-pub use error::ServersTableError;
 use serenity::all::{ChannelId, Context, CreateCommand, GuildId, Ready, RoleId};
 use sqlx::PgPool;
 use std::collections::HashMap;
 
-use crate::{Error, Result};
+use crate::Result;
 
 pub fn commands(ctx: &Context, ready: &Ready) -> Result<HashMap<GuildId, Vec<CreateCommand>>> {
     let mut commands = HashMap::new();
@@ -26,12 +24,13 @@ pub fn commands(ctx: &Context, ready: &Ready) -> Result<HashMap<GuildId, Vec<Cre
 pub struct ServersTable;
 
 impl ServersTable {
-    pub async fn get_row(pool: &PgPool, guild_id: impl TryInto<i64>) -> Result<Option<ServerRow>> {
-        let guild_id: i64 = guild_id.try_into().map_err(|_| Error::ConversionError)?;
+    pub async fn get_row(pool: &PgPool, id: GuildId) -> Result<Option<ServerRow>> {
+        let guild_id: i64 = id.get() as i64;
 
         let result = sqlx::query_as!(ServerRow, "SELECT * FROM servers WHERE id = $1", guild_id)
             .fetch_optional(pool)
-            .await?;
+            .await
+            .unwrap();
 
         Ok(result)
     }
@@ -42,7 +41,8 @@ impl ServersTable {
         )
         .map(|r| r.support_channel_id)
         .fetch_all(pool)
-        .await?;
+        .await
+        .unwrap();
 
         let channel_ids = result
             .into_iter()
@@ -68,65 +68,44 @@ pub struct ServerRow {
 
 impl ServerRow {
     pub fn get_rules_channel_id(&self) -> Result<ChannelId> {
-        let id: u64 = self
-            .rules_channel_id
-            .ok_or(ServersTableError::RulesChannelNotFound)?
-            .try_into()?;
+        let id = self.rules_channel_id.unwrap();
 
-        Ok(ChannelId::new(id))
+        Ok(ChannelId::new(id as u64))
     }
 
     pub fn get_general_channel_id(&self) -> Result<ChannelId> {
-        let id: u64 = self
-            .general_channel_id
-            .ok_or(ServersTableError::GeneralChannelNotFound)?
-            .try_into()?;
+        let id = self.general_channel_id.unwrap();
 
-        Ok(ChannelId::new(id))
+        Ok(ChannelId::new(id as u64))
     }
 
     pub fn get_spoiler_channel_id(&self) -> Result<ChannelId> {
-        let id: u64 = self
-            .spoiler_channel_id
-            .ok_or(ServersTableError::SpoilerChannelNotFound)?
-            .try_into()?;
+        let id = self.spoiler_channel_id.unwrap();
 
-        Ok(ChannelId::new(id))
+        Ok(ChannelId::new(id as u64))
     }
 
     pub fn get_support_channel_id(&self) -> Result<ChannelId> {
-        let id: u64 = self
-            .support_channel_id
-            .ok_or(ServersTableError::SupportChannelNotFound)?
-            .try_into()?;
+        let id = self.support_channel_id.unwrap();
 
-        Ok(ChannelId::new(id))
+        Ok(ChannelId::new(id as u64))
     }
 
     pub fn get_suggestion_channel_id(&self) -> Result<ChannelId> {
-        let id: u64 = self
-            .suggestions_channel_id
-            .ok_or(ServersTableError::SuggestionsChannelNotFound)?
-            .try_into()?;
+        let id = self.suggestions_channel_id.unwrap();
 
-        Ok(ChannelId::new(id))
+        Ok(ChannelId::new(id as u64))
     }
 
     pub fn get_artist_role_id(&self) -> Result<RoleId> {
-        let id: u64 = self
-            .artist_role_id
-            .ok_or(ServersTableError::ArtistRoleNotFound)?
-            .try_into()?;
+        let id = self.artist_role_id.unwrap();
 
-        Ok(RoleId::new(id))
+        Ok(RoleId::new(id as u64))
     }
 
     pub fn get_sleep_role_id(&self) -> Result<RoleId> {
-        let id: u64 = self
-            .sleep_role_id
-            .ok_or(ServersTableError::SleepRoleNotFound)?
-            .try_into()?;
+        let id = self.sleep_role_id.unwrap();
 
-        Ok(RoleId::new(id))
+        Ok(RoleId::new(id as u64))
     }
 }

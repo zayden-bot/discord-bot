@@ -24,16 +24,25 @@ pub async fn send_or_update_message(
     channel_id: ChannelId,
     embed: CreateEmbed,
 ) -> Result<()> {
-    let message = channel_id.messages_iter(ctx).boxed().try_next().await?;
+    let message = channel_id
+        .messages_iter(ctx)
+        .boxed()
+        .try_next()
+        .await
+        .unwrap();
 
     match message {
         Some(mut message) => {
-            message.edit(&ctx, EditMessage::new().embed(embed)).await?;
+            message
+                .edit(&ctx, EditMessage::new().embed(embed))
+                .await
+                .unwrap();
         }
         None => {
             channel_id
                 .send_message(ctx, CreateMessage::new().embed(embed))
-                .await?;
+                .await
+                .unwrap();
         }
     }
 

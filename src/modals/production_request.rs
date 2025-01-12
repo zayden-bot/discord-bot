@@ -8,7 +8,7 @@ use serenity::all::{
 use std::collections::HashMap;
 use zayden_core::parse_modal_data;
 
-use crate::{Error, Result};
+use crate::Result;
 
 lazy_static! {
     static ref ROLE_MAP: HashMap<&'static str, RoleId> = {
@@ -51,7 +51,8 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
                 teams.join(" "),
             )),
         )
-        .await?;
+        .await
+        .unwrap();
 
     let embed = CreateEmbed::default()
         .title(format!("{} - {} - {}", app_name, episode, scene))
@@ -59,14 +60,8 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         .field("Affected Teams", teams.join(" "), true)
         .author(CreateEmbedAuthor::new(&modal.user.name));
 
-    let channels = modal
-        .guild_id
-        .ok_or_else(|| Error::NotInGuild)?
-        .channels(ctx)
-        .await?;
-    let channel = channels
-        .get(&modal.channel_id)
-        .ok_or_else(|| Error::NoChannel)?;
+    let channels = modal.guild_id.unwrap().channels(ctx).await.unwrap();
+    let channel = channels.get(&modal.channel_id).unwrap();
 
     let thread = channel
         .create_thread_from_message(
@@ -77,17 +72,20 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
                 .invitable(true)
                 .kind(ChannelType::PublicThread),
         )
-        .await?;
+        .await
+        .unwrap();
 
     thread
         .send_message(ctx, CreateMessage::default().embed(embed))
-        .await?;
+        .await
+        .unwrap();
 
     modal
         .create_response(ctx, CreateInteractionResponse::Acknowledge)
-        .await?;
+        .await
+        .unwrap();
 
-    resend_button_message(ctx, modal).await?;
+    resend_button_message(ctx, modal).await.unwrap();
 
     Ok(())
 }
@@ -95,7 +93,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
 async fn resend_button_message(ctx: &Context, interaction: &ModalInteraction) -> Result<()> {
     let mut messages = interaction.channel_id.messages_iter(ctx).boxed();
 
-    while let Some(message) = messages.try_next().await? {
+    while let Some(message) = messages.try_next().await.unwrap() {
         if let Some(ActionRowComponent::Button(b)) = message
             .components
             .first()
@@ -103,7 +101,7 @@ async fn resend_button_message(ctx: &Context, interaction: &ModalInteraction) ->
         {
             if let ButtonKind::NonLink { custom_id, .. } = &b.data {
                 if custom_id == "production_request" {
-                    message.delete(ctx).await?;
+                    message.delete(ctx).await.unwrap();
                     break;
                 }
             }
@@ -117,7 +115,8 @@ async fn resend_button_message(ctx: &Context, interaction: &ModalInteraction) ->
             CreateMessage::default()
                 .button(CreateButton::new("production_request").label("Production Request")),
         )
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

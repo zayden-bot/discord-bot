@@ -36,9 +36,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     }
 
     let pool = PostgresPool::get(ctx).await;
-    let level_data = get_user_level_data(&pool, msg.author.id.get())
-        .await
-        .unwrap();
+    let level_data = get_user_level_data(&pool, msg.author.id).await.unwrap();
 
     if level_data.last_xp
         >= (Utc::now().naive_utc() - TimeDelta::try_minutes(1).ok_or_else(|| Error::TimeDelta)?)
@@ -60,7 +58,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
 
     let xp = total_xp - current_total_xp;
 
-    update_user_level_data(&pool, level_data.id, xp, total_xp, level)
+    update_user_level_data(&pool, (level_data.id as u64).into(), xp, total_xp, level)
         .await
         .unwrap();
     update_member_roles(msg, ctx, level).await?;

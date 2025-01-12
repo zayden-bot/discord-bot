@@ -8,7 +8,7 @@ use serenity::all::{
 use crate::{guilds::college_kings::FAQ_CHANNEL_ID, Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer_ephemeral(ctx).await?;
+    interaction.defer_ephemeral(ctx).await.unwrap();
 
     let options = interaction.data.options();
 
@@ -24,7 +24,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .messages_iter(ctx)
         .enumerate()
         .then(|(index, msg_result)| async move {
-            let msg = msg_result?;
+            let msg = msg_result.unwrap();
             let id = msg
                 .content
                 .lines()
@@ -51,7 +51,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 },
             )),
         )
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

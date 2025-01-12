@@ -13,7 +13,7 @@ impl Handler {
             return Ok(());
         }
 
-        if let Channel::Private(c) = msg.channel(ctx).await? {
+        if let Channel::Private(c) = msg.channel(ctx).await.unwrap() {
             println!("{:?}", msg);
             println!();
             println!("{:?}", c)

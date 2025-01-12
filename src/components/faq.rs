@@ -16,10 +16,11 @@ pub async fn faq(ctx: &Context, interaction: &ComponentInteraction, ephemeral: b
 
     let message = FAQ_CHANNEL_ID
         .messages_iter(ctx)
-        .skip(index.parse::<usize>()?)
+        .skip(index.parse::<usize>().unwrap())
         .boxed()
         .try_next()
-        .await?
+        .await
+        .unwrap()
         .ok_or_else(|| Error::FaqMessageNotFound(index.to_string()))?;
 
     let mut parts: Vec<&str> = message.content.split("**").collect();
@@ -41,7 +42,8 @@ pub async fn faq(ctx: &Context, interaction: &ComponentInteraction, ephemeral: b
                     ),
             ),
         )
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

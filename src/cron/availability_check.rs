@@ -26,7 +26,8 @@ impl CronJob for AvailabilityCheck {
                 ctx,
                 availability_check_message("Are you available for tomorrow's meeting?"),
             )
-            .await?;
+            .await
+            .unwrap();
 
         Ok(())
     }

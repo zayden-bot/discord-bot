@@ -34,7 +34,8 @@ pub async fn production_request(ctx: &Context, interaction: &ComponentInteractio
 
     interaction
         .create_response(&ctx, CreateInteractionResponse::Modal(modal))
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

@@ -21,7 +21,7 @@ impl SlashCommand<Error> for GiveStarCommand {
         interaction: &CommandInteraction,
         _options: Vec<ResolvedOption<'_>>,
     ) -> Result<()> {
-        interaction.defer(ctx).await?;
+        interaction.defer(ctx).await.unwrap();
 
         let pool = PostgresPool::get(ctx).await;
 
@@ -47,7 +47,8 @@ impl SlashCommand<Error> for GiveStarCommand {
                         .description(description),
                 ),
             )
-            .await?;
+            .await
+            .unwrap();
 
         Ok(())
     }
@@ -66,7 +67,7 @@ impl SlashCommand<Error> for StarsCommand {
         interaction: &CommandInteraction,
         _options: Vec<ResolvedOption<'_>>,
     ) -> Result<()> {
-        interaction.defer(ctx).await?;
+        interaction.defer(ctx).await.unwrap();
 
         let pool = PostgresPool::get(ctx).await;
 
@@ -83,7 +84,8 @@ impl SlashCommand<Error> for StarsCommand {
                         .field("Received Stars", row.received_stars.to_string(), true),
                 ),
             )
-            .await?;
+            .await
+            .unwrap();
 
         Ok(())
     }

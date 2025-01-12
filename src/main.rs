@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     type_map.insert::<GoodNightLockedUsers>(Vec::new());
     type_map.insert::<PostgresPool>(pool);
 
-    let token = &env::var("DISCORD_TOKEN")?;
+    let token = &env::var("DISCORD_TOKEN").expect("Expected DISCORD_TOKEN in the environment");
 
     let mut client = ClientBuilder::new(token, GatewayIntents::all())
         .type_map(type_map)

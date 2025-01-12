@@ -3,7 +3,7 @@ use crate::Result;
 use serenity::all::{CommandInteraction, Context, CreateCommand, Ready};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    message_response(ctx, interaction, "Pong!").await?;
+    message_response(ctx, interaction, "Pong!").await.unwrap();
 
     Ok(())
 }

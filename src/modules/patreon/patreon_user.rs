@@ -1,58 +1,74 @@
-use std::fmt;
+use std::env;
 
-use reqwest::Client;
-use serde::Deserialize;
+use patreon_api::patreon_client::PatreonClientBuilder;
+use patreon_api::types::includes::MemberInclude;
+use patreon_api::types::response::MemberResponse;
+use sqlx::prelude::FromRow;
+use sqlx::PgPool;
 
-use crate::{Error, Result, SERVER_URL};
+use crate::Result;
 
-#[derive(Deserialize, Debug)]
-pub struct UserResponse {
-    pub lifetime_support_cents: i32,
-    pub tiers: Vec<Tier>,
+use super::cache::PATREON_CLIENT_ID;
+
+#[allow(dead_code)]
+#[derive(FromRow)]
+pub struct PatreonCacheRow {
+    pub email: String,
+    pub id: String,
+    pub discord_id: Option<i64>,
 }
 
-#[derive(Deserialize, Debug, Default)]
-pub struct Tier {
-    pub attributes: TierAttributes,
-}
-
-#[derive(Deserialize, Debug, Default)]
-
-pub struct TierAttributes {
-    pub amount_cents: i32,
-}
-
-#[derive(Debug)]
-pub struct PatreonUser {
-    pub lifetime_support: i32,
-    pub tier: i32,
-}
-
-impl PatreonUser {
-    pub async fn get(client: &Client, key: impl fmt::Display, force: bool) -> Result<Self> {
-        let res = client
-            .get(format!("{SERVER_URL}/api/v1/patreon/user/{key}"))
-            .query(&[("force", force)])
-            .send()
-            .await?;
-
-        println!("{:?}", res);
-
-        if res.status().is_success() {
-            let user: UserResponse = res.json().await?;
-            let highest_tier = user
-                .tiers
-                .into_iter()
-                .map(|tier| tier.attributes.amount_cents)
-                .max()
-                .unwrap_or_default();
-
-            Ok(PatreonUser {
-                lifetime_support: user.lifetime_support_cents / 100,
-                tier: highest_tier / 100,
-            })
+impl PatreonCacheRow {
+    pub async fn get(pool: &PgPool, key: &str) -> Result<Option<Self>> {
+        let row = if let Ok(id) = key.parse::<u64>() {
+            Self::get_from_id(pool, id).await.unwrap()
         } else {
-            Err(Error::PatreonAccountNotFound(key.to_string()))
-        }
+            Self::get_from_email(pool, key).await.unwrap()
+        };
+
+        Ok(row)
     }
+
+    pub async fn get_from_email(pool: &PgPool, email: &str) -> Result<Option<Self>> {
+        let row = sqlx::query_as!(
+            PatreonCacheRow,
+            "SELECT * FROM patreon_cache WHERE email = $1",
+            email,
+        )
+        .fetch_optional(pool)
+        .await
+        .unwrap();
+
+        Ok(row)
+    }
+
+    pub async fn get_from_id(pool: &PgPool, id: u64) -> Result<Option<Self>> {
+        let row = sqlx::query_as!(
+            PatreonCacheRow,
+            "SELECT * FROM patreon_cache WHERE id = $1",
+            id as i64,
+        )
+        .fetch_optional(pool)
+        .await
+        .unwrap();
+
+        Ok(row)
+    }
+}
+
+pub async fn patreon_member(pool: &PgPool, key: &str, force: bool) -> Result<MemberResponse> {
+    let row = PatreonCacheRow::get(pool, key).await.unwrap().unwrap();
+
+    let api_key = env::var("PATREON_TOKEN").unwrap();
+
+    let client = PatreonClientBuilder::new(api_key, PATREON_CLIENT_ID)
+        .build()
+        .unwrap();
+
+    let member = client
+        .member(&row.id, MemberInclude::CURRENTLY_ENTITLED_TIERS)
+        .await
+        .unwrap();
+
+    Ok(member)
 }

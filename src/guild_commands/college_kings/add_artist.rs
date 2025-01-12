@@ -4,7 +4,7 @@ use serenity::all::{
 };
 use zayden_core::parse_options;
 
-use crate::guilds::{ServersTable, ServersTableError};
+use crate::guilds::ServersTable;
 use crate::sqlx_lib::PostgresPool;
 use crate::utils::message_response;
 use crate::{Error, Result};
@@ -20,23 +20,26 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
-    let member = guild_id.member(&ctx, user).await?;
+    let member = guild_id.member(&ctx, user).await.unwrap();
 
     let pool = PostgresPool::get(ctx).await;
 
-    let artist_role_id = ServersTable::get_row(&pool, guild_id.get())
-        .await?
-        .ok_or(ServersTableError::ServerNotFound)?
-        .get_artist_role_id()?;
+    let artist_role_id = ServersTable::get_row(&pool, guild_id)
+        .await
+        .unwrap()
+        .unwrap()
+        .get_artist_role_id()
+        .unwrap();
 
-    member.add_role(&ctx, artist_role_id).await?;
+    member.add_role(&ctx, artist_role_id).await.unwrap();
 
     message_response(
         ctx,
         interaction,
         &format!("Added {} as an artist", member.display_name()),
     )
-    .await?;
+    .await
+    .unwrap();
 
     Ok(())
 }

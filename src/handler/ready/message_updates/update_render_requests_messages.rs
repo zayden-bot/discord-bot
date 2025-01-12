@@ -7,7 +7,7 @@ use crate::{guilds::college_kings::RENDER_REQUESTS_CHANNEL_ID, Result};
 
 pub async fn run(ctx: &Context) -> Result<()> {
     let mut messages = RENDER_REQUESTS_CHANNEL_ID.messages_iter(&ctx).boxed();
-    while let Some(message) = messages.try_next().await? {
+    while let Some(message) = messages.try_next().await.unwrap() {
         if let Some(ActionRowComponent::Button(b)) = message
             .components
             .first()
@@ -15,7 +15,7 @@ pub async fn run(ctx: &Context) -> Result<()> {
         {
             if let ButtonKind::NonLink { custom_id, .. } = &b.data {
                 if custom_id == "render_request" {
-                    message.delete(ctx).await?;
+                    message.delete(ctx).await.unwrap();
                     break;
                 }
             }
@@ -31,7 +31,7 @@ pub async fn run(ctx: &Context) -> Result<()> {
                 ))
                 .button(CreateButton::new("render_request").label("Request Render")),
         )
-        .await?;
+        .await.unwrap();
 
     Ok(())
 }

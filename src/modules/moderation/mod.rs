@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use chrono::NaiveDateTime;
-use serenity::all::{Context, CreateCommand, Ready, User};
+use serenity::all::{Context, CreateCommand, GuildId, Ready, User, UserId};
 use sqlx::{postgres::PgQueryResult, FromRow, PgPool};
 use zayden_core::SlashCommand;
 
@@ -9,7 +9,7 @@ pub use infraction::Infraction;
 pub use logs::Logs;
 pub use rules::RulesCommand;
 
-use crate::{Error, Result};
+use crate::Result;
 
 mod infraction;
 mod infraction_kind;
@@ -43,9 +43,9 @@ pub struct InfractionRow {
 
 impl InfractionRow {
     fn new(
-        user_id: impl TryInto<i64>,
+        user_id: UserId,
         username: impl Into<String>,
-        guild_id: impl TryInto<i64>,
+        guild_id: GuildId,
         infraction_kind: InfractionKind,
         moderator: &User,
         points: i32,
@@ -53,15 +53,11 @@ impl InfractionRow {
     ) -> Result<Self> {
         Ok(Self {
             id: 0,
-            user_id: user_id.try_into().map_err(|_| Error::ConversionError)?,
+            user_id: user_id.get() as i64,
             username: username.into(),
-            guild_id: guild_id.try_into().map_err(|_| Error::ConversionError)?,
+            guild_id: guild_id.get() as i64,
             infraction_type: infraction_kind.to_string(),
-            moderator_id: moderator
-                .id
-                .get()
-                .try_into()
-                .map_err(|_| Error::ConversionError)?,
+            moderator_id: moderator.id.get() as i64,
             moderator_username: moderator.name.clone(),
             points,
             reason: reason.into(),
@@ -71,17 +67,17 @@ impl InfractionRow {
 
     async fn user_infractions(
         pool: &PgPool,
-        user_id: impl TryInto<i64>,
+        user_id: UserId,
         recent: bool,
     ) -> Result<Vec<InfractionRow>> {
-        let user_id = user_id.try_into().map_err(|_| Error::ConversionError)?;
+        let user_id = user_id.get() as i64;
 
         let infractions = if recent {
             sqlx::query_as!(
                 InfractionRow,
                 "SELECT * FROM infractions WHERE user_id = $1 AND created_at > CURRENT_DATE - INTERVAL '6 months'",
                 user_id
-            ).fetch_all(pool).await?
+            ).fetch_all(pool).await.unwrap()
         } else {
             sqlx::query_as!(
                 InfractionRow,
@@ -89,16 +85,20 @@ impl InfractionRow {
                 user_id
             )
             .fetch_all(pool)
-            .await?
+            .await
+            .unwrap()
         };
 
         Ok(infractions)
     }
 
     async fn create(&self, pool: &PgPool) -> Result<PgQueryResult> {
-        let result = sqlx::query!("INSERT INTO infractions (user_id, username, guild_id, infraction_type, moderator_id, moderator_username, points, reason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", self.user_id, self.username, self.guild_id, self.infraction_type, self.moderator_id, self.moderator_username, self.points, self.reason)
+        let result = sqlx::query!(
+            "INSERT INTO infractions (user_id, username, guild_id, infraction_type, moderator_id, moderator_username, points, reason) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+            self.user_id, self.username, self.guild_id, self.infraction_type, self.moderator_id, self.moderator_username, self.points, self.reason
+        )
             .execute(pool)
-            .await?;
+            .await.unwrap();
 
         Ok(result)
     }

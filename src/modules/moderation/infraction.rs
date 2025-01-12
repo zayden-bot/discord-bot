@@ -134,7 +134,7 @@ impl SlashCommand<Error> for Infraction {
             _ => unreachable!("Invalid infraction count"),
         };
 
-        embed_response(ctx, interaction, embed).await?;
+        embed_response(ctx, interaction, embed).await.unwrap();
 
         Ok(())
     }
@@ -182,7 +182,7 @@ async fn send_user_message(
     };
 
     let embed = CreateEmbed::new().title(title).description(desc);
-    let message = dm_user_embed(ctx, user_id, embed).await?;
+    let message = dm_user_embed(ctx, user_id, embed).await.unwrap();
 
     Ok(message)
 }
@@ -211,12 +211,12 @@ async fn warn<'a>(
     let desc = if reason == "No reason provided." {
         format!(
             "You have been warned in {}.",
-            guild_id.to_partial_guild(ctx).await?.name
+            guild_id.to_partial_guild(ctx).await.unwrap().name
         )
     } else {
         format!(
             "You have been warned in {} for the following reason:\n{}",
-            guild_id.to_partial_guild(ctx).await?.name,
+            guild_id.to_partial_guild(ctx).await.unwrap().name,
             reason
         )
     };
@@ -241,17 +241,21 @@ async fn mute<'a>(
     points: i32,
     reason: &str,
 ) -> Result<CreateEmbed> {
-    let mut member = guild_id.member(ctx, user.id).await?;
+    let mut member = guild_id.member(ctx, user.id).await.unwrap();
 
     let timestamp = (Utc::now() + duration).timestamp();
     member
-        .disable_communication_until_datetime(ctx, Timestamp::from_unix_timestamp(timestamp)?)
-        .await?;
+        .disable_communication_until_datetime(
+            ctx,
+            Timestamp::from_unix_timestamp(timestamp).unwrap(),
+        )
+        .await
+        .unwrap();
 
     InfractionRow::new(
-        user.id.get(),
+        user.id,
         &user.name,
-        guild_id.get(),
+        guild_id,
         InfractionKind::Ban,
         moderator,
         points,
@@ -279,13 +283,13 @@ async fn mute<'a>(
     let desc: String = if reason == "No reason provided." {
         format!(
             "You have been muted in {} for {}.",
-            guild_id.to_partial_guild(ctx).await?.name,
+            guild_id.to_partial_guild(ctx).await.unwrap().name,
             duration_str
         )
     } else {
         format!(
             "You have been muted in {} for {}\n{}",
-            guild_id.to_partial_guild(ctx).await?.name,
+            guild_id.to_partial_guild(ctx).await.unwrap().name,
             duration_str,
             reason
         )
@@ -309,24 +313,26 @@ async fn ban<'a>(
     points: i32,
     reason: &str,
 ) -> Result<CreateEmbed> {
-    let member = guild_id.member(ctx, user.id).await?;
+    let member = guild_id.member(ctx, user.id).await.unwrap();
 
     let desc = if reason == "No reason provided." {
         format!(
             "You have been banned from {}.",
-            guild_id.to_partial_guild(ctx).await?.name
+            guild_id.to_partial_guild(ctx).await.unwrap().name
         )
     } else {
         format!(
             "You have been banned from {} for the following reason:\n{}",
-            guild_id.to_partial_guild(ctx).await?.name,
+            guild_id.to_partial_guild(ctx).await.unwrap().name,
             reason
         )
     };
 
-    send_user_message(ctx, user.id, InfractionKind::Ban, desc).await?;
+    send_user_message(ctx, user.id, InfractionKind::Ban, desc)
+        .await
+        .unwrap();
 
-    member.ban_with_reason(ctx, 1, reason).await?;
+    member.ban_with_reason(ctx, 1, reason).await.unwrap();
 
     InfractionRow::new(
         user.id,

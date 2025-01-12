@@ -4,7 +4,7 @@ use serenity::all::{CommandInteraction, Context, CreateCommand, Ready};
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
-    let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await?;
+    let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await.unwrap();
 
     message_response(
         ctx,
@@ -14,7 +14,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             partial_guild.approximate_member_count.unwrap_or_default()
         ),
     )
-    .await?;
+    .await
+    .unwrap();
 
     Ok(())
 }

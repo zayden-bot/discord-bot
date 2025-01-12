@@ -14,13 +14,13 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     let options = parse_options(&options);
 
     match options.get("ephemeral") {
-        Some(ResolvedValue::Boolean(true)) => interaction.defer_ephemeral(&ctx).await?,
-        _ => interaction.defer(&ctx).await?,
+        Some(ResolvedValue::Boolean(true)) => interaction.defer_ephemeral(&ctx).await.unwrap(),
+        _ => interaction.defer(&ctx).await.unwrap(),
     }
 
     let pool = PostgresPool::get(ctx).await;
 
-    let level_data = get_user_level_data(&pool, interaction.user.id.get()).await?;
+    let level_data = get_user_level_data(&pool, interaction.user.id).await?;
 
     embed_response(
         ctx,
@@ -30,7 +30,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             level_data.xp, level_data.level, level_data.total_xp
         )),
     )
-    .await?;
+    .await
+    .unwrap();
 
     Ok(())
 }

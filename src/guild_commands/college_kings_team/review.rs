@@ -9,7 +9,7 @@ use crate::utils::message_response;
 use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer_ephemeral(ctx).await?;
+    interaction.defer_ephemeral(ctx).await.unwrap();
 
     let options = interaction.data.options();
     let options = parse_options(&options);
@@ -33,9 +33,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                     .field("Feedback", feedback, false),
             ),
         )
-        .await?;
+        .await
+        .unwrap();
 
-    message_response(ctx, interaction, "Feedback submitted!").await?;
+    message_response(ctx, interaction, "Feedback submitted!")
+        .await
+        .unwrap();
 
     Ok(())
 }

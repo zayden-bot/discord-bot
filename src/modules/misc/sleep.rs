@@ -11,7 +11,7 @@ use serenity::all::{
 use sqlx::PgPool;
 use zayden_core::SlashCommand;
 
-use crate::guilds::{ServersTable, ServersTableError};
+use crate::guilds::ServersTable;
 use crate::handler::OnReady;
 use crate::sqlx_lib::PostgresPool;
 use crate::utils::message_response;
@@ -26,13 +26,15 @@ impl SlashCommand<Error> for Sleep {
         interaction: &CommandInteraction,
         _options: Vec<ResolvedOption<'_>>,
     ) -> Result<()> {
-        interaction.defer_ephemeral(ctx).await?;
+        interaction.defer_ephemeral(ctx).await.unwrap();
 
         let hours: u64 = match &interaction.data.options()[0].value {
             ResolvedValue::Integer(hours) => match (*hours).try_into() {
                 Ok(hours) => hours,
                 Err(_) => {
-                    message_response(ctx, interaction, "Hours must be a positive integer.").await?;
+                    message_response(ctx, interaction, "Hours must be a positive integer.")
+                        .await
+                        .unwrap();
                     return Ok(());
                 }
             },
@@ -56,7 +58,8 @@ impl SlashCommand<Error> for Sleep {
                     .button(confirm_button)
                     .button(cancel_button),
             )
-            .await?;
+            .await
+            .unwrap();
 
         if let Some(interaction) = message
             .await_component_interaction(ctx)
@@ -65,7 +68,8 @@ impl SlashCommand<Error> for Sleep {
         {
             interaction
                 .create_response(ctx, CreateInteractionResponse::Acknowledge)
-                .await?;
+                .await
+                .unwrap();
 
             if interaction.data.custom_id == "sleep_confirm" {
                 let member = interaction.member.unwrap();
@@ -108,12 +112,12 @@ impl OnReady for Sleep {
 }
 
 async fn foo(ctx: &Context, pool: &PgPool, guild_id: GuildId) -> Result<()> {
-    let sleep_role_id = ServersTable::get_row(pool, guild_id)
-        .await?
-        .ok_or(ServersTableError::ServerNotFound)?
-        .get_sleep_role_id()?;
+    let sleep_role_id = match ServersTable::get_row(pool, guild_id).await.unwrap() {
+        Some(row) => row.get_sleep_role_id().unwrap(),
+        None => return Ok(()),
+    };
 
-    let channels = guild_id.channels(&ctx).await?;
+    let channels = guild_id.channels(&ctx).await.unwrap();
     for channel in channels.values() {
         if channel.name == "sleeping" {
             continue;
@@ -128,14 +132,15 @@ async fn foo(ctx: &Context, pool: &PgPool, guild_id: GuildId) -> Result<()> {
                     kind: PermissionOverwriteType::Role(sleep_role_id),
                 },
             )
-            .await?;
+            .await
+            .unwrap();
     }
 
     let mut members = guild_id.members_iter(&ctx).boxed();
 
-    while let Some(member) = members.try_next().await? {
+    while let Some(member) = members.try_next().await.unwrap() {
         if member.roles.contains(&sleep_role_id) {
-            member.remove_role(&ctx, sleep_role_id).await?;
+            member.remove_role(&ctx, sleep_role_id).await.unwrap();
         }
     }
 
@@ -146,19 +151,21 @@ async fn sleep_user(ctx: Context, member: Member, hours: u64) -> Result<()> {
     let pool = PostgresPool::get(&ctx).await;
 
     let sleep_role_id = ServersTable::get_row(&pool, member.guild_id)
-        .await?
-        .ok_or(ServersTableError::ServerNotFound)?
-        .get_sleep_role_id()?;
+        .await
+        .unwrap()
+        .unwrap()
+        .get_sleep_role_id()
+        .unwrap();
 
     drop(pool);
 
-    member.add_role(&ctx, sleep_role_id).await?;
+    member.add_role(&ctx, sleep_role_id).await.unwrap();
 
     tokio::time::sleep(Duration::from_secs(hours * 60 * 60)).await;
 
     println!("Waking up {}", member.user.name);
 
-    member.remove_role(&ctx, sleep_role_id).await?;
+    member.remove_role(&ctx, sleep_role_id).await.unwrap();
 
     Ok(())
 }

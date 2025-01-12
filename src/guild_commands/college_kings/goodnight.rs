@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::guilds::{ServersTable, ServersTableError};
+use crate::guilds::ServersTable;
 use crate::image_cache::ImageCache;
 use crate::sqlx_lib::PostgresPool;
 use crate::utils::message_response;
@@ -20,7 +20,7 @@ impl TypeMapKey for GoodNightLockedUsers {
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer(&ctx).await?;
+    interaction.defer(&ctx).await.unwrap();
 
     let pool = PostgresPool::get(ctx).await;
 
@@ -31,10 +31,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let user_id = interaction.user.id;
 
-    let general_channel_id = ServersTable::get_row(&pool, interaction.guild_id.unwrap().get())
-        .await?
-        .ok_or(ServersTableError::ServerNotFound)?
-        .get_general_channel_id()?;
+    let general_channel_id = ServersTable::get_row(&pool, interaction.guild_id.unwrap())
+        .await
+        .unwrap()
+        .unwrap()
+        .get_general_channel_id()
+        .unwrap();
 
     if interaction.channel_id == general_channel_id {
         if locked_users.contains(&user_id) {
@@ -43,7 +45,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 interaction,
                 "You have already used this command today.",
             )
-            .await?;
+            .await
+            .unwrap();
             return Ok(());
         }
 
@@ -74,9 +77,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                         .title(format!("Good Night, {}!", interaction.user.name))
                         .attachment(file_name),
                 )
-                .attachments(EditAttachments::new().add(CreateAttachment::path(image_path).await?)),
+                .attachments(
+                    EditAttachments::new().add(CreateAttachment::path(image_path).await.unwrap()),
+                ),
         )
-        .await?;
+        .await
+        .unwrap();
 
     if interaction.channel_id == general_channel_id {
         tokio::spawn({

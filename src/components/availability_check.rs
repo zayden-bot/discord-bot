@@ -63,7 +63,8 @@ pub async fn availability_check(
                 ),
             ),
         )
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

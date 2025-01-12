@@ -11,7 +11,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         + "4. Now that your Patreon and Discord accounts are communicating, our integration will assign you the role tied to your Tier!\n"
         + "5. If you're still having trouble, please visit this website: <https://support.patreon.com/hc/en-us/articles/212052266-Get-my-Discord-role>";
 
-    message_response(ctx, interaction, content).await?;
+    message_response(ctx, interaction, content).await.unwrap();
 
     Ok(())
 }

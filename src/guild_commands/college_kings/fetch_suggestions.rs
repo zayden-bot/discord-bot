@@ -5,21 +5,22 @@ use serenity::all::{
 };
 use std::time;
 
-use crate::{Error, Result};
+use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let start_time = time::Instant::now();
 
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
+    let guild_id = interaction.guild_id.unwrap();
 
-    let active_guild_threads = guild_id.get_active_threads(&ctx).await?;
+    let active_guild_threads = guild_id.get_active_threads(&ctx).await.unwrap();
     let threads: Vec<GuildChannel> = active_guild_threads
         .threads
         .into_iter()
         .chain(
             SUGGESTION_CATEGORY_ID
                 .get_archived_public_threads(&ctx, None, None)
-                .await?
+                .await
+                .unwrap()
                 .threads,
         )
         .filter(|thread| {
@@ -40,7 +41,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 Some(100),
                 None,
             )
-            .await?;
+            .await
+            .unwrap();
         thread_reaction_counts.push((thread, reactions.len()));
     }
 
@@ -63,7 +65,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     interaction
         .user
         .dm(&ctx, CreateMessage::new().add_embed(embed))
-        .await?;
+        .await
+        .unwrap();
 
     message_response(
         ctx,
@@ -73,7 +76,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             elapsed_time.as_secs()
         ),
     )
-    .await?;
+    .await
+    .unwrap();
 
     Ok(())
 }

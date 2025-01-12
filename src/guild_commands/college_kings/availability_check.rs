@@ -11,7 +11,7 @@ use crate::utils::message_response;
 use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer_ephemeral(ctx).await?;
+    interaction.defer_ephemeral(ctx).await.unwrap();
 
     let options = interaction.data.options();
     let options = parse_options(&options);
@@ -23,9 +23,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     TEAM_LEADS_CHANNEL_ID
         .send_message(ctx, availability_check_message(title))
-        .await?;
+        .await
+        .unwrap();
 
-    message_response(ctx, interaction, "Availability check sent").await?;
+    message_response(ctx, interaction, "Availability check sent")
+        .await
+        .unwrap();
 
     Ok(())
 }

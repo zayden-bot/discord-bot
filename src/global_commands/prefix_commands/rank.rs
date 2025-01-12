@@ -8,7 +8,8 @@ pub async fn run(ctx: &Context, msg: Message) -> Result<()> {
             &ctx,
             "Mee6 is being deprecated, please use the `/rank` command instead",
         )
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

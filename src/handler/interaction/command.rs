@@ -99,12 +99,14 @@ impl Handler {
                             SUPER_USERS[0].mention()
                         )),
                     )
-                    .await?;
+                    .await
+                    .unwrap();
                 return Err(e);
             }
             command
                 .edit_response(ctx, EditInteractionResponse::new().content(msg))
-                .await?;
+                .await
+                .unwrap();
         }
 
         Ok(())

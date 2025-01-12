@@ -41,7 +41,8 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction, accepted: bool) -> Res
 
     channel_id
         .edit_thread(ctx, EditThread::new().name(&name).archived(false))
-        .await?;
+        .await
+        .unwrap();
 
     message
         .edit(
@@ -56,11 +57,13 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction, accepted: bool) -> Res
                     .footer(old_embed.footer.expect("Footer is required").into()),
             ),
         )
-        .await?;
+        .await
+        .unwrap();
 
     modal
         .create_response(ctx, CreateInteractionResponse::Acknowledge)
-        .await?;
+        .await
+        .unwrap();
 
     let title = if accepted {
         "Suggestion Accepted"
@@ -73,9 +76,11 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction, accepted: bool) -> Res
             ctx,
             CreateMessage::new().embed(CreateEmbed::new().title(title).description(response)),
         )
-        .await?
+        .await
+        .unwrap()
         .pin(ctx)
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

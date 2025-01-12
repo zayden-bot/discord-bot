@@ -19,7 +19,7 @@ pub async fn run(ctx: &Context) -> Result<()> {
 
 pub async fn update_support_message(ctx: &Context, support_channel_id: ChannelId) -> Result<()> {
     let mut messages = support_channel_id.messages_iter(&ctx).boxed();
-    while let Some(message) = messages.try_next().await? {
+    while let Some(message) = messages.try_next().await.unwrap() {
         if let Some(ActionRowComponent::Button(b)) = message
             .components
             .first()
@@ -27,7 +27,7 @@ pub async fn update_support_message(ctx: &Context, support_channel_id: ChannelId
         {
             if let ButtonKind::NonLink { custom_id, .. } = &b.data {
                 if custom_id == "support_ticket" {
-                    message.delete(ctx).await?;
+                    message.delete(ctx).await.unwrap();
                     break;
                 }
             }

@@ -9,7 +9,7 @@ use crate::utils::embed_response;
 use crate::{Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer(&ctx).await?;
+    interaction.defer(&ctx).await.unwrap();
 
     let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
@@ -35,16 +35,18 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                     .title("Error")
                     .description("Member not found."),
             )
-            .await?;
+            .await
+            .unwrap();
             return Ok(());
         }
     };
 
-    let guild = guild_id.to_partial_guild(&ctx).await?;
+    let guild = guild_id.to_partial_guild(&ctx).await.unwrap();
 
     match user
         .create_dm_channel(&ctx)
-        .await?
+        .await
+        .unwrap()
         .send_message(
             &ctx,
             CreateMessage::new().add_embed(CreateEmbed::new().description(format!(
@@ -60,12 +62,15 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             ..
         }))) => {}
         result => {
-            result?;
+            result.unwrap();
         }
     }
 
-    guild_id.ban_with_reason(&ctx, user, 1, reason).await?;
-    guild_id.unban(&ctx, user).await?;
+    guild_id
+        .ban_with_reason(&ctx, user, 1, reason)
+        .await
+        .unwrap();
+    guild_id.unban(&ctx, user).await.unwrap();
 
     embed_response(
         ctx,
@@ -75,7 +80,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             member.user.name, reason
         )),
     )
-    .await?;
+    .await
+    .unwrap();
 
     Ok(())
 }

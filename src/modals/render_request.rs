@@ -1,4 +1,3 @@
-use reqwest::Client;
 use serenity::all::{
     ButtonStyle, Context, CreateButton, CreateChannel, CreateEmbed, CreateInteractionResponse,
     CreateInteractionResponseMessage, CreateMessage, Mentionable, ModalInteraction,
@@ -6,7 +5,8 @@ use serenity::all::{
 };
 use zayden_core::parse_modal_data;
 
-use crate::modules::patreon::PatreonUser;
+use crate::modules::patreon::patreon_member;
+use crate::sqlx_lib::PostgresPool;
 use crate::{
     guilds::{college_kings::RENDER_REQUESTS_CHANNEL_ID, college_kings_team::MESSY_USER_ID},
     Error, Result,
@@ -15,14 +15,16 @@ use crate::{
 pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let guild_id = modal.guild_id.ok_or_else(|| Error::NotInGuild)?;
 
-    let client = Client::new();
+    let pool = PostgresPool::get(ctx).await;
 
     let mut data = parse_modal_data(&modal.data.components);
 
-    let user = match data.remove("email") {
-        Some(email) => PatreonUser::get(&client, email, false).await?,
-        _ => PatreonUser::get(&client, modal.user.id, false).await?,
+    let response = match data.remove("email") {
+        Some(email) => patreon_member(&pool, email, false).await?,
+        _ => patreon_member(&pool, &modal.user.id.to_string(), false).await?,
     };
+
+    let tier = response.data.attributes.currently_entitled_amount_cents / 100;
 
     let character = data.remove("character").unwrap();
     let prop = data.remove("prop").unwrap_or("No prop specified.");
@@ -31,7 +33,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         .remove("description")
         .unwrap_or("No description specified.");
 
-    if user.tier < 50 {
+    if tier < 50 {
         modal
             .create_response(
                 ctx,
@@ -40,7 +42,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
                         .content("You must be at least a $50 patron to use this feature.\nThe cache is updated every 24 hours. If you've recently upgraded, please wait a day and try again or contact us through the support channel.").ephemeral(true),
                 ),
             )
-            .await?;
+            .await.unwrap();
 
         return Ok(());
     }
@@ -49,7 +51,7 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         .title("Render Request")
         .description(description)
         .fields(vec![
-            ("Tier", format!("${}", user.tier).as_str(), true),
+            ("Tier", format!("${}", tier).as_str(), true),
             ("Character", character, false),
             ("Prop", prop, false),
             ("Location", location, false),
@@ -63,7 +65,8 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
 
     let category_id = RENDER_REQUESTS_CHANNEL_ID
         .to_channel(ctx)
-        .await?
+        .await
+        .unwrap()
         .guild()
         .unwrap()
         .parent_id
@@ -95,7 +98,8 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
                 .nsfw(true)
                 .permissions(permissions),
         )
-        .await?;
+        .await
+        .unwrap();
 
     channel
         .send_message(
@@ -113,11 +117,13 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
                         .style(ButtonStyle::Danger),
                 ),
         )
-        .await?;
+        .await
+        .unwrap();
 
     modal
         .create_response(ctx, CreateInteractionResponse::Acknowledge)
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

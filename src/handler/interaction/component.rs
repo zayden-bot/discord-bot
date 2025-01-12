@@ -29,7 +29,7 @@ impl Handler {
             "levels_user" => components::levels(ctx, component, "user").await,
             "levels_next" => components::levels(ctx, component, "next").await,
             "production_request" => components::production_request(ctx, component).await,
-            "render_request" => components::render_request(ctx, component).await,
+            "render_request" => components::render_request(ctx, component, pool).await,
             "suggestions_accept" | "accept" => components::suggestions(ctx, component, true).await,
             "suggestions_reject" | "reject" => components::suggestions(ctx, component, false).await,
             "suggestions_added" => components::suggestions(ctx, component, true).await,
@@ -66,7 +66,8 @@ impl Handler {
                             SUPER_USERS[0].mention()
                         )),
                     )
-                    .await?;
+                    .await
+                    .unwrap();
                 return Err(e);
             }
             component
@@ -76,7 +77,8 @@ impl Handler {
                         .content(msg)
                         .ephemeral(true),
                 )
-                .await?;
+                .await
+                .unwrap();
         }
 
         Ok(())

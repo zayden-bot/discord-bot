@@ -26,11 +26,11 @@ impl SlashCommand<Error> for RulesCommand {
         interaction: &CommandInteraction,
         _options: Vec<ResolvedOption<'_>>,
     ) -> Result<()> {
-        interaction.defer_ephemeral(ctx).await?;
+        interaction.defer_ephemeral(ctx).await.unwrap();
 
         let rules_path = PathBuf::from_str("messages").unwrap().join("rules.md");
 
-        let rules = tokio::fs::read_to_string(rules_path).await?;
+        let rules = tokio::fs::read_to_string(rules_path).await.unwrap();
         let fields = rules.split("\r\n\r\n").map(|rule| {
             let mut lines = rule.lines();
             let title = lines.next().unwrap();
@@ -40,10 +40,15 @@ impl SlashCommand<Error> for RulesCommand {
 
         let embed = CreateEmbed::new().colour(Colour::from_rgb(255, 0, 0)).title("College Kings Server Rules").description("The below rules are a truncated version of the rules found in the [Code of Conduct](https://gist.github.com/KiloOscarSix/201a919b5650e511f11287c0a9c4c2fc).").fields(fields);
 
-        let mut message = CHANNEL_ID.message(ctx, MESSAGE_ID).await?;
-        message.edit(ctx, EditMessage::new().embed(embed)).await?;
+        let mut message = CHANNEL_ID.message(ctx, MESSAGE_ID).await.unwrap();
+        message
+            .edit(ctx, EditMessage::new().embed(embed))
+            .await
+            .unwrap();
 
-        message_response(ctx, interaction, "The rules have been sent.").await?;
+        message_response(ctx, interaction, "The rules have been sent.")
+            .await
+            .unwrap();
 
         Ok(())
     }

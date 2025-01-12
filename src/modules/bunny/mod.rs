@@ -6,15 +6,17 @@ use crate::Result;
 pub async fn latest_download_link(app_name: &str, platform: &str) -> Result<String> {
     let bunny_storage = BunnyStorage::new(
         "collegekingsstorage",
-        &env::var("BUNNY_READ_ONLY_KEY")?,
+        &env::var("BUNNY_READ_ONLY_KEY").unwrap(),
         "de",
-    )?;
+    )
+    .unwrap();
     let files = bunny_storage
         .list(&format!(
             "__bcdn_perma_cache__/pullzone__collegekings__22373407/wp-content/uploads/secured/{}/",
             app_name
         ))
-        .await?;
+        .await
+        .unwrap();
 
     let latest_file = files
         .into_iter()

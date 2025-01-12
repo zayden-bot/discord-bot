@@ -11,7 +11,7 @@ const POSITIVE_REACTION: &str = "👍";
 const NEGATIVE_REACTION: &str = "👎";
 
 pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChannel) -> Result<()> {
-    let message = reaction.message(ctx).await?;
+    let message = reaction.message(ctx).await.unwrap();
 
     let mut positive_count: i32 = 0;
     let mut negative_count: i32 = 0;
@@ -25,15 +25,16 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
     }
 
     let pool = PostgresPool::get(ctx).await;
-    let suggestion_channel_id = ServersTable::get_row(&pool, channel.guild_id.get())
-        .await?
-        .ok_or(crate::guilds::ServersTableError::ServerNotFound)?
+    let suggestion_channel_id = ServersTable::get_row(&pool, channel.guild_id)
+        .await
+        .unwrap()
+        .unwrap()
         .get_suggestion_channel_id()?;
 
     let mut messages = suggestion_channel_id.messages_iter(&ctx).boxed();
 
     if (positive_count - negative_count) >= 20 {
-        while let Some(mut msg) = messages.try_next().await? {
+        while let Some(mut msg) = messages.try_next().await.unwrap() {
             if msg.embeds[0].url == Some(message.link()) {
                 msg.edit(
                     ctx,
@@ -47,7 +48,8 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
                         ))
                         .components(create_components()),
                 )
-                .await?;
+                .await
+                .unwrap();
                 return Ok(());
             }
         }
@@ -65,11 +67,12 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
                     ))
                     .components(create_components()),
             )
-            .await?;
+            .await
+            .unwrap();
     } else if (negative_count - positive_count) <= 15 {
-        while let Some(msg) = messages.try_next().await? {
+        while let Some(msg) = messages.try_next().await.unwrap() {
             if msg.embeds[0].url == Some(message.link()) {
-                msg.delete(ctx).await?;
+                msg.delete(ctx).await.unwrap();
                 return Ok(());
             }
         }

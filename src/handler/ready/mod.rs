@@ -33,7 +33,7 @@ impl Handler {
 
             guild.id.set_commands(ctx, commands)
         });
-        future::try_join_all(futures).await?;
+        future::try_join_all(futures).await.unwrap();
 
         update_messages(ctx).await?;
 

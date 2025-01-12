@@ -1,21 +1,22 @@
 use std::time::Duration;
 
 use async_trait::async_trait;
-use reqwest::Client;
+use patreon_api::types::Member;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     CreateEmbed, CreateEmbedFooter, Ready, ResolvedOption, ResolvedValue,
 };
+use sqlx::PgPool;
 use url::Url;
 use zayden_core::{parse_options, SlashCommand};
 
-pub use patreon_user::PatreonUser;
-
+use crate::sqlx_lib::PostgresPool;
 use crate::utils::{embed_response, message_response};
 use crate::{Error, Result, SERVER_URL};
 
 pub mod cache;
 mod patreon_user;
+pub use patreon_user::patreon_member;
 
 const CLIENT_ID: &str = "co3TJ3lwqHN5WSVuIBiDNhfQv28V4FR-z6g-_fIogDzj_Um09DoWLGE5rvAJeTQd";
 
@@ -34,12 +35,14 @@ impl SlashCommand<Error> for Patreon {
         interaction: &CommandInteraction,
         options: Vec<ResolvedOption<'_>>,
     ) -> Result<()> {
+        let pool = PostgresPool::get(ctx).await;
+
         let command = &options[0];
 
         match command.name {
             "info" => info(ctx, interaction).await?,
-            "login" => login(ctx, interaction).await?,
-            "check" => check(ctx, interaction, &command.value).await?,
+            "login" => login(ctx, interaction, &pool).await?,
+            "check" => check(ctx, interaction, &pool, &command.value).await?,
             _ => unreachable!("Unknown subcommand"),
         };
 
@@ -84,7 +87,7 @@ impl SlashCommand<Error> for Patreon {
     }
 }
 async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer(ctx).await?;
+    interaction.defer(ctx).await.unwrap();
 
     embed_response(ctx, interaction, CreateEmbed::new().title("Pledge to College Kings")
             .url("https://www.patreon.com/collegekings")
@@ -92,28 +95,33 @@ async fn info(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
             .image("https://media.discordapp.net/attachments/769943204673486858/787791290514538516/CollegeKingsTopBanner.jpg")
             .thumbnail("https://images-ext-2.discordapp.net/external/QOCCliX2PNqo717REOwxtbvIrxVV2DZ1CRc8Svz3vUs/https/collegekingsgame.com/wp-content/uploads/2020/08/college-kings-wide-white.png")
             .footer(CreateEmbedFooter::new("https://www.patreon.com/collegekings"))
-    ).await?;
+    ).await.unwrap();
 
     Ok(())
 }
 
-async fn login(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer_ephemeral(ctx).await?;
+async fn login(ctx: &Context, interaction: &CommandInteraction, pool: &PgPool) -> Result<()> {
+    interaction.defer_ephemeral(ctx).await.unwrap();
 
     let patreon_url = Url::parse(&format!("https://www.patreon.com/oauth2/authorize?response_type=code&client_id={}&redirect_uri={}/api/v1/patreon/oauth/zayden&state={}", CLIENT_ID, SERVER_URL, interaction.user.id)).unwrap();
 
-    message_response(ctx, interaction, patreon_url.as_str()).await?;
-
-    let client = Client::new();
+    message_response(ctx, interaction, patreon_url.as_str())
+        .await
+        .unwrap();
 
     tokio::time::sleep(Duration::from_secs(5)).await;
 
     for _ in 0..10 * 60 {
-        if PatreonUser::get(&client, interaction.user.id, false)
-            .await
-            .is_ok()
-        {
-            message_response(ctx, interaction, "Status: Success!").await?;
+        let Member { email, .. } = patreon_member(pool, &interaction.user.id.to_string(), false)
+            .await?
+            .data
+            .attributes;
+
+        // TODO: Fix this
+        if email.is_some() {
+            message_response(ctx, interaction, "Status: Success!")
+                .await
+                .unwrap();
 
             return Ok(());
         } else {
@@ -122,12 +130,15 @@ async fn login(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
                 interaction,
                 format!("{patreon_url}\n\nStatus: User not currently in cache."),
             )
-            .await?;
+            .await
+            .unwrap();
         }
         tokio::time::sleep(Duration::from_secs(1)).await;
     }
 
-    message_response(ctx, interaction, "Status: Timeout").await?;
+    message_response(ctx, interaction, "Status: Timeout")
+        .await
+        .unwrap();
 
     Ok(())
 }
@@ -135,9 +146,10 @@ async fn login(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
 async fn check(
     ctx: &Context,
     interaction: &CommandInteraction,
+    pool: &PgPool,
     subcommand: &ResolvedValue<'_>,
 ) -> Result<()> {
-    interaction.defer_ephemeral(ctx).await?;
+    interaction.defer_ephemeral(ctx).await.unwrap();
 
     let subcommand = match subcommand {
         ResolvedValue::SubCommand(subcommand) => subcommand,
@@ -156,7 +168,12 @@ async fn check(
         _ => false,
     };
 
-    let user = PatreonUser::get(&Client::new(), email.to_lowercase(), force).await?;
+    let Member {
+        email,
+        campaign_lifetime_support_cents,
+        currently_entitled_amount_cents,
+        ..
+    } = patreon_member(pool, email, force).await?.data.attributes;
 
     embed_response(
         ctx,
@@ -165,10 +182,13 @@ async fn check(
             .title("Patreon Status")
             .description(format!(
                 "Email: {}\n Lifetime Support: **${}**\nCurrent Tier: **${}**",
-                email, user.lifetime_support, user.tier
+                email.unwrap_or_default(),
+                campaign_lifetime_support_cents / 100,
+                currently_entitled_amount_cents / 100
             )),
     )
-    .await?;
+    .await
+    .unwrap();
 
     Ok(())
 }

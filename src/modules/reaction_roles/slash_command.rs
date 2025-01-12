@@ -20,7 +20,7 @@ impl SlashCommand<Error> for ReactionRoleCommand {
         interaction: &CommandInteraction,
         _options: Vec<ResolvedOption<'_>>,
     ) -> Result<()> {
-        interaction.defer_ephemeral(ctx).await?;
+        interaction.defer_ephemeral(ctx).await.unwrap();
 
         let pool = PostgresPool::get(ctx).await;
 
@@ -33,7 +33,8 @@ impl SlashCommand<Error> for ReactionRoleCommand {
 
         interaction
             .edit_response(ctx, EditInteractionResponse::new().content("Success."))
-            .await?;
+            .await
+            .unwrap();
 
         Ok(())
     }

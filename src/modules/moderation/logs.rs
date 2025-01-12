@@ -36,7 +36,7 @@ impl SlashCommand<Error> for Logs {
         let pool = PostgresPool::get(ctx).await;
 
         let infractions =
-            InfractionRow::user_infractions(&pool, user.id.get(), filter == "recent").await?;
+            InfractionRow::user_infractions(&pool, user.id, filter == "recent").await?;
 
         let fields = infractions.into_iter().map(|infraction| {
             (
@@ -62,7 +62,8 @@ impl SlashCommand<Error> for Logs {
                 .title(format!("Logs for {}", user.name))
                 .fields(fields),
         )
-        .await?;
+        .await
+        .unwrap();
 
         Ok(())
     }

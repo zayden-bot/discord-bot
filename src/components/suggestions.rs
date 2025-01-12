@@ -25,7 +25,8 @@ pub async fn suggestions(
                             .content("You do not have permission to use this component."),
                     ),
                 )
-                .await?;
+                .await
+                .unwrap();
             return Ok(());
         }
     }
@@ -44,7 +45,8 @@ pub async fn suggestions(
 
     interaction
         .create_response(ctx, CreateInteractionResponse::Modal(modal))
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

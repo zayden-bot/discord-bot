@@ -1,13 +1,16 @@
-use reqwest::Client;
 use serenity::all::{
     ComponentInteraction, Context, CreateActionRow, CreateInputText, CreateInteractionResponse,
     CreateModal, InputTextStyle,
 };
+use sqlx::PgPool;
 
-use crate::modules::patreon::PatreonUser;
-use crate::Result;
+use crate::{modules::patreon::patreon_member, Result};
 
-pub async fn render_request(ctx: &Context, interaction: &ComponentInteraction) -> Result<()> {
+pub async fn render_request(
+    ctx: &Context,
+    interaction: &ComponentInteraction,
+    pool: &PgPool,
+) -> Result<()> {
     let character_input = CreateInputText::new(InputTextStyle::Short, "Character", "character")
         .placeholder("Enter the character you want in the render.");
 
@@ -26,7 +29,7 @@ pub async fn render_request(ctx: &Context, interaction: &ComponentInteraction) -
 
     let mut components = Vec::with_capacity(5);
 
-    let result = PatreonUser::get(&Client::new(), interaction.user.id, false).await;
+    let result = patreon_member(pool, &interaction.user.id.to_string(), false).await;
 
     if result.is_err() {
         let email_input = CreateInputText::new(InputTextStyle::Short, "Patreon Email", "email")
@@ -45,7 +48,8 @@ pub async fn render_request(ctx: &Context, interaction: &ComponentInteraction) -
 
     interaction
         .create_response(&ctx, CreateInteractionResponse::Modal(modal))
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

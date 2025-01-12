@@ -11,7 +11,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             .field("Loyal", "✅ Bro\n✅ Boyfriend\n❌ Trouble Maker", true)
             .field("Confident", "✅ Boyfriend\n✅ Trouble Maker\n❌ Bro", true),
     )
-    .await?;
+    .await
+    .unwrap();
 
     Ok(())
 }

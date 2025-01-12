@@ -7,7 +7,7 @@ use crate::sqlx_lib::user_levels::get_users;
 use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer(&ctx).await?;
+    interaction.defer(&ctx).await.unwrap();
 
     let page_number = 1;
 
@@ -39,7 +39,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 .button(CreateButton::new("levels_user").emoji('🎯'))
                 .button(CreateButton::new("levels_next").label(">")),
         )
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

@@ -14,8 +14,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     let options = parse_options(&options);
 
     match options.get("ephemeral") {
-        Some(ResolvedValue::Boolean(true)) => interaction.defer_ephemeral(&ctx).await?,
-        _ => interaction.defer(&ctx).await?,
+        Some(ResolvedValue::Boolean(true)) => interaction.defer_ephemeral(&ctx).await.unwrap(),
+        _ => interaction.defer(&ctx).await.unwrap(),
     }
 
     let user = match options.get("user") {
@@ -25,11 +25,11 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let pool = PostgresPool::get(ctx).await;
 
-    let level_data = get_user_level_data(&pool, user.id.get()).await?;
+    let level_data = get_user_level_data(&pool, user.id).await?;
 
     let level = level_data.level;
     let xp_for_next_level = 5 * (level * level) + 50 * level + 100;
-    let user_rank = get_user_rank(&pool, user.id.get())
+    let user_rank = get_user_rank(&pool, user.id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
 
@@ -47,7 +47,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                 (level_data.xp as f32 / xp_for_next_level as f32 * 100.0).round()
             )),
     )
-    .await?;
+    .await
+    .unwrap();
 
     Ok(())
 }

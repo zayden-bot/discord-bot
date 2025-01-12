@@ -10,7 +10,7 @@ use crate::{Error, Result};
 const LIMIT: i64 = 10;
 
 pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &str) -> Result<()> {
-    interaction.defer(ctx).await?;
+    interaction.defer(ctx).await.unwrap();
 
     if let Some(MessageInteractionMetadata::Component(metadata)) =
         interaction.message.interaction_metadata.as_deref()
@@ -31,7 +31,8 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
         .text
         .strip_prefix("Page ")
         .unwrap()
-        .parse()?;
+        .parse()
+        .unwrap();
 
     old_embed.fields = Vec::new();
     let mut new_embed: CreateEmbed = old_embed.into();
@@ -41,9 +42,10 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
             page_number = (page_number - 1).max(1);
         }
         "user" => {
-            let row_number = get_user_row_number(&pool, interaction.user.id.get())
-                .await?
-                .ok_or_else(|| Error::UserNotFound)?;
+            let row_number = get_user_row_number(&pool, interaction.user.id)
+                .await
+                .unwrap()
+                .unwrap();
 
             page_number = row_number / LIMIT + 1;
         }
@@ -72,7 +74,8 @@ pub async fn levels(ctx: &Context, interaction: &ComponentInteraction, action: &
 
     interaction
         .edit_response(ctx, EditInteractionResponse::new().embed(new_embed))
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

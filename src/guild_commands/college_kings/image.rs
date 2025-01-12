@@ -10,13 +10,14 @@ use serenity::all::{
 };
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer(&ctx).await?;
+    interaction.defer(&ctx).await.unwrap();
 
     let guild_roles = interaction
         .guild_id
         .ok_or_else(|| Error::NotInGuild)?
         .roles(&ctx)
-        .await?;
+        .await
+        .unwrap();
 
     let member_roles: Vec<&Role> = interaction
         .member
@@ -67,9 +68,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             &ctx,
             EditInteractionResponse::new()
                 .embed(CreateEmbed::new().attachment(file_name))
-                .attachments(EditAttachments::new().add(CreateAttachment::path(image_path).await?)),
+                .attachments(
+                    EditAttachments::new().add(CreateAttachment::path(image_path).await.unwrap()),
+                ),
         )
-        .await?;
+        .await
+        .unwrap();
 
     Ok(())
 }

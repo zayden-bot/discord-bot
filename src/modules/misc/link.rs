@@ -1,14 +1,15 @@
 use async_trait::async_trait;
-use reqwest::Client;
+use patreon_api::types::Member;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
     Permissions, Ready, ResolvedOption, ResolvedValue,
 };
+use sqlx::PgPool;
 use zayden_core::{parse_options, SlashCommand};
 
-use crate::guilds::{ServersTable, ServersTableError};
+use crate::guilds::ServersTable;
 use crate::modules::bunny;
-use crate::modules::patreon::PatreonUser;
+use crate::modules::patreon::patreon_member;
 use crate::sqlx_lib::PostgresPool;
 use crate::utils::message_response;
 use crate::{Error, Result};
@@ -22,9 +23,11 @@ impl SlashCommand<Error> for Link {
         interaction: &CommandInteraction,
         _options: Vec<ResolvedOption<'_>>,
     ) -> Result<()> {
+        let pool = PostgresPool::get(ctx).await;
+
         let command = &interaction.data.options()[0];
 
-        download(ctx, interaction, &command.value).await?;
+        download(ctx, interaction, &pool, &command.value).await?;
 
         Ok(())
     }
@@ -68,16 +71,17 @@ impl SlashCommand<Error> for Link {
 async fn download(
     ctx: &Context,
     interaction: &CommandInteraction,
+    pool: &PgPool,
     subcommand: &ResolvedValue<'_>,
 ) -> Result<()> {
     let guild_id = interaction.guild_id.ok_or(Error::NotInGuild)?;
 
-    let pool = PostgresPool::get(ctx).await;
-
-    let support_channel_id = ServersTable::get_row(&pool, guild_id)
-        .await?
-        .ok_or(ServersTableError::ServerNotFound)?
-        .get_support_channel_id()?;
+    let support_channel_id = ServersTable::get_row(pool, guild_id)
+        .await
+        .unwrap()
+        .unwrap()
+        .get_support_channel_id()
+        .unwrap();
 
     if interaction
         .channel
@@ -86,9 +90,9 @@ async fn download(
         .parent_id
         .is_some_and(|id| id == support_channel_id)
     {
-        interaction.defer(ctx).await?;
+        interaction.defer(ctx).await.unwrap();
     } else {
-        interaction.defer_ephemeral(ctx).await?;
+        interaction.defer_ephemeral(ctx).await.unwrap();
     }
 
     let options = match subcommand {
@@ -106,16 +110,25 @@ async fn download(
             .permissions
             .is_some_and(|perms| perms.contains(Permissions::MANAGE_MESSAGES))
     }) {
-        let client = Client::new();
-        let user = PatreonUser::get(&client, interaction.user.id, false).await?;
+        let Member {
+            campaign_lifetime_support_cents,
+            currently_entitled_amount_cents,
+            ..
+        } = patreon_member(pool, &interaction.user.id.to_string(), false)
+            .await?
+            .data
+            .attributes;
 
-        if game == "College_Kings_2" && user.tier < 10 && user.lifetime_support < 20 {
+        if game == "College_Kings_2"
+            && currently_entitled_amount_cents < 1000
+            && campaign_lifetime_support_cents < 2000
+        {
             message_response(
                 ctx,
                 interaction,
                 "To access College Kings 2, you need to be an active $10 (Junior) patron with a lifetime subscription of $20.\nUse `/patreon_user login` to manually update the cache and link your Discord account.",
             )
-            .await?;
+            .await.unwrap();
 
             return Ok(());
         }
@@ -130,7 +143,7 @@ async fn download(
 
     let link = bunny::latest_download_link(&game_folder, platform).await?;
 
-    message_response(ctx, interaction, link).await?;
+    message_response(ctx, interaction, link).await.unwrap();
 
     Ok(())
 }
