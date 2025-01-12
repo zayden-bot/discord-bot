@@ -113,7 +113,7 @@ impl OnReady for Sleep {
 
 async fn foo(ctx: &Context, pool: &PgPool, guild_id: GuildId) -> Result<()> {
     let sleep_role_id = match ServersTable::get_row(pool, guild_id).await.unwrap() {
-        Some(row) => row.get_sleep_role_id().unwrap(),
+        Some(row) => row.sleep_role_id().unwrap(),
         None => return Ok(()),
     };
 
@@ -154,7 +154,7 @@ async fn sleep_user(ctx: Context, member: Member, hours: u64) -> Result<()> {
         .await
         .unwrap()
         .unwrap()
-        .get_sleep_role_id()
+        .sleep_role_id()
         .unwrap();
 
     drop(pool);

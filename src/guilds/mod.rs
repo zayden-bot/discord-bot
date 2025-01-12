@@ -103,9 +103,7 @@ impl ServerRow {
         Ok(RoleId::new(id as u64))
     }
 
-    pub fn get_sleep_role_id(&self) -> Result<RoleId> {
-        let id = self.sleep_role_id.unwrap();
-
-        Ok(RoleId::new(id as u64))
+    pub fn sleep_role_id(&self) -> Option<RoleId> {
+        self.sleep_role_id.map(|id| RoleId::new(id as u64))
     }
 }
