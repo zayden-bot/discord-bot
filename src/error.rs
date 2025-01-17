@@ -4,23 +4,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-    UnknownCommand(String),
-    CommandNotFound,
-    DataNotFound,
-    TimeDelta,
-    NoImage,
-    NoUser,
-    UserNotFound,
-    NoRole,
-    RoleNotFound(u64),
-    NoMember,
-    NoChannel,
-    NoParent,
-    NoFileName,
-    FaqMessageNotFound(String),
-    EmptyMessage,
+    MissingGuildId,
     PatreonAccountNotFound(String),
-    NotInGuild,
     NotInteractionAuthor,
 
     Family(family::Error),
@@ -32,13 +17,13 @@ pub enum Error {
 impl ErrorResponse for Error {
     fn to_response(&self) -> String {
         match self {
+            Error::MissingGuildId => String::from("This command only works in a server."),
             Error::PatreonAccountNotFound(_) => String::from("Patreon account not found.\nIf you've recently joined, please use `/patreon_user login` to manually update the cache and link your Discord account."),
             Error::NotInteractionAuthor => String::from("You are not the author of this interaction."),
             Error::Family(e) => e.to_response(),
             Error::GoldStar(e) => e.to_response(),
             Error::ReactionRole(e) => e.to_response(),
             Error::Ticket(e) => e.to_response(),
-            _ => String::new(),
         }
     }
 }

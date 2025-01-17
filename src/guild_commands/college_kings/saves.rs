@@ -6,7 +6,7 @@ use crate::utils::message_response;
 use crate::{Error, Result};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::MissingGuildId)?;
 
     let pool = PostgresPool::get(ctx).await;
 

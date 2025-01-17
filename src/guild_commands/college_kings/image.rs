@@ -6,37 +6,31 @@ use rand::seq::{IteratorRandom, SliceRandom};
 use rand::thread_rng;
 use serenity::all::{
     CommandInteraction, Context, CreateAttachment, CreateCommand, CreateEmbed, EditAttachments,
-    EditInteractionResponse, Ready, Role,
+    EditInteractionResponse, Ready,
 };
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     interaction.defer(&ctx).await.unwrap();
 
-    let guild_roles = interaction
+    let mut guild_roles = interaction
         .guild_id
-        .ok_or_else(|| Error::NotInGuild)?
+        .ok_or(Error::MissingGuildId)?
         .roles(&ctx)
         .await
         .unwrap();
 
-    let member_roles: Vec<&Role> = interaction
+    let member_roles = interaction
         .member
         .as_ref()
-        .ok_or_else(|| Error::NoMember)?
+        .unwrap()
         .roles
         .iter()
-        .map(|role| -> Result<&Role> {
-            guild_roles
-                .get(role)
-                .ok_or_else(|| Error::RoleNotFound(role.get()))
-        })
-        .collect::<Result<_>>()?;
+        .map(|role| guild_roles.remove(role).unwrap())
+        .collect::<Vec<_>>();
 
     let image_map = {
         let data = ctx.data.read().await;
-        let image_cache = data
-            .get::<ImageCache>()
-            .ok_or_else(|| Error::DataNotFound)?;
+        let image_cache = data.get::<ImageCache>().unwrap();
         image_cache.character_map.clone()
     };
 
@@ -55,13 +49,9 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
             .values()
             .flat_map(|v| v.iter())
             .choose(&mut thread_rng())
-            .ok_or_else(|| Error::NoImage)?,
+            .unwrap(),
     };
-    let file_name = image_path
-        .file_name()
-        .ok_or_else(|| Error::NoFileName)?
-        .to_str()
-        .ok_or_else(|| Error::NoFileName)?;
+    let file_name = image_path.file_name().unwrap().to_str().unwrap();
 
     interaction
         .edit_response(

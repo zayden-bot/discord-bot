@@ -25,12 +25,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         .enumerate()
         .then(|(index, msg_result)| async move {
             let msg = msg_result.unwrap();
-            let id = msg
-                .content
-                .lines()
-                .next()
-                .ok_or_else(|| Error::EmptyMessage)?
-                .trim();
+            let id = msg.content.lines().next().unwrap().trim();
 
             Ok::<CreateSelectMenuOption, Error>(CreateSelectMenuOption::new(
                 id[2..id.len() - 2].to_string(),

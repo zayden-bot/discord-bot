@@ -18,7 +18,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         _ => unreachable!("User option is required"),
     };
 
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::MissingGuildId)?;
 
     let member = guild_id.member(&ctx, user).await.unwrap();
 

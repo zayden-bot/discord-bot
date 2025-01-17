@@ -4,7 +4,7 @@ use crate::guilds::ServersTable;
 use crate::image_cache::ImageCache;
 use crate::sqlx_lib::PostgresPool;
 use crate::utils::message_response;
-use crate::{Error, Result};
+use crate::Result;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serenity::all::{
@@ -25,9 +25,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
     let pool = PostgresPool::get(ctx).await;
 
     let mut data = ctx.data.write().await;
-    let locked_users = data
-        .get_mut::<GoodNightLockedUsers>()
-        .ok_or_else(|| Error::DataNotFound)?;
+    let locked_users = data.get_mut::<GoodNightLockedUsers>().unwrap();
 
     let user_id = interaction.user.id;
 
@@ -53,20 +51,12 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
         locked_users.push(user_id);
     }
 
-    let image_cache = data
-        .get::<ImageCache>()
-        .ok_or_else(|| Error::DataNotFound)?;
+    let image_cache = data.get::<ImageCache>().unwrap();
 
     let entries = &image_cache.good_night_images;
 
-    let image_path = entries
-        .choose(&mut thread_rng())
-        .ok_or_else(|| Error::NoImage)?;
-    let file_name = image_path
-        .file_name()
-        .ok_or_else(|| Error::NoFileName)?
-        .to_str()
-        .ok_or_else(|| Error::NoFileName)?;
+    let image_path = entries.choose(&mut thread_rng()).unwrap();
+    let file_name = image_path.file_name().unwrap().to_str().unwrap();
 
     interaction
         .edit_response(

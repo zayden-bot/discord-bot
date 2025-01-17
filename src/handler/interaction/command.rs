@@ -13,7 +13,7 @@ use crate::guild_commands::{college_kings, college_kings_team};
 use crate::modules::gold_star::slash_commands::{GiveStarCommand, StarsCommand};
 use crate::modules::{misc, patreon};
 use crate::modules::{moderation, reaction_roles};
-use crate::{Error, Result, SUPER_USERS};
+use crate::{Result, SUPER_USERS};
 
 impl Handler {
     pub async fn interaction_command(ctx: &Context, command: &CommandInteraction) -> Result<()> {
@@ -84,7 +84,10 @@ impl Handler {
                 reaction_roles::ReactionRoleCommand::run(ctx, command, options).await
             }
             //endregion: reaction_roles
-            _ => Err(Error::UnknownCommand(command.data.name.clone())),
+            _ => {
+                println!("Unknown command: {}", command.data.name);
+                return Ok(());
+            }
         };
 
         if let Err(e) = result {

@@ -7,7 +7,7 @@ use zayden_core::parse_options;
 use crate::sqlx_lib::user_levels::{get_user_level_data, get_user_rank};
 use crate::sqlx_lib::PostgresPool;
 use crate::utils::embed_response;
-use crate::{Error, Result};
+use crate::Result;
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
     let options = interaction.data.options();
@@ -29,9 +29,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
 
     let level = level_data.level;
     let xp_for_next_level = 5 * (level * level) + 50 * level + 100;
-    let user_rank = get_user_rank(&pool, user.id)
-        .await?
-        .ok_or_else(|| Error::UserNotFound)?;
+    let user_rank = get_user_rank(&pool, user.id).await?.unwrap();
 
     embed_response(
         ctx,

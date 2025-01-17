@@ -4,7 +4,7 @@ use serenity::all::{
     CreateInteractionResponse, CreateInteractionResponseMessage,
 };
 
-use crate::{guilds::college_kings::FAQ_CHANNEL_ID, Error, Result};
+use crate::{guilds::college_kings::FAQ_CHANNEL_ID, Result};
 
 pub async fn faq(ctx: &Context, interaction: &ComponentInteraction, ephemeral: bool) -> Result<()> {
     let index =
@@ -21,12 +21,10 @@ pub async fn faq(ctx: &Context, interaction: &ComponentInteraction, ephemeral: b
         .try_next()
         .await
         .unwrap()
-        .ok_or_else(|| Error::FaqMessageNotFound(index.to_string()))?;
+        .unwrap();
 
     let mut parts: Vec<&str> = message.content.split("**").collect();
-    let description = parts
-        .pop()
-        .ok_or_else(|| Error::FaqMessageNotFound(index.to_string()))?;
+    let description = parts.pop().unwrap();
     let title = parts.join("");
 
     interaction

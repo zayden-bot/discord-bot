@@ -9,7 +9,7 @@ use serenity::all::{
 
 use crate::sqlx_lib::user_levels::{get_user_level_data, update_user_level_data};
 use crate::sqlx_lib::PostgresPool;
-use crate::{Error, Result};
+use crate::Result;
 
 const BLOCKED_CHANNEL_IDS: [ChannelId; 1] = [ChannelId::new(776139754408247326)];
 
@@ -38,9 +38,7 @@ pub async fn run(ctx: &Context, msg: &Message) -> Result<()> {
     let pool = PostgresPool::get(ctx).await;
     let level_data = get_user_level_data(&pool, msg.author.id).await.unwrap();
 
-    if level_data.last_xp
-        >= (Utc::now().naive_utc() - TimeDelta::try_minutes(1).ok_or_else(|| Error::TimeDelta)?)
-    {
+    if level_data.last_xp >= (Utc::now().naive_utc() - TimeDelta::minutes(1)) {
         return Ok(());
     }
 

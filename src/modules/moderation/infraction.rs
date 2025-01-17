@@ -28,7 +28,7 @@ impl SlashCommand<Error> for Infraction {
         interaction: &CommandInteraction,
         _options: Vec<ResolvedOption<'_>>,
     ) -> Result<()> {
-        let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
+        let guild_id = interaction.guild_id.ok_or_else(|| Error::MissingGuildId)?;
 
         let options = interaction.data.options();
         let options = parse_options(&options);
@@ -54,7 +54,7 @@ impl SlashCommand<Error> for Infraction {
 
         let six_months_age = Utc::now()
             .checked_sub_months(Months::new(6))
-            .ok_or_else(|| Error::TimeDelta)?
+            .unwrap()
             .naive_utc();
 
         let infractions: Vec<_> = infractions
@@ -87,7 +87,7 @@ impl SlashCommand<Error> for Infraction {
                     guild_id,
                     user,
                     &interaction.user,
-                    TimeDelta::try_hours(1).ok_or_else(|| Error::TimeDelta)?,
+                    TimeDelta::hours(1),
                     points,
                     reason,
                 )
@@ -100,7 +100,7 @@ impl SlashCommand<Error> for Infraction {
                     guild_id,
                     user,
                     &interaction.user,
-                    TimeDelta::try_hours(8).ok_or_else(|| Error::TimeDelta)?,
+                    TimeDelta::hours(8),
                     points,
                     reason,
                 )
@@ -113,7 +113,7 @@ impl SlashCommand<Error> for Infraction {
                     guild_id,
                     user,
                     &interaction.user,
-                    TimeDelta::try_days(28).ok_or_else(|| Error::TimeDelta)?,
+                    TimeDelta::days(28),
                     points,
                     reason,
                 )

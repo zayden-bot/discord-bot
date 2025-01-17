@@ -2,7 +2,7 @@ use crate::{utils::message_response, Error, Result};
 use serenity::all::{CommandInteraction, Context, CreateCommand, Ready};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::NotInGuild)?;
+    let guild_id = interaction.guild_id.ok_or_else(|| Error::MissingGuildId)?;
 
     let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await.unwrap();
 

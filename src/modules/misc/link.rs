@@ -74,7 +74,7 @@ async fn download(
     pool: &PgPool,
     subcommand: &ResolvedValue<'_>,
 ) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or(Error::NotInGuild)?;
+    let guild_id = interaction.guild_id.ok_or(Error::MissingGuildId)?;
 
     let support_channel_id = ServersTable::get_row(pool, guild_id)
         .await
@@ -86,7 +86,7 @@ async fn download(
     if interaction
         .channel
         .as_ref()
-        .ok_or_else(|| Error::NotInGuild)?
+        .ok_or_else(|| Error::MissingGuildId)?
         .parent_id
         .is_some_and(|id| id == support_channel_id)
     {

@@ -176,7 +176,7 @@ async fn check(
         ..
     } = patreon_member(pool, email, force)
         .await?
-        .unwrap()
+        .ok_or_else(|| Error::PatreonAccountNotFound(email.to_string()))?
         .data
         .attributes;
 
