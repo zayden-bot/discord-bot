@@ -114,6 +114,7 @@ async fn login(ctx: &Context, interaction: &CommandInteraction, pool: &PgPool) -
     for _ in 0..10 * 60 {
         let Member { email, .. } = patreon_member(pool, &interaction.user.id.to_string(), false)
             .await?
+            .unwrap()
             .data
             .attributes;
 
@@ -173,7 +174,11 @@ async fn check(
         campaign_lifetime_support_cents,
         currently_entitled_amount_cents,
         ..
-    } = patreon_member(pool, email, force).await?.data.attributes;
+    } = patreon_member(pool, email, force)
+        .await?
+        .unwrap()
+        .data
+        .attributes;
 
     embed_response(
         ctx,

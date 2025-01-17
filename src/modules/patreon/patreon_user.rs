@@ -45,7 +45,7 @@ impl PatreonCacheRow {
     pub async fn get_from_id(pool: &PgPool, id: u64) -> Result<Option<Self>> {
         let row = sqlx::query_as!(
             PatreonCacheRow,
-            "SELECT * FROM patreon_cache WHERE id = $1",
+            "SELECT * FROM patreon_cache WHERE discord_id = $1",
             id as i64,
         )
         .fetch_optional(pool)
@@ -56,8 +56,15 @@ impl PatreonCacheRow {
     }
 }
 
-pub async fn patreon_member(pool: &PgPool, key: &str, force: bool) -> Result<MemberResponse> {
-    let row = PatreonCacheRow::get(pool, key).await.unwrap().unwrap();
+pub async fn patreon_member(
+    pool: &PgPool,
+    key: &str,
+    force: bool,
+) -> Result<Option<MemberResponse>> {
+    let row = match PatreonCacheRow::get(pool, key).await.unwrap() {
+        Some(row) => row,
+        None => return Ok(None),
+    };
 
     let api_key = env::var("PATREON_TOKEN").unwrap();
 
@@ -70,5 +77,5 @@ pub async fn patreon_member(pool: &PgPool, key: &str, force: bool) -> Result<Mem
         .await
         .unwrap();
 
-    Ok(member)
+    Ok(Some(member))
 }

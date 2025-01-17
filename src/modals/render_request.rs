@@ -24,7 +24,12 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         _ => patreon_member(&pool, &modal.user.id.to_string(), false).await?,
     };
 
-    let tier = response.data.attributes.currently_entitled_amount_cents / 100;
+    let tier = response
+        .unwrap()
+        .data
+        .attributes
+        .currently_entitled_amount_cents
+        / 100;
 
     let character = data.remove("character").unwrap();
     let prop = data.remove("prop").unwrap_or("No prop specified.");

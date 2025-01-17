@@ -116,6 +116,7 @@ async fn download(
             ..
         } = patreon_member(pool, &interaction.user.id.to_string(), false)
             .await?
+            .unwrap()
             .data
             .attributes;
 
