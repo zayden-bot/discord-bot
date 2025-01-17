@@ -1,14 +1,15 @@
 use futures::{StreamExt, TryStreamExt};
 use serenity::all::{
-    ButtonStyle, Context, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedAuthor,
+    ButtonStyle, ChannelId, Context, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedAuthor,
     CreateEmbedFooter, CreateMessage, EditMessage, EmbedField, GuildChannel, Message, Reaction,
     ReactionType,
 };
 
-use crate::{guilds::ServersTable, sqlx_lib::PostgresPool, Result};
+use crate::Result;
 
 const POSITIVE_REACTION: &str = "👍";
 const NEGATIVE_REACTION: &str = "👎";
+const CHANNEL_ID: ChannelId = ChannelId::new(1225381390539821086);
 
 pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChannel) -> Result<()> {
     let message = reaction.message(ctx).await.unwrap();
@@ -24,14 +25,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
         }
     }
 
-    let pool = PostgresPool::get(ctx).await;
-    let suggestion_channel_id = ServersTable::get_row(&pool, channel.guild_id)
-        .await
-        .unwrap()
-        .unwrap()
-        .get_suggestion_channel_id()?;
-
-    let mut messages = suggestion_channel_id.messages_iter(&ctx).boxed();
+    let mut messages = CHANNEL_ID.messages_iter(&ctx).boxed();
 
     if (positive_count - negative_count) >= 20 {
         while let Some(mut msg) = messages.try_next().await.unwrap() {
@@ -54,7 +48,7 @@ pub async fn suggestion(ctx: &Context, reaction: &Reaction, channel: GuildChanne
             }
         }
 
-        suggestion_channel_id
+        CHANNEL_ID
             .send_message(
                 ctx,
                 CreateMessage::new()
