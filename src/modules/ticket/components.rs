@@ -1,4 +1,4 @@
-use serenity::all::{ComponentInteraction, Context};
+use serenity::all::{ComponentInteraction, Context, CreateInputText, InputTextStyle};
 use sqlx::{PgPool, Postgres};
 use ticket::TicketComponent;
 
@@ -22,7 +22,17 @@ pub async fn support_faq(
 }
 
 pub async fn support_ticket(ctx: &Context, component: &ComponentInteraction) -> Result<()> {
-    TicketComponent::support_ticket(ctx, component).await?;
+    let version =
+        CreateInputText::new(InputTextStyle::Short, "Version", "version").placeholder("1.0.0");
+
+    let additional = CreateInputText::new(
+        InputTextStyle::Paragraph,
+        "Additional Information",
+        "additional",
+    )
+    .placeholder("Please provide any additional information that may help us assist you.");
+
+    TicketComponent::support_ticket(ctx, component, vec![version, additional]).await?;
 
     Ok(())
 }
