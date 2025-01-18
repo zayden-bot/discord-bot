@@ -30,9 +30,10 @@ pub async fn support_ticket(ctx: &Context, component: &ComponentInteraction) -> 
         "Additional Information",
         "additional",
     )
-    .placeholder("Please provide any additional information that may help us assist you.");
+    .placeholder("Please provide any additional information that may help us assist you.")
+    .required(false);
 
-    TicketComponent::support_ticket(ctx, component, vec![version, additional]).await?;
+    TicketComponent::support_ticket(ctx, component, [version, additional]).await?;
 
     Ok(())
 }
