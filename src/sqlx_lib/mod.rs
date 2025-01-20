@@ -7,8 +7,6 @@ use sqlx::PgPool;
 
 use crate::Result;
 
-pub mod user_levels;
-
 pub struct PostgresPool;
 
 impl PostgresPool {

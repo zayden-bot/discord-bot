@@ -1,10 +1,15 @@
+pub mod component;
+pub mod message_command;
+pub mod slash_commands;
+
 use chrono::NaiveDateTime;
 use futures::{StreamExt, TryStreamExt};
 use serenity::all::{Context, User, UserId};
-use sqlx::{Pool, Postgres};
+use sqlx::PgPool;
 
-use crate::sqlx_lib::PostgresPool;
 use crate::{Error, Result};
+
+pub struct Levels;
 
 pub struct Level {
     pub id: i64,
@@ -15,7 +20,7 @@ pub struct Level {
     pub last_xp: NaiveDateTime,
 }
 
-pub async fn get_user_level_data(pool: &Pool<Postgres>, id: UserId) -> Result<Level> {
+pub async fn get_user_level_data(pool: &PgPool, id: UserId) -> Result<Level> {
     let user_id = id.get() as i64;
 
     let data = match sqlx::query_as!(Level, "SELECT * FROM levels WHERE id = $1", user_id)
@@ -38,7 +43,7 @@ pub async fn get_user_level_data(pool: &Pool<Postgres>, id: UserId) -> Result<Le
 }
 
 pub async fn update_user_level_data(
-    pool: &Pool<Postgres>,
+    pool: &PgPool,
     user_id: UserId,
     xp: i32,
     total_xp: i32,
@@ -59,7 +64,7 @@ pub async fn update_user_level_data(
     Ok(())
 }
 
-pub async fn get_user_rank(pool: &Pool<Postgres>, user_id: UserId) -> Result<Option<i64>> {
+pub async fn get_user_rank(pool: &PgPool, user_id: UserId) -> Result<Option<i64>> {
     let user_id = user_id.get() as i64;
 
     let data = sqlx::query!(
@@ -72,7 +77,7 @@ pub async fn get_user_rank(pool: &Pool<Postgres>, user_id: UserId) -> Result<Opt
     Ok(data.rank)
 }
 
-pub async fn get_user_row_number(pool: &Pool<Postgres>, user_id: UserId) -> Result<Option<i64>> {
+pub async fn get_user_row_number(pool: &PgPool, user_id: UserId) -> Result<Option<i64>> {
     let user_id = user_id.get() as i64;
 
     let data = sqlx::query!(
@@ -95,9 +100,12 @@ pub struct UserLevel {
     pub last_xp: NaiveDateTime,
 }
 
-pub async fn get_users(ctx: &Context, page: i64, limit: i64) -> Result<Vec<UserLevel>> {
-    let pool = PostgresPool::get(ctx).await;
-
+pub async fn get_users(
+    ctx: &Context,
+    pool: &PgPool,
+    page: i64,
+    limit: i64,
+) -> Result<Vec<UserLevel>> {
     let offset = (page - 1) * limit;
 
     let data = sqlx::query_as!(
@@ -106,7 +114,7 @@ pub async fn get_users(ctx: &Context, page: i64, limit: i64) -> Result<Vec<UserL
         limit,
         offset
     )
-    .fetch(&pool)
+    .fetch(pool)
     .then(|level_result| async move {
         let level = level_result.unwrap();
 

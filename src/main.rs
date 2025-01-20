@@ -4,9 +4,7 @@ use serenity::all::{ClientBuilder, GatewayIntents, UserId};
 use serenity::prelude::TypeMap;
 
 pub use error::{Error, Result};
-use guild_commands::college_kings::{
-    goodmorning::GoodMorningLockedUsers, goodnight::GoodNightLockedUsers,
-};
+use guild_commands::college_kings::greetings::GreetingLockedUsers;
 use sqlx_lib::PostgresPool;
 
 use crate::image_cache::ImageCache;
@@ -22,7 +20,6 @@ mod image_cache;
 pub mod modals;
 pub mod modules;
 mod sqlx_lib;
-mod utils;
 
 pub const SERVER_URL: &str = "http://145.40.184.89:8080";
 pub const SUPER_USERS: [UserId; 2] = [
@@ -38,8 +35,7 @@ async fn main() -> Result<()> {
 
     let mut type_map = TypeMap::new();
     type_map.insert::<ImageCache>(ImageCache::new());
-    type_map.insert::<GoodMorningLockedUsers>(Vec::new());
-    type_map.insert::<GoodNightLockedUsers>(Vec::new());
+    type_map.insert::<GreetingLockedUsers>(Vec::new());
     type_map.insert::<PostgresPool>(pool);
 
     let token = &env::var("DISCORD_TOKEN").expect("Expected DISCORD_TOKEN in the environment");

@@ -1,12 +1,11 @@
 use async_trait::async_trait;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, Permissions, Ready, ResolvedOption, ResolvedValue,
+    CreateEmbed, EditInteractionResponse, Permissions, Ready, ResolvedOption, ResolvedValue,
 };
+use sqlx::{PgPool, Postgres};
 use zayden_core::{parse_options, SlashCommand};
 
-use crate::sqlx_lib::PostgresPool;
-use crate::utils::embed_response;
 use crate::{Error, Result};
 
 use super::InfractionRow;
@@ -14,29 +13,28 @@ use super::InfractionRow;
 pub struct Logs;
 
 #[async_trait]
-impl SlashCommand<Error> for Logs {
+impl SlashCommand<Error, Postgres> for Logs {
     async fn run(
         ctx: &Context,
         interaction: &CommandInteraction,
-        _options: Vec<ResolvedOption<'_>>,
+        options: Vec<ResolvedOption<'_>>,
+        pool: &PgPool,
     ) -> Result<()> {
-        let options = interaction.data.options();
-        let options = parse_options(&options);
+        interaction.defer(ctx).await.unwrap();
 
-        let user = match options.get("user") {
-            Some(ResolvedValue::User(user, _)) => *user,
-            _ => unreachable!("User option is required"),
+        let mut options = parse_options(options);
+
+        let Some(ResolvedValue::User(user, _)) = options.remove("user") else {
+            unreachable!("User option is required");
         };
 
-        let filter = match options.get("filter") {
+        let filter = match options.remove("filter") {
             Some(ResolvedValue::String(filter)) => filter,
             _ => "recent",
         };
 
-        let pool = PostgresPool::get(ctx).await;
-
         let infractions =
-            InfractionRow::user_infractions(&pool, user.id, filter == "recent").await?;
+            InfractionRow::user_infractions(pool, user.id, filter == "recent").await?;
 
         let fields = infractions.into_iter().map(|infraction| {
             (
@@ -55,15 +53,14 @@ impl SlashCommand<Error> for Logs {
             )
         });
 
-        embed_response(
-            ctx,
-            interaction,
-            CreateEmbed::new()
-                .title(format!("Logs for {}", user.name))
-                .fields(fields),
-        )
-        .await
-        .unwrap();
+        let embed = CreateEmbed::new()
+            .title(format!("Logs for {}", user.name))
+            .fields(fields);
+
+        interaction
+            .edit_response(ctx, EditInteractionResponse::new().embed(embed))
+            .await
+            .unwrap();
 
         Ok(())
     }

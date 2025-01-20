@@ -145,7 +145,7 @@ checksum = "79296716171880943b8470b5f8d03aa55eb2e645a4874bdbb28adb49162e012c"
 [[package]]
 name = "bunny-cdn-wrapper"
 version = "0.1.0"
-source = "git+https://github.com/ViridianLink/bunny-cdn-wrapper.git?branch=main#792b96e30e81ff3e75998502910684bae5ede7d0"
+source = "git+https://github.com/ViridianLink/bunny-cdn-wrapper.git?branch=main#0a90ee0303ca89e784d9cc84ed281b53dac450b6"
 dependencies = [
  "lazy_static",
  "reqwest 0.12.12",
@@ -186,16 +186,6 @@ name = "cfg_aliases"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
-
-[[package]]
-name = "charming"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88f802d7b8011655a1162e04e6e6849bb57baae3c0ea7026c64ba280d80d1d77"
-dependencies = [
- "serde",
- "serde_json",
-]
 
 [[package]]
 name = "chrono"
@@ -425,19 +415,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "family"
-version = "0.1.0"
-source = "git+https://github.com/zayden-bot/family.git?branch=master#cb7cc2621c977adb65a89786a08ee19120cc8448"
-dependencies = [
- "async-trait",
- "charming",
- "futures",
- "serenity",
- "sqlx",
- "zayden-core",
-]
-
-[[package]]
 name = "fastrand"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -631,7 +608,7 @@ checksum = "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f"
 [[package]]
 name = "gold-star"
 version = "0.1.0"
-source = "git+https://github.com/zayden-bot/gold-star.git?branch=main#b9f1f4d94659dd5b5582250d80813ab040c81f24"
+source = "git+https://github.com/zayden-bot/gold-star.git?branch=main#757b0a816b5a8e5fb46bfbea08dcbebefddfa497"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1080,9 +1057,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.7.0"
+version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62f822373a4fe84d4bb149bf54e584a7f4abec90e072ed49cda0edea5b95471f"
+checksum = "8c9c992b02b5b4c94ea26e32fe5bccb7aa7d9f390ab5c1221ff895bc7ea8b652"
 dependencies = [
  "equivalent",
  "hashbrown",
@@ -1090,9 +1067,9 @@ dependencies = [
 
 [[package]]
 name = "ipnet"
-version = "2.10.1"
+version = "2.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddc24109865250148c2e0f3d25d4f0f479571723792d3802153c60922a4fb708"
+checksum = "469fb0b9cefa57e3ef31275ee7cacb78f2fdca44e4765491884a2b119d4eb130"
 
 [[package]]
 name = "itoa"
@@ -1564,7 +1541,7 @@ dependencies = [
 [[package]]
 name = "reaction-roles"
 version = "0.1.0"
-source = "git+https://github.com/zayden-bot/reaction-roles.git?branch=main#24a7556dddb3e651c20036d2a5620c914e98d2da"
+source = "git+https://github.com/zayden-bot/reaction-roles.git?branch=main#9529aca76588bbd63691733ff703ed7f11b23803"
 dependencies = [
  "serenity",
  "sqlx",
@@ -1933,9 +1910,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.135"
+version = "1.0.137"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b0d7ba2887406110130a978386c4e1befb98c674b4fba677954e4db976630d9"
+checksum = "930cfb6e6abf99298aaad7d29abbef7a9999a9a8806a40088f55f0dcec03146b"
 dependencies = [
  "itoa",
  "memchr",
@@ -2423,7 +2400,7 @@ dependencies = [
 [[package]]
 name = "ticket"
 version = "0.1.0"
-source = "git+https://github.com/zayden-bot/ticket?branch=main#0ddd9e6b9db59d8cdbfbbf27477fa3ad1bdb7634"
+source = "git+https://github.com/zayden-bot/ticket?branch=main#146e5364be7ec451915c30775cfcc252528c64d4"
 dependencies = [
  "async-trait",
  "futures",
@@ -3201,7 +3178,6 @@ dependencies = [
  "chrono",
  "cron",
  "dotenvy",
- "family",
  "futures",
  "gold-star",
  "lazy_static",
@@ -3223,10 +3199,11 @@ dependencies = [
 [[package]]
 name = "zayden-core"
 version = "0.1.0"
-source = "git+https://github.com/zayden-bot/slash-command-core.git?branch=master#3f7284761b5d14173bc8e753ac8a6802624ba2c6"
+source = "git+https://github.com/zayden-bot/slash-command-core.git?branch=master#0aef1a08d8707f47b7e56ef9da93f40f8228cb07"
 dependencies = [
  "async-trait",
  "serenity",
+ "sqlx",
 ]
 
 [[package]]

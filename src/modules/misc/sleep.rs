@@ -8,38 +8,31 @@ use serenity::all::{
     Member, PermissionOverwrite, PermissionOverwriteType, Permissions, Ready, ResolvedOption,
     ResolvedValue,
 };
-use sqlx::PgPool;
+use sqlx::{PgPool, Postgres};
 use zayden_core::SlashCommand;
 
 use crate::guilds::ServersTable;
 use crate::handler::OnReady;
 use crate::sqlx_lib::PostgresPool;
-use crate::utils::message_response;
 use crate::{Error, Result};
 
 pub struct Sleep;
 
 #[async_trait]
-impl SlashCommand<Error> for Sleep {
+impl SlashCommand<Error, Postgres> for Sleep {
     async fn run(
         ctx: &Context,
         interaction: &CommandInteraction,
-        _options: Vec<ResolvedOption<'_>>,
+        mut options: Vec<ResolvedOption<'_>>,
+        _pool: &PgPool,
     ) -> Result<()> {
         interaction.defer_ephemeral(ctx).await.unwrap();
 
-        let hours: u64 = match &interaction.data.options()[0].value {
-            ResolvedValue::Integer(hours) => match (*hours).try_into() {
-                Ok(hours) => hours,
-                Err(_) => {
-                    message_response(ctx, interaction, "Hours must be a positive integer.")
-                        .await
-                        .unwrap();
-                    return Ok(());
-                }
-            },
-            _ => unreachable!("Hours option is required and must be an integer."),
+        let Some(ResolvedValue::Integer(hours)) = options.pop().map(|option| option.value) else {
+            unreachable!("Hours option is required");
         };
+
+        let hours = hours.try_into().map_err(|_| Error::NegativeHours)?;
 
         let embed = CreateEmbed::new().description("This command will remove your ability to view any channels in the server until the time limit has expired or the zayden-bot restarts. This cannot be undone at this time.\nAre you sure you want to continue?");
 

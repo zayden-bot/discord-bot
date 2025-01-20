@@ -1,29 +1,42 @@
-use serenity::all::{CommandInteraction, Context, CreateCommand, Ready};
+use async_trait::async_trait;
+use serenity::all::{
+    CommandInteraction, Context, CreateCommand, EditInteractionResponse, Ready, ResolvedOption,
+};
+use sqlx::{PgPool, Postgres};
+use zayden_core::SlashCommand;
 
 use crate::guilds::ServersTable;
-use crate::sqlx_lib::PostgresPool;
-use crate::utils::message_response;
 use crate::{Error, Result};
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::MissingGuildId)?;
+pub struct Saves;
 
-    let pool = PostgresPool::get(ctx).await;
+#[async_trait]
+impl SlashCommand<Error, Postgres> for Saves {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+        pool: &PgPool,
+    ) -> Result<()> {
+        interaction.defer(&ctx).await.unwrap();
 
-    let support_thread_id = ServersTable::get_row(&pool, guild_id)
-        .await
-        .unwrap()
-        .unwrap()
-        .get_support_channel_id()
-        .unwrap();
+        let guild_id = interaction.guild_id.ok_or(Error::MissingGuildId)?;
 
-    message_response(ctx, interaction, format!("We do our best to retain save integrity with every update however due to the dynamic nature of game development saves might break. If you experience a save problem please let us know in <#{}>", support_thread_id)).await.unwrap();
+        let support_thread_id = ServersTable::get_row(pool, guild_id)
+            .await
+            .unwrap()
+            .unwrap()
+            .get_support_channel_id()
+            .unwrap();
 
-    Ok(())
-}
+        interaction.edit_response(ctx, EditInteractionResponse::new().content(format!("We do our best to retain save integrity with every update however due to the dynamic nature of game development saves might break. If you experience a save problem please let us know in <#{}>", support_thread_id))).await.unwrap();
 
-pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
-    let command = CreateCommand::new("saves").description("Get saves disclaimer");
+        Ok(())
+    }
 
-    Ok(command)
+    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+        let command = CreateCommand::new("saves").description("Get saves disclaimer");
+
+        Ok(command)
+    }
 }

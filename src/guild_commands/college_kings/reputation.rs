@@ -1,25 +1,45 @@
-use crate::utils::embed_response;
-use crate::Result;
-use serenity::all::{CommandInteraction, Context, CreateCommand, CreateEmbed, Ready};
+use async_trait::async_trait;
+use serenity::all::{
+    CommandInteraction, Context, CreateCommand, CreateEmbed, CreateInteractionResponse,
+    CreateInteractionResponseMessage, Ready, ResolvedOption,
+};
+use sqlx::{PgPool, Postgres};
+use zayden_core::SlashCommand;
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    embed_response(
-        ctx,
-        interaction,
-        CreateEmbed::new()
+use crate::{Error, Result};
+
+pub struct Reputation;
+
+#[async_trait]
+impl SlashCommand<Error, Postgres> for Reputation {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+        _pool: &PgPool,
+    ) -> Result<()> {
+        let embed = CreateEmbed::new()
             .field("Popular", "✅ Bro\n✅ Trouble Maker\n❌ Boyfriend", true)
             .field("Loyal", "✅ Bro\n✅ Boyfriend\n❌ Trouble Maker", true)
-            .field("Confident", "✅ Boyfriend\n✅ Trouble Maker\n❌ Bro", true),
-    )
-    .await
-    .unwrap();
+            .field("Confident", "✅ Boyfriend\n✅ Trouble Maker\n❌ Bro", true);
 
-    Ok(())
-}
+        interaction
+            .create_response(
+                ctx,
+                CreateInteractionResponse::Message(
+                    CreateInteractionResponseMessage::new().embed(embed),
+                ),
+            )
+            .await
+            .unwrap();
 
-pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
-    let command = CreateCommand::new("reputation")
-        .description("View the secrets behind the reputation value");
+        Ok(())
+    }
 
-    Ok(command)
+    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+        let command = CreateCommand::new("reputation")
+            .description("View the secrets behind the reputation value");
+
+        Ok(command)
+    }
 }

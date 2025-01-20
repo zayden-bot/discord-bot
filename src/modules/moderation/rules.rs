@@ -3,15 +3,15 @@ use std::str::FromStr;
 
 use async_trait::async_trait;
 use serenity::all::{
-    ChannelId, Colour, CommandInteraction, CreateEmbed, EditMessage, MessageId, Ready,
-    ResolvedOption,
+    ChannelId, Colour, CommandInteraction, CreateEmbed, EditInteractionResponse, EditMessage,
+    MessageId, Ready, ResolvedOption,
 };
 use serenity::builder::CreateCommand;
 use serenity::model::Permissions;
 use serenity::prelude::Context;
+use sqlx::{PgPool, Postgres};
 use zayden_core::SlashCommand;
 
-use crate::utils::message_response;
 use crate::{Error, Result};
 
 const CHANNEL_ID: ChannelId = ChannelId::new(747430712617074718);
@@ -20,11 +20,12 @@ const MESSAGE_ID: MessageId = MessageId::new(788539168980336701);
 pub struct RulesCommand;
 
 #[async_trait]
-impl SlashCommand<Error> for RulesCommand {
+impl SlashCommand<Error, Postgres> for RulesCommand {
     async fn run(
         ctx: &Context,
         interaction: &CommandInteraction,
         _options: Vec<ResolvedOption<'_>>,
+        _pool: &PgPool,
     ) -> Result<()> {
         interaction.defer_ephemeral(ctx).await.unwrap();
 
@@ -46,7 +47,11 @@ impl SlashCommand<Error> for RulesCommand {
             .await
             .unwrap();
 
-        message_response(ctx, interaction, "The rules have been sent.")
+        interaction
+            .edit_response(
+                ctx,
+                EditInteractionResponse::new().content("The rules have been sent."),
+            )
             .await
             .unwrap();
 

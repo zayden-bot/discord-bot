@@ -3,8 +3,8 @@ use std::cmp;
 use async_trait::async_trait;
 use chrono::{Months, TimeDelta, Utc};
 use serenity::all::{
-    CommandInteraction, CommandOptionType, CreateEmbed, Message, Ready, ResolvedOption,
-    ResolvedValue, User, UserId,
+    CommandInteraction, CommandOptionType, CreateEmbed, CreateMessage, EditInteractionResponse,
+    Message, Ready, ResolvedOption, ResolvedValue, User, UserId,
 };
 use serenity::builder::{CreateCommand, CreateCommandOption};
 use serenity::model::prelude::GuildId;
@@ -13,8 +13,6 @@ use serenity::prelude::Context;
 use sqlx::{PgPool, Pool, Postgres};
 use zayden_core::{parse_options, SlashCommand};
 
-use crate::sqlx_lib::PostgresPool;
-use crate::utils::{dm_user_embed, embed_response};
 use crate::{Error, Result};
 
 use super::{InfractionKind, InfractionRow};
@@ -22,35 +20,34 @@ use super::{InfractionKind, InfractionRow};
 pub struct Infraction;
 
 #[async_trait]
-impl SlashCommand<Error> for Infraction {
+impl SlashCommand<Error, Postgres> for Infraction {
     async fn run(
         ctx: &Context,
         interaction: &CommandInteraction,
-        _options: Vec<ResolvedOption<'_>>,
+        options: Vec<ResolvedOption<'_>>,
+        pool: &PgPool,
     ) -> Result<()> {
-        let guild_id = interaction.guild_id.ok_or_else(|| Error::MissingGuildId)?;
+        interaction.defer(ctx).await.unwrap();
 
-        let options = interaction.data.options();
-        let options = parse_options(&options);
+        let guild_id = interaction.guild_id.ok_or(Error::MissingGuildId)?;
 
-        let user = match options.get("user") {
-            Some(ResolvedValue::User(user, _)) => *user,
-            _ => unreachable!("User option is required"),
+        let mut options = parse_options(options);
+
+        let Some(ResolvedValue::User(user, _)) = options.remove("user") else {
+            unreachable!("User option is required");
         };
 
-        let points = match options.get("points") {
-            Some(ResolvedValue::Integer(points)) => *points as i32,
+        let points = match options.remove("points") {
+            Some(ResolvedValue::Integer(points)) => points as i32,
             _ => 1,
         };
 
-        let reason = match options.get("reason") {
-            Some(ResolvedValue::String(reason)) => *reason,
+        let reason = match options.remove("reason") {
+            Some(ResolvedValue::String(reason)) => reason,
             _ => "No reason provided.",
         };
 
-        let pool = PostgresPool::get(ctx).await;
-
-        let infractions = InfractionRow::user_infractions(&pool, user.id, false).await?;
+        let infractions = InfractionRow::user_infractions(pool, user.id, false).await?;
 
         let six_months_age = Utc::now()
             .checked_sub_months(Months::new(6))
@@ -61,29 +58,18 @@ impl SlashCommand<Error> for Infraction {
             .iter()
             .filter(|infraction| infraction.created_at >= six_months_age)
             .collect();
-        let infraction_count: i32 = infractions
+        let infraction_count = infractions
             .into_iter()
             .map(|infraction| infraction.points)
-            .sum();
+            .sum::<i32>();
         let infraction_count = cmp::min(infraction_count + points, 5);
 
         let embed = match infraction_count {
-            1 => {
-                warn(
-                    ctx,
-                    &pool,
-                    guild_id,
-                    user,
-                    &interaction.user,
-                    points,
-                    reason,
-                )
-                .await?
-            }
+            1 => warn(ctx, pool, guild_id, user, &interaction.user, points, reason).await?,
             2 => {
                 mute(
                     ctx,
-                    &pool,
+                    pool,
                     guild_id,
                     user,
                     &interaction.user,
@@ -96,7 +82,7 @@ impl SlashCommand<Error> for Infraction {
             3 => {
                 mute(
                     ctx,
-                    &pool,
+                    pool,
                     guild_id,
                     user,
                     &interaction.user,
@@ -109,7 +95,7 @@ impl SlashCommand<Error> for Infraction {
             4 => {
                 mute(
                     ctx,
-                    &pool,
+                    pool,
                     guild_id,
                     user,
                     &interaction.user,
@@ -119,22 +105,14 @@ impl SlashCommand<Error> for Infraction {
                 )
                 .await?
             }
-            5 => {
-                ban(
-                    ctx,
-                    &pool,
-                    guild_id,
-                    user,
-                    &interaction.user,
-                    points,
-                    reason,
-                )
-                .await?
-            }
+            5 => ban(ctx, pool, guild_id, user, &interaction.user, points, reason).await?,
             _ => unreachable!("Invalid infraction count"),
         };
 
-        embed_response(ctx, interaction, embed).await.unwrap();
+        interaction
+            .edit_response(ctx, EditInteractionResponse::new().embed(embed))
+            .await
+            .unwrap();
 
         Ok(())
     }
@@ -182,7 +160,11 @@ async fn send_user_message(
     };
 
     let embed = CreateEmbed::new().title(title).description(desc);
-    let message = dm_user_embed(ctx, user_id, embed).await.unwrap();
+
+    let message = user_id
+        .direct_message(ctx, CreateMessage::new().embed(embed))
+        .await
+        .unwrap();
 
     Ok(message)
 }

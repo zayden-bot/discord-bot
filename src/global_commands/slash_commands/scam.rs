@@ -1,103 +1,101 @@
+use async_trait::async_trait;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, CreateMessage, DiscordJsonError, ErrorResponse, Permissions, Ready, ResolvedValue,
+    CreateEmbed, CreateMessage, DiscordJsonError, EditInteractionResponse, ErrorResponse,
+    HttpError, Permissions, Ready, ResolvedOption, ResolvedValue,
 };
-use serenity::http::HttpError::UnsuccessfulRequest;
-use zayden_core::parse_options;
+use sqlx::{PgPool, Postgres};
+use zayden_core::{parse_options, SlashCommand};
 
-use crate::utils::embed_response;
 use crate::{Error, Result};
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    interaction.defer(&ctx).await.unwrap();
+pub struct Scam;
 
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::MissingGuildId)?;
+#[async_trait]
+impl SlashCommand<Error, Postgres> for Scam {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        options: Vec<ResolvedOption<'_>>,
+        _pool: &PgPool,
+    ) -> Result<()> {
+        interaction.defer(&ctx).await.unwrap();
 
-    let options = interaction.data.options();
-    let options = parse_options(&options);
+        let guild_id = interaction.guild_id.ok_or(Error::MissingGuildId)?;
 
-    let user = match options.get("member") {
-        Some(ResolvedValue::User(user, _)) => *user,
-        _ => unreachable!("Expected user"),
-    };
-    let reason = match options.get("reason") {
-        Some(ResolvedValue::String(reason)) => reason,
-        _ => "Compromised account: Sending scam links.",
-    };
+        let mut options = parse_options(options);
 
-    let member = match guild_id.member(&ctx, user).await {
-        Ok(member) => member,
-        Err(_) => {
-            embed_response(
-                ctx,
-                interaction,
-                CreateEmbed::new()
-                    .title("Error")
-                    .description("Member not found."),
+        let Some(ResolvedValue::User(user, _)) = options.remove("member") else {
+            unreachable!("Expected user");
+        };
+
+        let reason = match options.remove("reason") {
+            Some(ResolvedValue::String(reason)) => reason,
+            _ => "Compromised account: Sending scam links.",
+        };
+
+        let guild = guild_id.to_partial_guild(&ctx).await.unwrap();
+
+        match user
+            .create_dm_channel(&ctx)
+            .await
+            .unwrap()
+            .send_message(
+                &ctx,
+                CreateMessage::new().add_embed(CreateEmbed::new().description(format!(
+                    "You have been soft banned from {} for the following reason: {}",
+                    guild.name, reason
+                ))),
             )
             .await
+        {
+            // 50007: Cannot send messages to this user
+            Err(serenity::Error::Http(HttpError::UnsuccessfulRequest(ErrorResponse {
+                error: DiscordJsonError { code: 50007, .. },
+                ..
+            }))) => {}
+            result => {
+                result.unwrap();
+            }
+        }
+
+        guild_id
+            .ban_with_reason(&ctx, user, 1, reason)
+            .await
             .unwrap();
-            return Ok(());
-        }
-    };
+        guild_id.unban(&ctx, user).await.unwrap();
 
-    let guild = guild_id.to_partial_guild(&ctx).await.unwrap();
+        let embed = CreateEmbed::new().title("Soft Banned").description(format!(
+            "{} has been successfully soft banned for the following reason: {}",
+            user.display_name(),
+            reason
+        ));
 
-    match user
-        .create_dm_channel(&ctx)
-        .await
-        .unwrap()
-        .send_message(
-            &ctx,
-            CreateMessage::new().add_embed(CreateEmbed::new().description(format!(
-                "You have been soft banned from {} for the following reason: {}",
-                guild.name, reason
-            ))),
-        )
-        .await
-    {
-        // 50007: Cannot send messages to this user
-        Err(serenity::Error::Http(UnsuccessfulRequest(ErrorResponse {
-            error: DiscordJsonError { code: 50007, .. },
-            ..
-        }))) => {}
-        result => {
-            result.unwrap();
-        }
+        interaction
+            .edit_response(ctx, EditInteractionResponse::new().embed(embed))
+            .await
+            .unwrap();
+
+        Ok(())
     }
 
-    guild_id
-        .ban_with_reason(&ctx, user, 1, reason)
-        .await
-        .unwrap();
-    guild_id.unban(&ctx, user).await.unwrap();
-
-    embed_response(
-        ctx,
-        interaction,
-        CreateEmbed::new().title("Soft Banned").description(format!(
-            "{} has been successfully soft banned for the following reason: {}",
-            member.user.name, reason
-        )),
-    )
-    .await
-    .unwrap();
-
-    Ok(())
-}
-
-pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
-    let command = CreateCommand::new("scam")
-        .description("Soft ban a compromised account")
-        .default_member_permissions(Permissions::KICK_MEMBERS)
-        .add_option(
-            CreateCommandOption::new(CommandOptionType::User, "member", "Member to soft ban")
-                .required(true),
-        )
-        .add_option(
-            CreateCommandOption::new(CommandOptionType::String, "reason", "Reason for soft ban")
+    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+        let command = CreateCommand::new("scam")
+            .description("Soft ban a compromised account")
+            .default_member_permissions(Permissions::KICK_MEMBERS)
+            .add_option(
+                CreateCommandOption::new(CommandOptionType::User, "member", "Member to soft ban")
+                    .required(true),
+            )
+            .add_option(
+                CreateCommandOption::new(
+                    CommandOptionType::String,
+                    "reason",
+                    "Reason for soft ban",
+                )
                 .required(false),
-        );
+            );
 
-    Ok(command)
+        Ok(command)
+    }
 }

@@ -3,6 +3,7 @@ use serenity::all::{Context, CreateCommand, Ready};
 mod bunny;
 // pub mod family;
 pub mod gold_star;
+pub mod levels;
 pub mod misc;
 pub mod moderation;
 pub mod patreon;

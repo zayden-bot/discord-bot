@@ -1,5 +1,4 @@
 use serenity::prelude::TypeMapKey;
-use std::collections::HashMap;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
@@ -12,29 +11,10 @@ fn get_images() -> Vec<PathBuf> {
         .collect()
 }
 
-fn create_character_map(images: Vec<PathBuf>) -> HashMap<String, Vec<PathBuf>> {
-    let mut character_map = HashMap::new();
-
-    for image in images {
-        let character = image
-            .iter()
-            .nth(2)
-            .and_then(|s| s.to_str())
-            .unwrap_or("unknown")
-            .to_string();
-
-        let entry = character_map.entry(character).or_insert_with(Vec::new);
-        entry.push(image);
-    }
-
-    character_map
-}
-
 #[derive(Debug)]
 pub struct ImageCache {
     pub good_morning_images: Vec<PathBuf>,
     pub good_night_images: Vec<PathBuf>,
-    pub character_map: HashMap<String, Vec<PathBuf>>,
 }
 
 impl ImageCache {
@@ -52,7 +32,6 @@ impl ImageCache {
                 .filter(|p| p.iter().nth(1).and_then(|s| s.to_str()) == Some("good_night"))
                 .cloned()
                 .collect(),
-            character_map: create_character_map(images),
         }
     }
 }

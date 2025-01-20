@@ -1,27 +1,43 @@
-use crate::{utils::message_response, Error, Result};
-use serenity::all::{CommandInteraction, Context, CreateCommand, Ready};
+use async_trait::async_trait;
+use serenity::all::{
+    CommandInteraction, Context, CreateCommand, EditInteractionResponse, Ready, ResolvedOption,
+};
+use sqlx::{PgPool, Postgres};
+use zayden_core::SlashCommand;
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::MissingGuildId)?;
+use crate::{Error, Result};
 
-    let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await.unwrap();
+pub struct MemberCount;
 
-    message_response(
-        ctx,
-        interaction,
-        &format!(
-            "There are **{}** members in this server",
-            partial_guild.approximate_member_count.unwrap_or_default()
-        ),
-    )
-    .await
-    .unwrap();
+#[async_trait]
+impl SlashCommand<Error, Postgres> for MemberCount {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+        _pool: &PgPool,
+    ) -> Result<()> {
+        let guild_id = interaction.guild_id.ok_or(Error::MissingGuildId)?;
 
-    Ok(())
-}
+        let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await.unwrap();
 
-pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
-    let command = CreateCommand::new("member_count").description("View the total member count");
+        interaction
+            .edit_response(
+                ctx,
+                EditInteractionResponse::new().content(format!(
+                    "There are **{}** members in this server",
+                    partial_guild.approximate_member_count.unwrap_or_default()
+                )),
+            )
+            .await
+            .unwrap();
 
-    Ok(command)
+        Ok(())
+    }
+
+    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+        let command = CreateCommand::new("member_count").description("View the total member count");
+
+        Ok(command)
+    }
 }

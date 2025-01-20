@@ -1,6 +1,7 @@
 use serenity::all::{ChannelId, Context, CreateCommand, GuildId, Ready, RoleId, UserId};
+use zayden_core::SlashCommand;
 
-use crate::guild_commands::college_kings_team::*;
+use crate::guild_commands::college_kings_team::Review;
 use crate::Result;
 
 pub const GUILD_ID: GuildId = GuildId::new(814314852855447634);
@@ -14,5 +15,5 @@ pub const STEVE_USER_ID: UserId = UserId::new(747423760780623872);
 pub const MESSY_USER_ID: UserId = UserId::new(841466088612298793);
 
 pub fn commands(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
-    Ok(vec![review::register(ctx, ready)?])
+    Ok(vec![Review::register(ctx, ready)?])
 }

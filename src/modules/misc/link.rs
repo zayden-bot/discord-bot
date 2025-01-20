@@ -1,33 +1,36 @@
+use std::collections::HashMap;
+
 use async_trait::async_trait;
 use patreon_api::types::Member;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    Permissions, Ready, ResolvedOption, ResolvedValue,
+    EditInteractionResponse, Permissions, Ready, ResolvedOption, ResolvedValue,
 };
-use sqlx::PgPool;
+use sqlx::{PgPool, Postgres};
 use zayden_core::{parse_options, SlashCommand};
 
 use crate::guilds::ServersTable;
 use crate::modules::bunny;
 use crate::modules::patreon::patreon_member;
-use crate::sqlx_lib::PostgresPool;
-use crate::utils::message_response;
 use crate::{Error, Result};
 
 pub struct Link;
 
 #[async_trait]
-impl SlashCommand<Error> for Link {
+impl SlashCommand<Error, Postgres> for Link {
     async fn run(
         ctx: &Context,
         interaction: &CommandInteraction,
-        _options: Vec<ResolvedOption<'_>>,
+        mut options: Vec<ResolvedOption<'_>>,
+        pool: &PgPool,
     ) -> Result<()> {
-        let pool = PostgresPool::get(ctx).await;
+        let ResolvedValue::SubCommand(options) = options.remove(0).value else {
+            unreachable!("Subcommand is required");
+        };
 
-        let command = &interaction.data.options()[0];
+        let options = parse_options(options);
 
-        download(ctx, interaction, &pool, &command.value).await?;
+        download(ctx, interaction, pool, options).await?;
 
         Ok(())
     }
@@ -72,7 +75,7 @@ async fn download(
     ctx: &Context,
     interaction: &CommandInteraction,
     pool: &PgPool,
-    subcommand: &ResolvedValue<'_>,
+    mut options: HashMap<&str, ResolvedValue<'_>>,
 ) -> Result<()> {
     let guild_id = interaction.guild_id.ok_or(Error::MissingGuildId)?;
 
@@ -86,7 +89,7 @@ async fn download(
     if interaction
         .channel
         .as_ref()
-        .ok_or_else(|| Error::MissingGuildId)?
+        .ok_or(Error::MissingGuildId)?
         .parent_id
         .is_some_and(|id| id == support_channel_id)
     {
@@ -95,14 +98,8 @@ async fn download(
         interaction.defer_ephemeral(ctx).await.unwrap();
     }
 
-    let options = match subcommand {
-        ResolvedValue::SubCommand(options) => parse_options(options),
-        _ => unreachable!("Subcommand is required"),
-    };
-
-    let game = match options.get("game") {
-        Some(ResolvedValue::String(game)) => *game,
-        _ => unreachable!("Game option is required"),
+    let Some(ResolvedValue::String(game)) = options.remove("game") else {
+        unreachable!("Game option is required");
     };
 
     if !interaction.member.as_ref().is_some_and(|member| {
@@ -124,14 +121,7 @@ async fn download(
             && currently_entitled_amount_cents < 1000
             && campaign_lifetime_support_cents < 2000
         {
-            message_response(
-                ctx,
-                interaction,
-                "To access College Kings 2, you need to be an active $10 (Junior) patron with a lifetime subscription of $20.\nUse `/patreon_user login` to manually update the cache and link your Discord account.",
-            )
-            .await.unwrap();
-
-            return Ok(());
+            return Err(Error::PatreonTierTooLow);
         }
     }
 
@@ -144,7 +134,10 @@ async fn download(
 
     let link = bunny::latest_download_link(&game_folder, platform).await?;
 
-    message_response(ctx, interaction, link).await.unwrap();
+    interaction
+        .edit_response(ctx, EditInteractionResponse::new().content(link))
+        .await
+        .unwrap();
 
     Ok(())
 }

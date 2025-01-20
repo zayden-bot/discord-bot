@@ -1,3 +1,4 @@
+use zayden_core::Error as ZaydenError;
 use zayden_core::ErrorResponse;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -7,20 +8,25 @@ pub enum Error {
     MissingGuildId,
     PatreonAccountNotFound(String),
     NotInteractionAuthor,
+    NegativeHours,
+    CommandTimeout,
+    PatreonTierTooLow,
 
-    Family(family::Error),
     GoldStar(gold_star::Error),
     ReactionRole(reaction_roles::Error),
     Ticket(ticket::Error),
 }
 
 impl ErrorResponse for Error {
-    fn to_response(&self) -> String {
+    fn to_response(&self) -> &str {
         match self {
-            Error::MissingGuildId => String::from("This command only works in a server."),
-            Error::PatreonAccountNotFound(_) => String::from("Patreon account not found.\nIf you've recently joined, please use `/patreon_user login` to manually update the cache and link your Discord account."),
-            Error::NotInteractionAuthor => String::from("You are not the author of this interaction."),
-            Error::Family(e) => e.to_response(),
+            Error::MissingGuildId => ZaydenError::MissingGuildId.to_response(),
+            Error::PatreonAccountNotFound(_) => "Patreon account not found.\nIf you've recently joined, please use `/patreon_user login` to manually update the cache and link your Discord account.",
+            Error::NotInteractionAuthor => "You are not the author of this interaction.",
+            Error::NegativeHours => "Hours must be a positive number.",
+            Error::CommandTimeout => "You have already used this command today.",
+            Error::PatreonTierTooLow => "To access College Kings 2, you need to be an active $10 (Junior) patron with a lifetime subscription of $20.\nUse `/patreon_user login` to manually update the cache and link your Discord account.",
+
             Error::GoldStar(e) => e.to_response(),
             Error::ReactionRole(e) => e.to_response(),
             Error::Ticket(e) => e.to_response(),
@@ -35,12 +41,6 @@ impl std::fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
-
-impl From<family::Error> for Error {
-    fn from(e: family::Error) -> Self {
-        Error::Family(e)
-    }
-}
 
 impl From<gold_star::Error> for Error {
     fn from(e: gold_star::Error) -> Self {

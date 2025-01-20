@@ -1,44 +1,50 @@
-use crate::{utils::embed_response, Error, Result};
+use async_trait::async_trait;
 use serenity::all::{
-    ChannelType, CommandInteraction, Context, CreateCommand, CreateEmbed, CreateEmbedAuthor, Ready,
+    ChannelType, CommandInteraction, Context, CreateCommand, CreateEmbed, CreateEmbedAuthor,
+    EditInteractionResponse, Ready, ResolvedOption,
 };
+use sqlx::{PgPool, Postgres};
+use zayden_core::SlashCommand;
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> {
-    let guild_id = interaction.guild_id.ok_or_else(|| Error::MissingGuildId)?;
-    let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await.unwrap();
+use crate::{Error, Result};
 
-    let mut category_channel_count = 0;
-    let mut text_channel_count = 0;
-    let mut voice_channel_count = 0;
+pub struct ServerInfo;
 
-    guild_id
-        .channels(&ctx)
-        .await
-        .unwrap()
-        .values()
-        .for_each(|channel| match channel.kind {
-            ChannelType::Category => category_channel_count += 1,
-            ChannelType::Text => text_channel_count += 1,
-            ChannelType::Voice => voice_channel_count += 1,
-            _ => (),
-        });
+#[async_trait]
+impl SlashCommand<Error, Postgres> for ServerInfo {
+    async fn run(
+        ctx: &Context,
+        interaction: &CommandInteraction,
+        _options: Vec<ResolvedOption<'_>>,
+        _pool: &PgPool,
+    ) -> Result<()> {
+        let guild_id = interaction.guild_id.ok_or(Error::MissingGuildId)?;
+        let partial_guild = guild_id.to_partial_guild_with_counts(&ctx).await.unwrap();
 
-    embed_response(
-        ctx,
-        interaction,
-        CreateEmbed::new()
+        let (category_count, text_count, voice_count) =
+            guild_id.channels(&ctx).await.unwrap().values().fold(
+                (0, 0, 0),
+                |(mut cat, mut text, mut voice), channel| {
+                    match channel.kind {
+                        ChannelType::Category => cat += 1,
+                        ChannelType::Text => text += 1,
+                        ChannelType::Voice => voice += 1,
+                        _ => (),
+                    }
+
+                    (cat, text, voice)
+                },
+            );
+
+        let embed = CreateEmbed::new()
             .author(
                 CreateEmbedAuthor::new(&partial_guild.name)
                     .icon_url(partial_guild.icon_url().unwrap_or_default()),
             )
             .field("Owner", format!("<@{}>", partial_guild.owner_id), true)
-            .field(
-                "Channel Categories",
-                category_channel_count.to_string(),
-                true,
-            )
-            .field("Text Channels", text_channel_count.to_string(), true)
-            .field("Voice Channels", voice_channel_count.to_string(), true)
+            .field("Channel Categories", category_count.to_string(), true)
+            .field("Text Channels", text_count.to_string(), true)
+            .field("Voice Channels", voice_count.to_string(), true)
             .field(
                 "Members",
                 partial_guild
@@ -47,15 +53,20 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<()> 
                     .to_string(),
                 true,
             )
-            .field("Roles", partial_guild.roles.len().to_string(), true),
-    )
-    .await
-    .unwrap();
+            .field("Roles", partial_guild.roles.len().to_string(), true);
 
-    Ok(())
-}
-pub fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
-    let command = CreateCommand::new("server_info").description("Get information about the server");
+        interaction
+            .edit_response(ctx, EditInteractionResponse::new().embed(embed))
+            .await
+            .unwrap();
 
-    Ok(command)
+        Ok(())
+    }
+
+    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+        let command =
+            CreateCommand::new("server_info").description("Get information about the server");
+
+        Ok(command)
+    }
 }

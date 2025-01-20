@@ -2,9 +2,10 @@ use serenity::all::{
     ComponentInteraction, Context, CreateInteractionResponseFollowup, Mentionable,
 };
 use sqlx::PgPool;
-use zayden_core::ErrorResponse;
+use zayden_core::{Component, ErrorResponse};
 
 use crate::handler::Handler;
+use crate::modules::levels::Levels;
 use crate::modules::ticket::components::{support_close, support_faq, support_ticket};
 // use crate::modules::family::components::{AdoptComponent, MarryComponent};
 use crate::{components, Result, SUPER_USERS};
@@ -12,27 +13,31 @@ use crate::{components, Result, SUPER_USERS};
 impl Handler {
     pub async fn interaction_component(
         ctx: &Context,
-        component: &ComponentInteraction,
+        interaction: &ComponentInteraction,
         pool: &PgPool,
     ) -> Result<()> {
         println!(
             "{} ran component: {}",
-            component.user.name, component.data.custom_id
+            interaction.user.name, interaction.data.custom_id
         );
 
-        let result = match component.data.custom_id.as_str() {
-            "cron_available" => components::availability_check(ctx, component, true).await,
-            "cron_unavailable" => components::availability_check(ctx, component, false).await,
-            "faq" => components::faq(ctx, component, false).await,
-            "faq_ephemeral" => components::faq(ctx, component, true).await,
-            "levels_previous" => components::levels(ctx, component, "previous").await,
-            "levels_user" => components::levels(ctx, component, "user").await,
-            "levels_next" => components::levels(ctx, component, "next").await,
-            "production_request" => components::production_request(ctx, component).await,
-            "render_request" => components::render_request(ctx, component, pool).await,
-            "suggestions_accept" | "accept" => components::suggestions(ctx, component, true).await,
-            "suggestions_reject" | "reject" => components::suggestions(ctx, component, false).await,
-            "suggestions_added" => components::suggestions(ctx, component, true).await,
+        let result = match interaction.data.custom_id.as_str() {
+            "cron_available" => components::availability_check(ctx, interaction, true).await,
+            "cron_unavailable" => components::availability_check(ctx, interaction, false).await,
+            "faq" => components::faq(ctx, interaction, false).await,
+            "faq_ephemeral" => components::faq(ctx, interaction, true).await,
+            "levels_previous" | "levels_user" | "levels_next" => {
+                Levels::run(ctx, interaction, pool).await
+            }
+            "production_request" => components::production_request(ctx, interaction).await,
+            "render_request" => components::render_request(ctx, interaction, pool).await,
+            "suggestions_accept" | "accept" => {
+                components::suggestions(ctx, interaction, true).await
+            }
+            "suggestions_reject" | "reject" => {
+                components::suggestions(ctx, interaction, false).await
+            }
+            "suggestions_added" => components::suggestions(ctx, interaction, true).await,
 
             //region Family
             // "adopt_accept" => AdoptComponent::accept(ctx, component).await,
@@ -48,17 +53,17 @@ impl Handler {
             //endregion: Misc
 
             //region: Ticket
-            "support_close" => support_close(ctx, component).await,
-            "support_faq" => support_faq(ctx, component, pool).await,
-            "support_ticket" => support_ticket(ctx, component).await,
+            "support_close" => support_close(ctx, interaction).await,
+            "support_faq" => support_faq(ctx, interaction, pool).await,
+            "support_ticket" => support_ticket(ctx, interaction).await,
             //endregion: Ticket
-            _ => unimplemented!("Component not implemented: {}", component.data.custom_id),
+            _ => unimplemented!("Component not implemented: {}", interaction.data.custom_id),
         };
 
         if let Err(e) = result {
             let msg = e.to_response();
             if msg.is_empty() {
-                component
+                interaction
                     .create_followup(
                         ctx,
                         CreateInteractionResponseFollowup::new().content(format!(
@@ -70,7 +75,7 @@ impl Handler {
                     .unwrap();
                 return Err(e);
             }
-            component
+            interaction
                 .create_followup(
                     ctx,
                     CreateInteractionResponseFollowup::new()

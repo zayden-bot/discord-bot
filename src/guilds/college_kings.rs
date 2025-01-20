@@ -1,6 +1,10 @@
 use serenity::all::{ChannelId, Context, CreateCommand, GuildId, Ready};
+use zayden_core::SlashCommand;
 
-use crate::guild_commands::college_kings::*;
+use crate::guild_commands::college_kings::{
+    AddArtist, AvailabilityCheck, Faq, FetchSuggestions, GetDiscordRole, Greetings, Reputation,
+    Saves, Spoilers,
+};
 use crate::Result;
 
 pub const GUILD_ID: GuildId = GuildId::new(745662812335898806);
@@ -15,17 +19,15 @@ pub const FAQ_CHANNEL_ID: ChannelId = ChannelId::new(1196346920059289690);
 
 pub fn commands(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
     let commands = vec![
-        add_artist::register(ctx, ready)?,
-        availability_check::register(ctx, ready)?,
-        faq::register(ctx, ready)?,
-        fetch_suggestions::register(ctx, ready)?,
-        get_discord_role::register(ctx, ready)?,
-        goodmorning::register(ctx, ready)?,
-        goodnight::register(ctx, ready)?,
-        image::register(ctx, ready)?,
-        reputation::register(ctx, ready)?,
-        saves::register(ctx, ready)?,
-        spoilers::register(ctx, ready)?,
+        AddArtist::register(ctx, ready)?,
+        AvailabilityCheck::register(ctx, ready)?,
+        Faq::register(ctx, ready)?,
+        FetchSuggestions::register(ctx, ready)?,
+        GetDiscordRole::register(ctx, ready)?,
+        Greetings::register(ctx, ready)?,
+        Reputation::register(ctx, ready)?,
+        Saves::register(ctx, ready)?,
+        Spoilers::register(ctx, ready)?,
     ];
 
     Ok(commands)

@@ -1,24 +1,24 @@
 use serenity::all::{Context, CreateCommand, Ready};
+use zayden_core::SlashCommand;
 
 use crate::Result;
 
-pub mod levels;
 pub mod member_count;
 pub mod ping;
-pub mod rank;
 pub mod scam;
 pub mod server_info;
-pub mod xp;
+
+pub use member_count::MemberCount;
+pub use ping::Ping;
+pub use scam::Scam;
+pub use server_info::ServerInfo;
 
 pub fn register(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
     let commands = vec![
-        levels::register(ctx, ready)?,
-        member_count::register(ctx, ready)?,
-        ping::register(ctx, ready)?,
-        rank::register(ctx, ready)?,
-        scam::register(ctx, ready)?,
-        server_info::register(ctx, ready)?,
-        xp::register(ctx, ready)?,
+        MemberCount::register(ctx, ready)?,
+        Ping::register(ctx, ready)?,
+        Scam::register(ctx, ready)?,
+        ServerInfo::register(ctx, ready)?,
     ];
 
     Ok(commands)

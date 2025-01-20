@@ -7,12 +7,10 @@ edition = "2021"
 bunny-cdn-wrapper = { git = "https://github.com/ViridianLink/bunny-cdn-wrapper.git", branch = "main" }
 zayden-core = { git = "https://github.com/zayden-bot/slash-command-core.git", branch = "master" }
 reaction-roles = { git = "https://github.com/zayden-bot/reaction-roles.git", branch = "main" }
-family = { git = "https://github.com/zayden-bot/family.git", branch = "master" }
 gold-star = { git = "https://github.com/zayden-bot/gold-star.git", branch = "main" }
 patreon-api = { git = "https://github.com/ViridianLink/patreon-api.git", branch = "main" }
 ticket = { git = "https://github.com/zayden-bot/ticket", branch = "main" }
 async-trait = { version = "*", default-features = false }
-# charming = { version = "*", default-features = false, features = ["ssr"] }
 chrono = "*"
 cron = "*"
 dotenvy = { version = "*", default-features = false }
