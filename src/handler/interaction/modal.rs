@@ -26,7 +26,7 @@ impl Handler {
             "suggestions_reject" => {
                 suggestions::run(ctx, modal, false).await?;
             }
-            "support_ticket" => {
+            "support_ticket" | "ticket" => {
                 SupportModal::run::<Postgres, GuildTable>(ctx, modal, &pool).await?;
             }
             _ => unimplemented!("Modal not implemented: {}", modal.data.custom_id),
