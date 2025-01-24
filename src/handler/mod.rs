@@ -13,7 +13,6 @@ mod message;
 mod reaction_add;
 mod reaction_remove;
 mod ready;
-mod suggestions;
 
 pub struct Handler;
 
@@ -37,8 +36,12 @@ impl RawEventHandler for Handler {
                 Self::interaction_create(&ctx, interaction.interaction, &pool).await
             }
             Event::MessageCreate(msg) => Self::message(&ctx, msg.message, &pool).await,
-            Event::ReactionAdd(reaction) => Self::reaction_add(&ctx, reaction.reaction).await,
-            Event::ReactionRemove(reaction) => Self::reaction_remove(&ctx, reaction.reaction).await,
+            Event::ReactionAdd(reaction) => {
+                Self::reaction_add(&ctx, reaction.reaction, &pool).await
+            }
+            Event::ReactionRemove(reaction) => {
+                Self::reaction_remove(&ctx, reaction.reaction, &pool).await
+            }
             Event::Ready(ready) => Self::ready(&ctx, ready.ready).await,
             _ => Ok(()),
         };

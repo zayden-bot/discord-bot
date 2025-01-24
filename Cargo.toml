@@ -9,7 +9,8 @@ zayden-core = { git = "https://github.com/zayden-bot/slash-command-core.git", br
 reaction-roles = { git = "https://github.com/zayden-bot/reaction-roles.git", branch = "main" }
 gold-star = { git = "https://github.com/zayden-bot/gold-star.git", branch = "main" }
 patreon-api = { git = "https://github.com/ViridianLink/patreon-api.git", branch = "main" }
-ticket = { git = "https://github.com/zayden-bot/ticket", branch = "main" }
+ticket = { git = "https://github.com/zayden-bot/ticket.git", branch = "main" }
+suggestions = { git = "https://github.com/zayden-bot/suggestions.git", branch = "main" }
 async-trait = { version = "*", default-features = false }
 chrono = "*"
 cron = "*"

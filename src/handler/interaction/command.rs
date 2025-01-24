@@ -3,8 +3,7 @@ use zayden_core::{get_option_str, ErrorResponse, SlashCommand};
 
 use crate::global_commands::slash_commands::{MemberCount, Ping, Scam, ServerInfo};
 use crate::guild_commands::college_kings::{
-    AddArtist, AvailabilityCheck, Faq, FetchSuggestions, GetDiscordRole, Greetings, Reputation,
-    Saves, Spoilers,
+    AddArtist, AvailabilityCheck, Faq, GetDiscordRole, Greetings, Reputation, Saves, Spoilers,
 };
 use crate::guild_commands::college_kings_team::Review;
 use crate::handler::Handler;
@@ -15,6 +14,7 @@ use crate::modules::misc::{Link, Sleep};
 use crate::modules::moderation::{Infraction, Logs, RulesCommand};
 use crate::modules::patreon::Patreon;
 use crate::modules::reaction_roles::ReactionRoleCommand;
+use crate::modules::suggestions::FetchSuggestions;
 use crate::sqlx_lib::PostgresPool;
 use crate::Result;
 

@@ -2,6 +2,7 @@ use serenity::all::{
     ComponentInteraction, Context, CreateInteractionResponseFollowup, Mentionable,
 };
 use sqlx::PgPool;
+use suggestions::Suggestions;
 use zayden_core::{Component, ErrorResponse};
 
 use crate::handler::Handler;
@@ -31,13 +32,14 @@ impl Handler {
             }
             "production_request" => components::production_request(ctx, interaction).await,
             "render_request" => components::render_request(ctx, interaction, pool).await,
-            "suggestions_accept" | "accept" => {
-                components::suggestions(ctx, interaction, true).await
+            "suggestions_accept" | "suggestions_added" | "accept" => {
+                Suggestions::components(ctx, interaction, true).await;
+                Ok(())
             }
             "suggestions_reject" | "reject" => {
-                components::suggestions(ctx, interaction, false).await
+                Suggestions::components(ctx, interaction, false).await;
+                Ok(())
             }
-            "suggestions_added" => components::suggestions(ctx, interaction, true).await,
 
             //region Family
             // "adopt_accept" => AdoptComponent::accept(ctx, component).await,

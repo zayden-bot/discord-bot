@@ -8,6 +8,7 @@ pub mod misc;
 pub mod moderation;
 pub mod patreon;
 pub mod reaction_roles;
+pub mod suggestions;
 pub mod ticket;
 
 use crate::Result;

@@ -2265,6 +2265,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
+name = "suggestions"
+version = "0.1.0"
+source = "git+https://github.com/zayden-bot/suggestions.git?branch=main#1b45dcd8b6c25e711dacc8df3e146aaa73beab74"
+dependencies = [
+ "async-trait",
+ "futures",
+ "serenity",
+ "sqlx",
+ "zayden-core",
+]
+
+[[package]]
 name = "syn"
 version = "2.0.96"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2400,7 +2412,7 @@ dependencies = [
 [[package]]
 name = "ticket"
 version = "0.1.0"
-source = "git+https://github.com/zayden-bot/ticket?branch=main#e21328bc5a3df7ac1049c2d20c23e769dcc59f9c"
+source = "git+https://github.com/zayden-bot/ticket.git?branch=main#e21328bc5a3df7ac1049c2d20c23e769dcc59f9c"
 dependencies = [
  "async-trait",
  "futures",
@@ -3189,6 +3201,7 @@ dependencies = [
  "serde_json",
  "serenity",
  "sqlx",
+ "suggestions",
  "ticket",
  "tokio",
  "url",

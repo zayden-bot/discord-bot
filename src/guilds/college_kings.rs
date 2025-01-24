@@ -2,8 +2,7 @@ use serenity::all::{ChannelId, Context, CreateCommand, GuildId, Ready};
 use zayden_core::SlashCommand;
 
 use crate::guild_commands::college_kings::{
-    AddArtist, AvailabilityCheck, Faq, FetchSuggestions, GetDiscordRole, Greetings, Reputation,
-    Saves, Spoilers,
+    AddArtist, AvailabilityCheck, Faq, GetDiscordRole, Greetings, Reputation, Saves, Spoilers,
 };
 use crate::Result;
 
@@ -22,7 +21,6 @@ pub fn commands(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
         AddArtist::register(ctx, ready)?,
         AvailabilityCheck::register(ctx, ready)?,
         Faq::register(ctx, ready)?,
-        FetchSuggestions::register(ctx, ready)?,
         GetDiscordRole::register(ctx, ready)?,
         Greetings::register(ctx, ready)?,
         Reputation::register(ctx, ready)?,

@@ -15,6 +15,7 @@ pub enum Error {
     GoldStar(gold_star::Error),
     ReactionRole(reaction_roles::Error),
     Ticket(ticket::Error),
+    Suggestions(suggestions::Error),
 }
 
 impl ErrorResponse for Error {
@@ -30,6 +31,7 @@ impl ErrorResponse for Error {
             Error::GoldStar(e) => e.to_response(),
             Error::ReactionRole(e) => e.to_response(),
             Error::Ticket(e) => e.to_response(),
+            Error::Suggestions(e) => e.to_response(),
         }
     }
 }
@@ -57,5 +59,11 @@ impl From<reaction_roles::Error> for Error {
 impl From<ticket::Error> for Error {
     fn from(e: ticket::Error) -> Self {
         Error::Ticket(e)
+    }
+}
+
+impl From<suggestions::Error> for Error {
+    fn from(e: suggestions::Error) -> Self {
+        Error::Suggestions(e)
     }
 }

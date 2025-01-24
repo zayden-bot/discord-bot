@@ -1,9 +1,10 @@
 use serenity::all::{Context, ModalInteraction};
 use sqlx::Postgres;
+use suggestions::Suggestions;
 use ticket::SupportModal;
 
 use crate::handler::Handler;
-use crate::modals::{production_request, render_request, suggestions};
+use crate::modals::{production_request, render_request};
 use crate::sqlx_lib::{GuildTable, PostgresPool};
 use crate::Result;
 
@@ -21,10 +22,10 @@ impl Handler {
                 render_request::run(ctx, modal).await?;
             }
             "suggestions_accept" => {
-                suggestions::run(ctx, modal, true).await?;
+                Suggestions::modal(ctx, modal, true).await;
             }
             "suggestions_reject" => {
-                suggestions::run(ctx, modal, false).await?;
+                Suggestions::modal(ctx, modal, false).await;
             }
             "support_ticket" | "ticket" => {
                 SupportModal::run::<Postgres, GuildTable>(ctx, modal, &pool).await?;
