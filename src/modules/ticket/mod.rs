@@ -25,4 +25,15 @@ impl TicketGuildManager<Postgres> for GuildTable {
 
         Ok(row)
     }
+
+    async fn update_thread_id(pool: &PgPool, id: impl Into<GuildId> + Send) -> sqlx::Result<()> {
+        sqlx::query!(
+            "UPDATE guilds SET thread_id = thread_id + 1 WHERE id = $1",
+            id.into().get() as i64,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
 }

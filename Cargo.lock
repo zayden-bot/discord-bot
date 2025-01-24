@@ -1311,9 +1311,9 @@ dependencies = [
 
 [[package]]
 name = "openssl-probe"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
+checksum = "d05e27ee213611ffe7d6348b942e8f942b37114c00cc03cec254295a4a17852e"
 
 [[package]]
 name = "openssl-sys"
@@ -1541,7 +1541,7 @@ dependencies = [
 [[package]]
 name = "reaction-roles"
 version = "0.1.0"
-source = "git+https://github.com/zayden-bot/reaction-roles.git?branch=main#9529aca76588bbd63691733ff703ed7f11b23803"
+source = "git+https://github.com/zayden-bot/reaction-roles.git?branch=main#2d53debe85d7ca6967b2769c75c300d294d9d14b"
 dependencies = [
  "serenity",
  "sqlx",
@@ -1701,9 +1701,9 @@ checksum = "c7fb8039b3032c191086b10f11f319a6e99e1e82889c5cc6046f515c9db1d497"
 
 [[package]]
 name = "rustix"
-version = "0.38.43"
+version = "0.38.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a78891ee6bf2340288408954ac787aa063d8e8817e9f53abb37c695c6d834ef6"
+checksum = "fdb5bc1ae2baa591800df16c9ca78619bf65c0488b41b96ccec5d11220d8c154"
 dependencies = [
  "bitflags 2.8.0",
  "errno",
@@ -2400,7 +2400,7 @@ dependencies = [
 [[package]]
 name = "ticket"
 version = "0.1.0"
-source = "git+https://github.com/zayden-bot/ticket?branch=main#146e5364be7ec451915c30775cfcc252528c64d4"
+source = "git+https://github.com/zayden-bot/ticket?branch=main#e21328bc5a3df7ac1049c2d20c23e769dcc59f9c"
 dependencies = [
  "async-trait",
  "futures",
@@ -2685,9 +2685,9 @@ checksum = "5c1cb5db39152898a79168971543b1cb5020dff7fe43c8dc468b0885f5e29df5"
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.14"
+version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "adb9e6ca4f869e1180728b7950e35922a7fc6397f7b641499e8f3ef06e50dc83"
+checksum = "11cd88e12b17c6494200a9c1b683a04fcac9573ed74cd1b62aeb2727c5592243"
 
 [[package]]
 name = "unicode-normalization"
@@ -2742,9 +2742,9 @@ checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
 
 [[package]]
 name = "uuid"
-version = "1.12.0"
+version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "744018581f9a3454a9e15beb8a33b017183f1e7c0cd170232a2d1453b23a51c4"
+checksum = "b3758f5e68192bb96cc8f9b7e2c2cfdabb435499a28499a42f8f984092adad4b"
 
 [[package]]
 name = "vcpkg"
