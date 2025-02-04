@@ -15,12 +15,12 @@ use crate::Result;
 
 pub fn global_register(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
     let commands = [
-        // family::register(ctx, ready)?,
         gold_star::register(ctx, ready)?,
         misc::register(ctx, ready)?,
         moderation::register(ctx, ready)?,
         patreon::register(ctx, ready)?,
         reaction_roles::register(ctx, ready)?,
+        ticket::register(ctx, ready)?,
     ]
     .concat();
 

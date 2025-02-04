@@ -1,13 +1,31 @@
 use async_trait::async_trait;
-use serenity::all::GuildId;
+use serenity::all::{Context, CreateCommand, GuildId, MessageId, Ready};
+use slash_commands::{SupportCommand, TicketCommand};
 use sqlx::{PgPool, Postgres};
-use ticket::{support_guild_manager::TicketGuildRow, TicketGuildManager};
+use ticket::{
+    support_guild_manager::TicketGuildRow,
+    ticket_manager::{TicketManager, TicketRow},
+    TicketGuildManager,
+};
+use zayden_core::SlashCommand;
 
 use crate::sqlx_lib::GuildTable;
+use crate::Result;
 
 pub mod components;
 pub mod message_commands;
 pub mod slash_commands;
+
+pub fn register(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
+    let commands = vec![
+        TicketCommand::register(ctx, ready)?,
+        SupportCommand::register(ctx, ready)?,
+    ];
+
+    Ok(commands)
+}
+
+pub struct Ticket;
 
 #[async_trait]
 impl TicketGuildManager<Postgres> for GuildTable {
@@ -35,5 +53,22 @@ impl TicketGuildManager<Postgres> for GuildTable {
         .await?;
 
         Ok(())
+    }
+}
+
+pub struct TicketTable;
+
+#[async_trait]
+impl TicketManager<Postgres> for TicketTable {
+    async fn get(pool: &PgPool, id: impl Into<MessageId> + Send) -> sqlx::Result<TicketRow> {
+        let row = sqlx::query_as!(
+            TicketRow,
+            "SELECT * FROM tickets WHERE id = $1",
+            id.into().get() as i64
+        )
+        .fetch_one(pool)
+        .await?;
+
+        Ok(row)
     }
 }

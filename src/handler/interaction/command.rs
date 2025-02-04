@@ -15,6 +15,7 @@ use crate::modules::moderation::{Infraction, Logs, RulesCommand};
 use crate::modules::patreon::Patreon;
 use crate::modules::reaction_roles::ReactionRoleCommand;
 use crate::modules::suggestions::FetchSuggestions;
+use crate::modules::ticket::slash_commands::{SupportCommand, TicketCommand};
 use crate::sqlx_lib::PostgresPool;
 use crate::Result;
 
@@ -85,6 +86,11 @@ impl Handler {
             //region: reaction_roles
             "reaction_role" => ReactionRoleCommand::run(ctx, command, options, &pool),
             //endregion: reaction_roles
+
+            //region: ticket
+            "ticket" => TicketCommand::run(ctx, command, options, &pool),
+            "support" => SupportCommand::run(ctx, command, options, &pool),
+            //endregion: ticket
             _ => {
                 println!("Unknown command: {}", command.data.name);
                 return Ok(());

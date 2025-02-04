@@ -1,18 +1,21 @@
 use serenity::all::{Context, ModalInteraction};
-use sqlx::Postgres;
+use sqlx::{PgPool, Postgres};
 use suggestions::Suggestions;
-use ticket::SupportModal;
+use ticket::TicketModal;
 
 use crate::handler::Handler;
 use crate::modals::{production_request, render_request};
-use crate::sqlx_lib::{GuildTable, PostgresPool};
-use crate::Result;
+use crate::modules::ticket::TicketTable;
+use crate::sqlx_lib::GuildTable;
+use crate::{Error, Result};
 
 impl Handler {
-    pub async fn interaction_modal(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
+    pub async fn interaction_modal(
+        ctx: &Context,
+        modal: &ModalInteraction,
+        pool: &PgPool,
+    ) -> Result<()> {
         println!("{} ran modal: {}", modal.user.name, modal.data.custom_id);
-
-        let pool = PostgresPool::get(ctx).await;
 
         match modal.data.custom_id.as_str() {
             "production_request" => {
@@ -27,8 +30,10 @@ impl Handler {
             "suggestions_reject" => {
                 Suggestions::modal(ctx, modal, false).await;
             }
-            "support_ticket" | "ticket" => {
-                SupportModal::run::<Postgres, GuildTable>(ctx, modal, &pool).await?;
+            "create_ticket" => {
+                TicketModal::run::<Postgres, GuildTable, TicketTable>(ctx, modal, pool)
+                    .await
+                    .map_err(Error::from)?;
             }
             _ => unimplemented!("Modal not implemented: {}", modal.data.custom_id),
         }

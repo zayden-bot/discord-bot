@@ -7,8 +7,7 @@ use zayden_core::{Component, ErrorResponse};
 
 use crate::handler::Handler;
 use crate::modules::levels::Levels;
-use crate::modules::ticket::components::{support_close, support_faq, support_ticket};
-// use crate::modules::family::components::{AdoptComponent, MarryComponent};
+use crate::modules::ticket::Ticket;
 use crate::{components, Result, SUPER_USERS};
 
 impl Handler {
@@ -55,9 +54,9 @@ impl Handler {
             //endregion: Misc
 
             //region: Ticket
-            "support_close" => support_close(ctx, interaction).await,
-            "support_faq" => support_faq(ctx, interaction, pool).await,
-            "support_ticket" => support_ticket(ctx, interaction).await,
+            "ticket_create" => Ticket::ticket_create(ctx, interaction).await,
+            "support_close" => Ticket::support_close(ctx, interaction).await,
+            "support_faq" => Ticket::support_faq(ctx, interaction, pool).await,
             //endregion: Ticket
             _ => unimplemented!("Component not implemented: {}", interaction.data.custom_id),
         };

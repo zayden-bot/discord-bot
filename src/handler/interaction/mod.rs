@@ -20,7 +20,7 @@ impl Handler {
             Interaction::Component(component) => {
                 Self::interaction_component(ctx, component, pool).await?
             }
-            Interaction::Modal(modal) => Self::interaction_modal(ctx, modal).await?,
+            Interaction::Modal(modal) => Self::interaction_modal(ctx, modal, pool).await?,
             _ => unimplemented!("Interaction not implemented: {:?}", interaction.kind()),
         };
 
