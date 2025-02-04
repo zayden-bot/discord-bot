@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use async_trait::async_trait;
-use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::rng;
+use rand::seq::IndexedRandom;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateAttachment, CreateCommand,
     CreateCommandOption, CreateEmbed, EditAttachments, EditInteractionResponse, Ready,
@@ -68,7 +68,7 @@ impl SlashCommand<Error, Postgres> for Greetings {
             &image_cache.good_night_images
         };
 
-        let image_path = entries.choose(&mut thread_rng()).unwrap();
+        let image_path = entries.choose(&mut rng()).unwrap();
         let file_name = image_path.file_name().unwrap().to_str().unwrap();
 
         let title = if subcommand.name == "morning" {

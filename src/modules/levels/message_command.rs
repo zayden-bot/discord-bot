@@ -47,7 +47,7 @@ impl MessageCommand<Error, Postgres> for Levels {
         }
 
         let mut level = 0;
-        let rand_xp = rand::thread_rng().gen_range(15..25);
+        let rand_xp = rand::rng().random_range(15..25);
         let total_xp = level_data.total_xp + rand_xp;
 
         let mut xp_for_next_level = 100;
