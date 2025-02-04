@@ -14,12 +14,6 @@ impl Handler {
             return Ok(());
         }
 
-        if let Channel::Private(c) = msg.channel(ctx).await.unwrap() {
-            println!("{:?}", msg);
-            println!();
-            println!("{:?}", c)
-        }
-
         let command = msg.content.split_whitespace().next().unwrap_or_default();
 
         match command.to_lowercase().as_str() {
