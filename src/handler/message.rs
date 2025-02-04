@@ -1,4 +1,4 @@
-use serenity::all::{Channel, Context, Message};
+use serenity::all::{Context, Message};
 use sqlx::PgPool;
 use zayden_core::MessageCommand;
 
