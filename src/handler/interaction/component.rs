@@ -54,7 +54,7 @@ impl Handler {
             //endregion: Misc
 
             //region: Ticket
-            "ticket_create" => Ticket::ticket_create(ctx, interaction).await,
+            "ticket_create" | "support_ticket" => Ticket::ticket_create(ctx, interaction).await,
             "support_close" => Ticket::support_close(ctx, interaction).await,
             "support_faq" => Ticket::support_faq(ctx, interaction, pool).await,
             //endregion: Ticket

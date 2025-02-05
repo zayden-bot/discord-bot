@@ -15,7 +15,7 @@ pub struct AvailabilityCheck;
 #[async_trait]
 impl CronJob for AvailabilityCheck {
     fn schedule(&self) -> Schedule {
-        Schedule::from_str("0 0 14 * * Mon,Thu").unwrap()
+        Schedule::from_str("0 0 14 * * Mon").unwrap()
     }
 
     async fn action(&self, ctx: &Context) -> Result<()> {
