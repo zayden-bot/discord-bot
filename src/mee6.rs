@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::{thread::sleep, time::Duration};
 
 use serde::Deserialize;
