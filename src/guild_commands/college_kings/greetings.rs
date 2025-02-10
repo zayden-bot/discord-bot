@@ -5,8 +5,8 @@ use rand::rng;
 use rand::seq::IndexedRandom;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateAttachment, CreateCommand,
-    CreateCommandOption, CreateEmbed, EditAttachments, EditInteractionResponse, Ready,
-    ResolvedOption, UserId,
+    CreateCommandOption, CreateEmbed, DiscordJsonError, EditAttachments, EditInteractionResponse,
+    ErrorResponse, HttpError, Ready, ResolvedOption, UserId,
 };
 use serenity::prelude::TypeMapKey;
 use sqlx::{PgPool, Postgres};
@@ -34,7 +34,13 @@ impl SlashCommand<Error, Postgres> for Greetings {
         mut options: Vec<ResolvedOption<'_>>,
         pool: &PgPool,
     ) -> Result<()> {
-        interaction.defer(&ctx).await.unwrap();
+        if let Err(serenity::Error::Http(HttpError::UnsuccessfulRequest(ErrorResponse {
+            error: DiscordJsonError { code: 10062, .. },
+            ..
+        }))) = interaction.defer(&ctx).await
+        {
+            return Err(Error::UnknownInteraction);
+        }
 
         let mut data = ctx.data.write().await;
         let locked_users = data.get_mut::<GreetingLockedUsers>().unwrap();

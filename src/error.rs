@@ -5,6 +5,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
+    UnknownInteraction,
     MissingGuildId,
     PatreonAccountNotFound(String),
     NotInteractionAuthor,
@@ -21,6 +22,7 @@ pub enum Error {
 impl ErrorResponse for Error {
     fn to_response(&self) -> &str {
         match self {
+            Error::UnknownInteraction => ZaydenError::UnknownInteraction.to_response(),
             Error::MissingGuildId => ZaydenError::MissingGuildId.to_response(),
             Error::PatreonAccountNotFound(_) => "Patreon account not found.\nIf you've recently joined, please use `/patreon_user login` to manually update the cache and link your Discord account.",
             Error::NotInteractionAuthor => "You are not the author of this interaction.",
