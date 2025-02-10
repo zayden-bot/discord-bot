@@ -17,6 +17,7 @@ mod guild_commands;
 pub mod guilds;
 mod handler;
 mod image_cache;
+mod mee6;
 pub mod modals;
 pub mod modules;
 mod sqlx_lib;
