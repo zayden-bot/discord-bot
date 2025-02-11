@@ -22,7 +22,7 @@ impl Handler {
                 production_request::run(ctx, modal).await?;
             }
             "render_request" => {
-                render_request::run(ctx, modal).await?;
+                render_request::run(ctx, modal, pool).await?;
             }
             "suggestions_accept" => {
                 Suggestions::modal(ctx, modal, true).await;

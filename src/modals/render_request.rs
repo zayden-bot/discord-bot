@@ -1,21 +1,21 @@
 use serenity::all::{
-    ButtonStyle, Context, CreateButton, CreateChannel, CreateEmbed, CreateInteractionResponse,
-    CreateInteractionResponseMessage, CreateMessage, Mentionable, ModalInteraction,
-    PermissionOverwrite, PermissionOverwriteType, Permissions,
+    ButtonStyle, Context, CreateButton, CreateChannel, CreateEmbed, CreateMessage,
+    EditInteractionResponse, Mentionable, ModalInteraction, PermissionOverwrite,
+    PermissionOverwriteType, Permissions,
 };
+use sqlx::PgPool;
 use zayden_core::parse_modal_data;
 
 use crate::modules::patreon::patreon_member;
-use crate::sqlx_lib::PostgresPool;
 use crate::{
     guilds::{college_kings::RENDER_REQUESTS_CHANNEL_ID, college_kings_team::MESSY_USER_ID},
     Error, Result,
 };
 
-pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
+pub async fn run(ctx: &Context, modal: &ModalInteraction, pool: &PgPool) -> Result<()> {
     let guild_id = modal.guild_id.ok_or(Error::MissingGuildId)?;
 
-    let pool = PostgresPool::get(ctx).await;
+    modal.defer_ephemeral(ctx).await.unwrap();
 
     let mut data = parse_modal_data(&modal.data.components);
 
@@ -24,12 +24,25 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         _ => patreon_member(&pool, &modal.user.id.to_string(), false).await?,
     };
 
-    let tier = response
-        .unwrap()
-        .data
-        .attributes
-        .currently_entitled_amount_cents
-        / 100;
+    let tier = match response.map(|r| r.data.attributes.currently_entitled_amount_cents / 100) {
+        Some(tier) => tier,
+        None => {
+            modal.edit_response(ctx, EditInteractionResponse::new().content("You must be a patron to use this feature.\nThe cache is updated every 24 hours. If you've recently become a patron, please wait a day and try again or contact us through the support channel.")).await.unwrap();
+            return Ok(());
+        }
+    };
+
+    if tier < 50 {
+        modal
+        .edit_response(
+            ctx,
+            EditInteractionResponse::new()
+                    .content("You must be at least a $50 patron to use this feature.\nThe cache is updated every 24 hours. If you've recently upgraded, please wait a day and try again or contact us through the support channel."),
+        )
+        .await.unwrap();
+
+        return Ok(());
+    }
 
     let character = data.remove("character").unwrap();
     let prop = data.remove("prop").unwrap_or("No prop specified.");
@@ -37,20 +50,6 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
     let description = data
         .remove("description")
         .unwrap_or("No description specified.");
-
-    if tier < 50 {
-        modal
-            .create_response(
-                ctx,
-                CreateInteractionResponse::Message(
-                    CreateInteractionResponseMessage::new()
-                        .content("You must be at least a $50 patron to use this feature.\nThe cache is updated every 24 hours. If you've recently upgraded, please wait a day and try again or contact us through the support channel.").ephemeral(true),
-                ),
-            )
-            .await.unwrap();
-
-        return Ok(());
-    }
 
     let request = CreateEmbed::new()
         .title("Render Request")
@@ -126,7 +125,10 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction) -> Result<()> {
         .unwrap();
 
     modal
-        .create_response(ctx, CreateInteractionResponse::Acknowledge)
+        .edit_response(
+            ctx,
+            EditInteractionResponse::new().content("Your request has been submitted."),
+        )
         .await
         .unwrap();
 
