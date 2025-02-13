@@ -1,6 +1,5 @@
 mod update_information_message;
 mod update_render_requests_messages;
-mod update_support_messages;
 
 use crate::Result;
 
@@ -10,7 +9,6 @@ use serenity::all::{ChannelId, Context, CreateEmbed, CreateMessage, EditMessage}
 pub async fn update_messages(ctx: &Context) -> Result<()> {
     tokio::try_join!(
         update_information_message::run(ctx),
-        update_support_messages::run(ctx),
         update_render_requests_messages::run(ctx),
     )?;
 
