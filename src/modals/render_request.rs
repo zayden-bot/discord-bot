@@ -20,8 +20,8 @@ pub async fn run(ctx: &Context, modal: &ModalInteraction, pool: &PgPool) -> Resu
     let mut data = parse_modal_data(&modal.data.components);
 
     let response = match data.remove("email") {
-        Some(email) => patreon_member(&pool, email, false).await?,
-        _ => patreon_member(&pool, &modal.user.id.to_string(), false).await?,
+        Some(email) => patreon_member(pool, email, false).await?,
+        _ => patreon_member(pool, &modal.user.id.to_string(), false).await?,
     };
 
     let tier = match response.map(|r| r.data.attributes.currently_entitled_amount_cents / 100) {
