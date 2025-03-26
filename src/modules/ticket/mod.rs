@@ -36,7 +36,7 @@ impl TicketGuildManager<Postgres> for GuildTable {
                 id.into().get() as i64
             )
             .fetch_optional(pool)
-            .await.unwrap();
+            .await?;
 
         Ok(row)
     }
