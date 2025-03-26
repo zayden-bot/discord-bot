@@ -3,26 +3,23 @@ use serenity::all::{Context, CreateCommand, GuildId, MessageId, Ready};
 use slash_commands::{SupportCommand, TicketCommand};
 use sqlx::{PgPool, Postgres};
 use ticket::{
+    TicketGuildManager,
     support_guild_manager::TicketGuildRow,
     ticket_manager::{TicketManager, TicketRow},
-    TicketGuildManager,
 };
 use zayden_core::SlashCommand;
 
 use crate::sqlx_lib::GuildTable;
-use crate::Result;
 
 pub mod components;
 pub mod message_commands;
 pub mod slash_commands;
 
-pub fn register(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
-    let commands = vec![
-        TicketCommand::register(ctx, ready)?,
-        SupportCommand::register(ctx, ready)?,
-    ];
-
-    Ok(commands)
+pub fn register(ctx: &Context, ready: &Ready) -> [CreateCommand; 2] {
+    [
+        TicketCommand::register(ctx, ready).unwrap(),
+        SupportCommand::register(ctx, ready).unwrap(),
+    ]
 }
 
 pub struct Ticket;
@@ -70,5 +67,13 @@ impl TicketManager<Postgres> for TicketTable {
         .await?;
 
         Ok(row)
+    }
+
+    async fn delete(pool: &PgPool, id: impl Into<MessageId> + Send) -> sqlx::Result<()> {
+        sqlx::query!("DELETE FROM tickets WHERE id = $1", id.into().get() as i64)
+            .execute(pool)
+            .await?;
+
+        Ok(())
     }
 }

@@ -4,10 +4,20 @@ pub mod slash_commands;
 
 use chrono::NaiveDateTime;
 use futures::{StreamExt, TryStreamExt};
-use serenity::all::{Context, User, UserId};
+use serenity::all::{Context, CreateCommand, Ready, User, UserId};
+use slash_commands::{Rank, Xp};
 use sqlx::PgPool;
+use zayden_core::SlashCommand;
 
 use crate::{Error, Result};
+
+pub fn register(ctx: &Context, ready: &Ready) -> [CreateCommand; 3] {
+    [
+        Levels::register(ctx, ready).unwrap(),
+        Rank::register(ctx, ready).unwrap(),
+        Xp::register(ctx, ready).unwrap(),
+    ]
+}
 
 pub struct Levels;
 

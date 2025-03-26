@@ -12,7 +12,7 @@ use zayden_core::MessageCommand;
 
 use crate::{Error, Result};
 
-use super::{get_user_level_data, update_user_level_data, Levels};
+use super::{Levels, get_user_level_data, update_user_level_data};
 
 const BLOCKED_CHANNEL_IDS: [ChannelId; 1] = [ChannelId::new(776139754408247326)];
 

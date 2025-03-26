@@ -1,10 +1,10 @@
-use serenity::all::{Context, ModalInteraction};
+use serenity::all::{Context, EditInteractionResponse, ModalInteraction};
 use sqlx::{PgPool, Postgres};
 use suggestions::Suggestions;
 use ticket::TicketModal;
+use zayden_core::ErrorResponse;
 
 use crate::handler::Handler;
-use crate::modals::{production_request, render_request};
 use crate::modules::ticket::TicketTable;
 use crate::sqlx_lib::GuildTable;
 use crate::{Error, Result};
@@ -12,30 +12,40 @@ use crate::{Error, Result};
 impl Handler {
     pub async fn interaction_modal(
         ctx: &Context,
-        modal: &ModalInteraction,
+        interaction: &ModalInteraction,
         pool: &PgPool,
     ) -> Result<()> {
-        println!("{} ran modal: {}", modal.user.name, modal.data.custom_id);
+        println!(
+            "{} ran modal: {}",
+            interaction.user.name, interaction.data.custom_id
+        );
 
-        match modal.data.custom_id.as_str() {
-            "production_request" => {
-                production_request::run(ctx, modal).await?;
-            }
-            "render_request" => {
-                render_request::run(ctx, modal, pool).await?;
-            }
+        let result = match interaction.data.custom_id.as_str() {
             "suggestions_accept" => {
-                Suggestions::modal(ctx, modal, true).await;
+                Suggestions::modal(ctx, interaction, true).await;
+                Ok(())
             }
             "suggestions_reject" => {
-                Suggestions::modal(ctx, modal, false).await;
+                Suggestions::modal(ctx, interaction, false).await;
+                Ok(())
             }
             "create_ticket" => {
-                TicketModal::run::<Postgres, GuildTable, TicketTable>(ctx, modal, pool)
+                TicketModal::run::<Postgres, GuildTable, TicketTable>(ctx, interaction, pool)
                     .await
-                    .map_err(Error::from)?;
+                    .map_err(Error::from)
             }
-            _ => unimplemented!("Modal not implemented: {}", modal.data.custom_id),
+            _ => unimplemented!("Modal not implemented: {}", interaction.data.custom_id),
+        };
+
+        if let Err(e) = result {
+            let msg = e.to_response();
+
+            let _ = interaction.defer_ephemeral(ctx).await;
+
+            interaction
+                .edit_response(ctx, EditInteractionResponse::new().content(msg))
+                .await
+                .unwrap();
         }
 
         Ok(())

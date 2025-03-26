@@ -1,28 +1,21 @@
 use serenity::all::{Context, CreateCommand, Ready};
 
-mod bunny;
-// pub mod family;
-pub mod gold_star;
 pub mod levels;
-pub mod misc;
-pub mod moderation;
-pub mod patreon;
+// pub mod moderation;
+pub mod destiny2;
 pub mod reaction_roles;
 pub mod suggestions;
+pub mod temp_voice;
 pub mod ticket;
 
-use crate::Result;
+pub fn global_register(ctx: &Context, ready: &Ready) -> Vec<CreateCommand> {
+    let mut cmds = destiny2::register(ctx, ready).to_vec();
 
-pub fn global_register(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
-    let commands = [
-        gold_star::register(ctx, ready)?,
-        misc::register(ctx, ready)?,
-        moderation::register(ctx, ready)?,
-        patreon::register(ctx, ready)?,
-        reaction_roles::register(ctx, ready)?,
-        ticket::register(ctx, ready)?,
-    ]
-    .concat();
+    cmds.extend(levels::register(ctx, ready));
+    cmds.push(reaction_roles::register(ctx, ready));
+    cmds.push(suggestions::register(ctx, ready));
+    cmds.push(temp_voice::register(ctx, ready));
+    cmds.extend(ticket::register(ctx, ready));
 
-    Ok(commands)
+    cmds
 }

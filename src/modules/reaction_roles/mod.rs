@@ -1,6 +1,6 @@
 use async_trait::async_trait;
-use reaction_roles::reaction_roles_manager::ReactionRole;
 use reaction_roles::ReactionRolesManager;
+use reaction_roles::reaction_roles_manager::ReactionRole;
 use serenity::all::{Context, CreateCommand, Ready};
 use sqlx::any::AnyQueryResult;
 use sqlx::{Pool, Postgres};
@@ -11,10 +11,8 @@ pub use slash_command::ReactionRoleCommand;
 pub mod reaction;
 pub mod slash_command;
 
-use crate::Result;
-
-pub fn register(ctx: &Context, ready: &Ready) -> Result<Vec<CreateCommand>> {
-    Ok(vec![ReactionRoleCommand::register(ctx, ready)?])
+pub fn register(ctx: &Context, ready: &Ready) -> CreateCommand {
+    ReactionRoleCommand::register(ctx, ready).unwrap()
 }
 
 struct ReactionRolesTable;

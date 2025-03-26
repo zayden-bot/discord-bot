@@ -6,6 +6,8 @@ use zayden_core::SlashCommand;
 use crate::sqlx_lib::GuildTable;
 use crate::{Error, Result};
 
+use super::TicketTable;
+
 pub struct TicketCommand;
 
 #[async_trait]
@@ -16,7 +18,13 @@ impl SlashCommand<Error, Postgres> for TicketCommand {
         options: Vec<ResolvedOption<'_>>,
         pool: &PgPool,
     ) -> Result<()> {
-        ticket::TicketCommand::run::<Postgres, GuildTable>(ctx, interaction, pool, options).await?;
+        ticket::TicketCommand::run::<Postgres, GuildTable, TicketTable>(
+            ctx,
+            interaction,
+            pool,
+            options,
+        )
+        .await?;
 
         Ok(())
     }
