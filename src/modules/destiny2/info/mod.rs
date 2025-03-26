@@ -38,14 +38,20 @@ impl SlashCommand<Error, Postgres> for Perk {
 
         interaction.defer(ctx).await.unwrap();
 
-        let perk = sqlx::query_as!(
+        let perk = match sqlx::query_as!(
             DestinyPerk,
             "SELECT * FROM destiny_perks WHERE name = $1 LIMIT 1",
             perk
         )
         .fetch_one(pool)
         .await
-        .unwrap();
+        {
+            Ok(perk) => perk,
+            Err(_) => {
+                interaction.edit_response(ctx, EditInteractionResponse::new().content("This command is still work in progress. Please make sure the perk is typed __exactly__ how it appears in game (including captalisation).")).await.unwrap();
+                return Ok(());
+            }
+        };
 
         interaction
             .edit_response(
