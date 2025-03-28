@@ -4,7 +4,7 @@ pub use commands::Voice;
 pub mod events;
 
 use async_trait::async_trait;
-use serenity::all::{ChannelId, Context, CreateCommand, GuildId, Ready, UserId};
+use serenity::all::{ChannelId, Context, CreateCommand, GuildId, UserId};
 use sqlx::any::AnyQueryResult;
 use sqlx::{PgPool, Postgres};
 use temp_voice::voice_channel_manager::VoiceChannelMode;
@@ -13,8 +13,8 @@ use zayden_core::SlashCommand;
 
 use crate::sqlx_lib::GuildTable;
 
-pub fn register(ctx: &Context, ready: &Ready) -> CreateCommand {
-    Voice::register(ctx, ready).unwrap()
+pub fn register(ctx: &Context) -> CreateCommand {
+    Voice::register(ctx).unwrap()
 }
 
 #[async_trait]

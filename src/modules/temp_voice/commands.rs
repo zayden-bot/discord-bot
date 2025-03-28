@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use serenity::all::{CommandInteraction, Context, CreateCommand, Ready, ResolvedOption};
+use serenity::all::{CommandInteraction, Context, CreateCommand, ResolvedOption};
 use sqlx::{PgPool, Postgres};
 use temp_voice::VoiceCommand;
 use zayden_core::SlashCommand;
@@ -25,7 +25,7 @@ impl SlashCommand<Error, Postgres> for Voice {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         Ok(VoiceCommand::register())
     }
 }

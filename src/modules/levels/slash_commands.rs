@@ -1,15 +1,15 @@
 use async_trait::async_trait;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateButton, CreateCommand,
-    CreateCommandOption, CreateEmbed, CreateEmbedFooter, EditInteractionResponse, Ready,
-    ResolvedOption, ResolvedValue,
+    CreateCommandOption, CreateEmbed, CreateEmbedFooter, EditInteractionResponse, ResolvedOption,
+    ResolvedValue,
 };
 use sqlx::{PgPool, Postgres};
-use zayden_core::{parse_options, SlashCommand};
+use zayden_core::{SlashCommand, parse_options};
 
 use crate::{Error, Result};
 
-use super::{get_user_level_data, get_user_rank, get_users, Levels};
+use super::{Levels, get_user_level_data, get_user_rank, get_users};
 
 #[async_trait]
 impl SlashCommand<Error, Postgres> for Levels {
@@ -57,7 +57,7 @@ impl SlashCommand<Error, Postgres> for Levels {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         let command = CreateCommand::new("levels").description("Get the leaderboard");
 
         Ok(command)
@@ -111,7 +111,7 @@ impl SlashCommand<Error, Postgres> for Rank {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         let command = CreateCommand::new("rank")
             .description("Get your rank or another member's rank")
             .add_option(CreateCommandOption::new(
@@ -161,7 +161,7 @@ impl SlashCommand<Error, Postgres> for Xp {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         let command = CreateCommand::new("xp")
             .description("Get your current xp")
             .add_option(CreateCommandOption::new(

@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use serenity::all::{
-    CommandInteraction, Context, CreateCommand, EditInteractionResponse, Permissions, Ready,
+    CommandInteraction, Context, CreateCommand, EditInteractionResponse, Permissions,
     ResolvedOption,
 };
 use sqlx::{PgPool, Postgres};
@@ -37,7 +37,7 @@ impl SlashCommand<Error, Postgres> for ReactionRoleCommand {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         let command = reaction_roles::ReactionRoleCommand::register()
             .default_member_permissions(Permissions::MANAGE_MESSAGES);
 

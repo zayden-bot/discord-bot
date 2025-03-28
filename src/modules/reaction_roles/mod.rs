@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use reaction_roles::ReactionRolesManager;
 use reaction_roles::reaction_roles_manager::ReactionRole;
-use serenity::all::{Context, CreateCommand, Ready};
+use serenity::all::{Context, CreateCommand};
 use sqlx::any::AnyQueryResult;
 use sqlx::{Pool, Postgres};
 use zayden_core::SlashCommand;
@@ -11,8 +11,8 @@ pub use slash_command::ReactionRoleCommand;
 pub mod reaction;
 pub mod slash_command;
 
-pub fn register(ctx: &Context, ready: &Ready) -> CreateCommand {
-    ReactionRoleCommand::register(ctx, ready).unwrap()
+pub fn register(ctx: &Context) -> CreateCommand {
+    ReactionRoleCommand::register(ctx).unwrap()
 }
 
 struct ReactionRolesTable;

@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use serenity::all::{Context, CreateCommand, GuildId, MessageId, Ready};
+use serenity::all::{Context, CreateCommand, GuildId, MessageId};
 use slash_commands::{SupportCommand, TicketCommand};
 use sqlx::{PgPool, Postgres};
 use ticket::{
@@ -15,10 +15,10 @@ pub mod components;
 pub mod message_commands;
 pub mod slash_commands;
 
-pub fn register(ctx: &Context, ready: &Ready) -> [CreateCommand; 2] {
+pub fn register(ctx: &Context) -> [CreateCommand; 2] {
     [
-        TicketCommand::register(ctx, ready).unwrap(),
-        SupportCommand::register(ctx, ready).unwrap(),
+        TicketCommand::register(ctx).unwrap(),
+        SupportCommand::register(ctx).unwrap(),
     ]
 }
 

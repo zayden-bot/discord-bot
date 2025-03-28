@@ -58,7 +58,7 @@ impl SlashCommand<Error, Postgres> for RulesCommand {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         let command = CreateCommand::new("rules")
             .description("Display the server rules")
             .default_member_permissions(Permissions::MODERATE_MEMBERS);

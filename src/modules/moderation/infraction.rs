@@ -11,7 +11,7 @@ use serenity::model::prelude::GuildId;
 use serenity::model::{Permissions, Timestamp};
 use serenity::prelude::Context;
 use sqlx::{PgPool, Pool, Postgres};
-use zayden_core::{parse_options, SlashCommand};
+use zayden_core::{SlashCommand, parse_options};
 
 use crate::{Error, Result};
 
@@ -117,7 +117,7 @@ impl SlashCommand<Error, Postgres> for Infraction {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         let command = CreateCommand::new("infraction")
             .name("infraction")
             .description("Warn, mute, or ban a user")

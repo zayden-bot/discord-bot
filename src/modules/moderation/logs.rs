@@ -4,7 +4,7 @@ use serenity::all::{
     CreateEmbed, EditInteractionResponse, Permissions, Ready, ResolvedOption, ResolvedValue,
 };
 use sqlx::{PgPool, Postgres};
-use zayden_core::{parse_options, SlashCommand};
+use zayden_core::{SlashCommand, parse_options};
 
 use crate::{Error, Result};
 
@@ -65,7 +65,7 @@ impl SlashCommand<Error, Postgres> for Logs {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         let command = CreateCommand::new("logs")
             .description("Get logs for a user")
             .default_member_permissions(Permissions::MODERATE_MEMBERS)

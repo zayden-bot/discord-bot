@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use serenity::all::{Context, CreateCommand, GuildId, Ready};
+use serenity::all::{Context, CreateCommand, GuildId};
 use sqlx::{PgPool, Postgres};
 use suggestions::{SuggestionsGuildManager, SuggestionsGuildRow};
 use zayden_core::SlashCommand;
@@ -10,8 +10,8 @@ pub use slash_command::FetchSuggestions;
 
 use crate::sqlx_lib::GuildTable;
 
-pub fn register(ctx: &Context, ready: &Ready) -> CreateCommand {
-    FetchSuggestions::register(ctx, ready).unwrap()
+pub fn register(ctx: &Context) -> CreateCommand {
+    FetchSuggestions::register(ctx).unwrap()
 }
 
 #[async_trait]
