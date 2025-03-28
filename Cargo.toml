@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 zayden-core = { git = "https://github.com/zayden-bot/slash-command-core.git", branch = "master" }
+bungie-api = { git = "https://github.com/ViridianLink/bungie-api.git", branch = "main" }
 endgame-analysis = { git = "https://github.com/zayden-bot/endgame-analysis.git", branch = "main" }
 lfg = { git = "https://github.com/zayden-bot/lfg.git", branch = "main" }
 reaction-roles = { git = "https://github.com/zayden-bot/reaction-roles.git", branch = "main" }
@@ -34,6 +35,7 @@ tokio = { version = "*", default-features = false, features = [
     "macros",
     "rt-multi-thread",
 ] }
+time = { version = "*", default-features = false }
 url = { version = "*", default-features = false }
 walkdir = { version = "*", default-features = false }
 rand = { version = "*", default-features = false, features = ["thread_rng"] }
