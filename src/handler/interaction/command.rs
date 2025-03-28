@@ -7,10 +7,12 @@ use crate::handler::Handler;
 use crate::modules::destiny2::endgame_analysis::slash_commands::{DimWishlist, TierList, Weapon};
 use crate::modules::destiny2::info::Perk;
 use crate::modules::destiny2::lfg::LfgCommand;
+use crate::modules::events::live::Live;
 use crate::modules::levels::Levels;
 use crate::modules::levels::slash_commands::{Rank, Xp};
 use crate::modules::reaction_roles::ReactionRoleCommand;
 use crate::modules::suggestions::FetchSuggestions;
+use crate::modules::temp_voice::Voice;
 use crate::modules::ticket::slash_commands::{SupportCommand, TicketCommand};
 
 impl Handler {
@@ -37,12 +39,14 @@ impl Handler {
             // endregion
             "fetch_suggestions" => FetchSuggestions::run(ctx, interaction, options, pool),
             "levels" => Levels::run(ctx, interaction, options, pool),
+            "live" => Live::run(ctx, interaction, options, pool),
             "rank" => Rank::run(ctx, interaction, options, pool),
             "xp" => Xp::run(ctx, interaction, options, pool),
 
             // region: reaction_roles
             "reaction_role" => ReactionRoleCommand::run(ctx, interaction, options, pool),
             // endregion: reaction_roles
+            "voice" => Voice::run(ctx, interaction, options, pool),
 
             // region: ticket
             "ticket" => TicketCommand::run(ctx, interaction, options, pool),
