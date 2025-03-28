@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use endgame_analysis::{DimWishlistCommand, TierListCommand, WeaponCommand};
 use serenity::all::{
-    AutocompleteOption, CommandInteraction, Context, CreateCommand, Ready, ResolvedOption,
+    AutocompleteOption, CommandInteraction, Context, CreateCommand, ResolvedOption,
 };
 use sqlx::{PgPool, Postgres};
 use zayden_core::{Autocomplete, SlashCommand};
@@ -31,7 +31,7 @@ impl SlashCommand<Error, Postgres> for DimWishlist {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         Ok(DimWishlistCommand::register())
     }
 }
@@ -52,7 +52,7 @@ impl SlashCommand<Error, Postgres> for TierList {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         Ok(TierListCommand::register())
     }
 }
@@ -92,7 +92,7 @@ impl SlashCommand<Error, Postgres> for Weapon {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         Ok(WeaponCommand::register())
     }
 }

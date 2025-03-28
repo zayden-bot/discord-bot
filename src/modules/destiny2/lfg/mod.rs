@@ -1,5 +1,3 @@
-mod components;
-mod modal;
 mod slash_command;
 
 use async_trait::async_trait;
@@ -11,11 +9,9 @@ use serenity::all::{ChannelId, GuildId, MessageId, RoleId, UserId};
 use sqlx::any::AnyQueryResult;
 use sqlx::{PgPool, Pool, Postgres};
 
-pub use components::LfgComponents;
-pub use modal::{LfgCreateModal, LfgEditModal};
 pub use slash_command::LfgCommand;
 
-struct LfgGuildTable;
+pub struct LfgGuildTable;
 
 #[async_trait]
 impl LfgGuildManager<Postgres> for LfgGuildTable {
@@ -60,14 +56,22 @@ impl LfgGuildManager<Postgres> for LfgGuildTable {
     }
 }
 
-struct LfgPostTable;
+pub struct LfgPostTable;
 
 #[async_trait]
 impl LfgPostManager<Postgres> for LfgPostTable {
-    async fn get(
-        pool: &Pool<Postgres>,
-        id: impl Into<MessageId> + Send,
-    ) -> sqlx::Result<LfgPostRow> {
+    async fn get_past(pool: &PgPool) -> sqlx::Result<Vec<LfgPostRow>> {
+        let posts = sqlx::query_as!(
+            LfgPostRow,
+            "SELECT * FROM lfg_posts WHERE timestamp < NOW()"
+        )
+        .fetch_all(pool)
+        .await?;
+
+        Ok(posts)
+    }
+
+    async fn get(pool: &PgPool, id: impl Into<MessageId> + Send) -> sqlx::Result<LfgPostRow> {
         let post = sqlx::query_as!(
             LfgPostRow,
             "SELECT * FROM lfg_posts WHERE id = $1",
@@ -79,8 +83,23 @@ impl LfgPostManager<Postgres> for LfgPostTable {
         Ok(post)
     }
 
+    async fn get_upcoming_by_user(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Vec<LfgPostRow>> {
+        let posts = sqlx::query_as!(
+            LfgPostRow,
+            "SELECT * FROM lfg_posts WHERE ($1 = ANY(fireteam) OR $1 = ANY(alternatives)) AND timestamp > NOW()",
+            id.into().get() as i64
+        )
+        .fetch_all(pool)
+        .await?;
+
+        Ok(posts)
+    }
+
     async fn save(
-        pool: &Pool<Postgres>,
+        pool: &PgPool,
         id: impl Into<i64> + Send,
         owner: impl Into<i64> + Send,
         activity: &str,
@@ -120,7 +139,7 @@ impl LfgPostManager<Postgres> for LfgPostTable {
     }
 
     async fn delete(
-        pool: &Pool<Postgres>,
+        pool: &PgPool,
         id: impl Into<MessageId> + Send,
     ) -> sqlx::Result<AnyQueryResult> {
         let result = sqlx::query!(
@@ -134,7 +153,7 @@ impl LfgPostManager<Postgres> for LfgPostTable {
     }
 }
 
-struct UsersTable;
+pub struct UsersTable;
 
 #[async_trait]
 impl TimezoneManager<Postgres> for UsersTable {

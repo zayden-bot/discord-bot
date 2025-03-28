@@ -1,3 +1,4 @@
+pub mod database_manager;
 pub mod slash_commands;
 
 use async_trait::async_trait;

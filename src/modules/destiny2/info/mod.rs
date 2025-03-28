@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use endgame_analysis::DestinyPerk;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateInteractionResponse, CreateInteractionResponseMessage, EditInteractionResponse, Ready,
+    CreateInteractionResponse, CreateInteractionResponseMessage, EditInteractionResponse,
     ResolvedOption, ResolvedValue,
 };
 use sqlx::{PgPool, Postgres};
@@ -65,7 +65,7 @@ impl SlashCommand<Error, Postgres> for Perk {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         let cmd = CreateCommand::new("perk")
             .description("Perk information")
             .add_option(

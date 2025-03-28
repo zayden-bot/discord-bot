@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use serenity::all::{
-    AutocompleteOption, CommandInteraction, Context, CreateCommand, Ready, ResolvedOption,
+    AutocompleteOption, CommandInteraction, Context, CreateCommand, ResolvedOption,
 };
 use sqlx::{PgPool, Postgres};
 use zayden_core::{Autocomplete, SlashCommand};
@@ -29,7 +29,7 @@ impl SlashCommand<Error, Postgres> for LfgCommand {
         Ok(())
     }
 
-    fn register(_ctx: &Context, _ready: &Ready) -> Result<CreateCommand> {
+    fn register(_ctx: &Context) -> Result<CreateCommand> {
         Ok(lfg::LfgCommand::register())
     }
 }
