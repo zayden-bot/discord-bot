@@ -12,6 +12,7 @@ mod message;
 mod reaction_add;
 mod reaction_remove;
 mod ready;
+mod thread_delete;
 mod voice_state_update;
 
 pub struct Handler;
@@ -38,13 +39,14 @@ impl RawEventHandler for Handler {
             Event::ReactionRemove(event) => {
                 Self::reaction_remove(&ctx, event.reaction, &pool).await
             }
-            Event::Ready(event) => Self::ready(&ctx, event.ready).await,
+            Event::Ready(event) => Self::ready(&ctx, event.ready, &pool).await,
             Event::VoiceStateUpdate(event) => {
                 Self::voice_state_update(&ctx, event.voice_state, &pool).await
             }
             Event::InteractionCreate(event) => {
                 Self::interaction_create(&ctx, event.interaction, &pool).await
             }
+            Event::ThreadDelete(event) => Self::thread_delete(&ctx, event.thread, &pool).await,
             _ => Ok(()),
         };
 
