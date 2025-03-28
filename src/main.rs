@@ -1,9 +1,13 @@
 use std::env;
 
-use serenity::all::{ClientBuilder, GatewayIntents, UserId};
+use endgame_analysis::endgame_analysis::EndgameAnalysisSheet;
+use modules::destiny2::endgame_analysis::DestinyWeaponTable;
+use modules::destiny2::endgame_analysis::database_manager::DestinyDatabaseManager;
+use serenity::all::{ClientBuilder, GatewayIntents, GuildId, UserId};
 use serenity::prelude::TypeMap;
 
 pub use error::{Error, Result};
+use sqlx::Postgres;
 use sqlx_lib::PostgresPool;
 
 mod error;
@@ -14,12 +18,20 @@ mod sqlx_lib;
 pub const SUPER_USERS: [UserId; 1] = [
     UserId::new(211486447369322506), // oscarsix
 ];
+pub const BRADSTER_GUILD: GuildId = GuildId::new(1255957182457974875);
 
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenvy::dotenv().unwrap();
 
     let pool = PostgresPool::init().await.unwrap();
+
+    if !cfg!(debug_assertions) {
+        DestinyDatabaseManager::update_dbs(&pool).await.unwrap();
+        EndgameAnalysisSheet::update::<Postgres, DestinyWeaponTable>(&pool)
+            .await
+            .unwrap();
+    }
 
     let mut type_map = TypeMap::new();
     type_map.insert::<PostgresPool>(pool);
