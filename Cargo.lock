@@ -1093,7 +1093,7 @@ dependencies = [
 [[package]]
 name = "lfg"
 version = "0.1.0"
-source = "git+https://github.com/zayden-bot/lfg.git?branch=main#7c81fd8f8a12473fa6530c85ed0deeacea4b918a"
+source = "git+https://github.com/zayden-bot/lfg.git?branch=main#2161c9d7c9d696bfa83326d549010c8be0450335"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2363,7 +2363,7 @@ dependencies = [
 [[package]]
 name = "temp-voice"
 version = "0.1.0"
-source = "git+https://github.com/zayden-bot/temp-voice.git?branch=main#6ba7fccebbe989d6882dda9fe9a77cda162df800"
+source = "git+https://github.com/zayden-bot/temp-voice.git?branch=main#e713b0fd6e7e01c97241b2e238a25ab85db5d85d"
 dependencies = [
  "async-trait",
  "futures",
