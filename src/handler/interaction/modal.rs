@@ -6,7 +6,7 @@ use ticket::TicketModal;
 use zayden_core::ErrorResponse;
 
 use crate::handler::Handler;
-use crate::modules::destiny2::lfg::{LfgGuildTable, LfgPostTable, UsersTable};
+use crate::modules::destiny2::lfg::{LfgGuildTable, LfgMessageTable, LfgPostTable, UsersTable};
 use crate::modules::ticket::TicketTable;
 use crate::sqlx_lib::GuildTable;
 use crate::{Error, Result};
@@ -24,20 +24,22 @@ impl Handler {
 
         let result = match interaction.data.custom_id.as_str() {
             // region LFG
-            "lfg_create" => {
-                LfgCreateModal::run::<Postgres, LfgGuildTable, LfgPostTable, UsersTable>(
-                    ctx,
-                    interaction,
-                    pool,
-                )
-                .await
-                .map_err(Error::from)
-            }
-            "lfg_edit" => {
-                LfgEditModal::run::<Postgres, LfgPostTable, UsersTable>(ctx, interaction, pool)
-                    .await
-                    .map_err(Error::from)
-            }
+            "lfg_create" => LfgCreateModal::run::<
+                Postgres,
+                LfgGuildTable,
+                LfgPostTable,
+                LfgMessageTable,
+                UsersTable,
+            >(ctx, interaction, pool)
+            .await
+            .map_err(Error::from),
+            "lfg_edit" => LfgEditModal::run::<Postgres, LfgPostTable, LfgMessageTable, UsersTable>(
+                ctx,
+                interaction,
+                pool,
+            )
+            .await
+            .map_err(Error::from),
             // endregion
 
             // region Ticket
