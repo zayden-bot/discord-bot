@@ -1,10 +1,12 @@
 mod slash_command;
 
 use async_trait::async_trait;
-use chrono::NaiveDateTime;
 use chrono_tz::Tz;
 use lfg::timezone_manager::LOCALE_TO_TIMEZONE;
-use lfg::{LfgGuildManager, LfgGuildRow, LfgPostManager, LfgPostRow, TimezoneManager};
+use lfg::{
+    LfgGuildManager, LfgGuildRow, LfgMessageManager, LfgMessageRow, LfgPostManager, LfgPostRow,
+    TimezoneManager,
+};
 use serenity::all::{ChannelId, GuildId, MessageId, RoleId, UserId};
 use sqlx::any::AnyQueryResult;
 use sqlx::{PgPool, Pool, Postgres};
@@ -72,13 +74,11 @@ impl LfgPostManager<Postgres> for LfgPostTable {
     }
 
     async fn get(pool: &PgPool, id: impl Into<MessageId> + Send) -> sqlx::Result<LfgPostRow> {
-        let post = sqlx::query_as!(
-            LfgPostRow,
-            "SELECT * FROM lfg_posts WHERE id = $1",
-            id.into().get() as i64
-        )
-        .fetch_one(pool)
-        .await?;
+        let id: i64 = id.into().get() as i64;
+
+        let post = sqlx::query_as!(LfgPostRow, "SELECT * FROM lfg_posts WHERE id = $1", id)
+            .fetch_one(pool)
+            .await?;
 
         Ok(post)
     }
@@ -98,18 +98,7 @@ impl LfgPostManager<Postgres> for LfgPostTable {
         Ok(posts)
     }
 
-    async fn save(
-        pool: &PgPool,
-        id: impl Into<i64> + Send,
-        owner: impl Into<i64> + Send,
-        activity: &str,
-        timestamp: NaiveDateTime,
-        timezone: &str,
-        description: &str,
-        fireteam_size: impl Into<i16> + Send,
-        fireteam: &[i64],
-        alternatives: &[i64],
-    ) -> sqlx::Result<AnyQueryResult> {
+    async fn save(pool: &PgPool, row: LfgPostRow) -> sqlx::Result<AnyQueryResult> {
         let result = sqlx::query!(
             "INSERT INTO lfg_posts (id, owner_id, activity, timestamp, timezone, description, fireteam_size, fireteam, alternatives)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -122,15 +111,15 @@ impl LfgPostManager<Postgres> for LfgPostTable {
                           fireteam_size = EXCLUDED.fireteam_size,
                           fireteam = EXCLUDED.fireteam,
                           alternatives = EXCLUDED.alternatives;",
-            id.into(),
-            owner.into(),
-            activity,
-            timestamp,
-            timezone,
-            description,
-            fireteam_size.into(),
-            fireteam,
-            alternatives
+            row.id,
+            row.owner_id,
+            row.activity,
+            row.timestamp,
+            row.timezone,
+            row.description,
+            row.fireteam_size,
+            &row.fireteam,
+            &row.alternatives
         )
         .execute(pool)
         .await?;
@@ -150,6 +139,72 @@ impl LfgPostManager<Postgres> for LfgPostTable {
         .await?;
 
         Ok(result.into())
+    }
+}
+
+pub struct LfgMessageTable;
+
+#[async_trait]
+impl LfgMessageManager<Postgres> for LfgMessageTable {
+    async fn get(
+        pool: &PgPool,
+        id: impl Into<MessageId> + Send,
+    ) -> sqlx::Result<Option<LfgMessageRow>> {
+        let id = id.into().get() as i64;
+
+        let message = sqlx::query_as!(
+            LfgMessageRow,
+            "SELECT * FROM lfg_messages WHERE id = $1",
+            id
+        )
+        .fetch_optional(pool)
+        .await?;
+
+        Ok(message)
+    }
+
+    async fn get_by_post_id(
+        pool: &PgPool,
+        id: impl Into<ChannelId> + Send,
+    ) -> sqlx::Result<Vec<LfgMessageRow>> {
+        let id = id.into().get() as i64;
+
+        let messages = sqlx::query_as!(
+            LfgMessageRow,
+            "SELECT * FROM lfg_messages WHERE post_id = $1",
+            id
+        )
+        .fetch_all(pool)
+        .await?;
+
+        Ok(messages)
+    }
+
+    async fn save(pool: &PgPool, row: LfgMessageRow) -> sqlx::Result<()> {
+        sqlx::query!(
+            "INSERT INTO lfg_messages (id, channel_id, post_id)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (id)
+            DO UPDATE SET channel_id = EXCLUDED.channel_id,
+                          post_id = EXCLUDED.post_id;",
+            row.id,
+            row.channel_id,
+            row.post_id
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    async fn delete(pool: &PgPool, id: impl Into<MessageId> + Send) -> sqlx::Result<()> {
+        let id = id.into().get() as i64;
+
+        sqlx::query!("DELETE FROM lfg_messages WHERE id = $1", id)
+            .execute(pool)
+            .await?;
+
+        Ok(())
     }
 }
 

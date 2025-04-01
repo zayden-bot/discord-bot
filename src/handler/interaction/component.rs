@@ -6,7 +6,7 @@ use suggestions::Suggestions;
 use zayden_core::ErrorResponse;
 
 use crate::handler::Handler;
-use crate::modules::destiny2::lfg::LfgPostTable;
+use crate::modules::destiny2::lfg::{LfgMessageTable, LfgPostTable};
 use crate::modules::ticket::Ticket;
 use crate::{Error, Result};
 
@@ -23,21 +23,27 @@ impl Handler {
 
         let result = match interaction.data.custom_id.as_str() {
             // region: Lfg
-            "lfg_join" => {
-                lfg::PostComponents::join::<Postgres, LfgPostTable>(ctx, interaction, pool)
-                    .await
-                    .map_err(Error::from)
-            }
-            "lfg_leave" => {
-                lfg::PostComponents::leave::<Postgres, LfgPostTable>(ctx, interaction, pool)
-                    .await
-                    .map_err(Error::from)
-            }
-            "lfg_alternative" => {
-                lfg::PostComponents::alternative::<Postgres, LfgPostTable>(ctx, interaction, pool)
-                    .await
-                    .map_err(Error::from)
-            }
+            "lfg_join" => lfg::PostComponents::join::<Postgres, LfgPostTable, LfgMessageTable>(
+                ctx,
+                interaction,
+                pool,
+            )
+            .await
+            .map_err(Error::from),
+            "lfg_leave" => lfg::PostComponents::leave::<Postgres, LfgPostTable, LfgMessageTable>(
+                ctx,
+                interaction,
+                pool,
+            )
+            .await
+            .map_err(Error::from),
+            "lfg_alternative" => lfg::PostComponents::alternative::<
+                Postgres,
+                LfgPostTable,
+                LfgMessageTable,
+            >(ctx, interaction, pool)
+            .await
+            .map_err(Error::from),
             "lfg_settings" => {
                 lfg::PostComponents::settings::<Postgres, LfgPostTable>(ctx, interaction, pool)
                     .await
@@ -59,11 +65,13 @@ impl Handler {
                     .await
                     .map_err(Error::from)
             }
-            "lfg_kick_menu" => {
-                lfg::KickComponent::run::<Postgres, LfgPostTable>(ctx, interaction, pool)
-                    .await
-                    .map_err(Error::from)
-            }
+            "lfg_kick_menu" => lfg::KickComponent::run::<Postgres, LfgPostTable, LfgMessageTable>(
+                ctx,
+                interaction,
+                pool,
+            )
+            .await
+            .map_err(Error::from),
             "lfg_delete" => {
                 lfg::SettingsComponents::delete::<Postgres, LfgPostTable>(ctx, interaction, pool)
                     .await?;

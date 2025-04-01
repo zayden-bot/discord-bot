@@ -7,7 +7,7 @@ use zayden_core::{Autocomplete, SlashCommand};
 
 use crate::{Error, Result};
 
-use super::{LfgGuildTable, LfgPostTable, UsersTable};
+use super::{LfgGuildTable, LfgMessageTable, LfgPostTable, UsersTable};
 
 pub struct LfgCommand;
 
@@ -19,7 +19,7 @@ impl SlashCommand<Error, Postgres> for LfgCommand {
         _options: Vec<ResolvedOption<'_>>,
         pool: &PgPool,
     ) -> Result<()> {
-        lfg::LfgCommand::run::<Postgres, LfgGuildTable, LfgPostTable, UsersTable>(
+        lfg::LfgCommand::run::<Postgres, LfgGuildTable, LfgPostTable, LfgMessageTable, UsersTable>(
             ctx,
             interaction,
             pool,
