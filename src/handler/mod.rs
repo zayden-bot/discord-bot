@@ -8,7 +8,8 @@ use crate::sqlx_lib::PostgresPool;
 
 mod guild_create;
 mod interaction;
-mod message;
+mod message_create;
+mod message_delete;
 mod reaction_add;
 mod reaction_remove;
 mod ready;
@@ -35,6 +36,7 @@ impl RawEventHandler for Handler {
         let result = match ev {
             Event::GuildCreate(event) => Self::guild_create(&ctx, event.guild, &pool).await,
             Event::MessageCreate(event) => Self::message_create(&ctx, event.message, &pool).await,
+            Event::MessageDelete(event) => Self::message_delete(&ctx, event, &pool).await,
             Event::ReactionAdd(event) => Self::reaction_add(&ctx, event.reaction, &pool).await,
             Event::ReactionRemove(event) => {
                 Self::reaction_remove(&ctx, event.reaction, &pool).await
