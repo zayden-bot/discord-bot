@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use futures::future;
 use serenity::all::{
     ComponentInteraction, Context, CreateEmbed, CreateEmbedFooter, EditInteractionResponse,
     MessageInteractionMetadata,
@@ -8,12 +9,12 @@ use zayden_core::Component;
 
 use crate::{Error, Result};
 
-use super::{get_user_row_number, get_users, Levels};
+use super::{LevelsRow, LevelsTable};
 
 const LIMIT: i64 = 10;
 
 #[async_trait]
-impl Component<Error, Postgres> for Levels {
+impl Component<Error, Postgres> for LevelsRow {
     async fn run(ctx: &Context, interaction: &ComponentInteraction, pool: &PgPool) -> Result<()> {
         interaction.defer(ctx).await.unwrap();
 
@@ -47,7 +48,7 @@ impl Component<Error, Postgres> for Levels {
                 page_number = (page_number - 1).max(1);
             }
             "user" => {
-                let row_number = get_user_row_number(pool, interaction.user.id)
+                let row_number = LevelsTable::get_user_row_number(pool, interaction.user.id)
                     .await
                     .unwrap()
                     .unwrap();
@@ -60,19 +61,21 @@ impl Component<Error, Postgres> for Levels {
             _ => unreachable!(),
         };
 
-        let fields = get_users(ctx, pool, page_number, LIMIT)
+        let iter = LevelsTable::get_users(pool, page_number, LIMIT)
             .await?
             .into_iter()
-            .map(|level_data| {
+            .map(|row| async move {
                 (
-                    level_data.user.name,
+                    row.as_user(ctx).await.unwrap().name,
                     format!(
                         "Messages: {} | Total XP: {} | Level: {}",
-                        level_data.message_count, level_data.xp, level_data.level
+                        row.message_count, row.xp, row.level
                     ),
                     false,
                 )
             });
+
+        let fields = future::join_all(iter).await;
 
         new_embed = new_embed.footer(CreateEmbedFooter::new(format!("Page {}", page_number)));
         new_embed = new_embed.fields(fields);

@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use futures::future;
 use serenity::all::{
     CommandInteraction, CommandOptionType, Context, CreateButton, CreateCommand,
     CreateCommandOption, CreateEmbed, CreateEmbedFooter, EditInteractionResponse, ResolvedOption,
@@ -9,7 +10,7 @@ use zayden_core::{SlashCommand, parse_options};
 
 use crate::{Error, Result};
 
-use super::{Levels, get_user_level_data, get_user_rank, get_users};
+use super::{Levels, LevelsRow, LevelsTable};
 
 #[async_trait]
 impl SlashCommand<Error, Postgres> for Levels {
@@ -23,19 +24,21 @@ impl SlashCommand<Error, Postgres> for Levels {
 
         let page_number = 1;
 
-        let fields = get_users(ctx, pool, page_number, 10)
+        let iter = LevelsTable::get_users(pool, page_number, 10)
             .await?
             .into_iter()
-            .map(|level_data| {
+            .map(|row| async move {
                 (
-                    level_data.user.name,
+                    row.as_user(ctx).await.unwrap().name,
                     format!(
                         "Messages: {} | Total XP: {} | Level: {}",
-                        level_data.message_count, level_data.xp, level_data.level
+                        row.message_count, row.xp, row.level
                     ),
                     false,
                 )
             });
+
+        let fields = future::join_all(iter).await;
 
         let embed = CreateEmbed::new()
             .title("Leaderboard")
@@ -86,11 +89,14 @@ impl SlashCommand<Error, Postgres> for Rank {
             _ => &interaction.user,
         };
 
-        let level_data = get_user_level_data(pool, user.id).await?;
+        let row = LevelsRow::from_table(pool, user.id).await.unwrap();
 
-        let level = level_data.level;
+        let level = row.level;
         let xp_for_next_level = 5 * (level * level) + 50 * level + 100;
-        let user_rank = get_user_rank(pool, user.id).await?.unwrap();
+        let user_rank = LevelsTable::get_user_rank(pool, user.id)
+            .await
+            .unwrap()
+            .unwrap();
 
         let embed = CreateEmbed::new()
             .title(format!("XP stats for {}", user.name))
@@ -98,9 +104,9 @@ impl SlashCommand<Error, Postgres> for Rank {
                 "Rank: #{}\nLevel: {}\nXP: {}/{} ({}%)",
                 user_rank,
                 level,
-                level_data.xp,
+                row.xp,
                 xp_for_next_level,
-                (level_data.xp as f32 / xp_for_next_level as f32 * 100.0).round()
+                (row.xp as f32 / xp_for_next_level as f32 * 100.0).round()
             ));
 
         interaction
@@ -146,11 +152,11 @@ impl SlashCommand<Error, Postgres> for Xp {
             _ => interaction.defer(&ctx).await.unwrap(),
         }
 
-        let level_data = get_user_level_data(pool, interaction.user.id).await?;
+        let row = LevelsRow::from_table(pool, interaction.user.id).await?;
 
         let embed = CreateEmbed::default().title("XP").description(format!(
             "Current XP: {}\nLevel: {}\nTotal XP: {}",
-            level_data.xp, level_data.level, level_data.total_xp
+            row.xp, row.level, row.total_xp
         ));
 
         interaction
