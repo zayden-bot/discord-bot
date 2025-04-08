@@ -7,12 +7,22 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     UnknownInteraction,
     MissingGuildId,
-    PatreonAccountNotFound(String),
     NotInteractionAuthor,
     NegativeHours,
     CommandTimeout,
-    PatreonTierTooLow,
 
+    // region: Gambling
+    InsufficientFunds,
+    InvalidBetAmount(String),
+    DailyClaimed,
+    WorkClaimed(String),
+    GiftUsed,
+    SelfGift,
+    SelfSend,
+    NegativeAmount,
+    Cooldown(String),
+    InvalidPrediction,
+    //endregion
     EndgameAnalysis(endgame_analysis::Error),
     Lfg(lfg::Error),
     ReactionRole(reaction_roles::Error),
@@ -23,20 +33,41 @@ pub enum Error {
     Sqlx(sqlx::Error),
 }
 
+impl Error {
+    pub fn invalid_bet_amount(min: i64) -> Error {
+        Error::InvalidBetAmount(format!("The minimum bet for this game is {}!", min))
+    }
+
+    pub fn work_claimed(timestamp: i64) -> Self {
+        Error::WorkClaimed(format!("You're on a break! Try again <t:{timestamp}:R>"))
+    }
+
+    pub fn cooldown(timestamp: i64) -> Self {
+        Error::Cooldown(format!(
+            "You are on a game cooldown. Try again <t:{timestamp}:R>."
+        ))
+    }
+}
+
 impl ErrorResponse for Error {
     fn to_response(&self) -> &str {
         match self {
             Error::UnknownInteraction => ZaydenError::UnknownInteraction.to_response(),
             Error::MissingGuildId => ZaydenError::MissingGuildId.to_response(),
-            Error::PatreonAccountNotFound(_) => {
-                "Patreon account not found.\nIf you've recently joined, please use `/patreon_user login` to manually update the cache and link your Discord account."
-            }
             Error::NotInteractionAuthor => "You are not the author of this interaction.",
             Error::NegativeHours => "Hours must be a positive number.",
             Error::CommandTimeout => "You have already used this command today.",
-            Error::PatreonTierTooLow => {
-                "To access College Kings 2, you need to be an active $10 (Junior) patron with a lifetime subscription of $20.\nUse `/patreon_user login` to manually update the cache and link your Discord account."
-            }
+
+            Error::InsufficientFunds => "You do not have enough funds",
+            Error::InvalidBetAmount(s) => s,
+            Error::DailyClaimed => "You collected today, try again tomorrow",
+            Error::WorkClaimed(s) => s,
+            Error::GiftUsed => "You can only gift someone once a day",
+            Error::SelfGift => "You can't give yourself a gift... How selfish!",
+            Error::SelfSend => "You cannot send funds to yourself",
+            Error::NegativeAmount => "Amount cannot be negative",
+            Error::Cooldown(s) => s,
+            Error::InvalidPrediction => "Invalid prediction value.",
 
             Error::EndgameAnalysis(e) => e.to_response(),
             Error::Lfg(e) => e.to_response(),

@@ -16,11 +16,6 @@ impl Handler {
         interaction: &ComponentInteraction,
         pool: &PgPool,
     ) -> Result<()> {
-        println!(
-            "{} ran component: {}",
-            interaction.user.name, interaction.data.custom_id
-        );
-
         let result = match interaction.data.custom_id.as_str() {
             // region: Lfg
             "lfg_join" => lfg::PostComponents::join::<Postgres, LfgPostTable, LfgMessageTable>(
@@ -100,10 +95,15 @@ impl Handler {
             "support_close" => Ticket::support_close(ctx, interaction).await,
             "support_faq" => Ticket::support_faq(ctx, interaction, pool).await,
             //endregion: Ticket
-            _ => unimplemented!("Component not implemented: {}", interaction.data.custom_id),
+            _ => Ok(()),
         };
 
         if let Err(e) = result {
+            println!(
+                "{} ran component: {}",
+                interaction.user.name, interaction.data.custom_id
+            );
+
             let msg = e.to_response();
 
             let _ = interaction.defer_ephemeral(ctx).await;

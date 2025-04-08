@@ -2,10 +2,9 @@ use serenity::all::{Context, Guild};
 use sqlx::PgPool;
 use zayden_core::SlashCommand;
 
-use crate::{
-    BRADSTER_GUILD, Result,
-    modules::{self, events::live::Live},
-};
+use crate::modules;
+use crate::modules::events::live::Live;
+use crate::{BRADSTER_GUILD, Result};
 
 use super::Handler;
 

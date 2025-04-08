@@ -1,0 +1,4 @@
+-- Add up migration script here
+ALTER TABLE gambling
+ADD COLUMN work TIMESTAMP NOT NULL DEFAULT '1970-01-01',
+ADD COLUMN gift DATE NOT NULL DEFAULT '1970-01-01';

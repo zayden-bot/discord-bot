@@ -8,6 +8,10 @@ use crate::modules::destiny2::endgame_analysis::slash_commands::{DimWishlist, Ti
 use crate::modules::destiny2::info::Perk;
 use crate::modules::destiny2::lfg::LfgCommand;
 use crate::modules::events::live::Live;
+use crate::modules::gambling::{
+    Coinflip, Daily, Gift, HigherLower, Leaderboard, Profile, RPS, Roll, Send, Stats, TicTacToe,
+    Work,
+};
 use crate::modules::levels::Levels;
 use crate::modules::levels::slash_commands::{Rank, Xp};
 use crate::modules::reaction_roles::ReactionRoleCommand;
@@ -24,11 +28,6 @@ impl Handler {
         let options = interaction.data.options();
         let options_str = get_option_str(&options);
 
-        println!(
-            "{} ran command: {}{}",
-            interaction.user.name, interaction.data.name, options_str
-        );
-
         let result = match interaction.data.name.as_str() {
             // region Destiny 2
             "weapon" => Weapon::run(ctx, interaction, options, pool),
@@ -36,6 +35,21 @@ impl Handler {
             "lfg" => LfgCommand::run(ctx, interaction, options, pool),
             "tierlist" => TierList::run(ctx, interaction, options, pool),
             "perk" => Perk::run(ctx, interaction, options, pool),
+            // endregion
+
+            // region gambling
+            "coinflip" => Coinflip::run(ctx, interaction, options, pool),
+            "daily" => Daily::run(ctx, interaction, options, pool),
+            "leaderboard" => Leaderboard::run(ctx, interaction, options, pool),
+            "profile" => Profile::run(ctx, interaction, options, pool),
+            "stats" => Stats::run(ctx, interaction, options, pool),
+            "rps" => RPS::run(ctx, interaction, options, pool),
+            "roll" => Roll::run(ctx, interaction, options, pool),
+            "work" => Work::run(ctx, interaction, options, pool),
+            "gift" => Gift::run(ctx, interaction, options, pool),
+            "higherorlower" => HigherLower::run(ctx, interaction, options, pool),
+            "send" => Send::run(ctx, interaction, options, pool),
+            "tictactoe" => TicTacToe::run(ctx, interaction, options, pool),
             // endregion
             "fetch_suggestions" => FetchSuggestions::run(ctx, interaction, options, pool),
             "levels" => Levels::run(ctx, interaction, options, pool),
@@ -60,6 +74,11 @@ impl Handler {
         .await;
 
         if let Err(e) = result {
+            println!(
+                "{} ran command: {}{}",
+                interaction.user.name, interaction.data.name, options_str
+            );
+
             let msg = e.to_response();
             let _ = interaction.defer_ephemeral(ctx).await;
 
