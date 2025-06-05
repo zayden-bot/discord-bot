@@ -1,3 +1,0 @@
--- Add up migration script here
-ALTER TABLE gambling
-ADD COLUMN guild_id BIGINT NOT NULL DEFAULT 1255957182457974875;

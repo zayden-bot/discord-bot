@@ -3,7 +3,6 @@ use serenity::async_trait;
 use serenity::model::prelude::Interaction;
 use serenity::prelude::Context;
 
-use crate::SUPER_USERS;
 use crate::sqlx_lib::PostgresPool;
 
 mod guild_create;
@@ -27,7 +26,7 @@ impl RawEventHandler for Handler {
                 interaction: Interaction::Command(interaction),
                 ..
             }) => interaction.data.name.clone(),
-            _ => String::from("Unknown"),
+            _ => String::new(),
         };
         let ev_debug = format!("{:?}", ev);
 
@@ -53,14 +52,13 @@ impl RawEventHandler for Handler {
         };
 
         if let Err(e) = result {
-            let msg = format!("Error handling {event_name} | {ev_command_name}: {:?}", e);
-            eprintln!("\n{}\n{}\n", msg, ev_debug);
+            let msg = if ev_command_name.is_empty() {
+                format!("Error handling {event_name}: {e:?}")
+            } else {
+                format!("Error handling {event_name} | {ev_command_name}: {:?}", e)
+            };
 
-            for user in SUPER_USERS {
-                if let Ok(channel) = user.create_dm_channel(&ctx).await {
-                    let _ = channel.say(&ctx, &msg).await;
-                }
-            }
+            eprintln!("\n{}\n{}\n", msg, ev_debug);
         }
     }
 }

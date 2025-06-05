@@ -1,6 +1,6 @@
 use serenity::all::{CommandInteraction, Context, EditInteractionResponse};
 use sqlx::PgPool;
-use zayden_core::{Autocomplete, ErrorResponse};
+use zayden_core::Autocomplete;
 
 use crate::Result;
 use crate::handler::Handler;
@@ -26,7 +26,7 @@ impl Handler {
         };
 
         if let Err(e) = result {
-            let msg = e.to_response();
+            let msg = e.to_string();
 
             let _ = interaction.defer_ephemeral(ctx).await;
 

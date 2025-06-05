@@ -1,6 +1,7 @@
+use chrono::Utc;
 use serenity::all::{CommandInteraction, Context, EditInteractionResponse};
 use sqlx::PgPool;
-use zayden_core::{ErrorResponse, SlashCommand, get_option_str};
+use zayden_core::{SlashCommand, get_option_str};
 
 use crate::Result;
 use crate::handler::Handler;
@@ -9,11 +10,11 @@ use crate::modules::destiny2::info::Perk;
 use crate::modules::destiny2::lfg::LfgCommand;
 use crate::modules::events::live::Live;
 use crate::modules::gambling::{
-    Coinflip, Daily, Gift, HigherLower, Leaderboard, Profile, RPS, Roll, Send, Stats, TicTacToe,
-    Work,
+    Coinflip, Craft, Daily, Dig, Gift, Goals, HigherLower, Inventory, Leaderboard, Lotto, Mine,
+    Profile, RockPaperScissors, Roll, Send, Shop, TicTacToe, Work,
 };
-use crate::modules::levels::Levels;
-use crate::modules::levels::slash_commands::{Rank, Xp};
+use crate::modules::levels::{Levels, Rank, Xp};
+use crate::modules::misc::Random;
 use crate::modules::reaction_roles::ReactionRoleCommand;
 use crate::modules::suggestions::FetchSuggestions;
 use crate::modules::temp_voice::Voice;
@@ -26,7 +27,14 @@ impl Handler {
         pool: &PgPool,
     ) -> Result<()> {
         let options = interaction.data.options();
-        let options_str = get_option_str(&options);
+
+        println!(
+            "[{}] {} ran command: {}{}",
+            Utc::now().format("%Y-%m-%d %H:%M:%S"),
+            interaction.user.name,
+            interaction.data.name,
+            get_option_str(&options)
+        );
 
         let result = match interaction.data.name.as_str() {
             // region Destiny 2
@@ -39,27 +47,31 @@ impl Handler {
 
             // region gambling
             "coinflip" => Coinflip::run(ctx, interaction, options, pool),
+            "craft" => Craft::run(ctx, interaction, options, pool),
             "daily" => Daily::run(ctx, interaction, options, pool),
+            "dig" => Dig::run(ctx, interaction, options, pool),
+            "inventory" => Inventory::run(ctx, interaction, options, pool),
+            "higherorlower" => HigherLower::run(ctx, interaction, options, pool),
             "leaderboard" => Leaderboard::run(ctx, interaction, options, pool),
+            "lotto" => Lotto::run(ctx, interaction, options, pool),
+            "mine" => Mine::run(ctx, interaction, options, pool),
             "profile" => Profile::run(ctx, interaction, options, pool),
-            "stats" => Stats::run(ctx, interaction, options, pool),
-            "rps" => RPS::run(ctx, interaction, options, pool),
+            "rps" => RockPaperScissors::run(ctx, interaction, options, pool),
             "roll" => Roll::run(ctx, interaction, options, pool),
             "work" => Work::run(ctx, interaction, options, pool),
             "gift" => Gift::run(ctx, interaction, options, pool),
-            "higherorlower" => HigherLower::run(ctx, interaction, options, pool),
+            "goals" => Goals::run(ctx, interaction, options, pool),
             "send" => Send::run(ctx, interaction, options, pool),
+            "shop" => Shop::run(ctx, interaction, options, pool),
             "tictactoe" => TicTacToe::run(ctx, interaction, options, pool),
             // endregion
-            "fetch_suggestions" => FetchSuggestions::run(ctx, interaction, options, pool),
             "levels" => Levels::run(ctx, interaction, options, pool),
+            "random" => Random::run(ctx, interaction, options, pool),
+            "fetch_suggestions" => FetchSuggestions::run(ctx, interaction, options, pool),
             "live" => Live::run(ctx, interaction, options, pool),
             "rank" => Rank::run(ctx, interaction, options, pool),
             "xp" => Xp::run(ctx, interaction, options, pool),
-
-            // region: reaction_roles
             "reaction_role" => ReactionRoleCommand::run(ctx, interaction, options, pool),
-            // endregion: reaction_roles
             "voice" => Voice::run(ctx, interaction, options, pool),
 
             // region: ticket
@@ -74,12 +86,7 @@ impl Handler {
         .await;
 
         if let Err(e) = result {
-            println!(
-                "{} ran command: {}{}",
-                interaction.user.name, interaction.data.name, options_str
-            );
-
-            let msg = e.to_response();
+            let msg = e.to_string();
             let _ = interaction.defer_ephemeral(ctx).await;
 
             interaction

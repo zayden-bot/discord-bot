@@ -1,15 +1,47 @@
 use async_trait::async_trait;
-use serenity::all::{
-    Colour, CommandInteraction, Context, CreateCommand, CreateEmbed, EditInteractionResponse,
-    ResolvedOption,
-};
+use gambling::commands::profile::{ProfileManager, ProfileRow};
+use gambling::{Commands, GamblingItem};
+use serenity::all::{CommandInteraction, Context, CreateCommand, ResolvedOption, UserId};
+use sqlx::types::Json;
 use sqlx::{PgPool, Postgres};
 use zayden_core::SlashCommand;
 
-use crate::modules::levels::level_up_xp;
 use crate::{Error, Result};
 
-use super::{COIN, GamblingAndLevelsRow};
+pub struct ProfileTable;
+
+#[async_trait]
+impl ProfileManager<Postgres> for ProfileTable {
+    async fn row(pool: &PgPool, id: impl Into<UserId> + Send) -> sqlx::Result<Option<ProfileRow>> {
+        let id = id.into();
+
+        sqlx::query_as!(
+            ProfileRow,
+            r#"SELECT
+            g.coins,
+            g.gems,
+
+            COALESCE(l.xp, 0) AS xp,
+            COALESCE(l.level, 0) AS level,
+            
+            (
+                SELECT jsonb_agg(
+                    jsonb_build_object(
+                        'quantity', inv.quantity,
+                        'item_id', inv.item_id
+                    )
+                )
+                FROM gambling_inventory inv
+                WHERE inv.user_id = g.id
+            ) as "inventory: Json<Vec<GamblingItem>>"
+            
+            FROM gambling g LEFT JOIN levels l ON g.id = l.id WHERE g.id = $1;"#,
+            id.get() as i64
+        )
+        .fetch_optional(pool)
+        .await
+    }
+}
 
 pub struct Profile;
 
@@ -18,37 +50,15 @@ impl SlashCommand<Error, Postgres> for Profile {
     async fn run(
         ctx: &Context,
         interaction: &CommandInteraction,
-        _options: Vec<ResolvedOption<'_>>,
+        options: Vec<ResolvedOption<'_>>,
         pool: &PgPool,
     ) -> Result<()> {
-        interaction.defer(ctx).await.unwrap();
-
-        let row = GamblingAndLevelsRow::from_table(pool, interaction.user.id).await;
-
-        let xp_for_next_rank = level_up_xp(row.level);
-
-        let embed = CreateEmbed::new()
-            .title(interaction.user.display_name())
-            .field(format!("Cash <:coin:{COIN}>"), row.cash.to_string(), false)
-            .field(
-                format!("Level {}", row.level),
-                format!("{} / {} xp", row.xp, xp_for_next_rank),
-                false,
-            )
-            .colour(Colour::TEAL)
-            .thumbnail(interaction.user.avatar_url().unwrap());
-
-        interaction
-            .edit_response(ctx, EditInteractionResponse::new().embed(embed))
-            .await
-            .unwrap();
+        Commands::profile::<Postgres, ProfileTable>(ctx, interaction, options, pool).await?;
 
         Ok(())
     }
 
     fn register(_ctx: &Context) -> Result<CreateCommand> {
-        let cmd = CreateCommand::new("profile").description("Show your cash, level and items");
-
-        Ok(cmd)
+        Ok(Commands::register_profile())
     }
 }

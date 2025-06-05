@@ -1,15 +1,84 @@
 use async_trait::async_trait;
-use chrono::Utc;
-use serenity::all::{
-    Colour, CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, EditInteractionResponse, Mentionable, ResolvedOption, ResolvedValue,
-};
-use sqlx::{PgPool, Postgres};
+use gambling::commands::gift::GiftManager;
+use gambling::{Commands, commands::gift::SenderRow};
+use serenity::all::{CommandInteraction, Context, CreateCommand, ResolvedOption, UserId};
+use sqlx::{PgPool, Postgres, any::AnyQueryResult};
 use zayden_core::SlashCommand;
 
+use crate::modules::gambling::GoalsTable;
 use crate::{Error, Result};
 
-use super::{GamblingRow, GamblingTable};
+pub struct GiftTable;
+
+#[async_trait]
+impl GiftManager<Postgres> for GiftTable {
+    async fn sender(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Option<SenderRow>> {
+        let id = id.into();
+
+        sqlx::query_as!(
+            SenderRow,
+            "SELECT g.id, g.coins, g.gems, g.gift, COALESCE(l.level, 0) AS level FROM gambling g LEFT JOIN levels l ON g.id = l.id WHERE g.id = $1",
+            id.get() as i64
+        )
+        .fetch_optional(pool)
+        .await
+    }
+
+    async fn add_coins(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+        amount: i64,
+    ) -> sqlx::Result<AnyQueryResult> {
+        let id = id.into();
+
+        sqlx::query!(
+            "UPDATE gambling SET coins = coins + $2 WHERE id = $1",
+            id.get() as i64,
+            amount
+        )
+        .execute(pool)
+        .await
+        .map(AnyQueryResult::from)
+    }
+
+    async fn save_sender(pool: &PgPool, row: SenderRow) -> sqlx::Result<AnyQueryResult> {
+        let mut tx = pool.begin().await?;
+
+        let mut result = sqlx::query!(
+            "INSERT INTO gambling (id, coins, gems, gift)
+            VALUES ($1, $2, $3, now())
+            ON CONFLICT (id) DO UPDATE SET
+            coins = EXCLUDED.coins, gems = EXCLUDED.gems, gift = EXCLUDED.gift;",
+            row.id,
+            row.coins,
+            row.gems,
+        )
+        .execute(&mut *tx)
+        .await
+        .map(AnyQueryResult::from)?;
+
+        let result2 = sqlx::query!(
+            "INSERT INTO levels (id, level)
+            VALUES ($1, $2)
+            ON CONFLICT (id) DO UPDATE SET
+            level = EXCLUDED.level;",
+            row.id,
+            row.level,
+        )
+        .execute(&mut *tx)
+        .await
+        .map(AnyQueryResult::from)?;
+
+        result.extend([result2]);
+
+        tx.commit().await?;
+
+        Ok(result)
+    }
+}
 
 pub struct Gift;
 
@@ -21,63 +90,12 @@ impl SlashCommand<Error, Postgres> for Gift {
         options: Vec<ResolvedOption<'_>>,
         pool: &PgPool,
     ) -> Result<()> {
-        interaction.defer(ctx).await.unwrap();
-
-        let ResolvedValue::User(recipient, _) = options[0].value else {
-            unreachable!("recipient is required")
-        };
-
-        if recipient == &interaction.user {
-            return Err(Error::SelfGift);
-        }
-
-        let mut user_row = GamblingTable::get(pool, interaction.user.id)
-            .await
-            .unwrap()
-            .unwrap_or_else(|| GamblingRow::new(interaction.user.id));
-
-        let today = Utc::now().naive_utc().date();
-
-        if user_row.gift == today {
-            return Err(Error::GiftUsed);
-        }
-
-        user_row.gift = today;
-        GamblingTable::save(pool, user_row).await.unwrap();
-
-        if (GamblingTable::add_cash(pool, recipient.id, 2500).await).is_err() {
-            let mut row = GamblingRow::new(recipient.id);
-            row.cash += 2500;
-            GamblingTable::save(pool, row).await.unwrap();
-        };
-
-        let embed = CreateEmbed::new()
-            .description(format!(
-                "🎁 You sent a gift of 2,500 to {}",
-                recipient.mention()
-            ))
-            .colour(Colour::GOLD);
-
-        interaction
-            .edit_response(ctx, EditInteractionResponse::new().embed(embed))
-            .await
-            .unwrap();
+        Commands::gift::<Postgres, GoalsTable, GiftTable>(ctx, interaction, options, pool).await?;
 
         Ok(())
     }
 
     fn register(_ctx: &Context) -> Result<CreateCommand> {
-        let cmd = CreateCommand::new("gift")
-            .description("Send a free gift to a user!")
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::User,
-                    "recipient",
-                    "The user to receive the free gift",
-                )
-                .required(true),
-            );
-
-        Ok(cmd)
+        Ok(Commands::register_gift())
     }
 }

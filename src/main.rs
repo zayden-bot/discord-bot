@@ -10,6 +10,7 @@ pub use error::{Error, Result};
 use sqlx::Postgres;
 use sqlx_lib::PostgresPool;
 
+mod cron;
 mod error;
 mod handler;
 pub mod modules;
@@ -24,11 +25,13 @@ pub const BRADSTER_GUILD: GuildId = GuildId::new(1255957182457974875);
 async fn main() -> Result<()> {
     dotenvy::dotenv().unwrap();
 
-    let pool = PostgresPool::init().await.unwrap();
+    let pool = PostgresPool::new().await.unwrap();
 
     if !cfg!(debug_assertions) {
-        DestinyDatabaseManager::update_dbs(&pool).await.unwrap();
-        EndgameAnalysisSheet::update::<Postgres, DestinyWeaponTable>(&pool)
+        DestinyDatabaseManager::update_dbs(&pool.pool)
+            .await
+            .unwrap();
+        EndgameAnalysisSheet::update::<Postgres, DestinyWeaponTable>(&pool.pool)
             .await
             .unwrap();
     }

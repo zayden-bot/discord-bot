@@ -1,14 +1,64 @@
 use async_trait::async_trait;
-use serenity::all::{
-    CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption,
-    CreateEmbed, EditInteractionResponse, Mentionable, ResolvedOption, ResolvedValue,
-};
+use gambling::Commands;
+use gambling::commands::send::{SendManager, SendRow};
+use serenity::all::{CommandInteraction, Context, CreateCommand, ResolvedOption, UserId};
+use sqlx::any::AnyQueryResult;
 use sqlx::{PgPool, Postgres};
-use zayden_core::{SlashCommand, parse_options};
+use zayden_core::SlashCommand;
 
 use crate::{Error, Result};
 
-use super::{COIN, GamblingRow, GamblingTable};
+use super::goals::GoalsTable;
+
+pub struct SendTable;
+
+#[async_trait]
+impl SendManager<Postgres> for SendTable {
+    async fn row(
+        pool: &PgPool,
+        id: impl Into<UserId> + std::marker::Send,
+    ) -> sqlx::Result<Option<SendRow>> {
+        let id = id.into();
+
+        sqlx::query_as!(
+            SendRow,
+            "SELECT g.id, g.coins, g.gems, COALESCE(l.level, 0) AS level FROM gambling g LEFT JOIN levels l ON g.id = l.id WHERE g.id = $1;",
+            id.get() as i64
+        ).fetch_optional(pool).await
+    }
+
+    async fn add_coins(
+        pool: &PgPool,
+        id: impl Into<UserId> + std::marker::Send,
+        amount: i64,
+    ) -> sqlx::Result<AnyQueryResult> {
+        let id = id.into();
+
+        sqlx::query!(
+            "UPDATE gambling SET coins = coins + $2 WHERE id = $1",
+            id.get() as i64,
+            amount
+        )
+        .execute(pool)
+        .await
+        .map(AnyQueryResult::from)
+    }
+
+    async fn save(pool: &PgPool, row: SendRow) -> sqlx::Result<AnyQueryResult> {
+        sqlx::query!(
+            "INSERT INTO gambling (id, coins, gems)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (id) DO UPDATE SET
+            coins = EXCLUDED.coins, gems = EXCLUDED.gems;",
+            row.id,
+            row.coins,
+            row.gems,
+        )
+        .execute(pool)
+        .await
+        .map(AnyQueryResult::from)
+    }
+}
 
 pub struct Send;
 
@@ -20,81 +70,11 @@ impl SlashCommand<Error, Postgres> for Send {
         options: Vec<ResolvedOption<'_>>,
         pool: &PgPool,
     ) -> Result<()> {
-        interaction.defer(ctx).await.unwrap();
-
-        let mut options = parse_options(options);
-
-        let Some(ResolvedValue::User(recipient, _)) = options.remove("recipient") else {
-            unreachable!("recipient is required");
-        };
-
-        if recipient == &interaction.user {
-            return Err(Error::SelfSend);
-        }
-
-        let Some(ResolvedValue::Integer(amount)) = options.remove("amount") else {
-            unreachable!("amount is required");
-        };
-
-        if amount < 0 {
-            return Err(Error::NegativeAmount);
-        }
-
-        let mut user_row = GamblingTable::get(pool, interaction.user.id)
-            .await
-            .unwrap()
-            .unwrap_or_else(|| GamblingRow::new(interaction.user.id));
-
-        if user_row.cash < amount {
-            return Err(Error::InsufficientFunds);
-        }
-
-        user_row.cash -= amount;
-
-        GamblingTable::save(pool, user_row).await.unwrap();
-
-        if GamblingTable::add_cash(pool, recipient.id, amount)
-            .await
-            .is_err()
-        {
-            let mut row = GamblingRow::new(recipient.id);
-            row.cash += amount;
-            GamblingTable::save(pool, row).await.unwrap();
-        }
-
-        let embed = CreateEmbed::new().description(format!(
-            "You sent {amount} <:coin:{COIN}> to {}",
-            recipient.mention()
-        ));
-
-        interaction
-            .edit_response(ctx, EditInteractionResponse::new().embed(embed))
-            .await
-            .unwrap();
-
+        Commands::send::<Postgres, GoalsTable, SendTable>(ctx, interaction, options, pool).await?;
         Ok(())
     }
 
     fn register(_ctx: &Context) -> Result<CreateCommand> {
-        let cmd = CreateCommand::new("send")
-            .description("Send another player some of your cash")
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::User,
-                    "recipient",
-                    "The player recieving the cash",
-                )
-                .required(true),
-            )
-            .add_option(
-                CreateCommandOption::new(
-                    CommandOptionType::Integer,
-                    "amount",
-                    "The amount to send",
-                )
-                .required(true),
-            );
-
-        Ok(cmd)
+        Ok(Commands::register_send())
     }
 }

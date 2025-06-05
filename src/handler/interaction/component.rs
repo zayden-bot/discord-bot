@@ -1,9 +1,9 @@
+use chrono::Utc;
 use serenity::all::{
     ComponentInteraction, Context, CreateInteractionResponse, EditInteractionResponse,
 };
 use sqlx::{PgPool, Postgres};
 use suggestions::Suggestions;
-use zayden_core::ErrorResponse;
 
 use crate::handler::Handler;
 use crate::modules::destiny2::lfg::{LfgMessageTable, LfgPostTable};
@@ -16,6 +16,13 @@ impl Handler {
         interaction: &ComponentInteraction,
         pool: &PgPool,
     ) -> Result<()> {
+        println!(
+            "[{}] {} ran component: {}",
+            Utc::now().format("%Y-%m-%d %H:%M:%S"),
+            interaction.user.name,
+            interaction.data.custom_id,
+        );
+
         let result = match interaction.data.custom_id.as_str() {
             // region: Lfg
             "lfg_join" => lfg::PostComponents::join::<Postgres, LfgPostTable, LfgMessageTable>(
@@ -68,15 +75,20 @@ impl Handler {
             .await
             .map_err(Error::from),
             "lfg_delete" => {
-                lfg::SettingsComponents::delete::<Postgres, LfgPostTable>(ctx, interaction, pool)
-                    .await?;
+                let r = lfg::SettingsComponents::delete::<Postgres, LfgPostTable>(
+                    ctx,
+                    interaction,
+                    pool,
+                )
+                .await
+                .map_err(Error::from);
 
                 interaction
                     .create_response(ctx, CreateInteractionResponse::Acknowledge)
                     .await
                     .unwrap();
 
-                Ok(())
+                r
             }
             // "lfg_tags_add" => Lfg::tags_add(ctx, interaction).await,
             // "lfg_tags_remove" => Lfg::tags_remove(ctx, interaction).await,
@@ -99,12 +111,7 @@ impl Handler {
         };
 
         if let Err(e) = result {
-            println!(
-                "{} ran component: {}",
-                interaction.user.name, interaction.data.custom_id
-            );
-
-            let msg = e.to_response();
+            let msg = e.to_string();
 
             let _ = interaction.defer_ephemeral(ctx).await;
 

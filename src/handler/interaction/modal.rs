@@ -1,9 +1,9 @@
+use chrono::Utc;
 use lfg::{LfgCreateModal, LfgEditModal};
 use serenity::all::{Context, EditInteractionResponse, ModalInteraction};
 use sqlx::{PgPool, Postgres};
 use suggestions::Suggestions;
 use ticket::TicketModal;
-use zayden_core::ErrorResponse;
 
 use crate::handler::Handler;
 use crate::modules::destiny2::lfg::{LfgGuildTable, LfgMessageTable, LfgPostTable, UsersTable};
@@ -18,21 +18,14 @@ impl Handler {
         pool: &PgPool,
     ) -> Result<()> {
         println!(
-            "{} ran modal: {}",
-            interaction.user.name, interaction.data.custom_id
+            "[{}] {} ran modal: {}",
+            Utc::now().format("%Y-%m-%d %H:%M:%S"),
+            interaction.user.name,
+            interaction.data.custom_id
         );
 
         let result = match interaction.data.custom_id.as_str() {
             // region LFG
-            "lfg_create" => LfgCreateModal::run::<
-                Postgres,
-                LfgGuildTable,
-                LfgPostTable,
-                LfgMessageTable,
-                UsersTable,
-            >(ctx, interaction, pool)
-            .await
-            .map_err(Error::from),
             "lfg_edit" => LfgEditModal::run::<Postgres, LfgPostTable, LfgMessageTable, UsersTable>(
                 ctx,
                 interaction,
@@ -40,6 +33,17 @@ impl Handler {
             )
             .await
             .map_err(Error::from),
+            custom_id if custom_id.starts_with("lfg_create") => {
+                LfgCreateModal::run::<
+                    Postgres,
+                    LfgGuildTable,
+                    LfgPostTable,
+                    LfgMessageTable,
+                    UsersTable,
+                >(ctx, interaction, pool)
+                .await
+                .map_err(Error::from)
+            }
             // endregion
 
             // region Ticket
@@ -62,7 +66,7 @@ impl Handler {
         };
 
         if let Err(e) = result {
-            let msg = e.to_response();
+            let msg = e.to_string();
 
             let _ = interaction.defer_ephemeral(ctx).await;
 

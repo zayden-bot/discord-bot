@@ -1,10 +1,10 @@
 use serenity::all::{Context, VoiceState};
 use sqlx::{PgPool, Postgres};
-use temp_voice::events::voice_state_update::{channel_creator, channel_deleter};
 use temp_voice::VoiceStateCache;
+use temp_voice::events::voice_state_update::{channel_creator, channel_deleter};
 
-use crate::sqlx_lib::GuildTable;
 use crate::Result;
+use crate::sqlx_lib::GuildTable;
 
 use super::VoiceChannelTable;
 

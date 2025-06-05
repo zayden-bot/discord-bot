@@ -1,143 +1,109 @@
-pub mod component;
-pub mod message_command;
-pub mod slash_commands;
+mod commands;
 
-use chrono::NaiveDateTime;
-use serenity::all::{Context, CreateCommand, User, UserId};
-use sqlx::{PgPool, any::AnyQueryResult};
-use zayden_core::SlashCommand;
+pub use commands::{Levels, Rank, Xp};
 
-#[inline(always)]
-pub const fn level_up_xp(level: i32) -> i32 {
-    (5 * level * level) + (50 * level) + 100
-}
-
-pub fn register(ctx: &Context) -> CreateCommand {
-    Levels::register(ctx).unwrap()
-}
-
-pub struct Levels;
+use async_trait::async_trait;
+pub use levels::Commands;
+use levels::{FullLevelRow, LeaderboardRow, LevelsManager, RankRow, XpRow};
+use serenity::all::UserId;
+use sqlx::any::AnyQueryResult;
+use sqlx::{PgPool, Postgres};
 
 pub struct LevelsTable;
 
-impl LevelsTable {
-    pub async fn get_user_rank(
+#[async_trait]
+impl LevelsManager<Postgres> for LevelsTable {
+    async fn leaderboard(
         pool: &PgPool,
-        user_id: impl Into<UserId>,
-    ) -> sqlx::Result<Option<i64>> {
-        let user_id = user_id.into().get() as i64;
+        users: &[i64],
+        page: i64,
+    ) -> sqlx::Result<Vec<LeaderboardRow>> {
+        let offset = (page - 1) * 10;
 
-        let data = sqlx::query!(
-            "SELECT rank FROM (SELECT id, RANK() OVER (ORDER BY total_xp DESC) FROM levels) AS ranked WHERE id = $1",
-            user_id
-        )
-        .fetch_one(pool)
-        .await?;
-
-        Ok(data.rank)
-    }
-
-    pub async fn get_user_row_number(
-        pool: &PgPool,
-        user_id: impl Into<UserId>,
-    ) -> sqlx::Result<Option<i64>> {
-        let user_id = user_id.into().get() as i64;
-
-        let data = sqlx::query!(
-            "SELECT row_number FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY total_xp DESC) FROM levels) AS ranked WHERE id = $1",
-            user_id
-        )
-        .fetch_one(pool)
-        .await?;
-
-        Ok(data.row_number)
-    }
-
-    pub async fn get_users(pool: &PgPool, page: i64, limit: i64) -> sqlx::Result<Vec<LevelsRow>> {
-        let offset = (page - 1) * limit;
-
-        let data = sqlx::query_as!(
-            LevelsRow,
-            "SELECT * FROM levels ORDER BY total_xp DESC LIMIT $1 OFFSET $2",
-            limit,
+        sqlx::query_as!(
+            LeaderboardRow,
+            "SELECT id, xp, level, message_count FROM levels WHERE id = ANY($1) ORDER BY total_xp DESC LIMIT 10 OFFSET $2",
+            users,
             offset
         )
         .fetch_all(pool)
-        .await?;
-
-        Ok(data)
-    }
-}
-
-pub struct LevelsRow {
-    pub id: i64,
-    pub xp: i32,
-    pub level: i32,
-    pub total_xp: i32,
-    pub message_count: i32,
-    pub last_xp: NaiveDateTime,
-}
-
-impl LevelsRow {
-    pub fn new(id: impl Into<UserId>) -> Self {
-        let id = id.into().get() as i64;
-
-        Self {
-            id,
-            xp: 0,
-            level: 1,
-            total_xp: 0,
-            message_count: 0,
-            last_xp: NaiveDateTime::default(),
-        }
+        .await
     }
 
-    pub async fn from_table(pool: &PgPool, id: impl Into<UserId>) -> sqlx::Result<Self> {
-        let id = id.into().get() as i64;
+    async fn user_rank(
+        pool: &PgPool,
+        user_id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Option<i64>> {
+        let id = user_id.into().get() as i64;
 
-        let row = sqlx::query_as!(LevelsRow, "SELECT * FROM levels WHERE id = $1", id)
-            .fetch_optional(pool)
-            .await?
-            .unwrap_or_else(|| LevelsRow::new(id as u64));
-
-        Ok(row)
+        sqlx::query_scalar!(
+            "SELECT row_number FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY total_xp DESC) FROM levels) AS ranked WHERE id = $1",
+            id
+        )
+        .fetch_one(pool)
+        .await
     }
 
-    pub fn id(&self) -> UserId {
-        UserId::new(self.id as u64)
+    async fn rank_row(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Option<RankRow>> {
+        let id = id.into();
+
+        sqlx::query_as!(
+            RankRow,
+            "SELECT xp, level FROM levels WHERE id = $1",
+            id.get() as i64
+        )
+        .fetch_optional(pool)
+        .await
     }
 
-    pub async fn as_user(&self, ctx: &Context) -> serenity::Result<User> {
-        self.id().to_user(ctx).await
+    async fn xp_row(pool: &PgPool, id: impl Into<UserId> + Send) -> sqlx::Result<Option<XpRow>> {
+        let id = id.into();
+
+        sqlx::query_as!(
+            XpRow,
+            "SELECT xp, level, total_xp FROM levels WHERE id = $1",
+            id.get() as i64
+        )
+        .fetch_optional(pool)
+        .await
     }
 
-    pub fn update_level(&mut self) -> bool {
-        let next_level_xp = level_up_xp(self.level);
+    async fn full_row(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Option<FullLevelRow>> {
+        let id = id.into();
 
-        let rand_xp = rand::random_range(15..25);
-        self.total_xp += rand_xp;
-        self.xp += rand_xp;
-
-        if self.xp >= next_level_xp {
-            self.xp -= next_level_xp;
-            self.level += 1;
-            return true;
-        };
-
-        false
+        sqlx::query_as!(
+            FullLevelRow,
+            "SELECT * FROM levels WHERE id = $1",
+            id.get() as i64
+        )
+        .fetch_optional(pool)
+        .await
     }
 
-    pub async fn save(self, pool: &PgPool) -> sqlx::Result<AnyQueryResult> {
-        let r = sqlx::query!(
-            "UPDATE levels SET xp = $2, total_xp = $3, level = $4, message_count = message_count + 1, last_xp = now() WHERE id = $1",
-            self.id,
-            self.xp,
-            self.total_xp,
-            self.level,
+    async fn save(pool: &PgPool, row: FullLevelRow) -> sqlx::Result<AnyQueryResult> {
+        sqlx::query!(
+            "INSERT INTO levels (id, xp, total_xp, level, message_count, last_xp)
+            VALUES ($1, $2, $3, $4, $5, now())
+            ON CONFLICT (id) DO UPDATE
+            SET xp = EXCLUDED.xp,
+                total_xp = EXCLUDED.total_xp,
+                level = EXCLUDED.level,
+                message_count = EXCLUDED.message_count,
+                last_xp = now();",
+            row.id,
+            row.xp,
+            row.total_xp as i32,
+            row.level,
+            row.message_count as i32,
         )
         .execute(pool)
-        .await?;
-
-        Ok(r.into())
+        .await
+        .map(AnyQueryResult::from)
     }
 }

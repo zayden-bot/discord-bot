@@ -1,14 +1,213 @@
 use async_trait::async_trait;
-use serenity::all::{
-    Colour, CommandInteraction, Context, CreateCommand, CreateEmbed, EditInteractionResponse,
-    Mentionable, ResolvedOption,
+use futures::TryStreamExt;
+use gambling::Commands;
+use gambling::commands::leaderboard::{
+    CoinsRow, EggplantsRow, GemsRow, LeaderboardManager, LeaderboardRow, LottoTicketRow,
 };
+use gambling::shop::{EGGPLANT, LOTTO_TICKET};
+use serenity::all::{CommandInteraction, Context, CreateCommand, ResolvedOption, UserId};
 use sqlx::{PgPool, Postgres};
 use zayden_core::SlashCommand;
 
 use crate::{Error, Result};
 
-use super::GamblingTable;
+const LIMIT: i64 = 10;
+
+pub struct LeaderboardTable;
+
+#[async_trait]
+impl LeaderboardManager<Postgres> for LeaderboardTable {
+    async fn networth(
+        pool: &PgPool,
+        users: &[i64],
+        page_num: i64,
+    ) -> sqlx::Result<Vec<LeaderboardRow>> {
+        todo!()
+    }
+
+    async fn networth_row_number(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Option<i64>> {
+        todo!()
+    }
+
+    async fn coins(
+        pool: &PgPool,
+        users: &[i64],
+        page_num: i64,
+    ) -> sqlx::Result<Vec<LeaderboardRow>> {
+        let offset = (page_num - 1) * LIMIT;
+
+        sqlx::query_as!(
+            CoinsRow,
+            r#"
+            SELECT id, coins
+            FROM gambling
+            WHERE id = ANY($1)
+            ORDER BY coins DESC
+            LIMIT $2
+            OFFSET $3
+            "#,
+            users,
+            LIMIT,
+            offset
+        )
+        .fetch(pool)
+        .map_ok(LeaderboardRow::Coins)
+        .try_collect::<Vec<_>>()
+        .await
+    }
+
+    async fn coins_row_number(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Option<i64>> {
+        let user_id = id.into();
+
+        sqlx::query_scalar!(
+            r#"
+        WITH numbered_users AS (
+            SELECT
+                id,
+                ROW_NUMBER() OVER (ORDER BY coins DESC) as rn
+            FROM
+                gambling
+        )
+        SELECT rn
+        FROM numbered_users
+        WHERE id = $1
+        "#,
+            user_id.get() as i64
+        )
+        .fetch_optional(pool)
+        .await
+        .map(|num| num.flatten())
+    }
+
+    async fn gems(
+        pool: &PgPool,
+        users: &[i64],
+        page_num: i64,
+    ) -> sqlx::Result<Vec<LeaderboardRow>> {
+        let offset = (page_num - 1) * LIMIT;
+
+        sqlx::query_as!(
+            GemsRow,
+            r#"
+            SELECT id, gems
+            FROM gambling
+            WHERE id = ANY($1)
+            ORDER BY gems DESC
+            LIMIT $2
+            OFFSET $3
+            "#,
+            users,
+            LIMIT,
+            offset
+        )
+        .fetch(pool)
+        .map_ok(LeaderboardRow::Gems)
+        .try_collect::<Vec<_>>()
+        .await
+    }
+
+    async fn gems_row_number(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Option<i64>> {
+        let user_id = id.into();
+
+        sqlx::query_scalar!(
+            r#"
+        WITH numbered_users AS (
+            SELECT
+                id,
+                ROW_NUMBER() OVER (ORDER BY gems DESC) as rn
+            FROM
+                gambling
+        )
+        SELECT rn
+        FROM numbered_users
+        WHERE id = $1
+        "#,
+            user_id.get() as i64
+        )
+        .fetch_optional(pool)
+        .await
+        .map(|num| num.flatten())
+    }
+
+    async fn eggplants(
+        pool: &PgPool,
+        users: &[i64],
+        page_num: i64,
+    ) -> sqlx::Result<Vec<LeaderboardRow>> {
+        let offset = (page_num - 1) * LIMIT;
+
+        sqlx::query_as!(
+            EggplantsRow,
+            r#"
+            SELECT id, quantity
+            FROM gambling_inventory
+            WHERE user_id = ANY($1) AND item_id = $2
+            ORDER BY quantity DESC
+            LIMIT $3
+            OFFSET $4
+            "#,
+            users,
+            EGGPLANT.id,
+            LIMIT,
+            offset
+        )
+        .fetch(pool)
+        .map_ok(LeaderboardRow::Eggplants)
+        .try_collect::<Vec<_>>()
+        .await
+    }
+
+    async fn eggplants_row_number(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Option<i64>> {
+        todo!()
+    }
+
+    async fn lottotickets(
+        pool: &PgPool,
+        users: &[i64],
+        page_num: i64,
+    ) -> sqlx::Result<Vec<LeaderboardRow>> {
+        let offset = (page_num - 1) * LIMIT;
+
+        sqlx::query_as!(
+            LottoTicketRow,
+            r#"
+            SELECT id, quantity
+            FROM gambling_inventory
+            WHERE user_id = ANY($1) AND item_id = $2
+            ORDER BY quantity DESC
+            LIMIT $3
+            OFFSET $4
+            "#,
+            users,
+            LOTTO_TICKET.id,
+            LIMIT,
+            offset
+        )
+        .fetch(pool)
+        .map_ok(LeaderboardRow::LottoTickets)
+        .try_collect::<Vec<_>>()
+        .await
+    }
+
+    async fn lottotickets_row_number(
+        pool: &PgPool,
+        id: impl Into<UserId> + Send,
+    ) -> sqlx::Result<Option<i64>> {
+        todo!()
+    }
+}
 
 pub struct Leaderboard;
 
@@ -17,48 +216,16 @@ impl SlashCommand<Error, Postgres> for Leaderboard {
     async fn run(
         ctx: &Context,
         interaction: &CommandInteraction,
-        _options: Vec<ResolvedOption<'_>>,
+        options: Vec<ResolvedOption<'_>>,
         pool: &PgPool,
     ) -> Result<()> {
-        interaction.defer(ctx).await.unwrap();
-
-        let rows = GamblingTable::guild_leaderboard(pool, 1).await.unwrap();
-
-        let desc = rows
-            .into_iter()
-            .enumerate()
-            .map(|(i, row)| {
-                let place = if i == 0 {
-                    "🥇".to_string()
-                } else if i == 1 {
-                    "🥈".to_string()
-                } else if i == 2 {
-                    "🥉".to_string()
-                } else {
-                    format!("#{}", i + 1)
-                };
-
-                format!("{} - {} - {}", place, row.user_id().mention(), row.cash)
-            })
-            .collect::<Vec<_>>()
-            .join("\n\n");
-
-        let embed = CreateEmbed::new()
-            .title("🏁 Leaderboard")
-            .description(desc)
-            .colour(Colour::TEAL);
-
-        interaction
-            .edit_response(ctx, EditInteractionResponse::new().embed(embed))
-            .await
-            .unwrap();
+        Commands::leaderboard::<Postgres, LeaderboardTable>(ctx, interaction, options, pool)
+            .await?;
 
         Ok(())
     }
 
     fn register(_ctx: &Context) -> Result<CreateCommand> {
-        let cmd = CreateCommand::new("leaderboard").description("Total Cash Leaderboard");
-
-        Ok(cmd)
+        Ok(Commands::register_leaderboard())
     }
 }

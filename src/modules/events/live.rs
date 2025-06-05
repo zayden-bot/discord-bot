@@ -30,10 +30,10 @@ impl SlashCommand<Error, Postgres> for Live {
                 CreateScheduledEvent::new(
                     ScheduledEventType::External,
                     "Brad is LIVE",
-                    Timestamp::now(),
+                    Timestamp::now().saturating_add(Duration::minutes(1)),
                 )
                 .location("https://www.twitch.tv/bradleythebradster")
-                .end_time(Timestamp::now().checked_add(Duration::hours(7)).unwrap()),
+                .end_time(Timestamp::now().saturating_add(Duration::hours(7))),
             )
             .await
             .unwrap();

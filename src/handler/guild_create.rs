@@ -1,6 +1,7 @@
 use serenity::all::{Context, Guild};
 use sqlx::PgPool;
 use zayden_core::SlashCommand;
+use zayden_core::cache::GuildMembersCache;
 
 use crate::modules;
 use crate::modules::events::live::Live;
@@ -10,12 +11,13 @@ use super::Handler;
 
 impl Handler {
     pub async fn guild_create(ctx: &Context, guild: Guild, _pool: &PgPool) -> Result<()> {
-        temp_voice::events::guild_create(ctx, &guild).await;
+        let (_, _, r) = tokio::join!(
+            temp_voice::events::guild_create(ctx, &guild),
+            GuildMembersCache::guild_create(ctx, &guild),
+            guild.set_commands(ctx, modules::global_register(ctx)),
+        );
 
-        guild
-            .set_commands(ctx, modules::global_register(ctx))
-            .await
-            .unwrap();
+        r?;
 
         if guild.id == BRADSTER_GUILD {
             guild
