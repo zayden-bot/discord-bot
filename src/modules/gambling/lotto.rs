@@ -59,29 +59,21 @@ impl LottoManager<Postgres> for LottoTable {
         .map(AnyQueryResult::from)
     }
 
-    async fn save(conn: &mut PgConnection, row: LottoRow) -> sqlx::Result<AnyQueryResult> {
-        let mut result = sqlx::query!(
-            "INSERT INTO gambling (id, coins) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET coins = EXCLUDED.coins;",
-            row.id,
-            row.coins
+    async fn add_coins(
+        conn: &mut PgConnection,
+        id: impl Into<UserId> + Send,
+        amount: i64,
+    ) -> sqlx::Result<AnyQueryResult> {
+        let id = id.into();
+
+        sqlx::query!(
+            "UPDATE gambling SET coins = coins + $2 WHERE id = $1",
+            id.get() as i64,
+            amount
         )
-        .execute(&mut *conn)
+        .execute(conn)
         .await
-        .map(AnyQueryResult::from)?;
-
-        let result2 = sqlx::query!(
-            "INSERT INTO gambling_inventory (user_id, item_id, quantity) VALUES ($1, $2, $3) ON CONFLICT (user_id, item_id) DO UPDATE SET quantity = EXCLUDED.quantity;",
-            row.id,
-            LOTTO_TICKET.id,
-            row.quantity
-        )
-        .execute(&mut *conn)
-        .await
-        .map(AnyQueryResult::from)?;
-
-        result.extend([result2]);
-
-        Ok(result)
+        .map(AnyQueryResult::from)
     }
 }
 
