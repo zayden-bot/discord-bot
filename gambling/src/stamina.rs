@@ -11,7 +11,7 @@ pub struct StaminaCron;
 
 impl StaminaCron {
     pub fn cron_job<Db: Database, Manager: StaminaManager<Db>>() -> CronJob<Db> {
-        CronJob::new("0 */10 * * * * *").set_action(|_ctx, pool| async move {
+        CronJob::new("stamina", "0 */10 * * * * *").set_action(|_ctx, pool| async move {
             Manager::update(&pool).await.unwrap();
         })
     }

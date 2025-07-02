@@ -16,38 +16,62 @@ pub async fn create_reminders<Db: Database, Manager: PostManager<Db>>(
     let day = row.start_time - Duration::hours(24);
     let mins_30 = row.start_time - Duration::minutes(30);
 
-    let week_job = CronJob::<Db>::new(&format!(
-        "0 {} {} {} {} * {}",
-        week.minute(),
-        week.hour(),
-        week.day(),
-        week.month(),
-        week.year()
-    ))
+    let week_job = CronJob::<Db>::new(
+        format!("lfg_{}", post_id),
+        &format!(
+            "0 {} {} {} {} * {}",
+            week.minute(),
+            week.hour(),
+            week.day(),
+            week.month(),
+            week.year()
+        ),
+    )
     .set_action(move |ctx, pool| async move {
         reminder::<Db, Manager>(ctx, pool, post_id).await;
     });
 
-    let day_job = CronJob::<Db>::new(&format!(
-        "0 {} {} {} {} * {}",
-        day.minute(),
-        day.hour(),
-        day.day(),
-        day.month(),
-        day.year()
-    ))
+    let day_job = CronJob::<Db>::new(
+        format!("lfg_{}", post_id),
+        &format!(
+            "0 {} {} {} {} * {}",
+            day.minute(),
+            day.hour(),
+            day.day(),
+            day.month(),
+            day.year()
+        ),
+    )
     .set_action(move |ctx, pool| async move {
         reminder::<Db, Manager>(ctx, pool, post_id).await;
     });
 
-    let mins_30_job = CronJob::<Db>::new(&format!(
-        "0 {} {} {} {} * {}",
-        mins_30.minute(),
-        mins_30.hour(),
-        mins_30.day(),
-        mins_30.month(),
-        mins_30.year()
-    ))
+    let mins_30_job = CronJob::<Db>::new(
+        format!("lfg_{}", post_id),
+        &format!(
+            "0 {} {} {} {} * {}",
+            mins_30.minute(),
+            mins_30.hour(),
+            mins_30.day(),
+            mins_30.month(),
+            mins_30.year()
+        ),
+    )
+    .set_action(move |ctx, pool| async move {
+        reminder::<Db, Manager>(ctx, pool, post_id).await;
+    });
+
+    let now_job = CronJob::<Db>::new(
+        format!("lfg_{}", post_id),
+        &format!(
+            "0 {} {} {} {} * {}",
+            row.start_time.minute(),
+            row.start_time.hour(),
+            row.start_time.day(),
+            row.start_time.month(),
+            row.start_time.year()
+        ),
+    )
     .set_action(move |ctx, pool| async move {
         reminder::<Db, Manager>(ctx, pool, post_id).await;
     });
@@ -55,7 +79,7 @@ pub async fn create_reminders<Db: Database, Manager: PostManager<Db>>(
     let mut data = ctx.data.write().await;
     let jobs = data.entry::<CronJobs<Db>>().or_insert(Vec::new());
 
-    jobs.extend([week_job, day_job, mins_30_job]);
+    jobs.extend([week_job, day_job, mins_30_job, now_job]);
 }
 
 async fn reminder<Db: Database, Manager: PostManager<Db>>(

@@ -78,7 +78,7 @@ pub struct Lotto;
 
 impl Lotto {
     pub fn cron_job<Db: Database, Manager: LottoManager<Db>>() -> CronJob<Db> {
-        CronJob::new("0 0 17 * * Fri *").set_action(|ctx, pool| async move {
+        CronJob::new("lotto", "0 0 17 * * Fri *").set_action(|ctx, pool| async move {
             let mut tx: sqlx::Transaction<'static, Db> = pool.begin().await.unwrap();
 
             let mut rows = Manager::rows(&mut *tx).await.unwrap();

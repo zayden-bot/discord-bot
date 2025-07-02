@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::str::FromStr;
 use std::sync::Arc;
 use std::{marker::PhantomData, pin::Pin};
@@ -12,16 +13,15 @@ pub type ActionFn<Db> =
 
 #[derive(Clone)]
 pub struct CronJob<Db: Database> {
+    pub id: String,
     pub schedule: Schedule,
     pub action_fn: ActionFn<Db>,
 }
 
-impl<Db> CronJob<Db>
-where
-    Db: Database,
-{
-    pub fn new(source: &str) -> Self {
+impl<Db: Database> CronJob<Db> {
+    pub fn new(id: impl Into<String>, source: &str) -> Self {
         Self {
+            id: id.into(),
             schedule: Schedule::from_str(source).unwrap(),
             action_fn: Self::action_fn(|_, _| async {}),
         }
@@ -52,6 +52,15 @@ where
     {
         self.action_fn = Self::action_fn(f);
         self
+    }
+}
+
+impl<Db: Database> Debug for CronJob<Db> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CronJob")
+            .field("id", &self.id)
+            .field("schedule", &self.schedule)
+            .finish()
     }
 }
 
