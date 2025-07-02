@@ -1,0 +1,17 @@
+[package]
+name = "temp-voice"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+zayden-core = { workspace = true }
+
+async-trait = { version = "*", default-features = false }
+sqlx = { version = "*", default-features = false, features = ["any", "macros"] }
+tokio = { version = "*", default-features = false }
+futures = { version = "*", default-features = false }
+
+[dependencies.serenity]
+version = "*"
+default-features = false
+features = ["rustls_backend", "builder", "client", "gateway", "model"]

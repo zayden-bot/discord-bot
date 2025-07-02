@@ -1,0 +1,15 @@
+[package]
+name = "ticket"
+version = "0.9.0"
+edition = "2024"
+
+[dependencies]
+zayden-core = { workspace = true }
+
+async-trait = { version = "*", default-features = false }
+sqlx = { version = "*", default-features = false, features = ["macros"] }
+serenity = { version = "*", default-features = false, features = [
+    "model",
+    "rustls_backend",
+] }
+futures = { version = "*", default-features = false }

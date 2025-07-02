@@ -153,41 +153,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bot"
-version = "0.9.0"
-dependencies = [
- "async-trait",
- "bigdecimal",
- "bungie-api",
- "chrono",
- "chrono-tz",
- "cron",
- "dotenvy",
- "endgame-analysis",
- "futures",
- "gambling",
- "levels",
- "lfg",
- "num-format",
- "openai_api_rust",
- "rand 0.9.1",
- "rand_distr",
- "reaction-roles",
- "serde",
- "serde_json",
- "serenity",
- "sqlx",
- "suggestions",
- "temp-voice",
- "ticket",
- "time",
- "tokio",
- "url",
- "walkdir",
- "zayden-core",
-]
-
-[[package]]
 name = "bumpalo"
 version = "3.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -200,7 +165,7 @@ source = "git+https://github.com/ViridianLink/bungie-api.git?branch=main#66a096e
 dependencies = [
  "bitflags 2.9.1",
  "chrono",
- "reqwest 0.12.22",
+ "reqwest 0.12.21",
  "serde",
  "serde_json",
  "url",
@@ -269,29 +234,6 @@ name = "cfg-if"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9555578bc9e57714c812a1f84e4fc5b4d21fcb063490c624de019f7464c91268"
-
-[[package]]
-name = "charming"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df19cf7d4540f4db08203dce5171421fdfc5e83ea3f14d7b5329f0dbff3bf3c2"
-dependencies = [
- "charming_macros",
- "serde",
- "serde_json",
- "serde_with",
-]
-
-[[package]]
-name = "charming_macros"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ec2398273c047c67d69794a924b1a2a5c14a5fab6bcbe8b24e86a0df9328e5e"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
 
 [[package]]
 name = "chrono"
@@ -437,41 +379,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "darling"
-version = "0.20.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc7f46116c46ff9ab3eb1597a45688b6715c6e628b5c133e288e709a29bcb4ee"
-dependencies = [
- "darling_core",
- "darling_macro",
-]
-
-[[package]]
-name = "darling_core"
-version = "0.20.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d00b9596d185e565c2207a0b01f8bd1a135483d02d9b7b0a54b11da8d53412e"
-dependencies = [
- "fnv",
- "ident_case",
- "proc-macro2",
- "quote",
- "strsim",
- "syn",
-]
-
-[[package]]
-name = "darling_macro"
-version = "0.20.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc34b93ccb385b40dc71c6fceac4b2ad23662c7eeb248cf10d529b7e055b6ead"
-dependencies = [
- "darling_core",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "dashmap"
 version = "5.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -541,12 +448,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
-name = "dyn-clone"
-version = "1.0.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c7a8fb8a9fbf66c1f703fe16184d10ca0ee9d23be5b4436400408ba54a95005"
-
-[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -567,6 +468,7 @@ dependencies = [
 [[package]]
 name = "endgame-analysis"
 version = "0.1.0"
+source = "git+https://github.com/zayden-bot/endgame-analysis.git?branch=main#692e4fa7e6165d7b0fac27ead81638babda19dc9"
 dependencies = [
  "async-trait",
  "bungie-api",
@@ -624,18 +526,6 @@ dependencies = [
  "concurrent-queue",
  "parking",
  "pin-project-lite",
-]
-
-[[package]]
-name = "family"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "charming",
- "futures",
- "serenity",
- "sqlx",
- "zayden-core",
 ]
 
 [[package]]
@@ -804,6 +694,7 @@ dependencies = [
 [[package]]
 name = "gambling"
 version = "0.1.0"
+source = "git+https://github.com/zayden-bot/gambling.git?branch=main#0a97a6fd3fa670514b8c48312e4573b7506e27e0"
 dependencies = [
  "async-trait",
  "chrono",
@@ -863,22 +754,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8d1add55171497b4705a648c6b583acafb01d58050a51727785f0b2c8e0a2b2"
 
 [[package]]
-name = "gold-star"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "chrono",
- "serenity",
- "sqlx",
- "zayden-core",
-]
-
-[[package]]
 name = "google-sheets-api"
 version = "0.1.0"
 source = "git+https://github.com/ViridianLink/google-sheets-api.git?branch=main#06e3545076ce06e3ebbf68b8774780dda5594da5"
 dependencies = [
- "reqwest 0.12.22",
+ "reqwest 0.12.21",
  "serde",
  "serde_json",
  "url",
@@ -896,18 +776,12 @@ dependencies = [
  "futures-sink",
  "futures-util",
  "http 0.2.12",
- "indexmap 2.10.0",
+ "indexmap",
  "slab",
  "tokio",
  "tokio-util",
  "tracing",
 ]
-
-[[package]]
-name = "hashbrown"
-version = "0.12.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 
 [[package]]
 name = "hashbrown"
@@ -1101,19 +975,6 @@ dependencies = [
 
 [[package]]
 name = "hyper-tls"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6183ddfa99b85da61a140bea0efc93fdf56ceaa041b37d553518030827f9905"
-dependencies = [
- "bytes",
- "hyper 0.14.32",
- "native-tls",
- "tokio",
- "tokio-native-tls",
-]
-
-[[package]]
-name = "hyper-tls"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "70206fc6890eaca9fde8a0bf71caa2ddfc9fe045ac9e5c70df101a7dbde866e0"
@@ -1263,12 +1124,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ident_case"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
-
-[[package]]
 name = "idna"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1291,24 +1146,12 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
-dependencies = [
- "autocfg",
- "hashbrown 0.12.3",
- "serde",
-]
-
-[[package]]
-name = "indexmap"
 version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fe4cd85333e22411419a0bcae1297d25e58c9443848b11dc6a86fefe8c78a661"
 dependencies = [
  "equivalent",
  "hashbrown 0.15.4",
- "serde",
 ]
 
 [[package]]
@@ -1355,6 +1198,7 @@ dependencies = [
 [[package]]
 name = "levels"
 version = "0.1.0"
+source = "git+https://github.com/zayden-bot/levels.git?branch=main#1e76a2759864377d50217aa6a01bfa07dddffcbf"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1367,7 +1211,8 @@ dependencies = [
 
 [[package]]
 name = "lfg"
-version = "0.9.0"
+version = "0.1.0"
+source = "git+https://github.com/zayden-bot/lfg.git?branch=main#32fa6749e494ed2ba92c871267fc44c3ae2edae1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1919,6 +1764,7 @@ dependencies = [
 [[package]]
 name = "reaction-roles"
 version = "0.1.0"
+source = "git+https://github.com/zayden-bot/reaction-roles.git?branch=main#86930b6e39be545fee97e98dc3625b732535a93e"
 dependencies = [
  "serenity",
  "sqlx",
@@ -1932,26 +1778,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d04b7d0ee6b4a0207a0a7adb104d23ecb0b47d6beae7152d0fa34b692b29fd6"
 dependencies = [
  "bitflags 2.9.1",
-]
-
-[[package]]
-name = "ref-cast"
-version = "1.0.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a0ae411dbe946a674d89546582cea4ba2bb8defac896622d6496f14c23ba5cf"
-dependencies = [
- "ref-cast-impl",
-]
-
-[[package]]
-name = "ref-cast-impl"
-version = "1.0.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1165225c21bff1f3bbce98f5a1f889949bc902d3575308cc7b0de30b4f6d27c7"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -1999,13 +1825,11 @@ dependencies = [
  "http-body 0.4.6",
  "hyper 0.14.32",
  "hyper-rustls",
- "hyper-tls 0.5.0",
  "ipnet",
  "js-sys",
  "log",
  "mime",
  "mime_guess",
- "native-tls",
  "once_cell",
  "percent-encoding",
  "pin-project-lite",
@@ -2017,7 +1841,6 @@ dependencies = [
  "sync_wrapper 0.1.2",
  "system-configuration",
  "tokio",
- "tokio-native-tls",
  "tokio-rustls 0.24.1",
  "tokio-util",
  "tower-service",
@@ -2032,9 +1855,9 @@ dependencies = [
 
 [[package]]
 name = "reqwest"
-version = "0.12.22"
+version = "0.12.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbc931937e6ca3a06e3b6c0aa7841849b160a90351d6ab467a8b9b9959767531"
+checksum = "4c8cea6b35bcceb099f30173754403d2eba0a5dc18cea3630fccd88251909288"
 dependencies = [
  "base64 0.22.1",
  "bytes",
@@ -2043,7 +1866,7 @@ dependencies = [
  "http-body 1.0.1",
  "http-body-util",
  "hyper 1.6.0",
- "hyper-tls 0.6.0",
+ "hyper-tls",
  "hyper-util",
  "js-sys",
  "log",
@@ -2241,30 +2064,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "schemars"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cd191f9397d57d581cddd31014772520aa448f65ef991055d7f61582c65165f"
-dependencies = [
- "dyn-clone",
- "ref-cast",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "schemars"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1375ba8ef45a6f15d83fa8748f1079428295d403d6ea991d09ab100155fbc06d"
-dependencies = [
- "dyn-clone",
- "ref-cast",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2373,38 +2172,6 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
-]
-
-[[package]]
-name = "serde_with"
-version = "3.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2c45cd61fefa9db6f254525d46e392b852e0e61d9a1fd36e5bd183450a556d5"
-dependencies = [
- "base64 0.22.1",
- "chrono",
- "hex",
- "indexmap 1.9.3",
- "indexmap 2.10.0",
- "schemars 0.9.0",
- "schemars 1.0.3",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_with_macros",
- "time",
-]
-
-[[package]]
-name = "serde_with_macros"
-version = "3.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de90945e6565ce0d9a25098082ed4ee4002e047cb59892c318d66821e14bb30f"
-dependencies = [
- "darling",
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -2573,7 +2340,7 @@ dependencies = [
  "futures-util",
  "hashbrown 0.15.4",
  "hashlink",
- "indexmap 2.10.0",
+ "indexmap",
  "log",
  "memchr",
  "native-tls",
@@ -2759,12 +2526,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "strsim"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
-
-[[package]]
 name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2773,6 +2534,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "suggestions"
 version = "0.1.0"
+source = "git+https://github.com/zayden-bot/suggestions.git?branch=main#50a019515606ce58e6dc71ef144ad06ea8341ac0"
 dependencies = [
  "async-trait",
  "futures",
@@ -2848,6 +2610,7 @@ checksum = "7b2093cf4c8eb1e67749a6762251bc9cd836b6fc171623bd0a9d324d37af2417"
 [[package]]
 name = "temp-voice"
 version = "0.1.0"
+source = "git+https://github.com/zayden-bot/temp-voice.git?branch=main#ed5e63c3a2c27e4a73a283abffaaef78fc70e33f"
 dependencies = [
  "async-trait",
  "futures",
@@ -2912,7 +2675,8 @@ dependencies = [
 
 [[package]]
 name = "ticket"
-version = "0.9.0"
+version = "0.1.0"
+source = "git+https://github.com/zayden-bot/ticket.git?branch=main#9eacaf1521bb4458e25c9835a7f9b5ae3bf17def"
 dependencies = [
  "async-trait",
  "futures",
@@ -3054,11 +2818,9 @@ checksum = "c83b561d025642014097b66e6c1bb422783339e0909e4429cde4749d1990bc38"
 dependencies = [
  "futures-util",
  "log",
- "native-tls",
  "rustls 0.22.4",
  "rustls-pki-types",
  "tokio",
- "tokio-native-tls",
  "tokio-rustls 0.25.0",
  "tungstenite",
  "webpki-roots 0.26.11",
@@ -3178,7 +2940,6 @@ dependencies = [
  "http 1.3.1",
  "httparse",
  "log",
- "native-tls",
  "rand 0.8.5",
  "rustls 0.22.4",
  "rustls-pki-types",
@@ -3848,8 +3609,44 @@ dependencies = [
 ]
 
 [[package]]
+name = "zayden-bot"
+version = "0.2.0"
+dependencies = [
+ "async-trait",
+ "bigdecimal",
+ "bungie-api",
+ "chrono",
+ "chrono-tz",
+ "cron",
+ "dotenvy",
+ "endgame-analysis",
+ "futures",
+ "gambling",
+ "levels",
+ "lfg",
+ "num-format",
+ "openai_api_rust",
+ "rand 0.9.1",
+ "rand_distr",
+ "reaction-roles",
+ "serde",
+ "serde_json",
+ "serenity",
+ "sqlx",
+ "suggestions",
+ "temp-voice",
+ "ticket",
+ "time",
+ "tokio",
+ "url",
+ "walkdir",
+ "zayden-core",
+]
+
+[[package]]
 name = "zayden-core"
-version = "0.9.0"
+version = "0.1.0"
+source = "git+https://github.com/zayden-bot/slash-command-core.git?branch=master#4695af0ae360caacfcfe0ece50720702fdcdfa04"
 dependencies = [
  "async-trait",
  "cron",

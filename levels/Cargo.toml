@@ -1,0 +1,14 @@
+[package]
+name = "levels"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zayden-core = { workspace = true }
+
+async-trait = { version = "*", default-features = false }
+chrono = { version = "*", default-features = false, features = ["now"] }
+futures = { version = "*", default-features = false, features = [] }
+rand = { version = "*", default-features = false, features = ["thread_rng"] }
+serenity = { version = "*", default-features = false, features = ["collector"] }
+sqlx = { version = "*", default-features = false, features = ["macros"] }

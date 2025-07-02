@@ -1,0 +1,25 @@
+[package]
+name = "lfg"
+version = "0.9.0"
+edition = "2024"
+
+[dependencies]
+zayden-core = { workspace = true }
+
+async-trait = { version = "*", default-features = false }
+chrono = { version = "*", default-features = false, features = [
+    "alloc",
+    "now",
+] }
+chrono-tz = { version = "*", default-features = false }
+futures = { version = "*" }
+serenity = { version = "*", default-features = false, features = [
+    "rustls_backend",
+    "model",
+    "chrono",
+] }
+sqlx = { version = "*", default-features = false, features = [
+    "any",
+    "macros",
+    "chrono",
+] }

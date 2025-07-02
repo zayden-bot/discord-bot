@@ -1,62 +1,32 @@
-[package]
-name = "zayden-bot"
-version = "0.2.0"
-edition = "2024"
+[workspace]
+resolver = "3"
+members = [
+    "bot",
+    "zayden-core",
+    "endgame-analysis",
+    "family",
+    "gambling",
+    "gold-star",
+    "levels",
+    "lfg",
+    "reaction-roles",
+    "suggestions",
+    "temp-voice",
+    "ticket",
+]
 
-[dependencies]
-zayden-core = { git = "https://github.com/zayden-bot/slash-command-core.git", branch = "master" }
-bungie-api = { git = "https://github.com/ViridianLink/bungie-api.git", branch = "main" }
-endgame-analysis = { git = "https://github.com/zayden-bot/endgame-analysis.git", branch = "main" }
-gambling = { git = "https://github.com/zayden-bot/gambling.git", branch = "main" }
-levels = { git = "https://github.com/zayden-bot/levels.git", branch = "main" }
-lfg = { git = "https://github.com/zayden-bot/lfg.git", branch = "main" }
-reaction-roles = { git = "https://github.com/zayden-bot/reaction-roles.git", branch = "main" }
-suggestions = { git = "https://github.com/zayden-bot/suggestions.git", branch = "main" }
-temp-voice = { git = "https://github.com/zayden-bot/temp-voice.git", branch = "main" }
-ticket = { git = "https://github.com/zayden-bot/ticket.git", branch = "main" }
+[workspace.dependencies]
+zayden-core = { path = "./zayden-core" }
+endgame-analysis = { path = "./endgame-analysis" }
+gambling = { path = "./gambling" }
+levels = { path = "./levels" }
+lfg = { path = "./lfg" }
+reaction-roles = { path = "./reaction-roles" }
+suggestions = { path = "./suggestions" }
+temp-voice = { path = "./temp-voice" }
+ticket = { path = "./ticket" }
 
-async-trait = { version = "*", default-features = false }
-bigdecimal = { version = "*", default-features = false }
-chrono = { version = "*", default-features = false }
-chrono-tz = { version = "*", default-features = false }
-cron = { version = "*", default-features = false }
-dotenvy = { version = "*", default-features = false }
-futures = { version = "*", default-features = false, features = [
-    "async-await",
-] }
-serde = { version = "*", default-features = false }
-serde_json = { version = "*", default-features = false }
-sqlx = { version = "*", default-features = false, features = [
-    "runtime-tokio",
-    "tls-native-tls",
-    "postgres",
-    "macros",
-    "chrono",
-    "uuid",
-    "json",
-    "bigdecimal",
-] }
-tokio = { version = "*", default-features = false, features = [
-    "macros",
-    "rt-multi-thread",
-] }
-time = { version = "*", default-features = false }
-url = { version = "*", default-features = false }
-walkdir = { version = "*", default-features = false }
-rand = { version = "*", default-features = false, features = ["thread_rng"] }
-rand_distr = { version = "*", default-features = false }
-serenity = { version = "*", default-features = false, features = [
-    "builder",
-    "client",
-    "collector",
-    "gateway",
-    "model",
-    "utils",
-    "rustls_backend",
-] }
-openai_api_rust = { version = "*", default-features = false }
-num-format = { version = "*", default-features = false, features = ["std"] }
-
+sqlx = { version = "*", default-features = false, features = ["macros"] }
 
 [profile.release]
 opt-level = 3

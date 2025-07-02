@@ -10,9 +10,6 @@ target/
 *.pdb
 
 # User Files
-.env
-.env.dev
-weapons.json
+../.env
 
-# Old files kept for reference
-Dockerfile
+.idea/

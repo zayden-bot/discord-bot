@@ -1,0 +1,16 @@
+[package]
+name = "gold-star"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zayden-core = { workspace = true }
+
+async-trait = { version = "*", default-features = false }
+chrono = { version = "*", default-features = false, features = ["now"] }
+sqlx = { version = "*", default-features = false, features = ["macros"] }
+
+[dependencies.serenity]
+version = "*"
+default-features = false
+features = ["rustls_backend", "builder", "client", "gateway", "model"]

@@ -1,0 +1,21 @@
+[package]
+name = "gambling"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+zayden-core = { workspace = true }
+levels = { workspace = true }
+
+async-trait = { version = "*", default-features = false }
+chrono = { version = "*", default-features = false }
+futures = { version = "*", default-features = false }
+rand = { version = "*", default-features = false, features = ["thread_rng"] }
+rand_distr = { version = "*", default-features = false }
+serde = { version = "*", default-features = false }
+serenity = { version = "*", default-features = false, features = [] }
+sqlx = { version = "*", default-features = false, features = [
+    "any",
+    "json",
+    "macros",
+] }

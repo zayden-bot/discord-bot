@@ -1,0 +1,15 @@
+[package]
+name = "reaction-roles"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = ["rust-tls"]
+native-tls = ["serenity/native_tls_backend"]
+rust-tls = ["serenity/rustls_backend"]
+
+[dependencies]
+zayden-core = { workspace = true }
+
+sqlx = { version = "*", default-features = false, features = ["any", "macros"] }
+serenity = { version = "*", default-features = false, features = ["model"] }
