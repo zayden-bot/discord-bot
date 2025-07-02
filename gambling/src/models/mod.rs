@@ -347,6 +347,6 @@ pub trait MineAmount: MineHourly {
 
         let duration = Utc::now() - mine_hour;
 
-        duration.num_hours() * self.hourly()
+        duration.num_hours().min(24) * self.hourly()
     }
 }
