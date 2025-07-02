@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use serenity::all::{User, UserId};
 use sqlx::{Database, FromRow, Pool};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use crate::relationships::Relationships;
 use crate::Result;
@@ -80,106 +80,106 @@ impl FamilyRow {
         }
     }
 
-    async fn long_relationship<'a, Db: Database, Manager: FamilyManager<Db>>(
-        &self,
-        pool: &Pool<Db>,
-        target_user: &FamilyRow,
-        mut working_relationship: Vec<&'a str>,
-        added_members: &mut HashSet<i64>,
-    ) -> Result<Vec<&'a str>> {
-        if added_members.contains(&self.id) {
-            return Ok(working_relationship);
-        }
+    // async fn long_relationship<'a, Db: Database, Manager: FamilyManager<Db>>(
+    //     &self,
+    //     pool: &Pool<Db>,
+    //     target_user: &FamilyRow,
+    //     mut working_relationship: Vec<&'a str>,
+    //     added_members: &mut HashSet<i64>,
+    // ) -> Result<Vec<&'a str>> {
+    //     if added_members.contains(&self.id) {
+    //         return Ok(working_relationship);
+    //     }
 
-        if target_user.id == self.id {
-            return Ok(working_relationship);
-        }
+    //     if target_user.id == self.id {
+    //         return Ok(working_relationship);
+    //     }
 
-        added_members.insert(self.id);
+    //     added_members.insert(self.id);
 
-        for parent_id in self.parent_ids.iter() {
-            if added_members.contains(parent_id) {
-                continue;
-            }
+    //     for parent_id in self.parent_ids.iter() {
+    //         if added_members.contains(parent_id) {
+    //             continue;
+    //         }
 
-            let parent = match Manager::get_row(pool, self.id).await? {
-                Some(parent) => parent,
-                None => FamilyRow::new(*parent_id, "Unknown".to_string()),
-            };
+    //         let parent = match Manager::get_row(pool, self.id).await? {
+    //             Some(parent) => parent,
+    //             None => FamilyRow::new(*parent_id, "Unknown".to_string()),
+    //         };
 
-            working_relationship.push("parent");
+    //         working_relationship.push("parent");
 
-            let old_len = working_relationship.len();
+    //         let old_len = working_relationship.len();
 
-            working_relationship = Box::pin(parent.long_relationship::<Db, Manager>(
-                pool,
-                target_user,
-                working_relationship,
-                added_members,
-            ))
-            .await?;
+    //         working_relationship = Box::pin(parent.long_relationship::<Db, Manager>(
+    //             pool,
+    //             target_user,
+    //             working_relationship,
+    //             added_members,
+    //         ))
+    //         .await?;
 
-            if working_relationship.len() != old_len {
-                return Ok(working_relationship);
-            }
-        }
+    //         if working_relationship.len() != old_len {
+    //             return Ok(working_relationship);
+    //         }
+    //     }
 
-        for partner in self.partner_ids.iter() {
-            if added_members.contains(partner) {
-                continue;
-            }
+    //     for partner in self.partner_ids.iter() {
+    //         if added_members.contains(partner) {
+    //             continue;
+    //         }
 
-            let partner = match Manager::get_row(pool, *partner).await? {
-                Some(partner) => partner,
-                None => FamilyRow::new(*partner, "Unknown".to_string()),
-            };
+    //         let partner = match Manager::get_row(pool, *partner).await? {
+    //             Some(partner) => partner,
+    //             None => FamilyRow::new(*partner, "Unknown".to_string()),
+    //         };
 
-            working_relationship.push("partner");
+    //         working_relationship.push("partner");
 
-            let old_len = working_relationship.len();
+    //         let old_len = working_relationship.len();
 
-            working_relationship = Box::pin(partner.long_relationship::<Db, Manager>(
-                pool,
-                target_user,
-                working_relationship,
-                added_members,
-            ))
-            .await?;
+    //         working_relationship = Box::pin(partner.long_relationship::<Db, Manager>(
+    //             pool,
+    //             target_user,
+    //             working_relationship,
+    //             added_members,
+    //         ))
+    //         .await?;
 
-            if working_relationship.len() != old_len {
-                return Ok(working_relationship);
-            }
-        }
+    //         if working_relationship.len() != old_len {
+    //             return Ok(working_relationship);
+    //         }
+    //     }
 
-        for child in self.children_ids.iter() {
-            if added_members.contains(child) {
-                continue;
-            }
+    //     for child in self.children_ids.iter() {
+    //         if added_members.contains(child) {
+    //             continue;
+    //         }
 
-            let child = match Manager::get_row(pool, *child).await? {
-                Some(child) => child,
-                None => FamilyRow::new(*child, "Unknown".to_string()),
-            };
+    //         let child = match Manager::get_row(pool, *child).await? {
+    //             Some(child) => child,
+    //             None => FamilyRow::new(*child, "Unknown".to_string()),
+    //         };
 
-            working_relationship.push("child");
+    //         working_relationship.push("child");
 
-            let old_len = working_relationship.len();
+    //         let old_len = working_relationship.len();
 
-            working_relationship = Box::pin(child.long_relationship::<Db, Manager>(
-                pool,
-                target_user,
-                working_relationship,
-                added_members,
-            ))
-            .await?;
+    //         working_relationship = Box::pin(child.long_relationship::<Db, Manager>(
+    //             pool,
+    //             target_user,
+    //             working_relationship,
+    //             added_members,
+    //         ))
+    //         .await?;
 
-            if working_relationship.len() != old_len {
-                return Ok(working_relationship);
-            }
-        }
+    //         if working_relationship.len() != old_len {
+    //             return Ok(working_relationship);
+    //         }
+    //     }
 
-        Ok(working_relationship)
-    }
+    //     Ok(working_relationship)
+    // }
 
     pub async fn tree<Db: Database, Manager: FamilyManager<Db>>(
         self,
@@ -209,12 +209,12 @@ impl From<&User> for FamilyRow {
     }
 }
 
-struct RelationshipSimplifier {}
+// struct RelationshipSimplifier {}
 
-impl RelationshipSimplifier {
-    pub fn cousin_string() {}
+// impl RelationshipSimplifier {
+//     pub fn cousin_string() {}
 
-    pub fn simplify(string: &str) -> Relationships {
-        Relationships::None
-    }
-}
+//     pub fn simplify(string: &str) -> Relationships {
+//         Relationships::None
+//     }
+// }
