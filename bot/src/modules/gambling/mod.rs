@@ -133,21 +133,9 @@ impl GameManager<Postgres> for GameTable {
     ) -> sqlx::Result<Option<GameRow>> {
         let id = id.into();
 
-        sqlx::query_as!(
+        sqlx::query_file_as!(
             GameRow,
-            "SELECT
-                g.id,
-                g.coins,
-                g.gems,
-                
-                COALESCE(l.level, 0) AS level,
-                
-                COALESCE(m.prestige, 0) AS prestige
-
-                FROM gambling g
-                LEFT JOIN levels l ON g.id = l.id
-                LEFT JOIN gambling_mine m on g.id = m.id
-                WHERE g.id = $1;",
+            "./sql/gambling/GameManager/row.sql",
             id.get() as i64
         )
         .fetch_optional(pool)
