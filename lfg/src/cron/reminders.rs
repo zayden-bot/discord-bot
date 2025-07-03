@@ -79,6 +79,7 @@ pub async fn create_reminders<Db: Database, Manager: PostManager<Db>>(
     let mut data = ctx.data.write().await;
     let jobs = data.entry::<CronJobs<Db>>().or_insert(Vec::new());
 
+    jobs.retain(|job| job.id != format!("lfg_{}", post_id));
     jobs.extend([week_job, day_job, mins_30_job, now_job]);
 }
 

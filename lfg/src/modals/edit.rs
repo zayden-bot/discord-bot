@@ -2,6 +2,7 @@ use serenity::all::{Context, CreateInteractionResponse, EditThread, ModalInterac
 use sqlx::{Database, Pool};
 use zayden_core::parse_modal_data;
 
+use crate::cron::create_reminders;
 use crate::templates::DefaultTemplate;
 use crate::utils::update_embeds;
 use crate::{PostBuilder, PostManager, PostRow, Result, Savable, TimezoneManager};
@@ -71,7 +72,10 @@ impl Edit {
         )
         .await;
 
-        Manager::save(pool, post.build()).await.unwrap();
+        let post = post.build();
+
+        create_reminders::<Db, Manager>(ctx, &post).await;
+        Manager::save(pool, post).await.unwrap();
 
         interaction
             .create_response(ctx, CreateInteractionResponse::Acknowledge)
