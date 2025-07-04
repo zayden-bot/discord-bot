@@ -20,7 +20,9 @@ impl Handler {
         );
         commands?;
 
-        if guild.id == BRADSTER_GUILD {
+        if guild.id == 1222360995700150443 {
+            println!("Registered Zayden Guild")
+        } else if guild.id == BRADSTER_GUILD {
             guild
                 .create_command(ctx, Live::register(ctx).unwrap())
                 .await?;
