@@ -121,6 +121,22 @@ impl GamblingManager<Postgres> for GamblingTable {
         .await
         .map(|r| r.unwrap())
     }
+
+    async fn bet(
+        pool: &PgPool,
+        id: impl Into<UserId> + std::marker::Send,
+        bet: i64,
+    ) -> sqlx::Result<PgQueryResult> {
+        let id = id.into();
+
+        sqlx::query_file!(
+            "./sql/gambling/GamblingManager/bet.sql",
+            id.get() as i64,
+            bet
+        )
+        .execute(pool)
+        .await
+    }
 }
 
 pub struct GameTable;
