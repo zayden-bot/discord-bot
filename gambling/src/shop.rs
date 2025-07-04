@@ -429,7 +429,7 @@ const MINER: ShopItem = ShopItem::new(
     "Miner",
     Emoji::None,
     "Increases passive mine income and boosts resource gains from dig",
-    10,
+    1,
     ShopCurrency::Coins,
     ShopPage::Mine1,
 );
