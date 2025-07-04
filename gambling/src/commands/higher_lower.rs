@@ -57,7 +57,7 @@ impl Commands {
 
         GameCache::can_play(ctx, interaction.user.id).await?;
 
-        *row.coins_mut() -= BUYIN;
+        row.bet(BUYIN);
 
         GameHandler::save(pool, row).await.unwrap();
 
