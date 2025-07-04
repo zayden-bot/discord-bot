@@ -1,9 +1,5 @@
-use chrono::DateTime;
-use chrono::Days;
-use chrono::NaiveTime;
-use chrono::Utc;
-use serenity::all::EmojiId;
-use serenity::all::UserId;
+use chrono::{DateTime, Days, NaiveTime, Utc};
+use serenity::all::{EmojiId, UserId};
 
 pub mod commands;
 pub mod error;
@@ -24,8 +20,9 @@ pub use game_cache::GameCache;
 pub use goals::GoalHandler;
 pub use lotto::{Lotto, LottoManager, LottoRow, jackpot};
 pub use models::{
-    Coins, EffectsManager, EffectsRow, GamblingGoalsRow, GamblingItem, GameManager, GameRow, Gems,
-    ItemInventory, MaxBet, MaxValues, MineHourly, Mining, Prestige, Stamina,
+    Coins, EffectsManager, EffectsRow, GamblingGoalsRow, GamblingItem, GamblingManager,
+    GameManager, GameRow, Gems, ItemInventory, MaxBet, MaxValues, MineHourly, Mining, Prestige,
+    Stamina,
 };
 pub use shop::{SHOP_ITEMS, ShopCurrency, ShopItem, ShopPage};
 pub use stamina::{StaminaCron, StaminaManager};

@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use serenity::all::UserId;
-use sqlx::{Database, FromRow, Pool, any::AnyQueryResult};
+use sqlx::{Database, FromRow, Pool};
 
 use crate::Prestige;
 
@@ -10,7 +10,7 @@ use super::{Coins, Gems, MaxBet};
 pub trait GameManager<Db: Database> {
     async fn row(pool: &Pool<Db>, id: impl Into<UserId> + Send) -> sqlx::Result<Option<GameRow>>;
 
-    async fn save(pool: &Pool<Db>, row: GameRow) -> sqlx::Result<AnyQueryResult>;
+    async fn save(pool: &Pool<Db>, row: GameRow) -> sqlx::Result<Db::QueryResult>;
 }
 
 #[derive(FromRow)]

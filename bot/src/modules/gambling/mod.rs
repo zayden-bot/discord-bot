@@ -1,7 +1,7 @@
 use async_trait::async_trait;
-use gambling::{GameManager, GameRow, models::GamblingManager};
+use gambling::{GamblingManager, GameManager, GameRow};
 use serenity::all::{Context, CreateCommand, UserId};
-use sqlx::{PgConnection, PgPool, Postgres, any::AnyQueryResult};
+use sqlx::{PgConnection, PgPool, Postgres, any::AnyQueryResult, postgres::PgQueryResult};
 use zayden_core::SlashCommand;
 
 mod blackjack;
@@ -52,6 +52,7 @@ pub use work::Work;
 
 pub fn register(ctx: &Context) -> [CreateCommand; 20] {
     [
+        Blackjack::register(ctx).unwrap(),
         Coinflip::register(ctx).unwrap(),
         Craft::register(ctx).unwrap(),
         Daily::register(ctx).unwrap(),
@@ -160,7 +161,7 @@ impl GameManager<Postgres> for GameTable {
         .await
     }
 
-    async fn save(pool: &PgPool, row: GameRow) -> sqlx::Result<AnyQueryResult> {
+    async fn save(pool: &PgPool, row: GameRow) -> sqlx::Result<PgQueryResult> {
         sqlx::query!(
             "INSERT INTO gambling (id, coins, gems)
             VALUES ($1, $2, $3)
@@ -172,6 +173,5 @@ impl GameManager<Postgres> for GameTable {
         )
         .execute(pool)
         .await
-        .map(AnyQueryResult::from)
     }
 }
