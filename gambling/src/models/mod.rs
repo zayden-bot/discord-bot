@@ -201,37 +201,37 @@ pub trait Prestige {
 pub trait MaxValues: Mining + Prestige {
     #[inline(always)]
     fn miners_per_mine() -> i64 {
-        10
+        100
     }
 
     #[inline(always)]
     fn mines_per_land() -> i64 {
-        10
+        100
     }
 
     #[inline(always)]
     fn land_per_country() -> i64 {
-        10
+        100
     }
 
     #[inline(always)]
     fn countries_per_continent() -> i64 {
-        10
+        100
     }
 
     #[inline(always)]
     fn continents_per_plant() -> i64 {
-        10
+        100
     }
 
     #[inline(always)]
     fn plants_per_solar_system() -> i64 {
-        10
+        100
     }
 
     #[inline(always)]
     fn solar_system_per_galaxies() -> i64 {
-        50
+        100
     }
 
     #[inline(always)]
@@ -315,7 +315,7 @@ pub trait MineHourly: Prestige {
             return 0;
         }
 
-        (miners * self.prestige_mult_100()) / 100
+        (miners * self.prestige_mult_100()) / 1000
     }
 }
 
