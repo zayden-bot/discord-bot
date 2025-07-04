@@ -341,9 +341,10 @@ fn edit_mine(row: &mut BuyRow, item: &ShopItem<'_>, amount: i64) -> Result<i64> 
     *value += amount;
 
     let quantity = *value;
+    let max_value = *row.max_values().get(item.id).unwrap();
 
-    if quantity > *row.max_values().get(item.id).unwrap() {
-        return Err(Error::InvalidAmount);
+    if quantity > max_value {
+        return Err(Error::InsufficientCapacity(quantity - max_value));
     }
 
     Ok(quantity)

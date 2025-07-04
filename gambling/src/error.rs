@@ -28,6 +28,7 @@ pub enum Error {
     Cooldown(i64),
     InvalidPrediction,
     InvalidAmount,
+    InsufficientCapacity(i64),
     ItemNotInInventory,
     InsufficientItemQuantity(i64),
 
@@ -74,6 +75,10 @@ impl std::fmt::Display for Error {
             }
             Error::InvalidPrediction => write!(f, "Invalid prediction value."),
             Error::InvalidAmount => write!(f, "Invalid amount value."),
+            Error::InsufficientCapacity(remaining) => write!(
+                f,
+                "You don't have enough capacity to buy that many.\nYou can buy `{remaining}` more before you are at capacity"
+            ),
             Error::ItemNotInInventory => write!(f, "You don't have that item in your inventory."),
             Error::InsufficientItemQuantity(quantity) => write!(
                 f,
