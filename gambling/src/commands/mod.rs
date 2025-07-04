@@ -1,3 +1,4 @@
+pub mod blackjack;
 pub mod coinflip;
 pub mod craft;
 pub mod daily;

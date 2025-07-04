@@ -4,6 +4,7 @@ use serenity::all::{Context, CreateCommand, UserId};
 use sqlx::{PgConnection, PgPool, Postgres, any::AnyQueryResult};
 use zayden_core::SlashCommand;
 
+mod blackjack;
 mod coinflip;
 mod craft;
 mod daily;
@@ -26,6 +27,7 @@ mod stamina;
 mod tictactoe;
 mod work;
 
+pub use blackjack::Blackjack;
 pub use coinflip::Coinflip;
 pub use craft::Craft;
 pub use daily::Daily;
@@ -48,7 +50,7 @@ pub use stamina::StaminaTable;
 pub use tictactoe::TicTacToe;
 pub use work::Work;
 
-pub fn register(ctx: &Context) -> [CreateCommand; 19] {
+pub fn register(ctx: &Context) -> [CreateCommand; 20] {
     [
         Coinflip::register(ctx).unwrap(),
         Craft::register(ctx).unwrap(),

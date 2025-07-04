@@ -51,6 +51,7 @@ const TECH: EmojiId = EmojiId::new(1384190136060874853);
 const UTILITY: EmojiId = EmojiId::new(1384190129421418739);
 const PRODUCTION: EmojiId = EmojiId::new(1384190122320334931);
 
+const CARD_BACK: EmojiId = EmojiId::new(1390357737011155024);
 const CLUBS_A: EmojiId = EmojiId::new(1383692636128284793);
 const CLUBS_2: EmojiId = EmojiId::new(1383692579710701619);
 const CLUBS_3: EmojiId = EmojiId::new(1383692586107015168);

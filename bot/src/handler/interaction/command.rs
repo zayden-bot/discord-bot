@@ -9,8 +9,8 @@ use crate::modules::destiny2::endgame_analysis::slash_commands::{DimWishlist, Ti
 use crate::modules::destiny2::info::Perk;
 use crate::modules::events::live::Live;
 use crate::modules::gambling::{
-    Coinflip, Craft, Daily, Dig, Gift, Goals, HigherLower, Inventory, Leaderboard, Lotto, Mine,
-    Prestige, Profile, RockPaperScissors, Roll, Send, Shop, TicTacToe, Work,
+    Blackjack, Coinflip, Craft, Daily, Dig, Gift, Goals, HigherLower, Inventory, Leaderboard,
+    Lotto, Mine, Prestige, Profile, RockPaperScissors, Roll, Send, Shop, TicTacToe, Work,
 };
 use crate::modules::levels::{Levels, Rank, Xp};
 use crate::modules::lfg::Lfg;
@@ -46,6 +46,7 @@ impl Handler {
             // endregion
 
             // region gambling
+            "blackjack" => Blackjack::run(ctx, interaction, options, pool),
             "coinflip" => Coinflip::run(ctx, interaction, options, pool),
             "craft" => Craft::run(ctx, interaction, options, pool),
             "daily" => Daily::run(ctx, interaction, options, pool),

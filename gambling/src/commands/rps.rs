@@ -72,9 +72,7 @@ impl Commands {
             )
             .await?;
 
-        payout =
-            EffectsHandler::payout(pool, interaction.user.id, bet, payout, winner == Some(true))
-                .await;
+        payout = EffectsHandler::payout(pool, interaction.user.id, bet, payout, winner).await;
 
         row.add_coins(payout);
 

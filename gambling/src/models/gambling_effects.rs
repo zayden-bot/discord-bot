@@ -80,7 +80,7 @@ pub trait EffectsManager<Db: Database> {
         user_id: impl Into<UserId> + Send,
         bet: i64,
         mut payout: i64,
-        win: bool,
+        win: Option<bool>,
     ) -> i64 {
         let base_payout = payout;
         payout = 0;
@@ -95,7 +95,7 @@ pub trait EffectsManager<Db: Database> {
             if let Some(id) = lucky_chip {
                 Self::remove_effect(&mut *tx, id).await.unwrap();
 
-                if !win {
+                if win == Some(false) {
                     payout = bet;
                 }
             }
@@ -106,7 +106,7 @@ pub trait EffectsManager<Db: Database> {
 
             let item = SHOP_ITEMS.get(&item_id).unwrap();
 
-            if win && item_id.starts_with("payout") {
+            if win == Some(true) && item_id.starts_with("payout") {
                 payout += (item.effect_fn)(bet, base_payout);
                 continue;
             }
